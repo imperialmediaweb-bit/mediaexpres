@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <g>
+    <rect x="4" y="10" width="44" height="40" rx="3" fill="#F8F5F0"/>
+    <path d="M4 30 L48 30" stroke="#E4B363" stroke-width="1.5" opacity="0.4"/>
+    <path d="M10 44 L10 18 L18 18 L26 32 L34 18 L42 18 L42 44 L36 44 L36 28 L27 42 L25 42 L16 28 L16 44 Z" fill="#0B2545"/>
+    <path d="M50 14 L56 20 L50 26" stroke="#D7263D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 34 L56 40 L50 46" stroke="#D7263D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  </g>
+  <g transform="translate(72 0)">
+    <text x="0" y="38" font-family="Georgia, 'Playfair Display', serif" font-weight="700" font-size="28" fill="#F8F5F0" letter-spacing="-0.5">Media</text>
+    <text x="96" y="38" font-family="-apple-system, 'Inter', sans-serif" font-weight="500" font-size="28" fill="#E4B363" letter-spacing="1">Expres</text>
+    <rect x="0" y="45" width="178" height="2" fill="#E4B363" opacity="0.85"/>
+  </g>
+</svg>

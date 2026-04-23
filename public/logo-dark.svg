@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <g>
+    <rect x="4" y="10" width="44" height="40" rx="3" fill="#0B0B0B"/>
+    <path d="M4 30 L48 30" stroke="#2A2A2A" stroke-width="1.5"/>
+    <path d="M10 44 L10 18 L18 18 L26 32 L34 18 L42 18 L42 44 L36 44 L36 28 L27 42 L25 42 L16 28 L16 44 Z" fill="#FFFFFF"/>
+    <path d="M50 14 L56 20 L50 26" stroke="#0B0B0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 34 L56 40 L50 46" stroke="#0B0B0B" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.6"/>
+  </g>
+  <g transform="translate(72 0)">
+    <text x="0" y="38" font-family="Georgia, serif" font-weight="700" font-size="28" fill="#0B0B0B" letter-spacing="-0.5">Media</text>
+    <text x="96" y="38" font-family="sans-serif" font-weight="500" font-size="28" fill="#0B0B0B" letter-spacing="1">Expres</text>
+    <rect x="0" y="45" width="178" height="2" fill="#0B0B0B"/>
+  </g>
+</svg>

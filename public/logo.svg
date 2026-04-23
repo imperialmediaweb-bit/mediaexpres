@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 260 60" fill="none">
+  <!-- Mark: folded newspaper "M" with motion accent -->
+  <g>
+    <!-- Base newspaper rectangle with fold shadow -->
+    <rect x="4" y="10" width="44" height="40" rx="3" fill="#0B2545"/>
+    <path d="M4 30 L48 30" stroke="#13396B" stroke-width="1.5"/>
+    <!-- Stylized M formed by newspaper fold peaks -->
+    <path d="M10 44 L10 18 L18 18 L26 32 L34 18 L42 18 L42 44 L36 44 L36 28 L27 42 L25 42 L16 28 L16 44 Z" fill="#F8F5F0"/>
+    <!-- Speed accent: red chevron suggesting "express" -->
+    <path d="M50 14 L56 20 L50 26" stroke="#D7263D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M50 34 L56 40 L50 46" stroke="#D7263D" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.65"/>
+  </g>
+  <!-- Wordmark -->
+  <g transform="translate(72 0)">
+    <text x="0" y="38" font-family="Georgia, 'Playfair Display', serif" font-weight="700" font-size="28" fill="#0B2545" letter-spacing="-0.5">Media</text>
+    <text x="96" y="38" font-family="-apple-system, 'Inter', sans-serif" font-weight="500" font-size="28" fill="#D7263D" letter-spacing="1">Expres</text>
+    <!-- Red underline -->
+    <rect x="0" y="45" width="178" height="2" fill="#D7263D" opacity="0.85"/>
+  </g>
+</svg>
