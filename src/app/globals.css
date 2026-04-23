@@ -4,9 +4,15 @@
 
 @layer base {
   :root {
-    --brand-navy: #0b2545;
-    --brand-red: #d7263d;
-    --brand-gold: #e4b363;
+    --brand-red: #c1121f;
+    --brand-red-dark: #9b111e;
+    --brand-red-light: #e11d2e;
+    --brand-black: #111111;
+    --brand-ink: #1a1a1a;
+    --brand-cream: #faf7f2;
+    --brand-gold: #c9a14a;
+    /* Back-compat */
+    --brand-navy: #111111;
   }
 
   html {
@@ -14,16 +20,25 @@
   }
 
   body {
-    background: #f8f5f0;
-    color: #0b2545;
+    background: #faf7f2;
+    color: #111111;
     font-feature-settings: "cv11", "ss01";
     -webkit-font-smoothing: antialiased;
   }
 
   ::selection {
-    background: #0b2545;
-    color: #f8f5f0;
+    background: #c1121f;
+    color: #faf7f2;
   }
+
+  /* Scrollbar: tabloid-red accent */
+  ::-webkit-scrollbar { width: 8px; height: 8px; }
+  ::-webkit-scrollbar-track { background: #faf7f2; }
+  ::-webkit-scrollbar-thumb {
+    background: #c1121f;
+    border-radius: 4px;
+  }
+  ::-webkit-scrollbar-thumb:hover { background: #9b111e; }
 }
 
 @layer components {
@@ -36,15 +51,19 @@
   }
 
   .h1 {
-    @apply font-serif text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-brand-navy;
+    @apply font-serif text-4xl sm:text-5xl lg:text-6xl font-bold leading-[1.05] tracking-tight text-brand-black;
   }
 
   .h2 {
-    @apply font-serif text-3xl sm:text-4xl font-bold leading-tight text-brand-navy;
+    @apply font-serif text-3xl sm:text-4xl font-bold leading-tight text-brand-black;
   }
 
   .h3 {
-    @apply font-serif text-2xl font-semibold text-brand-navy;
+    @apply font-serif text-2xl font-semibold text-brand-black;
+  }
+
+  .display {
+    @apply font-headline font-bold uppercase tracking-[0.01em] text-brand-black;
   }
 
   .lead {
@@ -52,7 +71,19 @@
   }
 
   .eyebrow {
-    @apply text-xs font-bold tracking-[0.2em] uppercase text-brand-red;
+    @apply text-xs font-headline font-bold tracking-[0.24em] uppercase text-brand-red;
+  }
+
+  /* Tabloid-style kicker (red bar + small uppercase) */
+  .kicker {
+    @apply inline-flex items-center gap-2 text-xs font-headline font-bold uppercase tracking-[0.2em] text-brand-red;
+  }
+  .kicker::before {
+    content: "";
+    display: inline-block;
+    width: 24px;
+    height: 2px;
+    background: #c1121f;
   }
 
   .prose-me {
@@ -62,7 +93,7 @@
   .prose-me h1,
   .prose-me h2,
   .prose-me h3 {
-    @apply font-serif text-brand-navy;
+    @apply font-serif text-brand-black;
   }
 
   .prose-me a {
@@ -76,16 +107,47 @@
   .link-underline {
     @apply relative after:absolute after:left-0 after:-bottom-0.5 after:h-0.5 after:w-0 after:bg-brand-red after:transition-all hover:after:w-full;
   }
+
+  /* Tabloid card: clean white with subtle red top rule on hover */
+  .card-tabloid {
+    @apply relative overflow-hidden rounded-lg border border-brand-rule bg-white transition-all;
+  }
+  .card-tabloid::before {
+    content: "";
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 3px;
+    background: #c1121f;
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s ease;
+  }
+  .card-tabloid:hover::before {
+    transform: scaleX(1);
+  }
+  .card-tabloid:hover {
+    box-shadow: 0 12px 30px -8px rgba(17,17,17,0.12);
+    transform: translateY(-2px);
+  }
 }
 
-/* Newspaper pattern background */
+/* Newsprint texture background */
 .bg-newsprint {
-  background-color: #f8f5f0;
-  background-image: radial-gradient(circle at 1px 1px, rgba(11, 37, 69, 0.04) 1px, transparent 0);
+  background-color: #faf7f2;
+  background-image: radial-gradient(circle at 1px 1px, rgba(17, 17, 17, 0.045) 1px, transparent 0);
   background-size: 24px 24px;
 }
 
-/* Animated underline for headlines */
+/* Masthead double-rule (used under section headings for editorial feel) */
+.masthead-rule {
+  background-image: linear-gradient(#111 0 0), linear-gradient(#111 0 0);
+  background-size: 100% 2px, 100% 1px;
+  background-position: 0 0, 0 6px;
+  background-repeat: no-repeat;
+  padding-top: 10px;
+}
+
+/* Animated underline for headlines (red only, tabloid) */
 .headline-accent {
   position: relative;
   display: inline-block;
@@ -98,7 +160,7 @@
   bottom: -6px;
   height: 4px;
   width: 100%;
-  background: linear-gradient(90deg, #d7263d 0%, #e4b363 100%);
+  background: #c1121f;
   border-radius: 2px;
 }
 

@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Playfair_Display, Inter } from "next/font/google";
+import { Playfair_Display, Inter, Oswald } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SITE } from "@/data/site";
@@ -18,8 +18,15 @@ const inter = Inter({
   display: "swap",
 });
 
+const oswald = Oswald({
+  subsets: ["latin", "latin-ext"],
+  variable: "--font-oswald",
+  display: "swap",
+  weight: ["400", "500", "600", "700"],
+});
+
 export const viewport: Viewport = {
-  themeColor: "#0B2545",
+  themeColor: "#c1121f",
   width: "device-width",
   initialScale: 1,
 };
@@ -78,7 +85,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ro" className={`${playfair.variable} ${inter.variable}`}>
+    <html
+      lang="ro"
+      className={`${playfair.variable} ${inter.variable} ${oswald.variable}`}
+    >
       <body className="min-h-screen font-sans flex flex-col">
         <StructuredData />
         <Navbar />

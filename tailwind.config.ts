@@ -17,27 +17,36 @@ const config: Config = {
     extend: {
       colors: {
         brand: {
-          navy: "#0B2545",
-          "navy-dark": "#071A33",
-          red: "#D7263D",
-          "red-dark": "#B51D31",
-          gold: "#E4B363",
-          "gold-light": "#F0CE92",
-          ivory: "#F8F5F0",
+          // New tabloid palette (inspired by Romanian local press)
+          red: "#c1121f",
+          "red-dark": "#9b111e",
+          "red-light": "#e11d2e",
+          black: "#111111",
+          ink: "#1a1a1a",
+          graphite: "#2b2b2b",
+          cream: "#faf7f2",
+          paper: "#fdfbf7",
+          rule: "#e5e5e5",
+          gold: "#c9a14a",
+          "gold-light": "#e3c57a",
           slate: "#334155",
+          // Back-compat aliases so existing components keep rendering
+          navy: "#111111",
+          "navy-dark": "#000000",
+          ivory: "#faf7f2",
         },
-        border: "hsl(220 14% 90%)",
-        input: "hsl(220 14% 90%)",
-        ring: "hsl(215 85% 17%)",
-        background: "hsl(36 33% 97%)",
-        foreground: "hsl(215 28% 17%)",
-        primary: { DEFAULT: "#0B2545", foreground: "#F8F5F0" },
-        secondary: { DEFAULT: "#F0E8D8", foreground: "#0B2545" },
-        muted: { DEFAULT: "hsl(220 14% 96%)", foreground: "hsl(220 9% 46%)" },
-        accent: { DEFAULT: "#D7263D", foreground: "#F8F5F0" },
-        destructive: { DEFAULT: "#D7263D", foreground: "#F8F5F0" },
-        card: { DEFAULT: "#FFFFFF", foreground: "#0B2545" },
-        popover: { DEFAULT: "#FFFFFF", foreground: "#0B2545" },
+        border: "hsl(0 0% 90%)",
+        input: "hsl(0 0% 90%)",
+        ring: "hsl(355 82% 41%)",
+        background: "hsl(36 45% 98%)",
+        foreground: "hsl(0 0% 7%)",
+        primary: { DEFAULT: "#c1121f", foreground: "#faf7f2" },
+        secondary: { DEFAULT: "#111111", foreground: "#faf7f2" },
+        muted: { DEFAULT: "hsl(0 0% 96%)", foreground: "hsl(0 0% 40%)" },
+        accent: { DEFAULT: "#c1121f", foreground: "#faf7f2" },
+        destructive: { DEFAULT: "#9b111e", foreground: "#faf7f2" },
+        card: { DEFAULT: "#FFFFFF", foreground: "#111111" },
+        popover: { DEFAULT: "#FFFFFF", foreground: "#111111" },
       },
       borderRadius: {
         lg: "12px",
@@ -47,6 +56,7 @@ const config: Config = {
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
         serif: ["var(--font-playfair)", "Georgia", "serif"],
+        headline: ["var(--font-oswald)", '"Arial Narrow"', "Impact", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -74,9 +84,15 @@ const config: Config = {
       },
       backgroundImage: {
         "hero-gradient":
-          "linear-gradient(135deg, #0B2545 0%, #13396B 50%, #1A4E8F 100%)",
+          "linear-gradient(135deg, #111111 0%, #2b2b2b 55%, #c1121f 100%)",
         "cta-gradient":
-          "linear-gradient(135deg, #D7263D 0%, #0B2545 100%)",
+          "linear-gradient(135deg, #c1121f 0%, #9b111e 100%)",
+        "paper-grain":
+          "radial-gradient(circle at 1px 1px, rgba(0,0,0,0.045) 1px, transparent 0)",
+      },
+      boxShadow: {
+        press: "0 10px 30px -10px rgba(193,18,31,0.25)",
+        card: "0 4px 20px -4px rgba(17,17,17,0.08)",
       },
     },
   },
