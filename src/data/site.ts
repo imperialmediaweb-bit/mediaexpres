@@ -37,6 +37,7 @@ export const FOOTER_LINKS = {
     { href: "/blog", label: "Blog" },
     { href: "/contact", label: "Contact" },
     { href: "/reteaua-noastra", label: "Rețeaua noastră" },
+    { href: "/parteneriat", label: "Parteneriat ziare" },
   ],
   legal: [
     { href: "/legal/termeni", label: "Termeni și condiții" },
