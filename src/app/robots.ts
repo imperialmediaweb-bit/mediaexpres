@@ -14,6 +14,7 @@ export default function robots(): MetadataRoute.Robots {
           "/api/*",
           "/comanda",
           "/reteaua-noastra",
+          "/oferta",
         ],
       },
     ],
