@@ -9,18 +9,16 @@ import {
   Globe,
   FileText,
   CreditCard,
+  ArrowRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RequestListModal } from "@/components/forms/RequestListModal";
 
-// Anti-PBN: pagina NU listează URL-urile celor 50 de publicații și NU
-// afișează prețurile. Ambele pleacă pe email prin RequestListModal.
 export const metadata: Metadata = {
   title: "Ofertă publicare advertoriale și comunicate",
   description:
-    "Publicare advertoriale și comunicate într-o rețea de 50+ ziare online, 41 ziare locale și 9 ziare naționale. Oferta completă cu prețuri și lista publicațiilor pe email.",
+    "Publicare advertoriale și comunicate într-o rețea de 50+ ziare online, 41 ziare locale și 9 ziare naționale. Acoperire locală și națională într-un singur plasament.",
   alternates: { canonical: "/oferta" },
-  robots: { index: false, follow: false },
 };
 
 const BENEFITS = [
@@ -73,21 +71,29 @@ export default function OfertaPage() {
       {/* Hero */}
       <section className="bg-brand-navy text-white">
         <div className="container py-20 text-center">
-          <p className="eyebrow text-brand-gold">Ofertă specială</p>
+          <p className="eyebrow text-brand-gold">Ofertă publicare</p>
           <h1 className="h1 mt-3 text-white">
-            Publicare advertoriale și comunicate
+            Advertoriale și comunicate în 50+ ziare românești
           </h1>
           <p className="lead mx-auto mt-6 max-w-2xl text-white/85">
             Rețea de 50+ ziare online, 41 ziare locale (câte unul pentru
             fiecare județ), 9 ziare naționale și 1 ziar dedicat diasporei.
             Vizibilitate locală și națională într-un singur plasament.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
+            <Button variant="gold" size="lg" asChild>
+              <Link href="/pachete">
+                Vezi pachete și prețuri <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
             <RequestListModal
               trigger={
-                <Button variant="gold" size="lg">
-                  <Mail className="h-4 w-4" /> Solicită oferta completă cu
-                  prețuri
+                <Button
+                  variant="outline"
+                  size="lg"
+                  className="border-white/30 text-white hover:bg-white hover:text-brand-navy"
+                >
+                  <Mail className="h-4 w-4" /> Lista ziarelor pe email
                 </Button>
               }
             />
@@ -149,15 +155,15 @@ export default function OfertaPage() {
         </div>
       </section>
 
-      {/* Packages (no prices) */}
+      {/* Packages descriptive — prices live on /pachete */}
       <section className="section bg-white">
         <div className="container">
           <div className="max-w-2xl text-center mx-auto">
             <p className="eyebrow">Pachete de promovare</p>
             <h2 className="h2 mt-2">Alege acoperirea potrivită</h2>
             <p className="lead mt-4">
-              Două variante simple: un singur portal sau întreaga rețea.
-              Tarifele detaliate sunt trimise pe email în oferta completă.
+              Două variante simple: un singur portal sau întreaga rețea. Vezi
+              tarifele și abonamentele lunare pe pagina de pachete.
             </p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -181,10 +187,13 @@ export default function OfertaPage() {
               highlight
             />
           </div>
-          <p className="mt-8 text-center text-sm text-slate-500">
-            Tarifele complete și lista celor 50+ publicații le primești pe
-            email, fără obligații.
-          </p>
+          <div className="mt-8 text-center">
+            <Button variant="default" size="lg" asChild>
+              <Link href="/pachete">
+                Vezi prețurile complete <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
         </div>
       </section>
 
@@ -227,34 +236,38 @@ export default function OfertaPage() {
         </div>
       </section>
 
-      {/* Final CTA (lead magnet) */}
+      {/* Final CTA: lista ziarelor (anti-PBN) + link la pachete */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 text-center">
           <Mail className="mx-auto h-10 w-10 text-brand-gold" />
           <h2 className="h2 mt-5 text-white">
-            Trimite-mi oferta completă pe email
+            Vrei lista completă a celor 50+ ziare?
           </h2>
           <p className="lead mt-4 mx-auto max-w-2xl text-white/85">
-            Lista completă a publicațiilor și prețurile detaliate sunt livrate
-            pe email în maximum 2 minute după completarea formularului. Fără
-            obligații, fără spam.
+            Din respect pentru rețeaua noastră și pentru a o proteja de abuzuri
+            SEO, numele și URL-urile exacte ale ziarelor le trimitem pe email,
+            gratuit, după un formular scurt. Prețurile sunt pe pagina de
+            pachete.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-wrap justify-center gap-3">
             <RequestListModal
               trigger={
                 <Button variant="gold" size="lg">
-                  <Mail className="h-4 w-4" /> Solicită oferta completă
+                  <Mail className="h-4 w-4" /> Solicită lista pe email
                 </Button>
               }
             />
+            <Button
+              variant="outline"
+              size="lg"
+              asChild
+              className="border-white/30 text-white hover:bg-white hover:text-brand-navy"
+            >
+              <Link href="/pachete">
+                Vezi pachete <ArrowRight className="h-4 w-4" />
+              </Link>
+            </Button>
           </div>
-          <p className="mt-6 text-sm text-white/60">
-            Ai deja oferta?{" "}
-            <Link href="/contact" className="underline">
-              Scrie-ne direct
-            </Link>{" "}
-            — răspundem în câteva ore în timpul programului.
-          </p>
         </div>
       </section>
     </>
