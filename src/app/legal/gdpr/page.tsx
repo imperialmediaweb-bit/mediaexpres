@@ -39,7 +39,7 @@ export default function GdprPage() {
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Cum îți exerciți drepturile</h2>
       <p>
-        Scrie-ne la <a href="mailto:contact@mediaexpres.ro">contact@mediaexpres.ro</a> cu cererea
+        Scrie-ne la <a href="mailto:contact@mediaexpress.ro">contact@mediaexpress.ro</a> cu cererea
         ta clară. Răspundem în maximum 30 de zile. Pentru mai multe detalii, consultă și{" "}
         <Link href="/legal/confidentialitate">politica de confidențialitate</Link>.
       </p>

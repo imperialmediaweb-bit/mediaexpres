@@ -18,7 +18,7 @@ export default function ConfidentialitatePage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Operator de date</h2>
       <p>
         MediaExpres SRL (denumit &bdquo;noi&rdquo;), cu sediul în București, România, email{" "}
-        <a href="mailto:contact@mediaexpres.ro">contact@mediaexpres.ro</a>.
+        <a href="mailto:contact@mediaexpress.ro">contact@mediaexpress.ro</a>.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Ce date colectăm</h2>
@@ -59,7 +59,7 @@ export default function ConfidentialitatePage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Contact</h2>
       <p>
         Pentru exercitarea oricăruia dintre drepturile de mai sus, scrie-ne la{" "}
-        <a href="mailto:contact@mediaexpres.ro">contact@mediaexpres.ro</a>. Răspundem în maximum 30
+        <a href="mailto:contact@mediaexpress.ro">contact@mediaexpress.ro</a>. Răspundem în maximum 30
         de zile.
       </p>
     </LegalLayout>
