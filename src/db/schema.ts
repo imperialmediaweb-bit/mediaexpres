@@ -18,7 +18,7 @@ export const users = pgTable("user", {
   email: text("email").unique().notNull(),
   emailVerified: timestamp("emailVerified", { mode: "date" }),
   image: text("image"),
-  // Billing / company details (pentru factură fiscală)
+  // Billing / company details (pentru factura fiscala)
   phone: text("phone"),
   companyName: text("company_name"),
   companyCui: text("company_cui"),
@@ -148,4 +148,28 @@ export const uploads = pgTable("upload", {
   height: integer("height"),
   bytes: integer("bytes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+// Publisher applications — ziare care cer sa intre in reteaua MediaExpres.
+export const publishers = pgTable("publisher", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  siteName: text("site_name").notNull(),
+  siteUrl: text("site_url").notNull(),
+  county: text("county"),
+  region: text("region"),
+  facebookUrl: text("facebook_url"),
+  monthlyTraffic: integer("monthly_traffic"),
+  articlesPerMonth: integer("articles_per_month"),
+  contactName: text("contact_name").notNull(),
+  contactEmail: text("contact_email").notNull(),
+  contactPhone: text("contact_phone"),
+  payoutIban: text("payout_iban"),
+  payoutCompany: text("payout_company"),
+  notes: text("notes"),
+  status: text("status").notNull().default("pending"), // pending | approved | rejected
+  rejectionReason: text("rejection_reason"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  decidedAt: timestamp("decided_at"),
 });
