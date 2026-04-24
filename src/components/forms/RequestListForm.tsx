@@ -3,14 +3,20 @@
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { CheckCircle2, Loader2, AlertCircle, Mail } from "lucide-react";
+import Link from "next/link";
+import { Loader2, AlertCircle, Mail, ArrowRight } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { requestListSchema, type RequestListInput } from "@/lib/validators";
 
-export function RequestListForm() {
+interface RequestListFormProps {
+  successHref?: string;
+  successCtaLabel?: string;
+}
+
+export function RequestListForm({ successHref, successCtaLabel }: RequestListFormProps = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const {
@@ -55,6 +61,14 @@ export function RequestListForm() {
           Verifică inbox-ul în următoarele 2 minute. Dacă nu primești email, verifică folder-ul
           de spam sau scrie-ne direct.
         </p>
+        {successHref && (
+          <Button variant="accent" size="lg" asChild className="mt-2">
+            <Link href={successHref}>
+              {successCtaLabel || "Vezi prețurile acum"}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+        )}
       </div>
     );
   }
