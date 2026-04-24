@@ -29,6 +29,7 @@ export const FOOTER_LINKS = {
     { href: "/pachete#standard", label: "Pachete Standard" },
     { href: "/pachete#cazino", label: "Pachete Cazino" },
     { href: "/pachete#abonamente", label: "Abonamente lunare" },
+    { href: "/oferta", label: "Ofertă advertoriale" },
     { href: "/comanda", label: "Comandă articol" },
   ],
   companie: [

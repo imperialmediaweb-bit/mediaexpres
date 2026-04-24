@@ -13,9 +13,11 @@ import { RequestListForm } from "./RequestListForm";
 
 interface RequestListModalProps {
   trigger: React.ReactNode;
+  successHref?: string;
+  successCtaLabel?: string;
 }
 
-export function RequestListModal({ trigger }: RequestListModalProps) {
+export function RequestListModal({ trigger, successHref, successCtaLabel }: RequestListModalProps) {
   const [open, setOpen] = useState(false);
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -28,7 +30,7 @@ export function RequestListModal({ trigger }: RequestListModalProps) {
             maximum 2 minute.
           </DialogDescription>
         </DialogHeader>
-        <RequestListForm />
+        <RequestListForm successHref={successHref} successCtaLabel={successCtaLabel} />
       </DialogContent>
     </Dialog>
   );

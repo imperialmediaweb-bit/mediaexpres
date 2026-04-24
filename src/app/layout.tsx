@@ -4,6 +4,10 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { SITE } from "@/data/site";
 import { StructuredData } from "@/components/seo/StructuredData";
+import {
+  ConversionBanner,
+  ConversionWidgets,
+} from "@/components/conversion/ConversionWidgets";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -91,9 +95,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen font-sans flex flex-col">
         <StructuredData />
+        <ConversionBanner />
         <Navbar />
         <main className="flex-1">{children}</main>
         <Footer />
+        <ConversionWidgets />
       </body>
     </html>
   );
