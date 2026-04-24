@@ -1,11 +1,11 @@
 export const SITE = {
   name: "MediaExpres",
-  domain: "mediaexpres.ro",
-  url: process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpres.ro",
+  domain: "mediaexpress.ro",
+  url: process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro",
   tagline: "Articolul tău în 50 de ziare românești în 24h",
   description:
     "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 37 pagini Facebook. Livrare în 24h, raport PDF, linkuri permanente.",
-  email: "contact@mediaexpres.ro",
+  email: "contact@mediaexpress.ro",
   phone: "+40 700 000 000",
   address: "București, România",
   schedule: "Luni – Vineri, 09:00 – 18:00",

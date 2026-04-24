@@ -19,7 +19,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
   providers: [
     Resend({
       apiKey: process.env.RESEND_API_KEY,
-      from: process.env.FROM_EMAIL || "MediaExpres <noreply@mediaexpres.ro>",
+      from: process.env.FROM_EMAIL || "MediaExpres <noreply@mediaexpress.ro>",
     }),
   ],
   session: { strategy: "database" },

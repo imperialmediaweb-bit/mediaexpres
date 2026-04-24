@@ -6,8 +6,8 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM = process.env.FROM_EMAIL || "MediaExpres <noreply@mediaexpres.ro>";
-const CONTACT = process.env.CONTACT_EMAIL || "contact@mediaexpres.ro";
+const FROM = process.env.FROM_EMAIL || "MediaExpres <noreply@mediaexpress.ro>";
+const CONTACT = process.env.CONTACT_EMAIL || "contact@mediaexpress.ro";
 
 interface SendArgs {
   to: string;
@@ -57,7 +57,7 @@ export function wrapEmail(title: string, body: string) {
       <h2 style="margin:0 0 16px 0;font-family:Georgia,serif;color:#0B2545;">${title}</h2>
       ${body}
     </div>
-    <p style="text-align:center;color:#64748b;font-size:12px;margin-top:24px;">&copy; ${new Date().getFullYear()} MediaExpres • mediaexpres.ro</p>
+    <p style="text-align:center;color:#64748b;font-size:12px;margin-top:24px;">&copy; ${new Date().getFullYear()} MediaExpres • mediaexpress.ro</p>
   </div>
 </body>
 </html>`;
