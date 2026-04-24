@@ -15,6 +15,8 @@ interface SendArgs {
   html: string;
   replyTo?: string;
   attachments?: { filename: string; path: string }[];
+  // ISO string; Resend schedules the send at this time instead of now.
+  scheduledAt?: string;
 }
 
 export async function sendEmail(args: SendArgs) {
@@ -23,13 +25,17 @@ export async function sendEmail(args: SendArgs) {
     console.warn("[email] RESEND_API_KEY missing — logging instead:", args.subject);
     return { ok: true, dryRun: true };
   }
-  const { data, error } = await resend.emails.send({
+  const payload: Parameters<typeof resend.emails.send>[0] = {
     from: FROM,
     to: args.to,
     subject: args.subject,
     html: args.html,
     replyTo: args.replyTo,
-  });
+  };
+  if (args.scheduledAt) {
+    (payload as unknown as { scheduledAt: string }).scheduledAt = args.scheduledAt;
+  }
+  const { data, error } = await resend.emails.send(payload);
   if (error) {
     console.error("[email] Resend error:", error);
     return { ok: false, error: error.message };
