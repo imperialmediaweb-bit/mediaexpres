@@ -27,7 +27,7 @@ Deschide [http://localhost:3000](http://localhost:3000).
 1. Conectează repo-ul în Railway dashboard.
 2. Setează variabilele din `.env.example`.
 3. Railway folosește `nixpacks.toml` + `railway.json` pentru build.
-4. Atașează domeniul `mediaexpres.ro` după primul deploy.
+4. Atașează domeniul `mediaexpress.ro` după primul deploy.
 
 ## Structura
 

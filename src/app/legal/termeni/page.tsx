@@ -52,7 +52,7 @@ export default function TermeniPage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">7. Abonamente</h2>
       <p>
         Abonamentele lunare se facturează la începutul fiecărei luni. Clientul poate anula abonamentul
-        cu minim 15 zile înainte de finalul lunii curente, printr-un email la contact@mediaexpres.ro.
+        cu minim 15 zile înainte de finalul lunii curente, printr-un email la contact@mediaexpress.ro.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">8. Răspundere</h2>

@@ -61,10 +61,10 @@ export default function ComandaPage({ searchParams }: PageProps) {
                 Scrie-ne pe email și îți recomandăm noi pachetul potrivit, gratuit.
               </p>
               <a
-                href="mailto:contact@mediaexpres.ro"
+                href="mailto:contact@mediaexpress.ro"
                 className="mt-3 inline-block text-sm font-semibold text-brand-gold hover:underline"
               >
-                contact@mediaexpres.ro →
+                contact@mediaexpress.ro →
               </a>
             </div>
           </div>
