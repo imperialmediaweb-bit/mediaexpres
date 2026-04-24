@@ -4,6 +4,7 @@ import { Check, Newspaper } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { OrderModal } from "@/components/forms/OrderModal";
+import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { formatPrice, cn } from "@/lib/utils";
 import type { Package } from "@/data/packages";
 
@@ -63,16 +64,20 @@ export function PackageCard({ pkg }: PackageCardProps) {
         ))}
       </ul>
 
-      <div className="mt-8">
+      <div className="mt-8 space-y-2">
+        <CheckoutButton
+          packageId={pkg.id}
+          mode="package"
+          label={`Plateste ${formatPrice(pkg.price)} RON`}
+          variant={isFeatured ? "accent" : "default"}
+          size="lg"
+          className="w-full"
+        />
         <OrderModal
           defaultPackageId={pkg.id}
           trigger={
-            <Button
-              variant={isFeatured ? "accent" : "default"}
-              size="lg"
-              className="w-full"
-            >
-              Comandă {pkg.name}
+            <Button variant="outline" size="default" className="w-full">
+              Comandă cu factură proformă
             </Button>
           }
         />
