@@ -33,8 +33,6 @@ export interface PressReleaseInput {
   city?: string;
 }
 
-// Public press-release generator (used by /generator-comunicat).
-// Shorter (300-500 cuvinte) ca să țin costul jos pentru lead-magnet gratuit.
 export async function generatePressRelease(
   input: PressReleaseInput
 ): Promise<GenerateArticleOutput> {
@@ -113,6 +111,80 @@ Scrie comunicatul de presa.`;
   }
 }
 
+export interface TitleVariant {
+  title: string;
+  ctrScore: number; // 1-100
+  reasoning: string;
+}
+
+// Generates 5 title variants with predicted CTR (1-100). Cheap & fast (Haiku).
+export async function generateTitleVariants(
+  topic: string
+): Promise<TitleVariant[]> {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
+
+  const system = `Esti un expert in copywriting jurnalistic pentru piata din Romania. Generezi 5 variante de titlu pentru un articol/comunicat de presa dat. Pentru fiecare titlu evaluezi probabil-CTR pe o scara 1-100, bazat pe:
+- claritatea promisiunii (cititorul intelege beneficiul instant)
+- specificitate (cifre, nume, locuri concrete bat generic-ul)
+- emotie/curiozitate fara clickbait
+- lungime optima 50-70 caractere
+- adaptat publicului romanesc, fara jargonisme
+
+Raspunde STRICT in format JSON cu cheia "variants": un array de exact 5 obiecte, fiecare cu cheile "title" (string), "ctrScore" (numar intreg 1-100), "reasoning" (string scurt — max 80 caractere — explicand de ce e bun sau slab). Fara markdown, fara comentarii.`;
+
+  const userPrompt = `Tema: ${topic}\n\nGenereaza 5 variante de titlu cu evaluare CTR.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL_FAST || "claude-haiku-4-5-20251001",
+      max_tokens: 800,
+      system,
+      messages: [{ role: "user", content: userPrompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error("[ai] title variants error", res.status, txt);
+    throw new Error("Generarea titlurilor a esuat");
+  }
+
+  const data = (await res.json()) as {
+    content?: Array<{ type: string; text?: string }>;
+  };
+  const text = (data.content || [])
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join("");
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  const raw = jsonMatch ? jsonMatch[0] : text;
+  try {
+    const parsed = JSON.parse(raw) as { variants?: unknown };
+    const variants = parsed.variants;
+    if (!Array.isArray(variants)) throw new Error("Format invalid");
+    return variants
+      .map((v) => v as TitleVariant)
+      .filter(
+        (v) =>
+          typeof v?.title === "string" &&
+          typeof v?.ctrScore === "number" &&
+          typeof v?.reasoning === "string"
+      )
+      .slice(0, 5);
+  } catch {
+    console.error("[ai] could not parse title variants JSON", text);
+    throw new Error("Raspunsul modelului nu a putut fi parsat");
+  }
+}
+
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
@@ -166,7 +238,6 @@ Scrie articolul.`;
     .map((c) => c.text || "")
     .join("");
 
-  // Extract JSON (tolerant to stray whitespace / code fences).
   const jsonMatch = text.match(/\{[\s\S]*\}/);
   const raw = jsonMatch ? jsonMatch[0] : text;
   try {
