@@ -17,6 +17,102 @@ export interface GenerateArticleOutput {
 
 const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
 
+export interface PressReleaseInput {
+  companyName: string;
+  announcement: string;
+  type:
+    | "lansare"
+    | "eveniment"
+    | "parteneriat"
+    | "rezultate"
+    | "extindere"
+    | "premii"
+    | "altceva";
+  contactName?: string;
+  contactEmail?: string;
+  city?: string;
+}
+
+// Public press-release generator (used by /generator-comunicat).
+// Shorter (300-500 cuvinte) ca să țin costul jos pentru lead-magnet gratuit.
+export async function generatePressRelease(
+  input: PressReleaseInput
+): Promise<GenerateArticleOutput> {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
+
+  const typeLabel: Record<PressReleaseInput["type"], string> = {
+    lansare: "lansare de produs/serviciu",
+    eveniment: "anunt de eveniment",
+    parteneriat: "parteneriat strategic",
+    rezultate: "rezultate financiare/operationale",
+    extindere: "extindere/locatie noua",
+    premii: "premiu sau distinctie",
+    altceva: "anunt corporate",
+  };
+
+  const system = `Esti un redactor de PR profesionist din Romania. Scrii comunicate de presa intr-un format jurnalistic standard, respectand:
+- structura: TITLU + INTRO (cine/ce/cand/unde) + 3-4 PARAGRAFE de context + CITAT din partea reprezentantului firmei + BOILERPLATE despre companie
+- ton informativ, neutru, fara superlative nefondate
+- 300-500 cuvinte
+- in limba romana corecta cu diacritice
+- fara clickbait, fara afirmatii imposibil de verificat
+
+Raspunde STRICT in format JSON cu cheile "title" si "body", fara markdown, fara comentarii. "body" contine textul cu paragrafe separate prin \\n\\n.`;
+
+  const cityClause = input.city ? ` din ${input.city}` : "";
+  const contactClause =
+    input.contactName && input.contactEmail
+      ? `\nPersoana de contact pentru presa: ${input.contactName}, ${input.contactEmail}`
+      : "";
+
+  const userPrompt = `Tip comunicat: ${typeLabel[input.type]}
+Companie: ${input.companyName}${cityClause}
+Ce anunta: ${input.announcement}${contactClause}
+
+Scrie comunicatul de presa.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 1500,
+      system,
+      messages: [{ role: "user", content: userPrompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error("[ai] Anthropic press-release error", res.status, txt);
+    throw new Error("Generarea a esuat");
+  }
+
+  const data = (await res.json()) as {
+    content?: Array<{ type: string; text?: string }>;
+  };
+  const text = (data.content || [])
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join("");
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  const raw = jsonMatch ? jsonMatch[0] : text;
+  try {
+    const parsed = JSON.parse(raw) as { title?: string; body?: string };
+    if (!parsed.title || !parsed.body) throw new Error("Raspuns incomplet");
+    return { title: parsed.title, body: parsed.body };
+  } catch {
+    console.error("[ai] could not parse press-release JSON", text);
+    throw new Error("Raspunsul modelului nu a putut fi parsat");
+  }
+}
+
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
