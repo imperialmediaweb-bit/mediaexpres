@@ -10,7 +10,6 @@ import {
   ShoppingBag,
   Repeat,
   Newspaper,
-  Handshake,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -26,7 +25,6 @@ const NAV = [
   { href: "/admin/articole", label: "Articole", icon: FileText },
   { href: "/admin/comenzi", label: "Comenzi", icon: ShoppingBag },
   { href: "/admin/abonamente", label: "Abonamente", icon: Repeat },
-  { href: "/admin/parteneri", label: "Parteneri", icon: Handshake },
   { href: "/admin/ziare", label: "Ziare", icon: Newspaper },
 ];
 
