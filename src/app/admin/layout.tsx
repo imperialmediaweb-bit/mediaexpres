@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Repeat,
   Newspaper,
+  Send,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -25,6 +26,7 @@ const NAV = [
   { href: "/admin/articole", label: "Articole", icon: FileText },
   { href: "/admin/comenzi", label: "Comenzi", icon: ShoppingBag },
   { href: "/admin/abonamente", label: "Abonamente", icon: Repeat },
+  { href: "/admin/prospecti", label: "Prospecți B2B", icon: Send },
   { href: "/admin/ziare", label: "Ziare", icon: Newspaper },
 ];
 
@@ -34,8 +36,6 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = getSession();
-
-  // Not logged in: render children directly (login page has its own fullscreen layout).
   if (!session) return <>{children}</>;
 
   return (
@@ -49,15 +49,8 @@ export default function AdminLayout({
             </span>
           </div>
           <div className="flex items-center gap-4 text-sm">
-            <span className="text-slate-600 hidden sm:inline">
-              Salut, {session.username}
-            </span>
-            <Link
-              href="/"
-              className="text-sm text-slate-500 hover:text-brand-red"
-            >
-              ← Site
-            </Link>
+            <span className="text-slate-600 hidden sm:inline">Salut, {session.username}</span>
+            <Link href="/" className="text-sm text-slate-500 hover:text-brand-red">← Site</Link>
             <LogoutButton />
           </div>
         </div>
