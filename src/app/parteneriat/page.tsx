@@ -70,7 +70,7 @@ export default function ParteneriatPage() {
               <li>✓ Trafic minim 5.000 vizite/lună (ideal 20k+)</li>
               <li>✓ Domeniu propriu, nu subdomeniu gratuit</li>
               <li>✓ Posibilitate de publicare în maximum 24h de la primire</li>
-              <li>✓ Pagină „Contact" + date firmă vizibile</li>
+              <li>✓ Pagină de contact cu date firmă vizibile</li>
             </ul>
           </div>
         </div>
