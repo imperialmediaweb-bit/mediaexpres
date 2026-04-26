@@ -2,10 +2,11 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { db } from "@/db";
-import { articles, uploads } from "@/db/schema";
+import { articles, uploads, subscriptions, orders } from "@/db/schema";
 import { and, eq } from "drizzle-orm";
 import { getEntitlements } from "@/lib/entitlements";
 import { ArticleEditor } from "@/components/cont/ArticleEditor";
+import { ArticleTracker } from "@/components/cont/ArticleTracker";
 import { ArrowLeft } from "lucide-react";
 
 export const metadata = {
@@ -31,6 +32,27 @@ export default async function ArticolPage({ params }: { params: { id: string } }
     ent.activeSubscription?.category === "casino" ? "casino" : "standard";
 
   const isReadOnly = article.status === "submitted" || article.status === "published";
+  const isPublished = article.status === "published";
+
+  // Pentru tracker: derivam pachetul (din comanda asociata sau din planul de abonament)
+  let trackerPackageId: string | null = null;
+  if (article.orderId) {
+    const [o] = await db
+      .select({ packageId: orders.packageId })
+      .from(orders)
+      .where(eq(orders.id, article.orderId))
+      .limit(1);
+    trackerPackageId = o?.packageId ?? null;
+  } else if (article.subscriptionId) {
+    const [s] = await db
+      .select({ planId: subscriptions.planId, category: subscriptions.category })
+      .from(subscriptions)
+      .where(eq(subscriptions.id, article.subscriptionId))
+      .limit(1);
+    if (s) {
+      trackerPackageId = s.category === "casino" ? "cazino-national" : "national";
+    }
+  }
 
   return (
     <section className="container py-12">
@@ -56,6 +78,15 @@ export default async function ArticolPage({ params }: { params: { id: string } }
           <div className="mt-6 rounded-md bg-blue-50 p-4 text-sm text-blue-900">
             Acest articol a fost trimis spre publicare si nu mai poate fi modificat.
             Pentru schimbari, contacteaza-ne pe email.
+          </div>
+        )}
+
+        {isPublished && (
+          <div className="mt-8">
+            <ArticleTracker
+              publishedAt={article.publishedAt}
+              packageId={trackerPackageId}
+            />
           </div>
         )}
 
