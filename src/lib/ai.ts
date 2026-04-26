@@ -113,11 +113,10 @@ Scrie comunicatul de presa.`;
 
 export interface TitleVariant {
   title: string;
-  ctrScore: number; // 1-100
+  ctrScore: number;
   reasoning: string;
 }
 
-// Generates 5 title variants with predicted CTR (1-100). Cheap & fast (Haiku).
 export async function generateTitleVariants(
   topic: string
 ): Promise<TitleVariant[]> {
@@ -246,6 +245,91 @@ Scrie articolul.`;
     return { title: parsed.title, body: parsed.body };
   } catch {
     console.error("[ai] could not parse JSON from model output", text);
+    throw new Error("Raspunsul modelului nu a putut fi parsat");
+  }
+}
+
+export interface EditorialMonth {
+  month: number;
+  monthName: string;
+  theme: string;
+  hook: string;
+  suggestedFormat: "lansare" | "eveniment" | "rezultate" | "extindere" | "altceva";
+}
+
+export async function generateEditorialCalendar(
+  industry: string,
+  companyContext: string
+): Promise<EditorialMonth[]> {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
+
+  const system = `Esti un strateg de PR cu experienta pe piata din Romania. Construiesti un calendar editorial anual (12 luni) cu teme de comunicate de presa. Pentru fiecare luna:
+- iei in calcul sezonalitatea industriei date
+- alegi teme care produc real interes mediatic in luna respectiva (ex: bilanturi anuale in ianuarie, vacante de vara in iulie, raport anual in martie, sezonul cumparaturilor in noiembrie)
+- variaza tipurile (lansari, evenimente, rezultate, parteneriate, extinderi, premii)
+- formuleaza temele specific, nu generic ("Bilantul vanzarilor 2025 cu cifre de crestere" vs "Anul 2025 a fost bun")
+
+Raspunde STRICT in format JSON cu cheia "calendar": un array de exact 12 obiecte, fiecare cu cheile:
+- "month" (1-12)
+- "monthName" (Ianuarie, Februarie, ...)
+- "theme" (string scurt, max 80 caractere)
+- "hook" (1-2 propozitii care explica de ce e potrivita in luna respectiva)
+- "suggestedFormat" (unul din: lansare, eveniment, rezultate, extindere, altceva)
+
+Fara markdown, fara comentarii.`;
+
+  const userPrompt = `Industria firmei: ${industry}
+Context companie: ${companyContext}
+
+Genereaza calendarul editorial pentru cele 12 luni.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: MODEL,
+      max_tokens: 3000,
+      system,
+      messages: [{ role: "user", content: userPrompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error("[ai] editorial calendar error", res.status, txt);
+    throw new Error("Generarea calendarului a esuat");
+  }
+
+  const data = (await res.json()) as {
+    content?: Array<{ type: string; text?: string }>;
+  };
+  const text = (data.content || [])
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join("");
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  const raw = jsonMatch ? jsonMatch[0] : text;
+  try {
+    const parsed = JSON.parse(raw) as { calendar?: unknown };
+    const arr = parsed.calendar;
+    if (!Array.isArray(arr)) throw new Error("Format invalid");
+    return arr
+      .map((m) => m as EditorialMonth)
+      .filter(
+        (m) =>
+          typeof m?.month === "number" &&
+          typeof m?.theme === "string" &&
+          typeof m?.hook === "string"
+      )
+      .slice(0, 12);
+  } catch {
+    console.error("[ai] could not parse editorial calendar JSON", text);
     throw new Error("Raspunsul modelului nu a putut fi parsat");
   }
 }
