@@ -3,9 +3,8 @@ import { Button } from "@/components/ui/button";
 import { MapPin, Newspaper, Facebook, Globe, Mail } from "lucide-react";
 import { RequestListModal } from "@/components/forms/RequestListModal";
 import { REGION_COUNTS } from "@/data/newspapers";
+import { CountyGrid } from "@/components/CountyGrid";
 
-// IMPORTANT: Această pagină NU conține URL-uri sau nume de ziare.
-// Este generică pentru a proteja rețeaua de indexare Google (anti-PBN).
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
   description: "MediaExpres distribuie pe o rețea națională de 50+ ziare și 37 pagini Facebook.",
@@ -98,7 +97,20 @@ export default function ReteauaPage() {
             </div>
           </div>
 
-          {/* Lead magnet */}
+          <div className="mt-20">
+            <div className="max-w-2xl">
+              <p className="eyebrow">Acoperire județeană</p>
+              <h2 className="h2 mt-2">Toate județele României</h2>
+              <p className="lead mt-4">
+                Click pe orice județ pentru a vedea pachetele și prețurile pentru
+                publicarea unui comunicat de presă în zona respectivă.
+              </p>
+            </div>
+            <div className="mt-10">
+              <CountyGrid />
+            </div>
+          </div>
+
           <div className="mt-16 rounded-2xl bg-brand-navy p-10 text-white text-center lg:p-16">
             <Mail className="mx-auto h-10 w-10 text-brand-gold" />
             <h3 className="mt-5 font-serif text-3xl font-bold">
