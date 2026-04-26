@@ -56,7 +56,7 @@ export default async function AdminArticolePage({
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">Articole</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Inbox articole trimise de clienți. Click pe „Deschide" ca să aprobi,
+        Inbox articole trimise de clienți. Click pe Deschide ca să aprobi,
         respingi și să pui URL-urile publicate.
       </p>
 
