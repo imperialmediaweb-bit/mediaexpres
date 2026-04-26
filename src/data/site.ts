@@ -30,6 +30,8 @@ export const FOOTER_LINKS = {
     { href: "/pachete#cazino", label: "Pachete Cazino" },
     { href: "/pachete#abonamente", label: "Abonamente lunare" },
     { href: "/generator-comunicat", label: "Generator AI gratuit" },
+    { href: "/sabloane", label: "Șabloane comunicate" },
+    { href: "/audit-mentiuni", label: "Audit mențiuni presă" },
     { href: "/oferta", label: "Ofertă advertoriale" },
     { href: "/comanda", label: "Comandă articol" },
   ],
