@@ -333,3 +333,88 @@ Genereaza calendarul editorial pentru cele 12 luni.`;
     throw new Error("Raspunsul modelului nu a putut fi parsat");
   }
 }
+
+export interface OutreachEmailInput {
+  companyName: string;
+  industry?: string;
+  city?: string;
+  website?: string;
+  notes?: string;
+}
+
+export interface OutreachEmail {
+  subject: string;
+  body: string;
+}
+
+export async function generateOutreachEmail(
+  input: OutreachEmailInput
+): Promise<OutreachEmail> {
+  const key = process.env.ANTHROPIC_API_KEY;
+  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
+
+  const system = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti, oferindu-le serviciul MediaExpres: publicare comunicate de presa pe 50 de ziare cu pachet de la 150 RON (Local) la 1500 RON (National 50).
+
+Reguli:
+- subject scurt si specific (max 60 caractere), care personalizeaza catre firma
+- intro: 1 propozitie care arata ca ai cercetat firma (gen "am vazut ca activati in [domeniu] din [oras]")
+- body: 2 paragrafe scurte care explica beneficiul concret pentru ei
+- CTA clar la final: "Raspunde-mi cu un da si trimit detalii", sau invitatie la apel scurt
+- semnatura: "Echipa MediaExpres - mediaexpress.ro"
+- TON profesional, NU pushy, NU clickbait
+- limba romana cu diacritice
+
+Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plain cu \\n\\n intre paragrafe. Fara markdown, fara comentarii.`;
+
+  const ctx = [
+    `Companie: ${input.companyName}`,
+    input.industry ? `Industrie: ${input.industry}` : "",
+    input.city ? `Oras: ${input.city}` : "",
+    input.website ? `Site web: ${input.website}` : "",
+    input.notes ? `Note: ${input.notes}` : "",
+  ]
+    .filter(Boolean)
+    .join("\n");
+
+  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma.`;
+
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      "x-api-key": key,
+      "anthropic-version": "2023-06-01",
+    },
+    body: JSON.stringify({
+      model: process.env.ANTHROPIC_MODEL_FAST || "claude-haiku-4-5-20251001",
+      max_tokens: 1000,
+      system,
+      messages: [{ role: "user", content: userPrompt }],
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error("[ai] outreach email error", res.status, txt);
+    throw new Error("Generarea email-ului a esuat");
+  }
+
+  const data = (await res.json()) as {
+    content?: Array<{ type: string; text?: string }>;
+  };
+  const text = (data.content || [])
+    .filter((c) => c.type === "text")
+    .map((c) => c.text || "")
+    .join("");
+
+  const jsonMatch = text.match(/\{[\s\S]*\}/);
+  const raw = jsonMatch ? jsonMatch[0] : text;
+  try {
+    const parsed = JSON.parse(raw) as { subject?: string; body?: string };
+    if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
+    return { subject: parsed.subject, body: parsed.body };
+  } catch {
+    console.error("[ai] could not parse outreach email JSON", text);
+    throw new Error("Raspunsul modelului nu a putut fi parsat");
+  }
+}
