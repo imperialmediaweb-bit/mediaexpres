@@ -5,7 +5,13 @@ import { db } from "@/db";
 import { prospects } from "@/db/schema";
 import { eq, inArray, asc } from "drizzle-orm";
 import { generateOutreachEmail } from "@/lib/ai";
-import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
+import {
+  sendEmail,
+  wrapEmailCold,
+  defaultListUnsubscribe,
+  ADMIN_EMAIL,
+  SENDER_NAME,
+} from "@/lib/email";
 import { isSuppressed } from "@/data/suppression-list";
 import { signProspectToken } from "@/lib/prospect-token";
 
@@ -27,8 +33,14 @@ const DAY_MS = 86_400_000;
 function htmlFromBody(body: string): string {
   return body
     .split(/\n\n+/)
-    .map((para) => `<p>${para.replace(/</g, "&lt;").replace(/\n/g, "<br/>")}</p>`)
+    .map((para) => `<p style="margin:0 0 14px 0;">${para.replace(/</g, "&lt;").replace(/\n/g, "<br/>")}</p>`)
     .join("");
+}
+
+// Plain-text alternative — spam filters favor email-urile cu ambele MIME parts.
+// Body-ul de la AI vine deja ca text plain cu \n\n, deci e direct utilizabil.
+function textFromBody(body: string, senderName: string): string {
+  return `${body}\n\nCu drag,\n${senderName}\nMediaExpres · mediaexpress.ro\n\n---\nDacă nu vrei să mai primești emailuri, răspunde STOP.`;
 }
 
 export async function POST(req: NextRequest) {
@@ -74,6 +86,8 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  const listUnsubscribe = defaultListUnsubscribe();
+
   let sent = 0;
   let failed = 0;
   let followUpsScheduled = 0;
@@ -105,13 +119,16 @@ export async function POST(req: NextRequest) {
         throw new Error("Lipseste subject sau body dupa generare");
       }
 
-      const html = wrapEmail(subject, htmlFromBody(bodyText));
+      const html = wrapEmailCold(htmlFromBody(bodyText));
+      const text = textFromBody(bodyText, SENDER_NAME);
 
       const initial = await sendEmail({
         to: p.email,
         subject,
         html,
+        text,
         replyTo: ADMIN_EMAIL,
+        listUnsubscribe,
       });
 
       if (!initial.ok) {
@@ -120,43 +137,52 @@ export async function POST(req: NextRequest) {
 
       const followUp1At = new Date(Date.now() + FOLLOWUP_1_DAYS * DAY_MS).toISOString();
       const followUp1Subject = `Re: ${subject}`;
-      const followUp1Body = `Salut,\n\nReiau scurt mesajul de saptamana trecuta. Ofer link-ul personalizat cu oferta + lista 50 ziare + formularul rapid sa publicam articolul tau in 24h:\n\n${ctaLink}\n\nDaca nu e momentul, raspunde cu STOP si te scot din lista. Niciun apel, niciun telefon - doar click pe link cand ai 2 minute.\n\nMultumesc,\nEchipa MediaExpres - mediaexpress.ro`;
-      const followUp1Html = wrapEmail(followUp1Subject, htmlFromBody(followUp1Body));
+      const followUp1Body = `Salut,\n\nReiau scurt mesajul de saptamana trecuta. Iti las link-ul personalizat cu oferta + lista 50 ziare + formularul rapid:\n\n${ctaLink}\n\nDaca nu e momentul, raspunde cu STOP si te scot din lista. Niciun apel, niciun telefon - doar click pe link cand ai 2 minute.\n\nMultumesc,`;
+      const followUp1Html = wrapEmailCold(htmlFromBody(followUp1Body));
+      const followUp1Text = textFromBody(followUp1Body, SENDER_NAME);
 
       const followUp1 = await sendEmail({
         to: p.email,
         subject: followUp1Subject,
         html: followUp1Html,
+        text: followUp1Text,
         replyTo: ADMIN_EMAIL,
         scheduledAt: followUp1At,
+        listUnsubscribe,
       });
       if (followUp1.ok) followUpsScheduled++;
 
       const followUp2At = new Date(Date.now() + FOLLOWUP_2_DAYS * DAY_MS).toISOString();
       const followUp2Subject = `Ultim mesaj — articol ${p.companyName} pe 50 ziare`;
-      const followUp2Body = `Salut,\n\nUltima oara pe acest thread. Daca vrei sa publicam un articol pentru ${p.companyName} pe 50 de ziare in 24h, link-ul personalizat e activ:\n\n${ctaLink}\n\nNu trebuie sa scrii articolul - AI-ul nostru il genereaza din 1-2 propozitii de tematica. Tu trimiti doar 3 poze prin formularul de la link.\n\nDaca nu e relevant, raspunde STOP si inchid thread-ul.\n\nMultumesc,\nEchipa MediaExpres - mediaexpress.ro`;
-      const followUp2Html = wrapEmail(followUp2Subject, htmlFromBody(followUp2Body));
+      const followUp2Body = `Salut,\n\nUltima oara pe acest thread. Daca vrei sa publicam un articol pentru ${p.companyName} pe 50 de ziare, link-ul personalizat e activ:\n\n${ctaLink}\n\nNu trebuie sa scrii articolul - AI-ul nostru il genereaza din 1-2 propozitii de tematica. Tu trimiti doar 3 poze prin formularul de la link.\n\nDaca nu e relevant, raspunde STOP si inchid thread-ul.\n\nMultumesc,`;
+      const followUp2Html = wrapEmailCold(htmlFromBody(followUp2Body));
+      const followUp2Text = textFromBody(followUp2Body, SENDER_NAME);
 
       const followUp2 = await sendEmail({
         to: p.email,
         subject: followUp2Subject,
         html: followUp2Html,
+        text: followUp2Text,
         replyTo: ADMIN_EMAIL,
         scheduledAt: followUp2At,
+        listUnsubscribe,
       });
       if (followUp2.ok) followUpsScheduled++;
 
       const followUp3At = new Date(Date.now() + FOLLOWUP_3_DAYS * DAY_MS).toISOString();
       const followUp3Subject = `Inchid thread-ul - confirmi?`;
-      const followUp3Body = `Salut,\n\nNu am primit raspuns, deci presupun ca nu e momentul. Inchid thread-ul.\n\nLink-ul ramane activ inca o saptamana daca te razgandesti:\n\n${ctaLink}\n\nMult succes cu ${p.companyName}.\n\nEchipa MediaExpres - mediaexpress.ro`;
-      const followUp3Html = wrapEmail(followUp3Subject, htmlFromBody(followUp3Body));
+      const followUp3Body = `Salut,\n\nNu am primit raspuns, deci presupun ca nu e momentul. Inchid thread-ul.\n\nLink-ul ramane activ inca o saptamana daca te razgandesti:\n\n${ctaLink}\n\nMult succes cu ${p.companyName}.`;
+      const followUp3Html = wrapEmailCold(htmlFromBody(followUp3Body));
+      const followUp3Text = textFromBody(followUp3Body, SENDER_NAME);
 
       const followUp3 = await sendEmail({
         to: p.email,
         subject: followUp3Subject,
         html: followUp3Html,
+        text: followUp3Text,
         replyTo: ADMIN_EMAIL,
         scheduledAt: followUp3At,
+        listUnsubscribe,
       });
       if (followUp3.ok) followUpsScheduled++;
 

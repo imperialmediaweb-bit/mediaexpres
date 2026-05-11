@@ -6,17 +6,22 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM = process.env.FROM_EMAIL || "MediaExpres <noreply@mediaexpress.ro>";
+const FROM = process.env.FROM_EMAIL || "Andrei Popescu <andrei@mediaexpress.ro>";
 const CONTACT = process.env.CONTACT_EMAIL || "contact@mediaexpress.ro";
+export const SENDER_NAME = process.env.SENDER_NAME || "Andrei Popescu";
 
 interface SendArgs {
   to: string;
   subject: string;
   html: string;
+  text?: string;
   replyTo?: string;
   attachments?: { filename: string; path: string }[];
   // ISO string; Resend schedules the send at this time instead of now.
   scheduledAt?: string;
+  // RFC 2369 + RFC 8058 — obligatoriu pentru bulk senders Gmail/Yahoo din 2024.
+  // Acceptă "mailto:..." sau "<https://...>" sau ambele separate prin virgulă.
+  listUnsubscribe?: string;
 }
 
 export async function sendEmail(args: SendArgs) {
@@ -32,8 +37,17 @@ export async function sendEmail(args: SendArgs) {
     html: args.html,
     replyTo: args.replyTo,
   };
+  if (args.text) {
+    (payload as unknown as { text: string }).text = args.text;
+  }
   if (args.scheduledAt) {
     (payload as unknown as { scheduledAt: string }).scheduledAt = args.scheduledAt;
+  }
+  if (args.listUnsubscribe) {
+    (payload as unknown as { headers: Record<string, string> }).headers = {
+      "List-Unsubscribe": args.listUnsubscribe,
+      "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+    };
   }
   const { data, error } = await resend.emails.send(payload);
   if (error) {
@@ -45,6 +59,8 @@ export async function sendEmail(args: SendArgs) {
 
 export const ADMIN_EMAIL = CONTACT;
 
+// Wrapper bogat-brand pentru email-uri tranzacționale unde clientul așteaptă "MediaExpres"
+// (confirmare comandă, factură, raport, etc). Pentru cold outreach folosește wrapEmailCold.
 export function wrapEmail(title: string, body: string) {
   return `<!DOCTYPE html>
 <html>
@@ -69,6 +85,32 @@ export function wrapEmail(title: string, body: string) {
   </div>
 </body>
 </html>`;
+}
+
+// Wrapper minimalist pentru cold outreach — arată ca o scrisoare personală, nu newsletter.
+// Fară banner colorat, fară buton CTA roto-rositori, fară elemente "marketing".
+// Spam-filterele scorează mult mai bine emailurile care arata 1:1 personal.
+export function wrapEmailCold(bodyHtml: string, senderName: string = SENDER_NAME) {
+  return `<!DOCTYPE html>
+<html>
+<body style="margin:0;padding:0;background:#ffffff;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Helvetica,Arial,sans-serif;color:#1f2937;font-size:15px;line-height:1.6;">
+  <div style="max-width:600px;margin:0 auto;padding:24px 16px;">
+    ${bodyHtml}
+    <div style="margin-top:16px;color:#1f2937;">
+      <p style="margin:0;">Cu drag,<br/><strong>${senderName}</strong><br/>MediaExpres &middot; <a href="https://mediaexpress.ro" style="color:#1f2937;">mediaexpress.ro</a></p>
+    </div>
+    <div style="margin-top:32px;font-size:11px;color:#9ca3af;line-height:1.5;">
+      <p style="margin:0;">Dacă nu vrei să mai primești emailuri de la mine, răspunde STOP la acest mesaj sau scrie la <a href="mailto:${CONTACT}?subject=STOP" style="color:#9ca3af;">${CONTACT}</a>.</p>
+    </div>
+  </div>
+</body>
+</html>`;
+}
+
+// Header List-Unsubscribe standard pentru toate emailurile reci.
+// Combină mailto (RFC 2369) cu o nota One-Click-compatibilă (RFC 8058).
+export function defaultListUnsubscribe() {
+  return `<mailto:${CONTACT}?subject=STOP&body=STOP>`;
 }
 
 function escapeHtml(value: string): string {
