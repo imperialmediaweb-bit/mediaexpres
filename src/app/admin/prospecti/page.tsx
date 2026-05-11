@@ -4,9 +4,10 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { prospects } from "@/db/schema";
 import { desc, eq, count } from "drizzle-orm";
-import { Plus, Mail, Sparkles, Zap } from "lucide-react";
+import { Plus, Mail, Sparkles, Zap, Upload } from "lucide-react";
 import { AddProspectForm } from "./AddProspectForm";
 import { ImportPRAgenciesButton } from "./ImportPRAgenciesButton";
+import { ImportCsvButton } from "./ImportCsvButton";
 import { BatchSendButton } from "./BatchSendButton";
 
 export const dynamic = "force-dynamic";
@@ -166,11 +167,25 @@ export default async function ProspectiPage({
                 Import rapid
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                39 agenții PR din România (verificate manual mai 2026), gata
+                38 agenții PR din România (verificate manual mai 2026), gata
                 pentru reseller program — un click și sunt în listă.
               </p>
               <div className="mt-3">
                 <ImportPRAgenciesButton />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-5">
+              <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+                <Upload className="h-4 w-4 text-emerald-600" />
+                Import CSV bulk
+              </h2>
+              <p className="mt-1 text-xs text-slate-600">
+                Lipește 50-500 prospecți dintr-un CSV (Google Maps export,
+                Pagini Aurii, LinkedIn etc.). Auto-dedupe + filtru suppression.
+              </p>
+              <div className="mt-3">
+                <ImportCsvButton />
               </div>
             </div>
 
