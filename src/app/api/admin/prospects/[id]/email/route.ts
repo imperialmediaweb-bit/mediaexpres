@@ -6,8 +6,12 @@ import { prospects } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { generateOutreachEmail } from "@/lib/ai";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
+import { isSuppressed } from "@/data/suppression-list";
+import { signProspectToken } from "@/lib/prospect-token";
 
 export const runtime = "nodejs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro";
 
 const schema = z.object({
   action: z.enum(["generate", "send"]),
@@ -27,6 +31,16 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
   const [p] = await db.select().from(prospects).where(eq(prospects.id, params.id)).limit(1);
   if (!p) return NextResponse.json({ ok: false, error: "Prospect inexistent" }, { status: 404 });
 
+  if (isSuppressed(p.email)) {
+    return NextResponse.json(
+      { ok: false, error: "Acest email este in suppression list (partener existent) - nu trimitem outreach catre el." },
+      { status: 400 }
+    );
+  }
+
+  const token = signProspectToken(p.id);
+  const ctaLink = `${SITE_URL}/oferta/${token}`;
+
   if (parsed.data.action === "generate") {
     try {
       const out = await generateOutreachEmail({
@@ -35,8 +49,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
         city: p.city || undefined,
         website: p.website || undefined,
         notes: p.notes || undefined,
+        ctaLink,
       });
-      return NextResponse.json({ ok: true, subject: out.subject, body: out.body });
+      return NextResponse.json({ ok: true, subject: out.subject, body: out.body, ctaLink });
     } catch (e: unknown) {
       console.error("[admin/prospects/email] generate error", e);
       return NextResponse.json({ ok: false, error: e instanceof Error ? e.message : "Eroare" }, { status: 500 });

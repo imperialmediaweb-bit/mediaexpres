@@ -1,5 +1,6 @@
-// Lista 39 agentii PR Romania verificate (mai 2026).
+// Lista 38 agentii PR Romania verificate (mai 2026).
 // Tier A = email direct catre decision-maker. Tier B = email catre office/format generic.
+// NOTA: Emblema Grup a fost scoasa din aceasta lista pentru ca este partener existent (vezi suppression-list.ts si social-proof.ts).
 
 export interface PRAgencyTemplate {
   companyName: string;
@@ -72,13 +73,6 @@ export const PR_AGENCIES_ROMANIA: PRAgencyTemplate[] = [
     city: "Bucuresti",
     website: "https://freecomm.ro",
     notes: "Owner. Membru PRGN. Fondata 2002. Independent.",
-  },
-  {
-    companyName: "EmblemaGroup (Emblema Solutions)",
-    email: "office@emblemasolutions.ro",
-    city: "Bucuresti",
-    website: "https://emblemasolutions.ro",
-    notes: "AM COLABORAT DEJA CU EI. Retail solutions + comm. Ai relatie existenta - mentioneaza.",
   },
   {
     companyName: "Oxygen Communications",
