@@ -132,6 +132,29 @@ export const prospects = pgTable("prospect", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// Comenzi venite via /oferta/[token]/comanda — pagina personalizata pentru prospects.
+// Pastram datele firmei CUMPARATOARE (pentru factura pe care o emit eu manual in soft-ul meu de facturare).
+// Lifecycle: pending -> articles_published -> invoiced -> paid (sau cancelled).
+export const prospectOrders = pgTable("prospect_order", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  prospectId: text("prospect_id").references(() => prospects.id, { onDelete: "set null" }),
+  packageId: text("package_id").notNull(),
+  buyerCompanyName: text("buyer_company_name").notNull(),
+  buyerCui: text("buyer_cui").notNull(),
+  buyerRegCom: text("buyer_reg_com"),
+  buyerAddress: text("buyer_address").notNull(),
+  buyerEmail: text("buyer_email").notNull(),
+  buyerPhone: text("buyer_phone"),
+  articleTopic: text("article_topic").notNull(),
+  articleNotes: text("article_notes"),
+  photoLinks: text("photo_links"),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  publishedAt: timestamp("published_at"),
+  invoicedAt: timestamp("invoiced_at"),
+  paidAt: timestamp("paid_at"),
+});
+
 export const publishers = pgTable("publisher", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   siteName: text("site_name").notNull(),
