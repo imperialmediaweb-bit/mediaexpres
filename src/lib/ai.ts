@@ -16,7 +16,9 @@ export interface GenerateArticleOutput {
 }
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
-const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+// Long-form (articole, press release, calendar editorial) — calitate prima.
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+// Short-form (outreach emails, title variants) — volume mare, cost conteaza.
 const MODEL_FAST = process.env.OPENAI_MODEL_FAST || "gpt-4o-mini";
 
 interface OpenAIMessage {
