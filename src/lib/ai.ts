@@ -1,6 +1,6 @@
-// Minimal Anthropic Messages API wrapper via fetch, avoids bundling the SDK.
-// Uses Claude Sonnet for article drafts (fast + good quality).
-// Docs: https://docs.claude.com/en/api/messages
+// OpenAI Chat Completions wrapper via fetch (no SDK).
+// All functions use response_format: json_object to enforce structured output.
+// Docs: https://platform.openai.com/docs/api-reference/chat/create
 
 export interface GenerateArticleInput {
   topic: string;
@@ -15,7 +15,74 @@ export interface GenerateArticleOutput {
   body: string;
 }
 
-const MODEL = process.env.ANTHROPIC_MODEL || "claude-sonnet-4-6";
+const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
+const MODEL = process.env.OPENAI_MODEL || "gpt-4o-mini";
+const MODEL_FAST = process.env.OPENAI_MODEL_FAST || "gpt-4o-mini";
+
+interface OpenAIMessage {
+  role: "system" | "user" | "assistant";
+  content: string;
+}
+
+interface CallOpenAIArgs {
+  system: string;
+  user: string;
+  model?: string;
+  maxTokens: number;
+  contextTag: string;
+}
+
+async function callOpenAI(args: CallOpenAIArgs): Promise<string> {
+  const key = process.env.OPENAI_API_KEY;
+  if (!key) throw new Error("OPENAI_API_KEY lipseste");
+
+  const messages: OpenAIMessage[] = [
+    { role: "system", content: args.system },
+    { role: "user", content: args.user },
+  ];
+
+  const res = await fetch(OPENAI_URL, {
+    method: "POST",
+    headers: {
+      "content-type": "application/json",
+      authorization: `Bearer ${key}`,
+    },
+    body: JSON.stringify({
+      model: args.model || MODEL,
+      messages,
+      max_tokens: args.maxTokens,
+      response_format: { type: "json_object" },
+      temperature: 0.7,
+    }),
+  });
+
+  if (!res.ok) {
+    const txt = await res.text();
+    console.error(`[ai] OpenAI ${args.contextTag} error`, res.status, txt);
+    throw new Error(`Generarea a esuat (${res.status})`);
+  }
+
+  const data = (await res.json()) as {
+    choices?: Array<{ message?: { content?: string } }>;
+  };
+  const content = data.choices?.[0]?.message?.content;
+  if (!content) {
+    console.error(`[ai] OpenAI ${args.contextTag} empty content`, data);
+    throw new Error("Raspuns gol de la model");
+  }
+  return content;
+}
+
+function parseJson<T>(raw: string, contextTag: string): T {
+  const jsonMatch = raw.match(/\{[\s\S]*\}/);
+  const candidate = jsonMatch ? jsonMatch[0] : raw;
+  try {
+    return JSON.parse(candidate) as T;
+  } catch {
+    console.error(`[ai] could not parse JSON for ${contextTag}`, raw);
+    throw new Error("Raspunsul modelului nu a putut fi parsat");
+  }
+}
 
 export interface PressReleaseInput {
   companyName: string;
@@ -36,9 +103,6 @@ export interface PressReleaseInput {
 export async function generatePressRelease(
   input: PressReleaseInput
 ): Promise<GenerateArticleOutput> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
-
   const typeLabel: Record<PressReleaseInput["type"], string> = {
     lansare: "lansare de produs/serviciu",
     eveniment: "anunt de eveniment",
@@ -70,45 +134,16 @@ Ce anunta: ${input.announcement}${contactClause}
 
 Scrie comunicatul de presa.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 1500,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+  const text = await callOpenAI({
+    system,
+    user: userPrompt,
+    maxTokens: 1500,
+    contextTag: "press-release",
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("[ai] Anthropic press-release error", res.status, txt);
-    throw new Error("Generarea a esuat");
-  }
-
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  const text = (data.content || [])
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join("");
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  const raw = jsonMatch ? jsonMatch[0] : text;
-  try {
-    const parsed = JSON.parse(raw) as { title?: string; body?: string };
-    if (!parsed.title || !parsed.body) throw new Error("Raspuns incomplet");
-    return { title: parsed.title, body: parsed.body };
-  } catch {
-    console.error("[ai] could not parse press-release JSON", text);
-    throw new Error("Raspunsul modelului nu a putut fi parsat");
-  }
+  const parsed = parseJson<{ title?: string; body?: string }>(text, "press-release");
+  if (!parsed.title || !parsed.body) throw new Error("Raspuns incomplet");
+  return { title: parsed.title, body: parsed.body };
 }
 
 export interface TitleVariant {
@@ -120,9 +155,6 @@ export interface TitleVariant {
 export async function generateTitleVariants(
   topic: string
 ): Promise<TitleVariant[]> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
-
   const system = `Esti un expert in copywriting jurnalistic pentru piata din Romania. Generezi 5 variante de titlu pentru un articol/comunicat de presa dat. Pentru fiecare titlu evaluezi probabil-CTR pe o scara 1-100, bazat pe:
 - claritatea promisiunii (cititorul intelege beneficiul instant)
 - specificitate (cifre, nume, locuri concrete bat generic-ul)
@@ -134,64 +166,31 @@ Raspunde STRICT in format JSON cu cheia "variants": un array de exact 5 obiecte,
 
   const userPrompt = `Tema: ${topic}\n\nGenereaza 5 variante de titlu cu evaluare CTR.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL_FAST || "claude-haiku-4-5-20251001",
-      max_tokens: 800,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+  const text = await callOpenAI({
+    system,
+    user: userPrompt,
+    model: MODEL_FAST,
+    maxTokens: 800,
+    contextTag: "title-variants",
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("[ai] title variants error", res.status, txt);
-    throw new Error("Generarea titlurilor a esuat");
-  }
-
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  const text = (data.content || [])
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join("");
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  const raw = jsonMatch ? jsonMatch[0] : text;
-  try {
-    const parsed = JSON.parse(raw) as { variants?: unknown };
-    const variants = parsed.variants;
-    if (!Array.isArray(variants)) throw new Error("Format invalid");
-    return variants
-      .map((v) => v as TitleVariant)
-      .filter(
-        (v) =>
-          typeof v?.title === "string" &&
-          typeof v?.ctrScore === "number" &&
-          typeof v?.reasoning === "string"
-      )
-      .slice(0, 5);
-  } catch {
-    console.error("[ai] could not parse title variants JSON", text);
-    throw new Error("Raspunsul modelului nu a putut fi parsat");
-  }
+  const parsed = parseJson<{ variants?: unknown }>(text, "title-variants");
+  const variants = parsed.variants;
+  if (!Array.isArray(variants)) throw new Error("Format invalid");
+  return variants
+    .map((v) => v as TitleVariant)
+    .filter(
+      (v) =>
+        typeof v?.title === "string" &&
+        typeof v?.ctrScore === "number" &&
+        typeof v?.reasoning === "string"
+    )
+    .slice(0, 5);
 }
 
 export async function generateArticle(
   input: GenerateArticleInput
 ): Promise<GenerateArticleOutput> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) {
-    throw new Error("ANTHROPIC_API_KEY lipseste");
-  }
-
   const isCasino = input.category === "casino";
   const system = `Esti un redactor profesionist pentru MediaExpres, o retea de ziare online din Romania. Scrii articole advertoriale care respecta urmatoarele reguli:
 - limba romana, clara, fara diacritice lipsa
@@ -208,45 +207,16 @@ Raspunde STRICT in format JSON cu cheile "title" si "body", fara markdown, fara 
 ${input.keyPoints ? `Puncte cheie: ${input.keyPoints}\n` : ""}${input.audience ? `Publicul tinta: ${input.audience}\n` : ""}
 Scrie articolul.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 2000,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+  const text = await callOpenAI({
+    system,
+    user: userPrompt,
+    maxTokens: 2000,
+    contextTag: "article",
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("[ai] Anthropic error", res.status, txt);
-    throw new Error("Generarea a esuat");
-  }
-
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  const text = (data.content || [])
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join("");
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  const raw = jsonMatch ? jsonMatch[0] : text;
-  try {
-    const parsed = JSON.parse(raw) as { title?: string; body?: string };
-    if (!parsed.title || !parsed.body) throw new Error("Raspuns incomplet");
-    return { title: parsed.title, body: parsed.body };
-  } catch {
-    console.error("[ai] could not parse JSON from model output", text);
-    throw new Error("Raspunsul modelului nu a putut fi parsat");
-  }
+  const parsed = parseJson<{ title?: string; body?: string }>(text, "article");
+  if (!parsed.title || !parsed.body) throw new Error("Raspuns incomplet");
+  return { title: parsed.title, body: parsed.body };
 }
 
 export interface EditorialMonth {
@@ -254,16 +224,18 @@ export interface EditorialMonth {
   monthName: string;
   theme: string;
   hook: string;
-  suggestedFormat: "lansare" | "eveniment" | "rezultate" | "extindere" | "altceva";
+  suggestedFormat:
+    | "lansare"
+    | "eveniment"
+    | "rezultate"
+    | "extindere"
+    | "altceva";
 }
 
 export async function generateEditorialCalendar(
   industry: string,
   companyContext: string
 ): Promise<EditorialMonth[]> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
-
   const system = `Esti un strateg de PR cu experienta pe piata din Romania. Construiesti un calendar editorial anual (12 luni) cu teme de comunicate de presa. Pentru fiecare luna:
 - iei in calcul sezonalitatea industriei date
 - alegi teme care produc real interes mediatic in luna respectiva (ex: bilanturi anuale in ianuarie, vacante de vara in iulie, raport anual in martie, sezonul cumparaturilor in noiembrie)
@@ -284,54 +256,25 @@ Context companie: ${companyContext}
 
 Genereaza calendarul editorial pentru cele 12 luni.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: MODEL,
-      max_tokens: 3000,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+  const text = await callOpenAI({
+    system,
+    user: userPrompt,
+    maxTokens: 3000,
+    contextTag: "editorial-calendar",
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("[ai] editorial calendar error", res.status, txt);
-    throw new Error("Generarea calendarului a esuat");
-  }
-
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  const text = (data.content || [])
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join("");
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  const raw = jsonMatch ? jsonMatch[0] : text;
-  try {
-    const parsed = JSON.parse(raw) as { calendar?: unknown };
-    const arr = parsed.calendar;
-    if (!Array.isArray(arr)) throw new Error("Format invalid");
-    return arr
-      .map((m) => m as EditorialMonth)
-      .filter(
-        (m) =>
-          typeof m?.month === "number" &&
-          typeof m?.theme === "string" &&
-          typeof m?.hook === "string"
-      )
-      .slice(0, 12);
-  } catch {
-    console.error("[ai] could not parse editorial calendar JSON", text);
-    throw new Error("Raspunsul modelului nu a putut fi parsat");
-  }
+  const parsed = parseJson<{ calendar?: unknown }>(text, "editorial-calendar");
+  const arr = parsed.calendar;
+  if (!Array.isArray(arr)) throw new Error("Format invalid");
+  return arr
+    .map((m) => m as EditorialMonth)
+    .filter(
+      (m) =>
+        typeof m?.month === "number" &&
+        typeof m?.theme === "string" &&
+        typeof m?.hook === "string"
+    )
+    .slice(0, 12);
 }
 
 export interface OutreachEmailInput {
@@ -351,9 +294,6 @@ export interface OutreachEmail {
 export async function generateOutreachEmail(
   input: OutreachEmailInput
 ): Promise<OutreachEmail> {
-  const key = process.env.ANTHROPIC_API_KEY;
-  if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
-
   const industryLower = (input.industry || "").toLowerCase();
   const isPRAgency =
     industryLower.includes("agentie pr") ||
@@ -369,9 +309,10 @@ export async function generateOutreachEmail(
     industryLower.includes("pariuri") ||
     industryLower.includes("betting");
 
-  const SOCIAL_PROOF = "Colaboram deja cu June, Emblema Grup, WhitePress (jucator European top), Blogatu si magazine online de renume din Romania.";
+  const SOCIAL_PROOF =
+    "Colaboram deja cu June, Emblema Grup, WhitePress (jucator European top), Blogatu si magazine online de renume din Romania.";
 
-  const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de ziare romanesti + 50 pagini Facebook, livrare 24h, raport PDF):
+  const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de ziare romanesti + 50 pagini Facebook, raport in 12h, raport PDF):
 - Pachet Local: 150 RON - 1 ziar judetean (test rapid)
 - Pachet Regional: 500 RON - 10 ziare dintr-o zona
 - Pachet National 50: 1500 RON - 50 ziare (41 locale + 9 nationale) + 50 pagini Facebook + 50 backlinks SEO -- ACESTA ESTE PACHETUL RECOMANDAT DEFAULT, mentioneaza-l cu prioritate
@@ -403,7 +344,7 @@ OFERTA SPECIALA RESELLER (mentioneaza in email):
 - White-label PDF report (raport cu sigla agentiei, nu MediaExpres)
 - Factura lunara consolidata
 - Cont de admin dedicat in platforma cu vizibilitate live pe statusul articolelor
-- Prioritate la publicare (under 24h pentru clientii reseller)
+- Prioritate la publicare (raport in 12h pentru clientii reseller)
 
 Pozitionare cheie: "Nu suntem competitie - suntem distributorul vostru. Voi pastrati relatia cu clientul, noi facem heavy-lifting-ul pe distributie."
 
@@ -455,43 +396,15 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plai
 
   const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma.`;
 
-  const res = await fetch("https://api.anthropic.com/v1/messages", {
-    method: "POST",
-    headers: {
-      "content-type": "application/json",
-      "x-api-key": key,
-      "anthropic-version": "2023-06-01",
-    },
-    body: JSON.stringify({
-      model: process.env.ANTHROPIC_MODEL_FAST || "claude-haiku-4-5-20251001",
-      max_tokens: 1000,
-      system,
-      messages: [{ role: "user", content: userPrompt }],
-    }),
+  const text = await callOpenAI({
+    system,
+    user: userPrompt,
+    model: MODEL_FAST,
+    maxTokens: 1000,
+    contextTag: "outreach-email",
   });
 
-  if (!res.ok) {
-    const txt = await res.text();
-    console.error("[ai] outreach email error", res.status, txt);
-    throw new Error("Generarea email-ului a esuat");
-  }
-
-  const data = (await res.json()) as {
-    content?: Array<{ type: string; text?: string }>;
-  };
-  const text = (data.content || [])
-    .filter((c) => c.type === "text")
-    .map((c) => c.text || "")
-    .join("");
-
-  const jsonMatch = text.match(/\{[\s\S]*\}/);
-  const raw = jsonMatch ? jsonMatch[0] : text;
-  try {
-    const parsed = JSON.parse(raw) as { subject?: string; body?: string };
-    if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
-    return { subject: parsed.subject, body: parsed.body };
-  } catch {
-    console.error("[ai] could not parse outreach email JSON", text);
-    throw new Error("Raspunsul modelului nu a putut fi parsat");
-  }
+  const parsed = parseJson<{ subject?: string; body?: string }>(text, "outreach-email");
+  if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
+  return { subject: parsed.subject, body: parsed.body };
 }
