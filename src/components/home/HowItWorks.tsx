@@ -17,7 +17,7 @@ const STEPS = [
     icon: Send,
     title: "Publicăm pe 50 ziare",
     description:
-      "În maximum 24h publicăm pe rețeaua noastră + distribuim automat pe 37 pagini Facebook.",
+      "În maximum 24h publicăm pe rețeaua noastră + distribuim automat pe 50 pagini Facebook.",
   },
   {
     icon: FileCheck2,

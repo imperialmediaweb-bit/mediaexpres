@@ -353,18 +353,75 @@ export async function generateOutreachEmail(
   const key = process.env.ANTHROPIC_API_KEY;
   if (!key) throw new Error("ANTHROPIC_API_KEY lipseste");
 
-  const system = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti, oferindu-le serviciul MediaExpres: publicare comunicate de presa pe 50 de ziare cu pachet de la 150 RON (Local) la 1500 RON (National 50).
+  const industryLower = (input.industry || "").toLowerCase();
+  const isPRAgency =
+    industryLower.includes("agentie pr") ||
+    industryLower.includes("agenție pr") ||
+    industryLower.includes("pr agency") ||
+    industryLower.includes("comunicare") ||
+    industryLower.includes("relatii publice") ||
+    industryLower.includes("relații publice");
+  const isCasino =
+    industryLower.includes("cazino") ||
+    industryLower.includes("casino") ||
+    industryLower.includes("igaming") ||
+    industryLower.includes("pariuri") ||
+    industryLower.includes("betting");
 
-Reguli:
-- subject scurt si specific (max 60 caractere), care personalizeaza catre firma
-- intro: 1 propozitie care arata ca ai cercetat firma (gen "am vazut ca activati in [domeniu] din [oras]")
-- body: 2 paragrafe scurte care explica beneficiul concret pentru ei
-- CTA clar la final: "Raspunde-mi cu un da si trimit detalii", sau invitatie la apel scurt
+  const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de ziare romanesti + 50 pagini Facebook, livrare 24h, raport PDF):
+- Pachet Local: 150 RON - 1 ziar judetean
+- Pachet Regional: 500 RON - 10 ziare dintr-o zona
+- Pachet National 50: 1500 RON - 50 ziare (41 locale + 9 nationale) + 50 pagini Facebook + 50 backlinks SEO (CEL MAI POPULAR)
+- Pachet Cazino Local: 300 RON / Cazino Regional: 900 RON / Cazino National: 2500 RON (pentru iGaming, conform ONJN)
+
+Abonamente lunare cu pret per articol mai mic:
+- Bronze: 1.300 RON/luna - 1 articol x 50 ziare
+- Silver: 2.400 RON/luna - 2 articole x 50 ziare
+- Gold: 4.500 RON/luna - 4 articole x 50 ziare (cel mai popular abonament)
+- Platinum: 8.000 RON/luna - 8 articole x 50 ziare`;
+
+  const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi direct articole - propui un parteneriat in care agentia foloseste reteaua MediaExpres pentru clientii lor.
+
+${PACKAGES_CONTEXT}
+
+OFERTA SPECIALA RESELLER (mentioneaza in email):
+- Discount 25-30% pe rate-card pentru toate pachetele si abonamentele
+- White-label PDF report (raport cu sigla agentiei, nu MediaExpres)
+- Factura lunara consolidata, nu per comanda
+- Cont de admin dedicat in platforma cu vizibilitate live pe statusul articolelor
+- Prioritate la publicare (under 24h pentru clientii reseller)
+
+Pozitionare cheie: "Nu suntem competitie - suntem distributorul vostru. Voi pastrati relatia cu clientul, noi facem heavy-lifting-ul pe distributie."
+
+Reguli email:
+- subject: scurt (max 65 caractere), mentioneaza concret reseller program SAU oferta specifica agentiei
+- intro: 1 propozitie care arata ca ai cercetat agentia (mentioneaza ceva specific din notes - ex. ca au clienti corporate, ca sunt independent, ca au premiu recent)
+- body: 2 paragrafe - PARAGRAFUL 1 explica problema (clientii lor cer distributie larga, agentia nu vrea sa construiasca reteaua), PARAGRAFUL 2 explica solutia (reseller program, white-label, discount)
+- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video. Propune DOAR raspuns prin email: "Raspunde-mi cu un da si trimit deck-ul cu pricing complet + termenii reseller-program pe email" sau "Daca te intereseaza, raspunde si iti trimit oferta detaliata + factura proforma."
+- semnatura: "Echipa MediaExpres - mediaexpress.ro"
+- TON: peer-to-peer profesional, NU pushy, NU pitch generic. Vorbesti cu un decision-maker care vede 50 cold-emails/saptamana.
+- limba romana cu diacritice corecte
+
+Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plain cu \\n\\n intre paragrafe. Fara markdown, fara comentarii.`;
+
+  const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti directi, oferindu-le serviciul MediaExpres.
+
+${PACKAGES_CONTEXT}
+
+${isCasino ? "ATENTIE: prospectul activeaza in iGaming/cazino - mentioneaza pachetul Cazino, nu Standard. Pachetele Cazino sunt conform ONJN si include joc responsabil." : ""}
+
+Reguli email:
+- subject scurt si specific (max 60 caractere), personalizat pentru firma
+- intro: 1 propozitie care arata ca ai cercetat firma (gen "am vazut ca activati in [domeniu] din [oras]" sau mentioneaza ceva specific din notes)
+- body: 2 paragrafe - PARAGRAFUL 1 explica beneficiul concret (vizibilitate, SEO, credibilitate, lead-uri), PARAGRAFUL 2 propune un pachet specific din lista de mai sus, cu pretul (ex. National 50 la 1500 RON)
+- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video. Propune DOAR raspuns prin email: "Raspunde-mi cu un DA si trimit oferta completa + factura proforma pe email" sau "Daca te intereseaza, raspunde si trimit detaliile."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON profesional, NU pushy, NU clickbait
 - limba romana cu diacritice
 
 Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plain cu \\n\\n intre paragrafe. Fara markdown, fara comentarii.`;
+
+  const system = isPRAgency ? PR_AGENCY_SYSTEM : STANDARD_SYSTEM;
 
   const ctx = [
     `Companie: ${input.companyName}`,

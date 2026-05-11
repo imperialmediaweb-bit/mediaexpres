@@ -15,7 +15,7 @@ const FEATURES = [
   },
   {
     icon: Facebook,
-    title: "37 pagini Facebook",
+    title: "50 pagini Facebook",
     description: "Distribuție automată pe paginile asociate. Include fiecare pachet.",
   },
   {
