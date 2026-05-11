@@ -49,14 +49,41 @@ export function BatchSendButton({ availableForBatch }: { availableForBatch: numb
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ limit: target }),
       });
-      const data = await res.json();
-      if (!res.ok || !data.ok) throw new Error(data.error || "Eroare");
+
+      // Citim răspunsul mai întâi ca text — dacă server-ul returnează HTML
+      // (deploy in progress, 500 unhandled, etc), JSON.parse aruncă generic
+      // "Unexpected token '<'". Cu text raw în hand putem arăta status code
+      // + un snippet din eroare ca user-ul să înțeleagă ce s-a întâmplat.
+      const raw = await res.text();
+      let data: unknown;
+      try {
+        data = JSON.parse(raw);
+      } catch {
+        const snippet = raw.slice(0, 200).replace(/\s+/g, " ").trim();
+        throw new Error(
+          `Server returned non-JSON (HTTP ${res.status}). ${snippet || "Încearcă din nou în 30 sec dacă deploy-ul e în desfășurare."}`
+        );
+      }
+
+      const json = data as {
+        ok?: boolean;
+        error?: string;
+        total?: number;
+        sent?: number;
+        failed?: number;
+        followUpsScheduled?: number;
+        errors?: Array<{ id: string; companyName: string; error: string }>;
+      };
+
+      if (!res.ok || !json.ok) {
+        throw new Error(json.error || `Eroare (HTTP ${res.status})`);
+      }
       setResult({
-        total: data.total,
-        sent: data.sent,
-        failed: data.failed,
-        followUpsScheduled: data.followUpsScheduled,
-        errors: data.errors,
+        total: json.total ?? 0,
+        sent: json.sent ?? 0,
+        failed: json.failed ?? 0,
+        followUpsScheduled: json.followUpsScheduled ?? 0,
+        errors: json.errors,
       });
       router.refresh();
     } catch (e: unknown) {
