@@ -59,7 +59,7 @@ export function Hero() {
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/85">
-            Distribuție rapidă de comunicate de presă pe 50 de ziare și 37 pagini Facebook.
+            Distribuție rapidă de comunicate de presă pe 50 de ziare și 50 pagini Facebook.
             Primești raport PDF complet cu linkuri și screenshot-uri. Publicare permanentă,
             backlinks SEO incluse.
           </p>

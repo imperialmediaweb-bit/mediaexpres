@@ -67,7 +67,7 @@ export default function DesprePage() {
                 cu bugete de PR consistente. MediaExpres schimbă asta.
               </p>
               <p>
-                Cu o rețea de 50 de ziare partenere (41 locale + 9 naționale) și 37 pagini Facebook,
+                Cu o rețea de 50 de ziare partenere (41 locale + 9 naționale) și 50 pagini Facebook,
                 oferim IMM-urilor, clinicilor, restaurantelor, startup-urilor și agențiilor de
                 marketing acces la vizibilitatea pe care, până acum, doar cei mari și-o permiteau.
               </p>

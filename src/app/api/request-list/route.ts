@@ -32,14 +32,14 @@ export async function POST(req: NextRequest) {
     "Lista completă a celor 50 ziare partenere",
     `
     <p>Salut ${firstName},</p>
-    <p>Îiți mulțumim pentru interesul pentru serviciile MediaExpres! Mai jos ai rezumatul rețelei noastre:</p>
+    <p>Îiti mulțumim pentru interesul pentru serviciile MediaExpres! Mai jos ai rezumatul rețelei noastre:</p>
     <table style="width:100%;border-collapse:collapse;margin:20px 0;">
       ${kv("Ziare naționale", `${REGION_COUNTS.Național} ziare`)}
       ${kv("Moldova", `${REGION_COUNTS.Moldova} ziare locale`)}
       ${kv("Transilvania", `${REGION_COUNTS.Transilvania} ziare locale`)}
       ${kv("Muntenia + București", `${REGION_COUNTS.Muntenia} ziare locale`)}
       ${kv("Banat + Oltenia", `${REGION_COUNTS.Banat} ziare locale`)}
-      ${kv("Distribuție Facebook", "37 pagini asociate")}
+      ${kv("Distribuție Facebook", "50 pagini asociate")}
     </table>
     <p>Lista detaliată cu toate numele și domeniile celor 50 ziare partenere este disponibilă ca document PDF. <strong>Pentru a proteja rețeaua noastră</strong>, trimitem documentul direct pe email după o scurtă convorbire — un membru al echipei te va contacta în maximum 24h.</p>
     <p>Dacă dorești să avansăm mai rapid, poți răspunde direct la acest email cu o scurtă descriere a proiectului.</p>
