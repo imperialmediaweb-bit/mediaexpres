@@ -3,10 +3,11 @@ import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { prospects } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
-import { Plus, Mail, Sparkles } from "lucide-react";
+import { desc, eq, count } from "drizzle-orm";
+import { Plus, Mail, Sparkles, Zap } from "lucide-react";
 import { AddProspectForm } from "./AddProspectForm";
 import { ImportPRAgenciesButton } from "./ImportPRAgenciesButton";
+import { BatchSendButton } from "./BatchSendButton";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +50,11 @@ export default async function ProspectiPage({
   const rows = await (filter === "all"
     ? baseQuery.orderBy(desc(prospects.createdAt))
     : baseQuery.where(eq(prospects.status, filter)).orderBy(desc(prospects.createdAt)));
+
+  const [{ value: newCount }] = await db
+    .select({ value: count() })
+    .from(prospects)
+    .where(eq(prospects.status, "new"));
 
   return (
     <div>
@@ -140,6 +146,20 @@ export default async function ProspectiPage({
 
         <aside>
           <div className="sticky top-4 space-y-4">
+            <div className="rounded-xl border-2 border-brand-red bg-gradient-to-br from-brand-red/5 to-brand-gold/5 p-5">
+              <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+                <Zap className="h-4 w-4 text-brand-red" />
+                Auto-pilot
+              </h2>
+              <p className="mt-1 text-xs text-slate-600">
+                AI generează + Resend trimite + follow-up automat la 5 zile.
+                Un singur click.
+              </p>
+              <div className="mt-3">
+                <BatchSendButton availableForBatch={newCount} />
+              </div>
+            </div>
+
             <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
               <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
                 <Sparkles className="h-4 w-4 text-purple-600" />
@@ -169,14 +189,17 @@ export default async function ProspectiPage({
 
             <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 text-xs text-blue-900">
               <p className="font-semibold flex items-center gap-1">
-                <Mail className="h-3.5 w-3.5" /> Cum funcționează
+                <Mail className="h-3.5 w-3.5" /> Fluxuri disponibile
               </p>
               <ol className="mt-2 list-inside list-decimal space-y-1">
-                <li>Adaugi firma manual sau Import lista PR</li>
-                <li>Click pe Deschide → AI generează email pitch</li>
-                <li>AI cunoaște toate pachetele tale + reseller -25% pentru agenții</li>
-                <li>Editezi dacă vrei + click Trimite</li>
-                <li>Resend trimite, statusul se mută la contactați</li>
+                <li>
+                  <strong>Auto-pilot:</strong> AI scrie + trimite + follow-up
+                  pentru N prospecți, fără click manual
+                </li>
+                <li>
+                  <strong>Manual:</strong> click pe prospect → revizuiești
+                  textul → trimiți unul-câte-unul
+                </li>
               </ol>
             </div>
           </div>
