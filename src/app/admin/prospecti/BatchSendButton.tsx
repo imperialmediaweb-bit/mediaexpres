@@ -80,7 +80,7 @@ export function BatchSendButton({ availableForBatch }: { availableForBatch: numb
           disabled={loading}
         />
         <span className="text-xs text-slate-500">
-          (max 50, există {availableForBatch} 'new')
+          (max 50, există {availableForBatch} &quot;new&quot;)
         </span>
       </div>
 
