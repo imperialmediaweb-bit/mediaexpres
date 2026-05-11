@@ -4,8 +4,9 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { prospects } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
-import { Plus, Mail } from "lucide-react";
+import { Plus, Mail, Sparkles } from "lucide-react";
 import { AddProspectForm } from "./AddProspectForm";
+import { ImportPRAgenciesButton } from "./ImportPRAgenciesButton";
 
 export const dynamic = "force-dynamic";
 
@@ -138,29 +139,46 @@ export default async function ProspectiPage({
         </div>
 
         <aside>
-          <div className="sticky top-4 rounded-xl border border-slate-200 bg-white p-5">
-            <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
-              <Plus className="h-4 w-4 text-brand-red" />
-              Adaugă prospect
-            </h2>
-            <p className="mt-1 text-xs text-slate-500">
-              Companie + email = minim. Restul ajută AI-ul să personalizeze.
-            </p>
-            <div className="mt-4">
-              <AddProspectForm />
+          <div className="sticky top-4 space-y-4">
+            <div className="rounded-xl border border-purple-200 bg-purple-50 p-5">
+              <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-purple-600" />
+                Import rapid
+              </h2>
+              <p className="mt-1 text-xs text-slate-600">
+                39 agenții PR din România (verificate manual mai 2026), gata
+                pentru reseller program — un click și sunt în listă.
+              </p>
+              <div className="mt-3">
+                <ImportPRAgenciesButton />
+              </div>
             </div>
-          </div>
 
-          <div className="mt-4 rounded-xl bg-blue-50 border border-blue-200 p-4 text-xs text-blue-900">
-            <p className="font-semibold flex items-center gap-1">
-              <Mail className="h-3.5 w-3.5" /> Cum funcționează
-            </p>
-            <ol className="mt-2 list-inside list-decimal space-y-1">
-              <li>Adaugi firma + email contact</li>
-              <li>Click pe Deschide → AI generează email pitch</li>
-              <li>Editezi dacă vrei + click Trimite</li>
-              <li>Resend trimite, statusul se mută la contactati</li>
-            </ol>
+            <div className="rounded-xl border border-slate-200 bg-white p-5">
+              <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+                <Plus className="h-4 w-4 text-brand-red" />
+                Adaugă prospect manual
+              </h2>
+              <p className="mt-1 text-xs text-slate-500">
+                Companie + email = minim. Restul ajută AI-ul să personalizeze.
+              </p>
+              <div className="mt-4">
+                <AddProspectForm />
+              </div>
+            </div>
+
+            <div className="rounded-xl bg-blue-50 border border-blue-200 p-4 text-xs text-blue-900">
+              <p className="font-semibold flex items-center gap-1">
+                <Mail className="h-3.5 w-3.5" /> Cum funcționează
+              </p>
+              <ol className="mt-2 list-inside list-decimal space-y-1">
+                <li>Adaugi firma manual sau Import lista PR</li>
+                <li>Click pe Deschide → AI generează email pitch</li>
+                <li>AI cunoaște toate pachetele tale + reseller -25% pentru agenții</li>
+                <li>Editezi dacă vrei + click Trimite</li>
+                <li>Resend trimite, statusul se mută la contactați</li>
+              </ol>
+            </div>
           </div>
         </aside>
       </div>
