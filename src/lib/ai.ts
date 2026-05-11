@@ -340,6 +340,7 @@ export interface OutreachEmailInput {
   city?: string;
   website?: string;
   notes?: string;
+  ctaLink?: string;
 }
 
 export interface OutreachEmail {
@@ -368,36 +369,51 @@ export async function generateOutreachEmail(
     industryLower.includes("pariuri") ||
     industryLower.includes("betting");
 
+  const SOCIAL_PROOF = "Colaboram deja cu June, Emblema Grup, WhitePress (jucator European top), Blogatu si magazine online de renume din Romania.";
+
   const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de ziare romanesti + 50 pagini Facebook, livrare 24h, raport PDF):
-- Pachet Local: 150 RON - 1 ziar judetean
+- Pachet Local: 150 RON - 1 ziar judetean (test rapid)
 - Pachet Regional: 500 RON - 10 ziare dintr-o zona
-- Pachet National 50: 1500 RON - 50 ziare (41 locale + 9 nationale) + 50 pagini Facebook + 50 backlinks SEO (CEL MAI POPULAR)
+- Pachet National 50: 1500 RON - 50 ziare (41 locale + 9 nationale) + 50 pagini Facebook + 50 backlinks SEO -- ACESTA ESTE PACHETUL RECOMANDAT DEFAULT, mentioneaza-l cu prioritate
 - Pachet Cazino Local: 300 RON / Cazino Regional: 900 RON / Cazino National: 2500 RON (pentru iGaming, conform ONJN)
 
 Abonamente lunare cu pret per articol mai mic:
 - Bronze: 1.300 RON/luna - 1 articol x 50 ziare
 - Silver: 2.400 RON/luna - 2 articole x 50 ziare
-- Gold: 4.500 RON/luna - 4 articole x 50 ziare (cel mai popular abonament)
-- Platinum: 8.000 RON/luna - 8 articole x 50 ziare`;
+- Gold: 4.500 RON/luna - 4 articole x 50 ziare
+- Platinum: 8.000 RON/luna - 8 articole x 50 ziare
+
+VALOARE ADAUGATA cheie (mentioneaza intotdeauna): in contul clientului AI-ul nostru SCRIE articolul automat din 1-2 propozitii de tematica. Clientul nu trebuie sa scrie nimic - doar tematica + 3 poze. Plus, AI genereaza un calendar editorial cu 12 idei lunare specifice industriei lor.`;
+
+  const ctaSection = input.ctaLink
+    ? `LINK CTA UNIC (PRIORITATE MAXIMA - acesta este singurul CTA, nu cere "raspunde DA"):
+${input.ctaLink}
+
+Acest link duce la pagina personalizata cu oferta completa, lista 50 ziare si formular intake (date firma + articol/tematica + poze). Mentioneaza ca dupa click totul e gestionat acolo, fara email back-and-forth.`
+    : "";
 
   const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi direct articole - propui un parteneriat in care agentia foloseste reteaua MediaExpres pentru clientii lor.
 
 ${PACKAGES_CONTEXT}
 
+SOCIAL PROOF (foloseste subtil in pitch, nu fortat): ${SOCIAL_PROOF}
+
 OFERTA SPECIALA RESELLER (mentioneaza in email):
 - Discount 25-30% pe rate-card pentru toate pachetele si abonamentele
 - White-label PDF report (raport cu sigla agentiei, nu MediaExpres)
-- Factura lunara consolidata, nu per comanda
+- Factura lunara consolidata
 - Cont de admin dedicat in platforma cu vizibilitate live pe statusul articolelor
 - Prioritate la publicare (under 24h pentru clientii reseller)
 
 Pozitionare cheie: "Nu suntem competitie - suntem distributorul vostru. Voi pastrati relatia cu clientul, noi facem heavy-lifting-ul pe distributie."
 
+${ctaSection}
+
 Reguli email:
 - subject: scurt (max 65 caractere), mentioneaza concret reseller program SAU oferta specifica agentiei
 - intro: 1 propozitie care arata ca ai cercetat agentia (mentioneaza ceva specific din notes - ex. ca au clienti corporate, ca sunt independent, ca au premiu recent)
-- body: 2 paragrafe - PARAGRAFUL 1 explica problema (clientii lor cer distributie larga, agentia nu vrea sa construiasca reteaua), PARAGRAFUL 2 explica solutia (reseller program, white-label, discount)
-- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video. Propune DOAR raspuns prin email: "Raspunde-mi cu un da si trimit deck-ul cu pricing complet + termenii reseller-program pe email" sau "Daca te intereseaza, raspunde si iti trimit oferta detaliata + factura proforma."
+- body: 2 paragrafe - PARAGRAFUL 1 explica problema (clientii lor cer distributie larga, agentia nu vrea sa construiasca reteaua), PARAGRAFUL 2 explica solutia (reseller program, white-label, discount) + mentioneaza colaborarile existente cu June, Emblema Grup, WhitePress, Blogatu
+- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC mai sus, pune-l in email cu text de tipul "Vezi termenii reseller + lista 50 ziare aici: [link]". Daca NU exista link, foloseste: "Raspunde-mi cu un da si iti trimit deck-ul cu termenii reseller pe email."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON: peer-to-peer profesional, NU pushy, NU pitch generic. Vorbesti cu un decision-maker care vede 50 cold-emails/saptamana.
 - limba romana cu diacritice corecte
@@ -408,13 +424,17 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plai
 
 ${PACKAGES_CONTEXT}
 
+SOCIAL PROOF (foloseste subtil): ${SOCIAL_PROOF}
+
 ${isCasino ? "ATENTIE: prospectul activeaza in iGaming/cazino - mentioneaza pachetul Cazino, nu Standard. Pachetele Cazino sunt conform ONJN si include joc responsabil." : ""}
+
+${ctaSection}
 
 Reguli email:
 - subject scurt si specific (max 60 caractere), personalizat pentru firma
 - intro: 1 propozitie care arata ca ai cercetat firma (gen "am vazut ca activati in [domeniu] din [oras]" sau mentioneaza ceva specific din notes)
-- body: 2 paragrafe - PARAGRAFUL 1 explica beneficiul concret (vizibilitate, SEO, credibilitate, lead-uri), PARAGRAFUL 2 propune un pachet specific din lista de mai sus, cu pretul (ex. National 50 la 1500 RON)
-- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video. Propune DOAR raspuns prin email: "Raspunde-mi cu un DA si trimit oferta completa + factura proforma pe email" sau "Daca te intereseaza, raspunde si trimit detaliile."
+- body: 2 paragrafe - PARAGRAFUL 1 explica beneficiul concret (vizibilitate, SEO, credibilitate, lead-uri) + social proof scurt (colaboram cu agentii PR top din RO). PARAGRAFUL 2 recomanda PACHETUL NATIONAL 50 (1500 RON) cu prioritate (sau Cazino National daca e iGaming) + mentioneaza ca AI scrie articolul din tematica lor (ei nu trebuie sa scrie nimic, doar 3 poze).
+- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC mai sus, pune-l in email cu text de tipul "Vezi oferta completa + lista 50 ziare + completeaza datele: [link]". Daca NU exista link, foloseste: "Raspunde-mi cu un DA si iti trimit detaliile."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON profesional, NU pushy, NU clickbait
 - limba romana cu diacritice
