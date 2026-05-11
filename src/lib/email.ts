@@ -6,9 +6,24 @@ function getResend() {
   return new Resend(key);
 }
 
-const FROM = process.env.FROM_EMAIL || "Andrei Popescu <andrei@mediaexpress.ro>";
+const RAW_FROM = process.env.FROM_EMAIL || "noreply@mediaexpress.ro";
 const CONTACT = process.env.CONTACT_EMAIL || "contact@mediaexpress.ro";
 export const SENDER_NAME = process.env.SENDER_NAME || "Andrei Popescu";
+
+// Auto-prepend SENDER_NAME ca display name dacă FROM_EMAIL e doar adresa.
+// User-ul are deja `noreply@mediaexpress.ro` verificat în Resend; nu vrem
+// să-i cerem să creeze un nou mailbox. Rezultat la send-time:
+//   "Andrei Popescu <noreply@mediaexpress.ro>"
+// Inbox afișează "Andrei Popescu" ca sender, deliverability beneficiază de
+// numele personal, dar tehnic emailul vine din mailbox-ul deja verificat.
+function buildFromHeader(): string {
+  // Dacă FROM_EMAIL conține deja un display name (format "Name <email>"),
+  // respectă configurația.
+  if (RAW_FROM.includes("<") && RAW_FROM.includes(">")) return RAW_FROM;
+  return `${SENDER_NAME} <${RAW_FROM}>`;
+}
+
+const FROM = buildFromHeader();
 
 interface SendArgs {
   to: string;
