@@ -292,11 +292,6 @@ export interface OutreachEmail {
 }
 
 // Pozitionarea brand-ului folosita ca PROPOZITIA 1 obligatorie in fiecare email.
-// User a furnizat explicit aceste afirmatii ca fapt:
-//  - cea mai mare retea de presa online din Romania
-//  - 50 publicatii (1/judet + 9 nationale)
-//  - DA 37 + trafic solid
-//  - 50 pagini Facebook
 const BRAND_PITCH_FULL =
   "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Avem un portofoliu de 50 publicatii (cate 1 per judet + 9 ziare nationale, toate cu DA 37 si trafic solid), plus 50 pagini de Facebook asociate fiecarei publicatii.";
 
@@ -336,7 +331,7 @@ Abonamente lunare cu pret per articol mai mic:
 - Gold: 4.500 RON/luna - 4 articole x 50 publicatii
 - Platinum: 8.000 RON/luna - 8 articole x 50 publicatii
 
-VALOARE ADAUGATA cheie: in contul clientului AI-ul nostru SCRIE articolul automat din 1-2 propozitii de tematica. Clientul nu trebuie sa scrie nimic - doar tematica + 3 poze.`;
+VALOARE ADAUGATA cheie: AGENTUL NOSTRU iti ajuta sa redactezi articolul - cauta cele mai bune solutii pentru tematica firmei voastre. Tu dai doar tema in 1-2 propozitii + 3 poze, restul facem noi. NU folosi cuvantul "AI" sau "automat" - foloseste "agentul nostru", "echipa noastra" sau "te ajutam cu redactarea".`;
 
   const ctaSection = input.ctaLink
     ? `LINK CTA UNIC (PRIORITATE MAXIMA - acesta este singurul CTA, nu cere "raspunde DA"):
@@ -349,11 +344,11 @@ Acest link duce la pagina personalizata unde prospectul vede:
 Mentioneaza in CTA ca dupa click vede lista ziarelor + oferta completa + formular.`
     : "";
 
-  const PLACEHOLDER_RULE = `REGULA ABSOLUTA: NICIODATA nu folosi placeholders cu paranteze patrate sau acolade gen [oras], [domeniu], [text], [industrie], {x}, <variabila>, <city>. Daca o informatie despre firma LIPSESTE, OMITE complet propozitia sau foloseste fallback generic (gen "Va scriu pentru un parteneriat scurt"). NU inventa orase, NU inventa industrii, NU folosi placeholders.`;
+  const PLACEHOLDER_RULE = `REGULA ABSOLUTA: NICIODATA placeholders cu paranteze patrate sau acolade [oras], [domeniu], {x}, <city> etc. Daca info LIPSESTE, OMITE complet propozitia sau foloseste fallback generic ("Va scriu pentru un parteneriat scurt"). NU inventa orase, NU inventa industrii.`;
 
   const FACTS_ONLY_RULE = `REGULA FACTS (fapte verificabile DOAR):
-PERMIS sa mentionezi: 50 publicatii online, 1 per judet, 9 nationale, DA 37, trafic solid (fara cifra exacta), 50 pagini Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), AI scrie articolul, 3 poze cerute, factura dupa publicare, contact dedicat per partener.
-INTERZIS sa inventezi: nr cititori/luna exact (zi "trafic solid", NU "2M cititori"), procent crestere trafic clienti ("nu raportez +X%"), DR pe Ahrefs.`;
+PERMIS: 50 publicatii online, 1/judet, 9 nationale, DA 37, trafic solid (calitativ, fara cifra), 50 pagini Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), agentul nostru/echipa noastra te ajuta cu redactarea, 3 poze, factura post-publicare, contact dedicat per partener.
+INTERZIS: nr cititori/luna exact, procent crestere trafic, DR Ahrefs, cuvantul "AI" sau "inteligenta artificiala" (foloseste "agentul nostru" sau "echipa noastra").`;
 
   const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi articole direct - propui parteneriat reseller in care agentia foloseste reteaua MediaExpres pentru clientii lor.
 
@@ -365,37 +360,37 @@ ${PACKAGES_CONTEXT}
 
 SOCIAL PROOF (foloseste subtil): ${SOCIAL_PROOF}
 
-OFERTA SPECIALA RESELLER (mentioneaza in email):
-- Discount -25% default pe rate-card pentru orice pachet
+OFERTA RESELLER:
+- Discount -25% default pe rate-card
 - Bonus volum retroactiv: peste 4 articole/luna -30%, peste 11 -35%
 - White-label PDF report (cu sigla agentiei)
 - Factura lunara consolidata
 - Cont admin dedicat + prioritate publicare 12h
-- Pagina de inscriere: mediaexpress.ro/parteneri
+- Pagina inscriere: mediaexpress.ro/parteneri
 
 ${ctaSection}
 
 Reguli email:
 - subject: scurt (max 65 caractere), mentioneaza reseller program
 - intro (2 propozitii):
-  PROPOZITIA 1 = PREZENTARE BRAND IDENTICA (folositi EXACT acest text): "${BRAND_PITCH_AGENCY}"
-  PROPOZITIA 2 = PERSONALIZATA agentie. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti clienti corporate si va scriu pentru un parteneriat reseller." / "Am observat ca lucrati cu branduri din real estate." Cand NU AI INFO: "Va scriu pentru un parteneriat reseller care v-ar putea interesa."
-- body: 2 paragrafe -
-  PARAGRAFUL 1 = problema concret + propunere: "Clientii vostri cer distributie larga (50+ ziare). Sa construiti reteaua = luni de munca. Alternativa: revindeti reteaua noastra cu marja garantata si white-label PDF."
-  PARAGRAFUL 2 = 4 castiguri pentru agentie (FAPTE):
-    a) Discount -25% default + bonus volum pana la -35% = marja pe fiecare client
-    b) White-label: raport cu sigla agentiei (clientul nu stie ca subcontractati)
-    c) Factura lunara consolidata = un singur invoice
-    d) Cont admin dedicat cu vizibilitate live + prioritate publicare 12h
-  + social proof: "colaboram deja cu June, Emblema Grup, WhitePress si magazine online romanesti"
-- CTA: INTERZIS apel/call/meeting/proforma. Daca exista LINK CTA UNIC, foloseste-l cu text de tipul: "Vezi lista celor 50 ziare grupate pe regiuni + termeni reseller + completeaza datele aici:" + link. Daca NU exista link: "Aplici 2 min pe mediaexpress.ro/parteneri si iti raspund in 24h cu termenii."
+  PROPOZITIA 1 = PREZENTARE BRAND IDENTICA: "${BRAND_PITCH_AGENCY}"
+  PROPOZITIA 2 = PERSONALIZATA agentie sau fallback generic.
+- body: 2 paragrafe:
+  PARAGRAFUL 1 = problema + propunere: "Clientii vostri cer distributie larga. Sa construiti reteaua = luni de munca. Alternativa: revindeti reteaua noastra cu marja garantata + white-label PDF."
+  PARAGRAFUL 2 = 4 castiguri:
+    a) Discount -25% + bonus volum pana la -35%
+    b) White-label: sigla agentiei pe raport
+    c) Factura lunara consolidata
+    d) Cont admin dedicat + prioritate 12h
+  + social proof: "colaboram cu June, Emblema, WhitePress si magazine online romanesti"
+- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi lista celor 50 ziare + termenii reseller + completeaza datele:" + link. Daca NU: "Aplici 2 min pe mediaexpress.ro/parteneri si iti raspund in 24h."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON: peer-to-peer profesional
 - limba romana cu diacritice
 
-Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" text plain cu \\n\\n intre paragrafe.`;
+Raspunde STRICT JSON cu "subject" si "body". "body" text plain cu \\n\\n intre paragrafe.`;
 
-  const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti directi, oferindu-le serviciul MediaExpres.
+  const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti directi.
 
 ${PLACEHOLDER_RULE}
 
@@ -405,34 +400,34 @@ ${PACKAGES_CONTEXT}
 
 SOCIAL PROOF: ${SOCIAL_PROOF}
 
-${isCasino ? "ATENTIE: prospectul activeaza in iGaming/cazino - mentioneaza pachetul Cazino, nu Standard. Pachetele Cazino sunt conform ONJN si include joc responsabil." : ""}
+${isCasino ? "ATENTIE: prospect iGaming/cazino - mentioneaza pachetul Cazino, conform ONJN." : ""}
 
 ${ctaSection}
 
 Reguli email:
-- subject scurt si specific (max 60 caractere), personalizat (NU [companie] sau placeholders)
+- subject scurt (max 60 caractere), personalizat (NU placeholders)
 - intro (2 propozitii):
-  PROPOZITIA 1 = PREZENTARE BRAND IDENTICA (folositi EXACT acest text): "${BRAND_PITCH_FULL}"
+  PROPOZITIA 1 = PREZENTARE BRAND IDENTICA: "${BRAND_PITCH_FULL}"
   PROPOZITIA 2 = PERSONALIZATA firma. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti un cabinet stomatologic in Cluj-Napoca si va scriu cu o oferta punctuala." / "Am dat peste magazinul vostru online de cosmetice naturale." Cand NU AI INFO: "Am vazut site-ul vostru si va scriu cu o oferta de vizibilitate."
 - body: 2 paragrafe -
-  PARAGRAFUL 1 = bullet list cu 4-5 beneficii concrete (FAPTE, fara cifre inventate). Alege 4 din lista:
+  PARAGRAFUL 1 = bullet list cu 4-5 beneficii concrete (FAPTE, fara cifre inventate). Alege 4:
     a) 50 publicari simultane pe 50 publicatii romanesti (1/judet + 9 nationale, DA 37)
-    b) 50 distributii pe paginile Facebook asociate fiecarei publicatii
-    c) Apariție redactionala: articol jurnalistic (NU reclama platita) - mult mai credibil
+    b) 50 distributii pe paginile Facebook asociate
+    c) Aparitie redactionala: articol jurnalistic (NU reclama platita)
     d) Linkuri PERMANENTE - articolul ramane online ani de zile, lucreaza continuu pentru SEO
     e) Raport PDF cu toate URL-urile in 12 ore + factura + contact dedicat
-    f) Zero efort: AI scrie articolul din 1-2 propozitii de tematica, voi trimiteti 3 poze
+    f) Zero efort: AGENTUL NOSTRU te ajuta sa redactezi articolul si cauta cele mai bune solutii pentru tematica firmei voastre, voi trimiteti doar 3 poze
   + social proof scurt: "colaboram cu June, Emblema, WhitePress si magazine online de renume din RO"
   PARAGRAFUL 2 = recomanda pachetul:
     - DEFAULT firme normale: Pachet National 50 (1500 RON) - 41 locale + 9 nationale + 50 Facebook + 50 backlinks permanente
     - DACA E iGaming/cazino: Pachet Cazino National (2500 RON), conform ONJN
-  + mentioneaza ca AI scrie articolul din tematica + 3 poze
-- CTA: INTERZIS apel/call/meeting/proforma. Daca exista LINK CTA UNIC, foloseste-l cu text de tipul: "Vezi lista celor 50 ziare + oferta completa + completeaza datele (firma + tematica + 3 poze) aici:" + link. Daca NU exista link: "Raspunde-mi cu DA si iti trimit detaliile complete."
+  + mentioneaza ca agentul nostru ajuta cu redactarea (NU "AI scrie automat"), voi furnizati doar tematica + 3 poze
+- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi lista celor 50 ziare + oferta completa + completeaza datele (firma + tematica + 3 poze):" + link. Daca NU: "Raspunde-mi cu DA si iti trimit detaliile."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
-- TON profesional, NU pushy, NU clickbait
+- TON profesional, NU pushy
 - limba romana cu diacritice
 
-Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" text plain cu \\n\\n intre paragrafe.`;
+Raspunde STRICT JSON cu "subject" si "body". "body" text plain cu \\n\\n intre paragrafe.`;
 
   const system = isPRAgency ? PR_AGENCY_SYSTEM : STANDARD_SYSTEM;
 
@@ -446,7 +441,7 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" text plain 
     .filter(Boolean)
     .join("\n");
 
-  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. AMINTESTE-TI:\n1. PROPOZITIA 1 = exact textul brand pitch (cea mai mare retea, 50 publicatii, DA 37, trafic solid, 50 Facebook)\n2. PROPOZITIA 2 = personalizata sau fallback generic, NICIODATA placeholders\n3. Cifre permise doar: 50/1/9/DA 37/12h/1500 RON. NU 2M cititori. NU procente.\n4. CTA: link to /oferta/[token] - dupa click vede lista 50 ziare + formular cu CUI + 3 poze.`;
+  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. REGULI CRITICE:\n1. PROPOZITIA 1 = exact textul brand pitch (cea mai mare retea, 50 publicatii, DA 37, trafic solid, 50 Facebook)\n2. PROPOZITIA 2 = personalizata sau fallback generic, NICIODATA placeholders\n3. NU folosi cuvantul "AI" sau "inteligenta artificiala" - foloseste "agentul nostru" sau "echipa noastra te ajuta"\n4. Cifre permise doar: 50/1/9/DA 37/12h/1500 RON. NU 2M cititori. NU procente.\n5. CTA: link to /oferta/[token] - dupa click vede lista 50 ziare + formular cu CUI + 3 poze.`;
 
   const text = await callOpenAI({
     system,
@@ -459,18 +454,23 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" text plain 
   const parsed = parseJson<{ subject?: string; body?: string }>(text, "outreach-email");
   if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
 
-  const cleanPlaceholders = (s: string) =>
+  // Safety net: scoatem placeholders [x] {y} si inlocuim mentiuni de "AI" cu "agentul nostru"
+  // in cazul in care modelul ignora regula in prompt.
+  const cleanText = (s: string) =>
     s
       .replace(/\[[^\]\n]{1,40}\]/g, "")
       .replace(/\{[^}\n]{1,40}\}/g, "")
       .replace(/<(?!\/?(a|br|p|strong|b|em|i)\b)[^>\n]{1,40}>/gi, "")
+      .replace(/\bAI[­\s-]+(scrie|redacteaza|genereaza|creeaza)\b/gi, "agentul nostru te ajuta sa $1")
+      .replace(/\bAI-ul (nostru )?\b/gi, "agentul nostru ")
+      .replace(/\binteligen[țt]a artificiala\b/gi, "agentul nostru")
       .replace(/[ \t]{2,}/g, " ")
       .replace(/ \./g, ".")
       .replace(/ ,/g, ",")
       .trim();
 
   return {
-    subject: cleanPlaceholders(parsed.subject),
-    body: cleanPlaceholders(parsed.body),
+    subject: cleanText(parsed.subject),
+    body: cleanText(parsed.body),
   };
 }

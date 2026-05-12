@@ -83,30 +83,30 @@ export default async function ProspectOfferPage({
     ? "Program de partener - distribuie la cost"
     : isCasino
     ? "Distributie cazino - ONJN-compliant"
-    : "Distributie comunicat - 50 ziare romanesti";
+    : "Distributie comunicat - 50 publicatii romanesti";
 
   const subhead = isPRAgency
     ? "PDF white-label, factura consolidata lunar, pret de partener -25% default cu bonus volum pana la -35%. Tu iti pastrezi marja, noi facem distributia."
     : isCasino
     ? "Pachete dedicate operatorilor de iGaming si pariuri sportive. Conformitate ONJN, mentiuni risk-free, raport complet."
-    : "Articolul tau publicat pe 41 ziare locale + 9 nationale + distribuit pe 50 pagini Facebook. Raport cu toate linkurile in 12 ore de la publicare.";
+    : "Articolul tau publicat pe 41 publicatii locale + 9 nationale + distribuit pe 50 pagini Facebook. Raport cu toate linkurile in 12 ore de la publicare.";
 
   const featured = isCasino
     ? {
         name: "Cazino National",
         price: "2500 RON",
-        reach: "50 ziare + 50 pagini Facebook",
+        reach: "50 publicatii + 50 pagini Facebook",
       }
     : isPRAgency
     ? {
         name: "National 50 (pret partener -25%)",
         price: "1125 RON / articol",
-        reach: "50 ziare + factura consolidata lunar",
+        reach: "50 publicatii + factura consolidata lunar",
       }
     : {
         name: "National 50",
         price: "1500 RON",
-        reach: "41 ziare locale + 9 nationale + 50 pagini Facebook",
+        reach: "41 publicatii locale + 9 nationale + 50 pagini Facebook",
       };
 
   const packageSet = isCasino ? CASINO_PACKAGES : STANDARD_PACKAGES;
@@ -122,7 +122,6 @@ export default async function ProspectOfferPage({
 
   return (
     <>
-      {/* Hero personalizat */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 md:py-20">
           <p className="eyebrow text-brand-gold">Oferta personalizata</p>
@@ -140,28 +139,27 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Cine suntem MediaExpres */}
       <section className="bg-white border-b border-slate-200">
         <div className="container py-12 md:py-14">
           <p className="eyebrow">Cine suntem</p>
           <h2 className="font-serif text-2xl md:text-3xl font-bold text-brand-navy mt-2">
-            MediaExpres - retea de distributie de comunicate de presa din Romania
+            Cea mai mare retea de presa online din Romania
           </h2>
           <p className="mt-4 text-slate-700 max-w-3xl leading-relaxed">
-            Lucram cu 50 de ziare romanesti partenere (41 judetene + 9 nationale) si 50 pagini
-            Facebook asociate. Specializarea noastra: publicare advertorial in format jurnalistic
-            - articolul vostru apare ca stire redactionala, NU ca reclama platita. Raport PDF cu
-            toate linkurile + screenshot-urile articolelor publicate in 12 ore de la publicare.
-            Articol permanent online.
+            MediaExpres lucreaza cu 50 de publicatii online romanesti (cate 1 ziar pe judet + 9
+            publicatii nationale, toate cu DA 37 si trafic solid), plus 50 pagini Facebook
+            asociate fiecarei publicatii. Specializare: articol redactional jurnalistic, NU
+            reclama platita - apare ca stire. Raport PDF cu URL-uri + screenshot-uri in 12 ore,
+            factura post-publicare, contact dedicat pentru fiecare partener.
           </p>
 
           <div className="mt-8 grid gap-4 sm:grid-cols-3">
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
               <p className="font-serif text-3xl font-bold text-brand-red">50</p>
               <p className="mt-1 text-sm font-semibold text-brand-navy">
-                ziare romanesti partenere
+                publicatii online romanesti
               </p>
-              <p className="text-xs text-slate-500">41 locale + 9 nationale</p>
+              <p className="text-xs text-slate-500">41 locale + 9 nationale, DA 37</p>
             </div>
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
               <p className="font-serif text-3xl font-bold text-brand-red">50</p>
@@ -173,7 +171,7 @@ export default async function ProspectOfferPage({
             <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
               <p className="font-serif text-3xl font-bold text-brand-red">12h</p>
               <p className="mt-1 text-sm font-semibold text-brand-navy">
-                raport PDF garantat
+                raport PDF + factura
               </p>
               <p className="text-xs text-slate-500">URL-uri + screenshot-uri articole</p>
             </div>
@@ -186,7 +184,6 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Pachet recomandat */}
       <section className="section bg-white">
         <div className="container">
           <p className="eyebrow">{headline}</p>
@@ -209,11 +206,11 @@ export default async function ProspectOfferPage({
             <ul className="mt-6 grid gap-2 md:grid-cols-2 text-white/90">
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-gold" />
-                1 articol publicat pe 50 de ziare
+                1 articol publicat pe 50 de publicatii
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-gold" />
-                AI redacteaza articolul din tematica voastra
+                Agentul nostru te ajuta sa redactezi articolul
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-gold" />
@@ -263,7 +260,8 @@ export default async function ProspectOfferPage({
 
             <p className="mt-6 text-xs text-white/60">
               Dupa click pe DA, completezi: date firma (CUI, adresa) + tematica articolului
-              (1-2 propozitii, AI scrie restul) + 3 poze relevante. In 12 ore primesti raportul.
+              (1-2 propozitii, agentul nostru te ajuta cu redactarea si gaseste cele mai bune
+              solutii) + 3 poze relevante. In 12 ore primesti raportul.
             </p>
           </div>
         </div>
@@ -277,7 +275,7 @@ export default async function ProspectOfferPage({
             <GainCard
               icon={Globe2}
               title="Acoperire larga"
-              desc="Articolul apare simultan pe 50 site-uri romanesti + 50 pagini Facebook (41 locale + 9 nationale)"
+              desc="Articolul apare simultan pe 50 publicatii romanesti + 50 pagini Facebook (41 locale + 9 nationale, DA 37)"
             />
             <GainCard
               icon={Award}
@@ -287,12 +285,12 @@ export default async function ProspectOfferPage({
             <GainCard
               icon={Link2}
               title="50 backlinks permanente"
-              desc="Linkuri din 50 site-uri reale de presa. Indexabile in Google. Raman online ani de zile."
+              desc="Linkuri din 50 publicatii reale. Articolul ramane online ani de zile - lucreaza continuu pentru SEO."
             />
             <GainCard
               icon={FileText}
-              title="Zero efort la voi"
-              desc="AI scrie articolul din 1-2 propozitii. Voi trimiteti 3 poze. Restul facem noi. Raport in 12h."
+              title="Te ajutam cu redactarea"
+              desc="Agentul nostru te ghideaza la redactare si cauta cele mai bune solutii pentru tematica firmei voastre. Voi trimiteti 3 poze. Raport in 12h."
             />
           </div>
         </div>
@@ -389,7 +387,7 @@ export default async function ProspectOfferPage({
                           {plan.distributionsPerMonth}
                         </td>
                         <td className="px-4 py-3 text-slate-600">
-                          50 ziare per articol
+                          50 publicatii per articol
                         </td>
                         <td className="px-4 py-3 text-right font-semibold">
                           {plan.priceStandard} RON/luna
@@ -407,23 +405,23 @@ export default async function ProspectOfferPage({
       <section className="section bg-white">
         <div className="container">
           <p className="eyebrow">Acoperire</p>
-          <h2 className="h2 mt-2">Reteaua de 50 ziare + 50 pagini Facebook</h2>
+          <h2 className="h2 mt-2">Reteaua de 50 publicatii + 50 pagini Facebook</h2>
           <p className="lead mt-3 text-slate-600">
-            Articolul vostru apare simultan pe 50 site-uri romanesti. Numele exacte + URL-urile
-            articolelor publicate ajung in raportul PDF in 12 ore de la publicare.
+            Articolul vostru apare simultan pe 50 publicatii online romanesti. Numele exacte +
+            URL-urile articolelor publicate ajung in raportul PDF in 12 ore de la publicare.
           </p>
 
           <div className="mt-8">
             <div className="flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-brand-red" />
               <h3 className="font-serif text-lg font-bold text-brand-navy">
-                9 ziare nationale
+                9 publicatii nationale
               </h3>
               <span className="text-sm text-slate-500">(acoperire nationala)</span>
             </div>
             <p className="mt-2 text-sm text-slate-600">
-              {nationalPapers.length} ziare cu trafic national + 1 dedicat diasporei romanesti.
-              Lista exacta cu numele si URL-urile - in raportul final.
+              {nationalPapers.length} publicatii cu trafic national + 1 dedicata diasporei
+              romanesti. Lista exacta cu numele si URL-urile - in raportul final.
             </p>
           </div>
 
@@ -431,7 +429,7 @@ export default async function ProspectOfferPage({
             <div className="flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-brand-red" />
               <h3 className="font-serif text-lg font-bold text-brand-navy">
-                41 ziare locale (cate 1 per judet)
+                41 publicatii locale (cate 1 per judet)
               </h3>
             </div>
             <div className="mt-4 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -462,8 +460,8 @@ export default async function ProspectOfferPage({
                   50 pagini Facebook asociate
                 </h3>
                 <p className="mt-1 text-sm text-slate-700">
-                  Fiecare ziar are pagina Facebook proprie. Articolul vostru se distribuie automat
-                  in ziua publicarii pe toate cele 50 de pagini.
+                  Fiecare publicatie are pagina Facebook proprie. Articolul vostru se distribuie
+                  automat in ziua publicarii pe toate cele 50 de pagini.
                 </p>
               </div>
             </div>
@@ -498,8 +496,8 @@ export default async function ProspectOfferPage({
         <div className="container py-16 text-center">
           <h2 className="h2 text-white">Gata sa comanzi?</h2>
           <p className="lead mt-4 mx-auto max-w-2xl text-white/85">
-            Completezi datele firmei + tematica articolului + 3 poze. AI redacteaza, noi publicam,
-            si primesti raportul cu toate linkurile in 12 ore.
+            Completezi datele firmei + tematica articolului + 3 poze. Agentul nostru te ajuta cu
+            redactarea, noi publicam, si primesti raportul cu toate linkurile in 12 ore.
           </p>
           <div className="mt-8">
             <Button asChild variant="gold" size="lg">
