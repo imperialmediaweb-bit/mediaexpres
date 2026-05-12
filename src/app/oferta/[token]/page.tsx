@@ -25,6 +25,7 @@ import {
 import { NEWSPAPERS } from "@/data/newspapers";
 import { Button } from "@/components/ui/button";
 import { AdvisorChat } from "./AdvisorChat";
+import { StrategyGenerator } from "./StrategyGenerator";
 
 export const dynamic = "force-dynamic";
 
@@ -185,7 +186,14 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      <section className="section bg-white">
+      {/* STRATEGIST AI - FEATURE WOW */}
+      <StrategyGenerator
+        prospectCompany={prospect.companyName}
+        prospectIndustry={prospect.industry || undefined}
+        prospectCity={prospect.city || undefined}
+      />
+
+      <section id="pachet-recomandat" className="section bg-white">
         <div className="container">
           <p className="eyebrow">{headline}</p>
           <h2 className="h2 mt-2">Pachet recomandat pentru voi</h2>
