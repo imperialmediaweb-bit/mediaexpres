@@ -41,6 +41,8 @@ interface Props {
   prospectCompany?: string;
   prospectIndustry?: string;
   prospectCity?: string;
+  actionHref?: string;
+  actionLabel?: string;
 }
 
 const TYPE_META: Record<
@@ -61,6 +63,8 @@ export function StrategyGenerator({
   prospectCompany,
   prospectIndustry,
   prospectCity,
+  actionHref = "#pachet-recomandat",
+  actionLabel = "Vezi pachetul recomandat",
 }: Props) {
   const [brandInput, setBrandInput] = useState(prospectCompany || "");
   const [briefDescription, setBriefDescription] = useState("");
@@ -113,7 +117,6 @@ export function StrategyGenerator({
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-amber-50/30 to-rose-50/30 py-16 md:py-20">
-      {/* Decorative gradient blobs */}
       <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-rose-200/40 blur-3xl" />
 
@@ -208,7 +211,6 @@ export function StrategyGenerator({
 
         {strategy && (
           <div className="mt-10 space-y-6">
-            {/* Brand Snapshot */}
             <div className="rounded-3xl border-2 border-brand-navy bg-brand-navy p-8 text-white shadow-xl">
               <div className="flex items-start gap-4">
                 <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-brand-gold/20">
@@ -223,7 +225,6 @@ export function StrategyGenerator({
               </div>
             </div>
 
-            {/* 5 Idea Cards */}
             <div>
               <div className="flex items-center gap-3 mb-5">
                 <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-brand-red text-white">
@@ -276,7 +277,6 @@ export function StrategyGenerator({
               </div>
             </div>
 
-            {/* Recommended Package + Frequency */}
             <div className="grid gap-5 md:grid-cols-2">
               <div className="rounded-2xl border-2 border-brand-red bg-gradient-to-br from-rose-50 to-amber-50 p-6">
                 <div className="flex items-center gap-3">
@@ -321,7 +321,6 @@ export function StrategyGenerator({
               </div>
             </div>
 
-            {/* Action buttons */}
             <div className="flex flex-col sm:flex-row gap-3 pt-2">
               <button
                 onClick={() => {
@@ -335,10 +334,10 @@ export function StrategyGenerator({
                 Genereaza alta strategie
               </button>
               <a
-                href="#pachet-recomandat"
+                href={actionHref}
                 className="flex-1 inline-flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-brand-red to-amber-500 px-6 py-3 text-sm font-bold text-white shadow-lg hover:shadow-xl transition"
               >
-                Vezi pachetul recomandat
+                {actionLabel}
                 <ArrowRight className="h-4 w-4" />
               </a>
             </div>
