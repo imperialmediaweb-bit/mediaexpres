@@ -122,6 +122,7 @@ export default async function ProspectOfferPage({
 
   return (
     <>
+      {/* Hero personalizat */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 md:py-20">
           <p className="eyebrow text-brand-gold">Oferta personalizata</p>
@@ -139,6 +140,53 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
+      {/* Cine suntem MediaExpres */}
+      <section className="bg-white border-b border-slate-200">
+        <div className="container py-12 md:py-14">
+          <p className="eyebrow">Cine suntem</p>
+          <h2 className="font-serif text-2xl md:text-3xl font-bold text-brand-navy mt-2">
+            MediaExpres - retea de distributie de comunicate de presa din Romania
+          </h2>
+          <p className="mt-4 text-slate-700 max-w-3xl leading-relaxed">
+            Lucram cu 50 de ziare romanesti partenere (41 judetene + 9 nationale) si 50 pagini
+            Facebook asociate. Specializarea noastra: publicare advertorial in format jurnalistic
+            - articolul vostru apare ca stire redactionala, NU ca reclama platita. Raport PDF cu
+            toate linkurile + screenshot-urile articolelor publicate in 12 ore de la publicare.
+            Articol permanent online.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <p className="font-serif text-3xl font-bold text-brand-red">50</p>
+              <p className="mt-1 text-sm font-semibold text-brand-navy">
+                ziare romanesti partenere
+              </p>
+              <p className="text-xs text-slate-500">41 locale + 9 nationale</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <p className="font-serif text-3xl font-bold text-brand-red">50</p>
+              <p className="mt-1 text-sm font-semibold text-brand-navy">
+                pagini Facebook asociate
+              </p>
+              <p className="text-xs text-slate-500">distributie automata ziua publicarii</p>
+            </div>
+            <div className="rounded-lg border border-slate-200 bg-slate-50 p-5">
+              <p className="font-serif text-3xl font-bold text-brand-red">12h</p>
+              <p className="mt-1 text-sm font-semibold text-brand-navy">
+                raport PDF garantat
+              </p>
+              <p className="text-xs text-slate-500">URL-uri + screenshot-uri articole</p>
+            </div>
+          </div>
+
+          <p className="mt-6 text-sm text-slate-600">
+            Distribuim recurent pentru agentii PR si magazine online de renume din Romania -
+            vezi parteneri mai jos.
+          </p>
+        </div>
+      </section>
+
+      {/* Pachet recomandat */}
       <section className="section bg-white">
         <div className="container">
           <p className="eyebrow">{headline}</p>
