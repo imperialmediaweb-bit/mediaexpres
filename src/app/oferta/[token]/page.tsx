@@ -9,9 +9,9 @@ import {
   Clock,
   FileText,
   Shield,
-  TrendingUp,
   Link2,
   Award,
+  Globe2,
 } from "lucide-react";
 import { db } from "@/db";
 import { prospects } from "@/db/schema";
@@ -86,7 +86,7 @@ export default async function ProspectOfferPage({
     : "Distributie comunicat - 50 ziare romanesti";
 
   const subhead = isPRAgency
-    ? "PDF white-label, factura consolidata lunar, pret de partener -25 pana la -30%. Tu iti pastrezi marja, noi facem distributia."
+    ? "PDF white-label, factura consolidata lunar, pret de partener -25% default cu bonus volum pana la -35%. Tu iti pastrezi marja, noi facem distributia."
     : isCasino
     ? "Pachete dedicate operatorilor de iGaming si pariuri sportive. Conformitate ONJN, mentiuni risk-free, raport complet."
     : "Articolul tau publicat pe 41 ziare locale + 9 nationale + distribuit pe 50 pagini Facebook. Raport cu toate linkurile in 12 ore de la publicare.";
@@ -99,9 +99,9 @@ export default async function ProspectOfferPage({
       }
     : isPRAgency
     ? {
-        name: "National 50 (pret partener)",
+        name: "National 50 (pret partener -25%)",
         price: "1125 RON / articol",
-        reach: "50 ziare + factura consolidata lunar (-25%)",
+        reach: "50 ziare + factura consolidata lunar",
       }
     : {
         name: "National 50",
@@ -111,9 +111,6 @@ export default async function ProspectOfferPage({
 
   const packageSet = isCasino ? CASINO_PACKAGES : STANDARD_PACKAGES;
 
-  // Pentru lista de judete acoperite afisam toate cele 41 ziare locale grupate
-  // pe regiuni. Userii vor primi lista detaliata cu nume + URL-uri in raportul
-  // final post-publicare.
   const localPapers = NEWSPAPERS.filter((n) => n.type === "local");
   const nationalPapers = NEWSPAPERS.filter((n) => n.type === "national");
   const byRegion = {
@@ -125,7 +122,6 @@ export default async function ProspectOfferPage({
 
   return (
     <>
-      {/* Hero personalizat */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 md:py-20">
           <p className="eyebrow text-brand-gold">Oferta personalizata</p>
@@ -143,7 +139,6 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Pachet recomandat */}
       <section className="section bg-white">
         <div className="container">
           <p className="eyebrow">{headline}</p>
@@ -186,7 +181,7 @@ export default async function ProspectOfferPage({
               </li>
               <li className="flex items-start gap-3">
                 <CheckCircle2 className="h-5 w-5 shrink-0 text-brand-gold" />
-                Articol permanent online - lucreaza ani de zile
+                Articol permanent online
               </li>
               {isCasino && (
                 <li className="flex items-start gap-3">
@@ -226,41 +221,35 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* 4 castiguri cifrate */}
       <section className="section bg-white pt-0">
         <div className="container">
-          <p className="eyebrow">Castigurile pe care le primiti</p>
-          <h2 className="h2 mt-2">Ce inseamna concret 50 ziare publicate</h2>
+          <p className="eyebrow">Ce primiti concret</p>
+          <h2 className="h2 mt-2">Beneficiile pachetului National 50</h2>
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <GainCard
-              icon={TrendingUp}
-              title="~2 milioane cititori"
-              desc="Audienta cumulata a celor 50 ziare + 50 pagini Facebook din retea"
-              metric="luna"
-            />
-            <GainCard
-              icon={Link2}
-              title="50 backlinks SEO"
-              desc="Site-uri cu DR 25-60. Google va indexa articolul vostru in 24-48h"
-              metric="permanente"
+              icon={Globe2}
+              title="Acoperire larga"
+              desc="Articolul apare simultan pe 50 site-uri romanesti + 50 pagini Facebook (41 locale + 9 nationale)"
             />
             <GainCard
               icon={Award}
-              title="+15-30% trafic organic"
-              desc="Cifra raportata de clientii nostri in luna urmatoare publicarii"
-              metric="medie clienti"
+              title="Aparitie redactionala"
+              desc="Articolul apare ca stire jurnalistica, NU ca reclama platita. Mult mai credibil decat un banner."
+            />
+            <GainCard
+              icon={Link2}
+              title="50 backlinks permanente"
+              desc="Linkuri din 50 site-uri reale de presa. Indexabile in Google. Raman online ani de zile."
             />
             <GainCard
               icon={FileText}
-              title="Aparitie redactionala"
-              desc="Articolul apare ca stire jurnalistica, NU ca reclama platita"
-              metric="credibilitate"
+              title="Zero efort la voi"
+              desc="AI scrie articolul din 1-2 propozitii. Voi trimiteti 3 poze. Restul facem noi. Raport in 12h."
             />
           </div>
         </div>
       </section>
 
-      {/* Toate pachetele */}
       <section className="section bg-slate-50">
         <div className="container">
           <p className="eyebrow">Toate optiunile</p>
@@ -367,7 +356,6 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Reteaua de 50 ziare - lista vizibila */}
       <section className="section bg-white">
         <div className="container">
           <p className="eyebrow">Acoperire</p>
@@ -377,7 +365,6 @@ export default async function ProspectOfferPage({
             articolelor publicate ajung in raportul PDF in 12 ore de la publicare.
           </p>
 
-          {/* 9 ziare nationale */}
           <div className="mt-8">
             <div className="flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-brand-red" />
@@ -392,7 +379,6 @@ export default async function ProspectOfferPage({
             </p>
           </div>
 
-          {/* 41 ziare locale grupate pe regiuni */}
           <div className="mt-8">
             <div className="flex items-center gap-2">
               <Newspaper className="h-5 w-5 text-brand-red" />
@@ -420,7 +406,6 @@ export default async function ProspectOfferPage({
             </div>
           </div>
 
-          {/* Facebook */}
           <div className="mt-8 rounded-xl border border-blue-200 bg-blue-50 p-5">
             <div className="flex items-start gap-3">
               <Facebook className="h-6 w-6 text-blue-600 shrink-0" />
@@ -429,8 +414,8 @@ export default async function ProspectOfferPage({
                   50 pagini Facebook asociate
                 </h3>
                 <p className="mt-1 text-sm text-slate-700">
-                  Fiecare ziar are pagina Facebook proprie (300-10.000 urmaritori fiecare).
-                  Articolul vostru se distribuie automat in ziua publicarii pe toate cele 50 de pagini.
+                  Fiecare ziar are pagina Facebook proprie. Articolul vostru se distribuie automat
+                  in ziua publicarii pe toate cele 50 de pagini.
                 </p>
               </div>
             </div>
@@ -438,7 +423,6 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Social proof */}
       <section className="section bg-slate-50">
         <div className="container max-w-3xl">
           <p className="eyebrow">De ce noi</p>
@@ -462,7 +446,6 @@ export default async function ProspectOfferPage({
         </div>
       </section>
 
-      {/* Final CTA */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 text-center">
           <h2 className="h2 text-white">Gata sa comanzi?</h2>
@@ -487,12 +470,10 @@ function GainCard({
   icon: Icon,
   title,
   desc,
-  metric,
 }: {
   icon: React.ComponentType<{ className?: string }>;
   title: string;
   desc: string;
-  metric: string;
 }) {
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5">
@@ -501,9 +482,6 @@ function GainCard({
         {title}
       </h3>
       <p className="mt-1 text-sm text-slate-600">{desc}</p>
-      <p className="mt-3 text-xs uppercase tracking-wider text-brand-red">
-        {metric}
-      </p>
     </div>
   );
 }
