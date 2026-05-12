@@ -332,10 +332,14 @@ VALOARE ADAUGATA cheie (mentioneaza intotdeauna): in contul clientului AI-ul nos
     ? `LINK CTA UNIC (PRIORITATE MAXIMA - acesta este singurul CTA, nu cere "raspunde DA"):
 ${input.ctaLink}
 
-Acest link duce la pagina personalizata cu oferta completa, lista 50 ziare si formular intake (date firma + articol/tematica + poze). Mentioneaza ca dupa click totul e gestionat acolo, fara email back-and-forth.`
+Acest link duce la pagina personalizata cu oferta completa, lista 50 ziare si formular intake (date firma + articol/tematica + 3 poze). Mentioneaza ca dupa click totul e gestionat acolo, fara email back-and-forth.`
     : "";
 
+  const PLACEHOLDER_RULE = `REGULA ABSOLUTA (PRIORITATE MAXIMA): NICIODATA nu folosi placeholders cu paranteze patrate sau acolade gen [oras], [domeniu], [text], [industrie], {x}, <variabila>, <city>, etc in raspuns. Daca o informatie despre firma LIPSESTE din contextul de mai jos (industrie, oras, note), TREBUIE sa OMITI complet propozitia care depinde de ea sau sa folosesti o abordare alternativa generica (gen "Bun gasit, scriu pentru un parteneriat scurt" sau "Am vazut site-ul vostru"). NU inventa orase, NU inventa industrii, NU folosi placeholders. Email-ul trebuie sa fie GATA DE TRIMITERE asa cum il scrii.`;
+
   const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi direct articole - propui un parteneriat in care agentia foloseste reteaua MediaExpres pentru clientii lor.
+
+${PLACEHOLDER_RULE}
 
 ${PACKAGES_CONTEXT}
 
@@ -354,16 +358,25 @@ ${ctaSection}
 
 Reguli email:
 - subject: scurt (max 65 caractere), mentioneaza concret reseller program SAU oferta specifica agentiei
-- intro: 1 propozitie care arata ca ai cercetat agentia (mentioneaza ceva specific din notes - ex. ca au clienti corporate, ca sunt independent, ca au premiu recent)
-- body: 2 paragrafe - PARAGRAFUL 1 explica problema (clientii lor cer distributie larga, agentia nu vrea sa construiasca reteaua), PARAGRAFUL 2 explica solutia (reseller program, white-label, discount) + mentioneaza colaborarile existente cu June, Emblema Grup, WhitePress, Blogatu
-- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC mai sus, pune-l in email cu text de tipul "Vezi termenii reseller + lista 50 ziare aici: [link]". Daca NU exista link, foloseste: "Raspunde-mi cu un da si iti trimit deck-ul cu termenii reseller pe email."
+- intro: 1 propozitie scurta personalizata. EXEMPLE CORECTE cand AI INFO: "Am vazut portofoliul vostru de clienti corporate" / "Am observat ca lucrati cu branduri din real estate". EXEMPLU CORECT cand NU AI INFO: "Bun gasit, scriu pentru un parteneriat reseller MediaExpres". NICIODATA placeholders.
+- body: 2 paragrafe -
+  PARAGRAFUL 1 explica problema concret: "Clientii vostri cer distributie larga (50+ ziare). Sa construiti voi reteaua = 6 luni si 50K+ EUR. Alternativa: revindeti reteaua noastra cu marja garantata."
+  PARAGRAFUL 2 listeaza 3-4 castiguri pentru agentie:
+    a) Discount 25-30% rate-card = marja garantata pe fiecare client
+    b) White-label: raport cu sigla agentiei, clientul nu stie ca subcontractati
+    c) Factura consolidata lunar = un singur invoice de gestionat
+    d) Cont admin dedicat cu vizibilitate live + prioritate 12h la publicare
+  + social proof scurt: "colaboram deja cu June, Emblema Grup, WhitePress si magazine online romanesti"
+- CTA: STRICT INTERZIS sa propui apel, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC, pune-l cu text "Vezi termenii reseller + lista 50 ziare aici: [link real, NU placeholder]". Daca NU exista link, foloseste: "Raspunde-mi cu DA si iti trimit deck-ul cu termenii reseller pe email."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
-- TON: peer-to-peer profesional, NU pushy, NU pitch generic. Vorbesti cu un decision-maker care vede 50 cold-emails/saptamana.
+- TON: peer-to-peer profesional, NU pushy, NU pitch generic.
 - limba romana cu diacritice corecte
 
 Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plain cu \\n\\n intre paragrafe. Fara markdown, fara comentarii.`;
 
   const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti directi, oferindu-le serviciul MediaExpres.
+
+${PLACEHOLDER_RULE}
 
 ${PACKAGES_CONTEXT}
 
@@ -374,10 +387,21 @@ ${isCasino ? "ATENTIE: prospectul activeaza in iGaming/cazino - mentioneaza pach
 ${ctaSection}
 
 Reguli email:
-- subject scurt si specific (max 60 caractere), personalizat pentru firma
-- intro: 1 propozitie care arata ca ai cercetat firma (gen "am vazut ca activati in [domeniu] din [oras]" sau mentioneaza ceva specific din notes)
-- body: 2 paragrafe - PARAGRAFUL 1 explica beneficiul concret (vizibilitate, SEO, credibilitate, lead-uri) + social proof scurt (colaboram cu agentii PR top din RO). PARAGRAFUL 2 recomanda PACHETUL NATIONAL 50 (1500 RON) cu prioritate (sau Cazino National daca e iGaming) + mentioneaza ca AI scrie articolul din tematica lor (ei nu trebuie sa scrie nimic, doar 3 poze).
-- CTA: STRICT INTERZIS sa propui apel telefonic, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC mai sus, pune-l in email cu text de tipul "Vezi oferta completa + lista 50 ziare + completeaza datele: [link]". Daca NU exista link, foloseste: "Raspunde-mi cu un DA si iti trimit detaliile."
+- subject scurt si specific (max 60 caractere), personalizat pentru firma (foloseste numele firmei daca da ceva specific, ALTFEL ramai generic - NU pune [companie])
+- intro: 1 propozitie scurta personalizata. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti un cabinet stomatologic in Cluj-Napoca" / "Am dat peste magazinul vostru online cu cosmetice naturale". EXEMPLU CORECT cand NU AI INFO despre industrie/oras: "Bun gasit, scriu in legatura cu o oferta punctuala" / "Am vazut site-ul vostru si scriu pentru o oferta". NICIODATA [domeniu] [oras] [industrie] sau alte placeholders.
+- body: 2 paragrafe -
+  PARAGRAFUL 1 listeaza 3 BENEFICII CONCRETE CU CIFRE (alege 3 din lista in functie de industria firmei):
+    a) Vizibilitate: articolul vostru apare pe 50 site-uri romanesti + 50 pagini Facebook (audience cumulat ~2M cititori/luna in reteaua noastra)
+    b) SEO: 50 backlinks permanente din site-uri cu DR 25-60, Google indexare in 24-48h
+    c) Credibilitate: aparitie redactionala (jurnalistic, nu reclama platita) - articolul apare ca stire, nu ca anunt
+    d) Lead-uri: clientii nostri raporteaza in medie +15-30% trafic organic in luna urmatoare publicarii
+    e) Permanent: articolul ramane online la nesfarsit, lucreaza pentru voi luni de zile dupa publicare
+  + social proof scurt: "colaboram cu June, Emblema Grup, WhitePress si magazine online de renume din RO"
+  PARAGRAFUL 2 recomanda pachetul potrivit:
+    - DEFAULT (firme normale): Pachet National 50 (1500 RON) - 41 ziare locale + 9 nationale + 50 pagini Facebook + 50 backlinks SEO
+    - DACA E iGaming/cazino: Pachet Cazino National (2500 RON), conform ONJN
+  + mentioneaza ca AI scrie articolul din 1-2 propozitii de tematica (clientul nu trebuie sa scrie nimic, doar 3 poze + tematica)
+- CTA: STRICT INTERZIS apel, call, meeting, intalnire, sedinta, discutie video, factura proforma. Daca exista LINK CTA UNIC, pune-l cu text "Vezi oferta completa, lista 50 ziare si completeaza datele (firma + tematica + 3 poze): [link real]". Daca NU exista link, foloseste: "Raspunde-mi cu DA si iti trimit detaliile complete."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON profesional, NU pushy, NU clickbait
 - limba romana cu diacritice
@@ -388,15 +412,15 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plai
 
   const ctx = [
     `Companie: ${input.companyName}`,
-    input.industry ? `Industrie: ${input.industry}` : "",
-    input.city ? `Oras: ${input.city}` : "",
+    input.industry ? `Industrie: ${input.industry}` : "INDUSTRIE NECUNOSCUTA - omite referintele la industrie",
+    input.city ? `Oras: ${input.city}` : "ORAS NECUNOSCUT - omite referintele la oras",
     input.website ? `Site web: ${input.website}` : "",
     input.notes ? `Note: ${input.notes}` : "",
   ]
     .filter(Boolean)
     .join("\n");
 
-  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma.`;
+  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. AMINTESTE-TI: NICIODATA placeholders [x] - daca info lipseste, omite acea parte sau foloseste fallback generic.`;
 
   const text = await callOpenAI({
     system,
@@ -408,5 +432,22 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plai
 
   const parsed = parseJson<{ subject?: string; body?: string }>(text, "outreach-email");
   if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
-  return { subject: parsed.subject, body: parsed.body };
+
+  // Safety net: daca modelul tot a strecurat [x] sau {y} in output, le scoatem
+  // si curatam dublu-spatiile rezultate. Mai bine email scurt decat email cu
+  // [domeniu] vizibil la prospect.
+  const cleanPlaceholders = (s: string) =>
+    s
+      .replace(/\[[^\]\n]{1,40}\]/g, "")
+      .replace(/\{[^}\n]{1,40}\}/g, "")
+      .replace(/<(?!\/?(a|br|p|strong|b|em|i)\b)[^>\n]{1,40}>/gi, "")
+      .replace(/[ \t]{2,}/g, " ")
+      .replace(/ \./g, ".")
+      .replace(/ ,/g, ",")
+      .trim();
+
+  return {
+    subject: cleanPlaceholders(parsed.subject),
+    body: cleanPlaceholders(parsed.body),
+  };
 }
