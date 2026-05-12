@@ -112,7 +112,7 @@ export default async function ProspectOfferPage({
   const packageSet = isCasino ? CASINO_PACKAGES : STANDARD_PACKAGES;
 
   // Pentru lista de judete acoperite afisam toate cele 41 ziare locale grupate
-  // pe regiuni. Useri vor primi lista detaliata cu nume si URL-uri in raportul
+  // pe regiuni. Userii vor primi lista detaliata cu nume + URL-uri in raportul
   // final post-publicare.
   const localPapers = NEWSPAPERS.filter((n) => n.type === "local");
   const nationalPapers = NEWSPAPERS.filter((n) => n.type === "national");
@@ -230,7 +230,7 @@ export default async function ProspectOfferPage({
       <section className="section bg-white pt-0">
         <div className="container">
           <p className="eyebrow">Castigurile pe care le primiti</p>
-          <h2 className="h2 mt-2\">Ce inseamna concret 50 ziare publicate</h2>
+          <h2 className="h2 mt-2">Ce inseamna concret 50 ziare publicate</h2>
           <div className="mt-8 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <GainCard
               icon={TrendingUp}
