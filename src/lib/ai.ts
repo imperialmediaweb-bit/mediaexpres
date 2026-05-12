@@ -333,7 +333,7 @@ ${input.ctaLink}
 Acest link duce la pagina personalizata cu oferta completa, lista 50 ziare si formular intake (date firma + articol/tematica + 3 poze). Mentioneaza ca dupa click totul e gestionat acolo, fara email back-and-forth.`
     : "";
 
-  const PLACEHOLDER_RULE = `REGULA ABSOLUTA (PRIORITATE MAXIMA): NICIODATA nu folosi placeholders cu paranteze patrate sau acolade gen [oras], [domeniu], [text], [industrie], {x}, <variabila>, <city>, etc in raspuns. Daca o informatie despre firma LIPSESTE din contextul de mai jos (industrie, oras, note), TREBUIE sa OMITI complet propozitia care depinde de ea sau sa folosesti o abordare alternativa generica (gen "Bun gasit, scriu pentru un parteneriat scurt" sau "Am vazut site-ul vostru"). NU inventa orase, NU inventa industrii, NU folosi placeholders. Email-ul trebuie sa fie GATA DE TRIMITERE asa cum il scrii.`;
+  const PLACEHOLDER_RULE = `REGULA ABSOLUTA (PRIORITATE MAXIMA): NICIODATA nu folosi placeholders cu paranteze patrate sau acolade gen [oras], [domeniu], [text], [industrie], {x}, <variabila>, <city>, etc in raspuns. Daca o informatie despre firma LIPSESTE din contextul de mai jos (industrie, oras, note), TREBUIE sa OMITI complet propozitia care depinde de ea sau sa folosesti o abordare alternativa generica (gen "Va scriu pentru un parteneriat scurt" sau "Am vazut site-ul vostru"). NU inventa orase, NU inventa industrii, NU folosi placeholders. Email-ul trebuie sa fie GATA DE TRIMITERE asa cum il scrii.`;
 
   const FACTS_ONLY_RULE = `REGULA FACTS (PRIORITATE MAXIMA): NU INVENTA CIFRE. NU mentiona:
 - nr cititori/luna pe retea (nu avem cifra verificata)
@@ -366,7 +366,9 @@ ${ctaSection}
 
 Reguli email:
 - subject: scurt (max 65 caractere), mentioneaza concret reseller program
-- intro: 1 propozitie scurta personalizata. EXEMPLE CORECTE cand AI INFO: "Am vazut portofoliul vostru de clienti corporate" / "Am observat ca lucrati cu branduri din real estate". EXEMPLU CORECT cand NU AI INFO: "Bun gasit, scriu pentru un parteneriat reseller MediaExpres". NICIODATA placeholders.
+- intro (2 propozitii): 
+  PROPOZITIA 1 = PREZENTARE BRAND (obligatorie, identica fiecare email): "Salut, sunt Andrei de la MediaExpres - retea de distributie de comunicate de presa pe 50 ziare romanesti."
+  PROPOZITIA 2 = PERSONALIZATA pentru agentie. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti clienti corporate in portofoliu si va scriu pentru un parteneriat reseller." / "Am observat ca lucrati cu branduri din real estate si va scriu pentru un partnership punctual." EXEMPLU CORECT cand NU AI INFO: "Va scriu pentru un parteneriat reseller care v-ar putea interesa." NICIODATA placeholders.
 - body: 2 paragrafe -
   PARAGRAFUL 1 explica problema concret: "Clientii vostri cer distributie larga (50+ ziare). Sa construiti voi reteaua = luni de munca. Alternativa: revindeti reteaua noastra cu marja."
   PARAGRAFUL 2 listeaza 3-4 castiguri pentru agentie (FAPTE, fara cifre inventate):
@@ -398,7 +400,9 @@ ${ctaSection}
 
 Reguli email:
 - subject scurt si specific (max 60 caractere), personalizat pentru firma (NU pune [companie] sau placeholders)
-- intro: 1 propozitie scurta personalizata. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti un cabinet stomatologic in Cluj-Napoca" / "Am dat peste magazinul vostru online cu cosmetice naturale". EXEMPLU CORECT cand NU AI INFO despre industrie/oras: "Bun gasit, scriu in legatura cu o oferta punctuala" / "Am vazut site-ul vostru si scriu pentru o oferta". NICIODATA placeholders sau cifre inventate.
+- intro (2 propozitii):
+  PROPOZITIA 1 = PREZENTARE BRAND (obligatorie, identica fiecare email): "Salut, sunt Andrei de la MediaExpres - retea de distributie de comunicate de presa pe 50 ziare romanesti + 50 pagini Facebook."
+  PROPOZITIA 2 = PERSONALIZATA pentru firma. EXEMPLE CORECTE cand AI INFO industrie+oras: "Am vazut ca aveti un cabinet stomatologic in Cluj-Napoca si va scriu cu o oferta punctuala." / "Am dat peste magazinul vostru online de cosmetice naturale si va scriu cu o propunere." EXEMPLU CORECT cand NU AI INFO: "Va scriu cu o oferta care v-ar putea interesa pentru vizibilitate online." NICIODATA placeholders, NICIODATA cifre inventate.
 - body: 2 paragrafe -
   PARAGRAFUL 1 listeaza 3 BENEFICII CONCRETE (FAPTE, fara cifre inventate, alege 3 in functie de industrie):
     a) Acoperire larga: articolul vostru apare simultan pe 50 site-uri romanesti + 50 pagini Facebook (locale + nationale)
@@ -430,7 +434,7 @@ Raspunde STRICT in format JSON cu cheile "subject" si "body". "body" e text plai
     .filter(Boolean)
     .join("\n");
 
-  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. AMINTESTE-TI: NICIODATA placeholders [x], NICIODATA cifre inventate (nr cititori, procent trafic, DR backlinks). Doar fapte verificabile.`;
+  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. AMINTESTE-TI: incepe cu prezentarea brand (Salut, sunt Andrei de la MediaExpres...), NICIODATA placeholders [x], NICIODATA cifre inventate (nr cititori, procent trafic, DR backlinks). Doar fapte verificabile.`;
 
   const text = await callOpenAI({
     system,
