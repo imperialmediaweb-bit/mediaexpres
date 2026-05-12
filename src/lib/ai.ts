@@ -291,7 +291,6 @@ export interface OutreachEmail {
   body: string;
 }
 
-// Pozitionarea brand-ului folosita ca PROPOZITIA 1 obligatorie in fiecare email.
 const BRAND_PITCH_FULL =
   "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Avem un portofoliu de 50 publicatii (cate 1 per judet + 9 ziare nationale, toate cu DA 37 si trafic solid), plus 50 pagini de Facebook asociate fiecarei publicatii.";
 
@@ -331,7 +330,13 @@ Abonamente lunare cu pret per articol mai mic:
 - Gold: 4.500 RON/luna - 4 articole x 50 publicatii
 - Platinum: 8.000 RON/luna - 8 articole x 50 publicatii
 
-VALOARE ADAUGATA cheie: AGENTUL NOSTRU iti ajuta sa redactezi articolul - cauta cele mai bune solutii pentru tematica firmei voastre. Tu dai doar tema in 1-2 propozitii + 3 poze, restul facem noi. NU folosi cuvantul "AI" sau "automat" - foloseste "agentul nostru", "echipa noastra" sau "te ajutam cu redactarea".`;
+VALOARE ADAUGATA cheie: AGENTUL NOSTRU iti ajuta sa redactezi articolul - cauta cele mai bune solutii pentru tematica firmei voastre. Tu dai doar tema in 1-2 propozitii + 3 poze, restul facem noi. NU folosi cuvantul "AI" sau "automat" - foloseste "agentul nostru", "echipa noastra" sau "te ajutam cu redactarea".
+
+BONUS UNIC IN PIATA ROMANEASCA (mentioneaza-l cu prioritate ca diferentiator vs competitie - DOAR MediaExpres are): STRATEG EDITORIAL AI - un tool gratuit unde clientul intra cu site-ul/brandul sau si primeste in 30 secunde:
+- 5 idei de articole personalizate brandului lor (cu tip articol + luna optima)
+- Pachet recomandat din portofoliul nostru
+- Calendar editorial cu sezonalitate
+Test gratuit fara cont la mediaexpress.ro/strateg-ai. Spune-le sa-l incerce inainte sau dupa ce vad oferta - ii ajuta sa ia cele mai bune decizii editoriale, e ceva ce nimeni altcineva pe piata romaneasca de PR nu ofera.`;
 
   const ctaSection = input.ctaLink
     ? `LINK CTA UNIC (PRIORITATE MAXIMA - acesta este singurul CTA, nu cere "raspunde DA"):
@@ -340,15 +345,16 @@ ${input.ctaLink}
 Acest link duce la pagina personalizata unde prospectul vede:
 - LISTA celor 50 ziare grupate pe regiuni (Moldova/Transilvania/Muntenia/Banat)
 - Toate pachetele (Local/Regional/National + abonamente)
+- STRATEGUL EDITORIAL AI integrat pe pagina (genereaza strategie personalizata)
 - Formularul intake (date firma + tematica articolului + 3 poze)
-Mentioneaza in CTA ca dupa click vede lista ziarelor + oferta completa + formular.`
+Mentioneaza in CTA ca dupa click vede lista ziarelor + oferta completa + STRATEGUL AI + formular.`
     : "";
 
   const PLACEHOLDER_RULE = `REGULA ABSOLUTA: NICIODATA placeholders cu paranteze patrate sau acolade [oras], [domeniu], {x}, <city> etc. Daca info LIPSESTE, OMITE complet propozitia sau foloseste fallback generic ("Va scriu pentru un parteneriat scurt"). NU inventa orase, NU inventa industrii.`;
 
   const FACTS_ONLY_RULE = `REGULA FACTS (fapte verificabile DOAR):
-PERMIS: 50 publicatii online, 1/judet, 9 nationale, DA 37, trafic solid (calitativ, fara cifra), 50 pagini Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), agentul nostru/echipa noastra te ajuta cu redactarea, 3 poze, factura post-publicare, contact dedicat per partener.
-INTERZIS: nr cititori/luna exact, procent crestere trafic, DR Ahrefs, cuvantul "AI" sau "inteligenta artificiala" (foloseste "agentul nostru" sau "echipa noastra").`;
+PERMIS: 50 publicatii online, 1/judet, 9 nationale, DA 37, trafic solid (calitativ, fara cifra), 50 pagini Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), agentul nostru/echipa noastra te ajuta cu redactarea, 3 poze, factura post-publicare, contact dedicat per partener, STRATEG EDITORIAL AI gratuit (unic in piata).
+INTERZIS: nr cititori/luna exact, procent crestere trafic, DR Ahrefs, cuvantul "AI" sau "inteligenta artificiala" pentru redactare (foloseste "agentul nostru" sau "echipa noastra"). EXCEPTIE: poti folosi denumirea "Strateg Editorial AI" ca nume de produs - este branded astfel intentionat.`;
 
   const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi articole direct - propui parteneriat reseller in care agentia foloseste reteaua MediaExpres pentru clientii lor.
 
@@ -366,6 +372,7 @@ OFERTA RESELLER:
 - White-label PDF report (cu sigla agentiei)
 - Factura lunara consolidata
 - Cont admin dedicat + prioritate publicare 12h
+- BONUS EXCLUSIV: acces nelimitat la Strategul Editorial AI - pentru fiecare client al agentiei, generati 5 idei de articole tailored in 30 sec (ore de brainstorm economisite per pitch)
 - Pagina inscriere: mediaexpress.ro/parteneri
 
 ${ctaSection}
@@ -376,21 +383,22 @@ Reguli email:
   PROPOZITIA 1 = PREZENTARE BRAND IDENTICA: "${BRAND_PITCH_AGENCY}"
   PROPOZITIA 2 = PERSONALIZATA agentie sau fallback generic.
 - body: 2 paragrafe:
-  PARAGRAFUL 1 = problema + propunere: "Clientii vostri cer distributie larga. Sa construiti reteaua = luni de munca. Alternativa: revindeti reteaua noastra cu marja garantata + white-label PDF."
-  PARAGRAFUL 2 = 4 castiguri:
+  PARAGRAFUL 1 = problema + propunere: "Clientii vostri cer distributie larga. Sa construiti reteaua = luni de munca. Alternativa: revindeti reteaua noastra cu marja garantata + white-label PDF + acces la tool-ul nostru de strategie editoriala AI care va economiseste ore de brainstorm per client."
+  PARAGRAFUL 2 = 5 castiguri:
     a) Discount -25% + bonus volum pana la -35%
     b) White-label: sigla agentiei pe raport
     c) Factura lunara consolidata
     d) Cont admin dedicat + prioritate 12h
+    e) BONUS unic in piata: Strateg Editorial AI - generati 5 idei de articole tailored fiecarui client al vostru in 30 sec (test gratis: mediaexpress.ro/strateg-ai)
   + social proof: "colaboram cu June, Emblema, WhitePress si magazine online romanesti"
-- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi lista celor 50 ziare + termenii reseller + completeaza datele:" + link. Daca NU: "Aplici 2 min pe mediaexpress.ro/parteneri si iti raspund in 24h."
+- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi termenii reseller + Strategul AI + lista 50 ziare:" + link. Daca NU: "Testati Strategul Editorial AI gratuit pe mediaexpress.ro/strateg-ai si aplicati pentru reseller pe mediaexpress.ro/parteneri - raspund in 24h."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON: peer-to-peer profesional
 - limba romana cu diacritice
 
 Raspunde STRICT JSON cu "subject" si "body". "body" text plain cu \\n\\n intre paragrafe.`;
 
-  const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (200-300 cuvinte) catre potentiali clienti directi.
+  const STANDARD_SYSTEM = `Esti un copywriter B2B specializat in cold-email pentru piata din Romania. Scrii email-uri scurte (250-350 cuvinte) catre potentiali clienti directi.
 
 ${PLACEHOLDER_RULE}
 
@@ -410,19 +418,21 @@ Reguli email:
   PROPOZITIA 1 = PREZENTARE BRAND IDENTICA: "${BRAND_PITCH_FULL}"
   PROPOZITIA 2 = PERSONALIZATA firma. EXEMPLE CORECTE cand AI INFO: "Am vazut ca aveti un cabinet stomatologic in Cluj-Napoca si va scriu cu o oferta punctuala." / "Am dat peste magazinul vostru online de cosmetice naturale." Cand NU AI INFO: "Am vazut site-ul vostru si va scriu cu o oferta de vizibilitate."
 - body: 2 paragrafe -
-  PARAGRAFUL 1 = bullet list cu 4-5 beneficii concrete (FAPTE, fara cifre inventate). Alege 4:
+  PARAGRAFUL 1 = bullet list cu 5 beneficii concrete (FAPTE). Folositi EXACT aceste optiuni (alege 5 din 7):
     a) 50 publicari simultane pe 50 publicatii romanesti (1/judet + 9 nationale, DA 37)
     b) 50 distributii pe paginile Facebook asociate
     c) Aparitie redactionala: articol jurnalistic (NU reclama platita)
     d) Linkuri PERMANENTE - articolul ramane online ani de zile, lucreaza continuu pentru SEO
     e) Raport PDF cu toate URL-urile in 12 ore + factura + contact dedicat
     f) Zero efort: AGENTUL NOSTRU te ajuta sa redactezi articolul si cauta cele mai bune solutii pentru tematica firmei voastre, voi trimiteti doar 3 poze
+    g) BONUS UNIC IN PIATA: Strateg Editorial AI gratuit - intri cu site-ul vostru pe mediaexpress.ro/strateg-ai si primesti in 30 sec 5 idei de articole personalizate brandului + pachet recomandat. NIMENI altcineva in Romania nu ofera asta - te ajuta sa iei cele mai bune decizii editoriale inainte sa platesti ceva.
+  PUNE OPTIUNEA (g) OBLIGATORIU - este diferentiatorul cheie vs competitia. Restul: alege 4 din a-f in functie de industrie.
   + social proof scurt: "colaboram cu June, Emblema, WhitePress si magazine online de renume din RO"
   PARAGRAFUL 2 = recomanda pachetul:
     - DEFAULT firme normale: Pachet National 50 (1500 RON) - 41 locale + 9 nationale + 50 Facebook + 50 backlinks permanente
     - DACA E iGaming/cazino: Pachet Cazino National (2500 RON), conform ONJN
-  + mentioneaza ca agentul nostru ajuta cu redactarea (NU "AI scrie automat"), voi furnizati doar tematica + 3 poze
-- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi lista celor 50 ziare + oferta completa + completeaza datele (firma + tematica + 3 poze):" + link. Daca NU: "Raspunde-mi cu DA si iti trimit detaliile."
+  + mentioneaza ca agentul nostru ajuta cu redactarea, voi furnizati doar tematica + 3 poze
+- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi oferta + lista 50 ziare + testeaza Strategul AI gratuit + completeaza datele aici:" + link. Daca NU: "Testati Strategul Editorial AI gratuit pe mediaexpress.ro/strateg-ai (30 sec) si raspundeti cu DA daca vreti detaliile complete."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON profesional, NU pushy
 - limba romana cu diacritice
@@ -441,13 +451,13 @@ Raspunde STRICT JSON cu "subject" si "body". "body" text plain cu \\n\\n intre p
     .filter(Boolean)
     .join("\n");
 
-  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. REGULI CRITICE:\n1. PROPOZITIA 1 = exact textul brand pitch (cea mai mare retea, 50 publicatii, DA 37, trafic solid, 50 Facebook)\n2. PROPOZITIA 2 = personalizata sau fallback generic, NICIODATA placeholders\n3. NU folosi cuvantul "AI" sau "inteligenta artificiala" - foloseste "agentul nostru" sau "echipa noastra te ajuta"\n4. Cifre permise doar: 50/1/9/DA 37/12h/1500 RON. NU 2M cititori. NU procente.\n5. CTA: link to /oferta/[token] - dupa click vede lista 50 ziare + formular cu CUI + 3 poze.`;
+  const userPrompt = `${ctx}\n\nGenereaza un email de outreach pentru aceasta firma. REGULI CRITICE:\n1. PROPOZITIA 1 = exact textul brand pitch (cea mai mare retea, 50 publicatii, DA 37, trafic solid, 50 Facebook)\n2. PROPOZITIA 2 = personalizata sau fallback generic, NICIODATA placeholders\n3. NU folosi cuvantul "AI" pentru redactare - foloseste "agentul nostru". EXCEPTIE: "Strateg Editorial AI" e nume de produs si trebuie folosit cu majuscule.\n4. PARAGRAFUL 1 OBLIGATORIU include optiunea (g) STRATEG EDITORIAL AI - acesta e diferentiatorul vs competitia.\n5. Cifre permise doar: 50/1/9/DA 37/12h/1500 RON. NU 2M cititori. NU procente.\n6. CTA: link to /oferta/[token] sau mediaexpress.ro/strateg-ai pentru test gratuit.`;
 
   const text = await callOpenAI({
     system,
     user: userPrompt,
     model: MODEL_FAST,
-    maxTokens: 1000,
+    maxTokens: 1200,
     contextTag: "outreach-email",
   });
 
@@ -455,13 +465,14 @@ Raspunde STRICT JSON cu "subject" si "body". "body" text plain cu \\n\\n intre p
   if (!parsed.subject || !parsed.body) throw new Error("Raspuns incomplet");
 
   // Safety net: scoatem placeholders [x] {y} si inlocuim mentiuni de "AI" cu "agentul nostru"
-  // in cazul in care modelul ignora regula in prompt.
+  // dar PASTRAM "Strateg Editorial AI" ca nume branded.
   const cleanText = (s: string) =>
     s
       .replace(/\[[^\]\n]{1,40}\]/g, "")
       .replace(/\{[^}\n]{1,40}\}/g, "")
       .replace(/<(?!\/?(a|br|p|strong|b|em|i)\b)[^>\n]{1,40}>/gi, "")
-      .replace(/\bAI[­\s-]+(scrie|redacteaza|genereaza|creeaza)\b/gi, "agentul nostru te ajuta sa $1")
+      // Replace generic "AI scrie/redacteaza" but NOT when preceded by "Strateg Editorial"
+      .replace(/(?<!Strateg Editorial )\bAI[­\s-]+(scrie|redacteaza|genereaza|creeaza)\b/gi, "agentul nostru te ajuta sa $1")
       .replace(/\bAI-ul (nostru )?\b/gi, "agentul nostru ")
       .replace(/\binteligen[țt]a artificiala\b/gi, "agentul nostru")
       .replace(/[ \t]{2,}/g, " ")
