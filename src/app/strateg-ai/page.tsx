@@ -113,8 +113,8 @@ export default function StrategAiPage() {
             Strategia e ancorata in reteaua reala MediaExpres
           </h2>
           <p className="lead mt-4 text-slate-600">
-            Spre deosebire de tool-uri AI generice care iti dau idei "in vid", strategul nostru
-            stie exact:
+            Spre deosebire de tool-uri AI generice care iti dau idei generice fara context real,
+            strategul nostru stie exact:
           </p>
           <ul className="mt-6 space-y-3.5 text-slate-700">
             <li className="flex gap-3 items-start">
