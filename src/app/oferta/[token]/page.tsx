@@ -24,6 +24,7 @@ import {
 } from "@/data/packages";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { Button } from "@/components/ui/button";
+import { AdvisorChat } from "./AdvisorChat";
 
 export const dynamic = "force-dynamic";
 
@@ -295,6 +296,12 @@ export default async function ProspectOfferPage({
           </div>
         </div>
       </section>
+
+      <AdvisorChat
+        prospectCompany={prospect.companyName}
+        prospectIndustry={prospect.industry || undefined}
+        prospectCity={prospect.city || undefined}
+      />
 
       <section className="section bg-slate-50">
         <div className="container">
