@@ -34,7 +34,8 @@ export default async function EmailuriPage() {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/emailuri");
 
-  const { data: emails, ok, error, hint } = await listResendEmails(100);
+  const { data: emails, ok, error, hint, totalFetched, fromDomain } =
+    await listResendEmails(100);
   const stats = aggregateStats(emails);
 
   return (
@@ -42,8 +43,8 @@ export default async function EmailuriPage() {
       <div>
         <h1 className="font-serif text-3xl font-bold text-brand-navy">Emailuri trimise</h1>
         <p className="mt-2 text-sm text-slate-600">
-          Toate emailurile trimise prin Resend, cu statistici de deschidere și click.
-          Datele se citesc live din Resend API la fiecare deschidere a paginii.
+          Toate emailurile trimise de pe <strong>{fromDomain || "mediaexpress.ro"}</strong> prin Resend,
+          cu statistici de deschidere și click. Datele se citesc live din Resend API.
         </p>
       </div>
 
@@ -96,7 +97,7 @@ export default async function EmailuriPage() {
             {emails.length === 0 ? (
               <tr>
                 <td colSpan={5} className="px-4 py-12 text-center text-slate-500">
-                  {ok ? "Niciun email trimis încă." : "Niciun email disponibil."}
+                  {ok ? `Niciun email trimis de pe ${fromDomain}.` : "Niciun email disponibil."}
                 </td>
               </tr>
             ) : (
@@ -139,7 +140,8 @@ export default async function EmailuriPage() {
       </div>
 
       <p className="mt-4 text-xs text-slate-400">
-        Live din Resend API. Afișăm primele 100 de emailuri.
+        Filtrat pe domeniul <strong>{fromDomain}</strong>: {emails.length} emailuri afișate din{" "}
+        {totalFetched ?? "?"} returnate de Resend (restul sunt de pe alte domenii ale contului tău).
         Rate-urile de Open/Click sunt calculate doar pe emailurile livrate.
       </p>
     </div>

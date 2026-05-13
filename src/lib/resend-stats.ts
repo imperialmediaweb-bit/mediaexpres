@@ -25,6 +25,20 @@ export interface ListEmailsResult {
   data: ResendEmailItem[];
   error?: string;
   hint?: string;
+  // Cate emailuri RAW a returnat Resend inainte de filtrare per-domeniu.
+  // Ajuta utilizatorul sa inteleaga daca limit-ul e atins inainte de filtrare.
+  totalFetched?: number;
+  fromDomain?: string;
+}
+
+// Resend API key e shared pe tot contul, deci /emails returneaza ABSOLUT TOATE
+// emailurile din toate proiectele/domeniile. Filtram client-side dupa domeniul
+// FROM_EMAIL ca sa nu vezi emailuri de la alte branduri (ex: Asociatii Happy)
+// in dashboard-ul MediaExpres.
+function getFromDomain(): string {
+  const raw = process.env.FROM_EMAIL || "noreply@mediaexpress.ro";
+  const match = raw.match(/@([^>\s]+)/);
+  return match ? match[1].toLowerCase() : "mediaexpress.ro";
 }
 
 export async function listResendEmails(limit = 100): Promise<ListEmailsResult> {
@@ -37,6 +51,8 @@ export async function listResendEmails(limit = 100): Promise<ListEmailsResult> {
       hint: "Setează RESEND_API_KEY în Railway / .env.local",
     };
   }
+
+  const fromDomain = getFromDomain();
 
   try {
     const res = await fetch(`https://api.resend.com/emails?limit=${limit}`, {
@@ -58,16 +74,27 @@ export async function listResendEmails(limit = 100): Promise<ListEmailsResult> {
         data: [],
         error: `Resend API ${res.status}: ${body.slice(0, 200)}`,
         hint,
+        fromDomain,
       };
     }
 
     const json = (await res.json()) as { data?: ResendEmailItem[] };
-    return { ok: true, data: json.data ?? [] };
+    const raw = json.data ?? [];
+    const filtered = raw.filter((e) =>
+      typeof e.from === "string" && e.from.toLowerCase().includes(fromDomain),
+    );
+    return {
+      ok: true,
+      data: filtered,
+      totalFetched: raw.length,
+      fromDomain,
+    };
   } catch (err) {
     return {
       ok: false,
       data: [],
       error: err instanceof Error ? err.message : String(err),
+      fromDomain,
     };
   }
 }
