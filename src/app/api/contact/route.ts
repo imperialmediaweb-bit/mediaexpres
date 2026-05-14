@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { contactSchema } from "@/lib/validators";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
 
@@ -46,5 +47,23 @@ export async function POST(req: NextRequest) {
   if (!r.ok) {
     return NextResponse.json({ ok: false, error: "Eroare" }, { status: 500 });
   }
+
+  // Meta CAPI: Lead event server-side, hashuit (PII-safe).
+  // Daca si front-end-ul trimite fbq('track','Lead', ..., {eventID:X}) cu acelasi
+  // event_id, Meta deduplicheaza automat. In lipsa, asta e oricum valid (Lead unic).
+  const { firstName, lastName } = splitName(data.name);
+  const reqUser = extractRequestUserData(req);
+  sendCapiEvent({
+    eventName: "Lead",
+    eventSourceUrl: req.headers.get("referer") || undefined,
+    user: {
+      email: data.email,
+      firstName,
+      lastName,
+      ...reqUser,
+    },
+    customData: { content_name: "Contact Form", content_category: "contact" },
+  }).catch((err) => console.error("[contact] capi error:", err));
+
   return NextResponse.json({ ok: true });
 }

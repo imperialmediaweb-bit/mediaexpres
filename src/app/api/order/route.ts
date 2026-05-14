@@ -3,6 +3,7 @@ import { orderSchema } from "@/lib/validators";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById, SUBSCRIPTION_PLANS } from "@/data/packages";
 import { formatPrice } from "@/lib/utils";
+import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
 
@@ -41,24 +42,26 @@ export async function POST(req: NextRequest) {
 
   const data = parsed.data;
 
-  // Honeypot: if bots fill website field, silently succeed
   if (data.website) {
     return NextResponse.json({ ok: true });
   }
 
   let packageLabel = data.packageId;
   let packagePrice = "";
+  let packageValue: number | undefined;
   if (data.packageId.startsWith("sub-")) {
     const sub = SUBSCRIPTION_PLANS.find((s) => s.id === data.packageId.replace("sub-", ""));
     if (sub) {
       packageLabel = `Abonament ${sub.name} (${sub.description})`;
       packagePrice = `${formatPrice(sub.priceStandard)} RON/lună (standard) • ${formatPrice(sub.priceCasino)} RON/lună (cazino)`;
+      packageValue = sub.priceStandard;
     }
   } else {
     const pkg = findPackageById(data.packageId);
     if (pkg) {
       packageLabel = `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})`;
       packagePrice = `${formatPrice(pkg.price)} RON`;
+      packageValue = pkg.price;
     }
   }
 
@@ -95,7 +98,6 @@ export async function POST(req: NextRequest) {
     replyTo: data.email,
   });
 
-  // Send confirmation to customer
   const customerHtml = wrapEmail(
     "Comandă primită — MediaExpres",
     `
@@ -120,6 +122,29 @@ export async function POST(req: NextRequest) {
   if (!adminResult.ok) {
     return NextResponse.json({ ok: false, error: "Eroare la trimiterea emailului" }, { status: 500 });
   }
+
+  // Meta CAPI: Lead event cu value (cat costa pachetul) ca optimization signal.
+  // E mai puternic decat Lead simplu pentru ca Meta poate optimiza catre VALUE.
+  const { firstName, lastName } = splitName(data.name);
+  const reqUser = extractRequestUserData(req);
+  sendCapiEvent({
+    eventName: "Lead",
+    eventSourceUrl: req.headers.get("referer") || undefined,
+    value: packageValue,
+    currency: "RON",
+    user: {
+      email: data.email,
+      phone: data.phone,
+      firstName,
+      lastName,
+      ...reqUser,
+    },
+    customData: {
+      content_name: packageLabel,
+      content_category: data.packageId.startsWith("sub-") ? "subscription" : "package",
+      content_ids: [data.packageId],
+    },
+  }).catch((err) => console.error("[order] capi error:", err));
 
   return NextResponse.json({ ok: true });
 }

@@ -8,6 +8,7 @@ import {
   ConversionBanner,
   ConversionWidgets,
 } from "@/components/conversion/ConversionWidgets";
+import { MetaPixel } from "@/components/analytics/MetaPixel";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -94,6 +95,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${playfair.variable} ${inter.variable} ${oswald.variable}`}
     >
       <body className="min-h-screen font-sans flex flex-col">
+        <MetaPixel />
         <StructuredData />
         <ConversionBanner />
         <Navbar />
