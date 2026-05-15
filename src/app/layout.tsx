@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     template: `%s • ${SITE.name}`,
   },
   description: SITE.description,
-    verification: {
+  verification: {
     other: {
       "facebook-domain-verification": "iz5oj3nyyqnsd5d2k2u256fzuoyviq",
     },
