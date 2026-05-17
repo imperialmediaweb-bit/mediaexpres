@@ -6,9 +6,10 @@ export const dynamic = "force-dynamic";
 
 interface Props {
   params: { token: string };
+  searchParams: { pkg?: string; region?: string; county?: string };
 }
 
-export default async function MaterialePage({ params }: Props) {
+export default async function MaterialePage({ params, searchParams }: Props) {
   const lead = verifyFbLeadToken(params.token);
   if (!lead) redirect("/oferta-fb");
 
@@ -22,10 +23,16 @@ export default async function MaterialePage({ params }: Props) {
             Hai să publicăm, {firstName}!
           </h1>
           <p className="mt-2 text-slate-600">
-            Completează formularul — publicăm pe 50 de ziare în 24h de la primire.
+            Completează formularul — publicăm în 24h de la primire.
           </p>
         </div>
-        <IntakeForm token={params.token} />
+        <IntakeForm
+          token={params.token}
+          leadEmail={lead.email}
+          initialPackage={searchParams.pkg}
+          initialRegion={searchParams.region}
+          initialCounty={searchParams.county}
+        />
       </div>
     </div>
   );

@@ -14,29 +14,49 @@ interface FormData {
   firmContactPhone: string;
   firmInvoiceEmail: string;
   packageId: string;
+  region: string;
+  county: string;
   articleMode: ArticleMode;
   articleTitle: string;
   articleBody: string;
   articleTopic: string;
 }
 
-const INITIAL: FormData = {
-  firmName: "",
-  firmCui: "",
-  firmAddress: "",
-  firmCity: "",
-  firmContactName: "",
-  firmContactPhone: "",
-  firmInvoiceEmail: "",
-  packageId: "national",
-  articleMode: "write",
-  articleTitle: "",
-  articleBody: "",
-  articleTopic: "",
-};
+interface Props {
+  token: string;
+  leadEmail?: string;
+  initialPackage?: string;
+  initialRegion?: string;
+  initialCounty?: string;
+}
 
-export function IntakeForm({ token }: { token: string }) {
-  const [data, setData] = useState<FormData>(INITIAL);
+export function IntakeForm({
+  token,
+  leadEmail,
+  initialPackage,
+  initialRegion,
+  initialCounty,
+}: Props) {
+  const validPkg = ["local", "regional", "national"].includes(initialPackage || "")
+    ? (initialPackage as string)
+    : "national";
+
+  const [data, setData] = useState<FormData>({
+    firmName: "",
+    firmCui: "",
+    firmAddress: "",
+    firmCity: "",
+    firmContactName: "",
+    firmContactPhone: "",
+    firmInvoiceEmail: leadEmail || "",
+    packageId: validPkg,
+    region: initialRegion || "",
+    county: initialCounty || "",
+    articleMode: "write",
+    articleTitle: "",
+    articleBody: "",
+    articleTopic: "",
+  });
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -125,6 +145,17 @@ export function IntakeForm({ token }: { token: string }) {
 
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow">
         <h2 className="mb-4 font-serif text-lg font-bold text-brand-navy">2. Pachet ales</h2>
+
+        {(data.region || data.county) && (
+          <div className="mb-4 rounded-xl border border-green-200 bg-green-50 p-3 text-sm">
+            <p className="font-semibold text-green-800">✓ Alegerea ta de pe pagina ofertă:</p>
+            <p className="mt-1 text-green-700">
+              {data.region && <>Regiune: <strong>{data.region}</strong></>}
+              {data.county && <>Județ: <strong>{data.county}</strong></>}
+            </p>
+          </div>
+        )}
+
         <div className="space-y-3">
           {STANDARD_PACKAGES.map((pkg) => (
             <label

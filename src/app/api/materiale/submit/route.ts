@@ -16,6 +16,8 @@ const schema = z.object({
   firmContactPhone: z.string().min(9).max(40),
   firmInvoiceEmail: z.string().email().max(200),
   packageId: z.string().min(1),
+  region: z.string().max(60).optional(),
+  county: z.string().max(60).optional(),
   articleMode: z.enum(["write", "ai"]),
   articleTitle: z.string().max(300).optional(),
   articleBody: z.string().max(50000).optional(),
@@ -45,7 +47,9 @@ export async function POST(req: NextRequest) {
   }
 
   const pkg = findPackageById(d.packageId);
-  const pkgLabel = pkg ? `${pkg.name} — ${pkg.price.toLocaleString("ro")} RON` : d.packageId;
+  let pkgLabel = pkg ? `${pkg.name} — ${pkg.price.toLocaleString("ro")} RON` : d.packageId;
+  if (d.packageId === "regional" && d.region) pkgLabel += ` (${d.region})`;
+  if (d.packageId === "local" && d.county) pkgLabel += ` (${d.county})`;
   const smartbill = `${d.firmName} | ${d.firmCui} | ${d.firmAddress}, ${d.firmCity} | ${d.firmContactName} | ${d.firmContactPhone} | ${d.firmInvoiceEmail} | ${pkgLabel}`;
 
   const articleSection =
