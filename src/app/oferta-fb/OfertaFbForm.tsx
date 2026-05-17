@@ -4,7 +4,6 @@ import { useState } from "react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
-// Genereaza event_id stabil pentru deduplicare intre Pixel browser si CAPI server.
 function makeEventId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
   return `evt-${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
@@ -38,13 +37,11 @@ export function OfertaFbForm() {
         setSubmitting(false);
         return;
       }
-
       trackPixelEvent(
         "Lead",
         { content_name: "Oferta FB Landing", content_category: "facebook-ad" },
         eventId,
       );
-
       setSuccess(true);
     } catch {
       setError("Conexiune nereușită. Verifică internetul și încearcă din nou.");
@@ -57,14 +54,14 @@ export function OfertaFbForm() {
       <div className="flex flex-col items-center py-6 text-center">
         <CheckCircle2 className="h-12 w-12 text-green-600" />
         <h3 className="mt-3 font-serif text-xl font-bold text-brand-navy">
-          Mulțumim! Am primit cererea ta.
+          Mulțumim! Verifică emailul.
         </h3>
         <p className="mt-2 text-sm text-slate-600">
-          Un consultant MediaExpres te va contacta în maxim 30 de minute (în
-          timpul programului 9-18) cu oferta personalizată.
+          Ți-am trimis oferta personalizată cu toate detaliile — pachete, prețuri și lista
+          de ziare. Durează maxim 2-3 minute să apară.
         </p>
-        <p className="mt-4 text-xs text-slate-400">
-          Verifică și folder-ul de spam dacă nu vezi emailul în 5 minute.
+        <p className="mt-3 text-xs text-slate-400">
+          Nu găsești emailul? Verifică și folderul Spam.
         </p>
       </div>
     );
@@ -82,7 +79,6 @@ export function OfertaFbForm() {
         className="absolute -left-[9999px] h-0 w-0 opacity-0"
         aria-hidden="true"
       />
-
       <div>
         <label htmlFor="fb-name" className="block text-sm font-medium text-brand-navy">
           Nume complet
@@ -98,7 +94,6 @@ export function OfertaFbForm() {
           className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20"
         />
       </div>
-
       <div>
         <label htmlFor="fb-email" className="block text-sm font-medium text-brand-navy">
           Email
@@ -113,7 +108,6 @@ export function OfertaFbForm() {
           className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20"
         />
       </div>
-
       <div>
         <label htmlFor="fb-phone" className="block text-sm font-medium text-brand-navy">
           Telefon
@@ -129,11 +123,9 @@ export function OfertaFbForm() {
           className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20"
         />
       </div>
-
       {error && (
         <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
       )}
-
       <button
         type="submit"
         disabled={submitting}
@@ -148,10 +140,7 @@ export function OfertaFbForm() {
           "Vreau oferta personalizată"
         )}
       </button>
-
-      <p className="text-center text-xs text-slate-500">
-        Fără spam. Niciodată nu îți vindem datele.
-      </p>
+      <p className="text-center text-xs text-slate-500">Fără spam. Niciodată nu îți vindem datele.</p>
     </form>
   );
 }

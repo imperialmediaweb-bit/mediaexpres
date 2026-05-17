@@ -2,14 +2,17 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
+import { signFbLeadToken } from "@/lib/fb-lead-token";
 
 export const runtime = "nodejs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro";
 
 const schema = z.object({
   name: z.string().min(2).max(120),
   email: z.string().email().max(200),
   phone: z.string().min(9).max(40),
-  website: z.string().max(200).optional(), // honeypot
+  website: z.string().max(200).optional(),
   eventId: z.string().min(8).max(64).optional(),
 });
 
@@ -55,8 +58,12 @@ export async function POST(req: NextRequest) {
 
   if (data.website) return NextResponse.json({ ok: true });
 
-  const html = wrapEmail(
-    "Lead nou — Campanie Facebook (oferta-fb)",
+  const token = signFbLeadToken({ name: data.name, email: data.email, phone: data.phone });
+  const offerUrl = `${SITE_URL}/oferta/${token}`;
+  const firstName = data.name.trim().split(/\s+/)[0];
+
+  const adminHtml = wrapEmail(
+    "Lead nou — Campanie Facebook",
     `
     <p style="margin:0 0 12px;color:#64748b;">Lead venit din landing page-ul dedicat campaniilor Facebook.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
@@ -66,37 +73,34 @@ export async function POST(req: NextRequest) {
       ${kv("Sursă", "Facebook Ads — /oferta-fb")}
       ${kv("IP", ip)}
     </table>
-    <p style="margin:16px 0 0;color:#0B2545;font-weight:600;">⏱️ Sună-l în max. 30 min pentru rată maximă de conversie.</p>
+    <p style="margin:16px 0 0;"><a href="${offerUrl}" style="color:#C8102E;">Link ofertă personalizată (trimis automat pe email)</a></p>
   `,
   );
 
   const adminResult = await sendEmail({
     to: ADMIN_EMAIL,
     subject: `🔥 [FB Lead] ${data.name} — ${data.phone}`,
-    html,
+    html: adminHtml,
     replyTo: data.email,
   });
 
-  const customerHtml = wrapEmail(
-    "Am primit cererea ta — te sunăm în 30 min",
-    `
-    <p>Salut ${data.name.split(" ")[0]},</p>
-    <p>Mulțumim pentru interes! Un consultant MediaExpres te va contacta în
-    <strong>maxim 30 de minute</strong> (în timpul programului 9-18) cu oferta personalizată
-    pentru tipul tău de articol.</p>
-    <p style="margin:16px 0;padding:14px;background:#F8F5F0;border-left:3px solid #C8102E;border-radius:4px;">
-      <strong style="color:#0B2545;">Până atunci, iată ce poți face:</strong><br/>
-      • Vezi pachetele și prețurile → <a href="https://mediaexpress.ro/pachete" style="color:#C8102E;">mediaexpress.ro/pachete</a><br/>
-      • Studii de caz → <a href="https://mediaexpress.ro/blog" style="color:#C8102E;">mediaexpress.ro/blog</a>
-    </p>
-    <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
-  `,
-  );
-
   await sendEmail({
     to: data.email,
-    subject: "Cererea ta a fost primită — te sunăm în 30 min",
-    html: customerHtml,
+    subject: "Oferta ta personalizată — MediaExpres",
+    html: wrapEmail(
+      "Oferta ta personalizată — MediaExpres",
+      `
+      <p>Salut ${firstName},</p>
+      <p>Am pregătit pentru tine <strong>oferta personalizată</strong> cu toate detaliile — pachete, prețuri și lista completă a rețelei noastre de 50 de ziare.</p>
+      <p style="margin:24px 0;text-align:center;">
+        <a href="${offerUrl}" style="display:inline-block;background:#C8102E;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:16px;">
+          Vezi oferta mea →
+        </a>
+      </p>
+      <p style="color:#64748b;font-size:13px;">Linkul este valabil 90 de zile. Pe pagina ofertei poți trimite materialele direct sau ne lași o întrebare.</p>
+      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      `,
+    ),
   });
 
   if (!adminResult.ok) {
@@ -106,25 +110,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // CAPI Lead cu acelasi event_id ca Pixel-ul browser -> dedup automat Meta.
-  const { firstName, lastName } = splitName(data.name);
-  const reqUser = extractRequestUserData(req);
+  const { firstName: fn, lastName } = splitName(data.name);
   sendCapiEvent({
     eventName: "Lead",
     eventId: data.eventId,
     eventSourceUrl: req.headers.get("referer") || undefined,
-    user: {
-      email: data.email,
-      phone: data.phone,
-      firstName,
-      lastName,
-      ...reqUser,
-    },
-    customData: {
-      content_name: "Oferta FB Landing",
-      content_category: "facebook-ad",
-      lead_source: "facebook",
-    },
+    user: { email: data.email, phone: data.phone, firstName: fn, lastName, ...extractRequestUserData(req) },
+    customData: { content_name: "Oferta FB Landing", content_category: "facebook-ad", lead_source: "facebook" },
   }).catch((err) => console.error("[oferta-fb] capi error:", err));
 
   return NextResponse.json({ ok: true });

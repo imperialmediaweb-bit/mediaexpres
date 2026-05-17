@@ -5,8 +5,7 @@ import { Newspaper, Clock, ShieldCheck, TrendingUp, Star } from "lucide-react";
 export const metadata: Metadata = {
   title: "Apari în 50 de ziare românești — Ofertă specială",
   description:
-    "Distribuție garantată în 50 de ziare online din România. Raport PDF cu screenshot-uri în 24h. De la 250 RON.",
-  // Landing dedicat campaniei Facebook — nu vrem să concureze cu /oferta in SEO.
+    "Distribuție în 50 de ziare online din România. Raport PDF cu screenshot-uri în 24h. De la 150 RON.",
   robots: { index: false, follow: false },
 };
 
@@ -17,16 +16,15 @@ export default function OfertaFbPage() {
         <div className="grid gap-10 md:grid-cols-2 md:items-center">
           <div>
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-red/10 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-brand-red">
-              <Star className="h-3 w-3 fill-current" /> Ofertă limitată
+              <Star className="h-3 w-3 fill-current" /> Ofertă specială
             </span>
             <h1 className="mt-4 font-serif text-3xl font-bold leading-tight text-brand-navy md:text-5xl">
               Apari în <span className="text-brand-red">50 de ziare</span>{" "}
               românești într-o singură zi
             </h1>
             <p className="mt-4 text-lg text-slate-600">
-              Comunicatul tău publicat pe rețeaua MediaExpres — 50 de ziare
-              online cu trafic real. Raport PDF cu screenshot-uri în 24h.
-              <strong className="text-brand-navy"> Garantat sau banii înapoi.</strong>
+              Comunicatul tău publicat pe rețeaua MediaExpres — 50 de ziare online cu trafic
+              real. Raport PDF cu screenshot-uri în 24h.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               <li className="flex items-start gap-3">
@@ -40,21 +38,21 @@ export default function OfertaFbPage() {
                 <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
                   <strong className="text-brand-navy">Publicat în 24h</strong>{" "}
-                  de la confirmarea comenzii — nu peste o săptămână
+                  de la confirmarea comenzii
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
-                  <strong className="text-brand-navy">Raport PDF</strong> cu
-                  screenshot-uri și link-uri verificabile — dovadă că a publicat
+                  <strong className="text-brand-navy">Raport PDF</strong> cu screenshot-uri
+                  și link-uri verificabile
                 </span>
               </li>
               <li className="flex items-start gap-3">
                 <TrendingUp className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
                   <strong className="text-brand-navy">SEO backlinks</strong>{" "}
-                  reali din 50 domenii diferite — boost direct în Google
+                  reali din 50 domenii diferite
                 </span>
               </li>
             </ul>
@@ -63,14 +61,14 @@ export default function OfertaFbPage() {
           <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6 shadow-xl md:p-8">
             <div className="mb-6 text-center">
               <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">
-                Începe acum
+                Primești oferta pe email
               </p>
               <h2 className="mt-1 font-serif text-2xl font-bold text-brand-navy">
-                Primești oferta personalizată în 30 minute
+                Ofertă personalizată cu prețuri și detalii complete
               </h2>
               <p className="mt-2 text-sm text-slate-600">
-                Completeă form-ul și te sunăm să-ți explicăm exact ce pachet se
-                potrivește bugetului tău.
+                Completează form-ul și primești pe email oferta cu pachetele, prețurile și
+                lista rețelei de ziare.
               </p>
             </div>
             <OfertaFbForm />
@@ -84,7 +82,7 @@ export default function OfertaFbPage() {
             <TrustCard
               number="312"
               label="companii servite"
-              subline="în 2024 — startup-uri, IMM-uri, agenții"
+              subline="startup-uri, IMM-uri, agenții PR"
             />
             <TrustCard
               number="15.000+"
@@ -94,32 +92,32 @@ export default function OfertaFbPage() {
             <TrustCard
               number="24h"
               label="timp publicare"
-              subline="sau banii înapoi, garantat scris"
+              subline="de la confirmarea comenzii"
             />
           </div>
         </div>
       </section>
 
       <section className="mx-auto max-w-3xl px-4 py-12">
-        <h2 className="font-serif text-2xl font-bold text-brand-navy text-center">
+        <h2 className="text-center font-serif text-2xl font-bold text-brand-navy">
           Întrebări frecvente
         </h2>
         <div className="mt-8 space-y-4">
           <FaqItem
             q="Cât costă?"
-            a="Pachetele încep de la 250 RON (5 ziare) și ajung la 1490 RON (50 ziare premium). După ce completeți form-ul, primiți oferta personalizată cu prețul exact pentru tipul vostru de articol."
+            a="Pachetele încep de la 150 RON (1 ziar județean) și ajung la 1500 RON (50 ziare, acoperire națională). Detalii complete primești pe email după completarea formularului."
           />
           <FaqItem
             q="Sunt ziare reale?"
-            a="Da. Rețeaua MediaExpres include 50 de domenii .ro proprii, fiecare cu trafic SEO real și indexare Google. La cerere vă trimitem lista completă înainte de plată."
+            a="Da. Rețeaua MediaExpres include 50 de domenii .ro proprii, fiecare cu trafic SEO real și indexare Google."
           />
           <FaqItem
             q="Cum primesc dovada că s-a publicat?"
-            a="În 24h de la confirmarea plății primeți un raport PDF cu URL-urile fiecărui articol publicat plus screenshot-uri. Toate link-urile sunt verificabile public."
+            a="În 24h de la confirmare primești un raport PDF cu URL-urile fiecărui articol publicat plus screenshot-uri."
           />
           <FaqItem
             q="Pot să-mi scriu eu articolul?"
-            a="Da. Trimiteți textul vostru sau, la cerere, scriem noi articolul pe baza brief-ului tău (cost suplimentar 150 RON / 600 cuvinte)."
+            a="Da. Trimiți textul tău sau, la cerere, îl scriem noi cu AI pe baza temei tale."
           />
         </div>
       </section>
@@ -139,9 +137,7 @@ function TrustCard({
   return (
     <div className="text-center">
       <p className="font-serif text-4xl font-bold text-brand-red">{number}</p>
-      <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-brand-navy">
-        {label}
-      </p>
+      <p className="mt-1 text-sm font-semibold uppercase tracking-wider text-brand-navy">{label}</p>
       <p className="mt-1 text-xs text-slate-500">{subline}</p>
     </div>
   );
@@ -153,9 +149,7 @@ function FaqItem({ q, a }: { q: string; a: string }) {
       <summary className="cursor-pointer list-none font-semibold text-brand-navy marker:hidden">
         <span className="flex items-center justify-between">
           {q}
-          <span className="text-brand-red transition-transform group-open:rotate-45">
-            +
-          </span>
+          <span className="text-brand-red transition-transform group-open:rotate-45">+</span>
         </span>
       </summary>
       <p className="mt-3 text-sm text-slate-600">{a}</p>
