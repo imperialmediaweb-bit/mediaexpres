@@ -4,6 +4,9 @@ import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById, SUBSCRIPTION_PLANS } from "@/data/packages";
 import { formatPrice } from "@/lib/utils";
 import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
+import { db } from "@/db";
+import { users, orders, articles } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
@@ -145,6 +148,53 @@ export async function POST(req: NextRequest) {
       content_ids: [data.packageId],
     },
   }).catch((err) => console.error("[order] capi error:", err));
+
+  // Persist order to DB (best-effort — don't fail the HTTP response if DB is down)
+  try {
+    // Find or create user
+    let userId: string;
+    const existingUsers = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existingUsers.length > 0) {
+      userId = existingUsers[0].id;
+    } else {
+      const inserted = await db
+        .insert(users)
+        .values({
+          email: data.email,
+          name: data.name,
+          phone: data.phone,
+          companyName: data.company || null,
+        })
+        .returning({ id: users.id });
+      userId = inserted[0].id;
+    }
+
+    // Create order record
+    const insertedOrders = await db
+      .insert(orders)
+      .values({
+        userId,
+        email: data.email,
+        packageId: data.packageId,
+        amount: packageValue ? packageValue * 100 : 0,
+        status: "pending_payment",
+      })
+      .returning({ id: orders.id });
+    const orderId = insertedOrders[0].id;
+
+    // Create article record
+    await db.insert(articles).values({
+      userId,
+      orderId,
+      title: data.articleTitle,
+      body: data.articleBody || null,
+      notes: data.notes || null,
+      existingUrl: data.articleUrl || null,
+      status: "draft",
+    });
+  } catch (err) {
+    console.error("[order] db persist error:", err);
+  }
 
   return NextResponse.json({ ok: true });
 }

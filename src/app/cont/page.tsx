@@ -9,6 +9,7 @@ import {
   Download,
   Image as ImageIcon,
   Sparkles,
+  Target,
 } from "lucide-react";
 
 export default async function ContPage() {
@@ -64,13 +65,18 @@ export default async function ContPage() {
             description="Disponibila dupa prima plata. Descarcare direct din cont."
             href="/cont/lista"
           />
+          <Card
+            icon={Target}
+            title="Strateg Editorial AI"
+            description="Genereaza 5 idei de articole tailored brandului tau in 30 secunde. Gratuit."
+            href="/strateg-ai"
+          />
         </div>
 
         <div className="mt-12 rounded-2xl border border-dashed border-slate-300 p-8">
           <h2 className="h2">Prima comanda?</h2>
           <p className="lead mt-3 text-slate-600">
-            Alege un pachet si plateste cu cardul. Imediat ce plata e confirmata,
-            iti activam accesul la lista, upload-ul de poze si generarea AI.
+            Dupa trimiterea comenzii te contactam in 2 ore cu proforma. Plata prin transfer bancar sau card.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="accent" size="lg" asChild>
