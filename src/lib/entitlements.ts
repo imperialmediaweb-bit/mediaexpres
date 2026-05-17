@@ -1,4 +1,4 @@
-import { and, eq, desc, leftJoin } from "drizzle-orm";
+import { and, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, subscriptions, articles } from "@/db/schema";
 import { SUBSCRIPTION_PLANS } from "@/data/packages";
