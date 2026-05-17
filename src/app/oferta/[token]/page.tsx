@@ -27,7 +27,7 @@ export default async function OfertaPage({ params }: Props) {
             <span className="text-brand-red">50 de ziare</span>
           </h1>
           <p className="mt-3 text-slate-600">
-            Bifează pachetul + regiunea, vezi ziarele, apoi „Public ACUM" — publicăm în 24h.
+            Bifează pachetul + regiunea, vezi ziarele, apoi &bdquo;Public ACUM&rdquo; &mdash; publicăm în 24h.
           </p>
         </div>
 
