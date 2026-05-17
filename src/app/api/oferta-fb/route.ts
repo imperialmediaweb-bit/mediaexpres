@@ -2,8 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
+import { signFbLeadToken } from "@/lib/fb-lead-token";
 
 export const runtime = "nodejs";
+
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro";
 
 const schema = z.object({
   name: z.string().min(2).max(120),
@@ -26,9 +29,15 @@ function limited(ip: string): boolean {
 }
 
 export async function POST(req: NextRequest) {
-  const ip = req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || req.headers.get("x-real-ip") || "unknown";
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    req.headers.get("x-real-ip") ||
+    "unknown";
   if (limited(ip)) {
-    return NextResponse.json({ ok: false, error: "Prea multe cereri. Încearcă din nou în câteva minute." }, { status: 429 });
+    return NextResponse.json(
+      { ok: false, error: "Prea multe cereri. Încearcă din nou în câteva minute." },
+      { status: 429 },
+    );
   }
 
   let body: unknown;
@@ -40,13 +49,21 @@ export async function POST(req: NextRequest) {
 
   const parsed = schema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ ok: false, error: parsed.error.errors[0]?.message || "Date invalide" }, { status: 400 });
+    return NextResponse.json(
+      { ok: false, error: parsed.error.errors[0]?.message || "Date invalide" },
+      { status: 400 },
+    );
   }
   const data = parsed.data;
+
   if (data.website) return NextResponse.json({ ok: true });
 
-  const html = wrapEmail(
-    "Lead nou — Campanie Facebook (oferta-fb)",
+  const token = signFbLeadToken({ name: data.name, email: data.email, phone: data.phone });
+  const offerUrl = `${SITE_URL}/oferta/${token}`;
+  const firstName = data.name.trim().split(/\s+/)[0];
+
+  const adminHtml = wrapEmail(
+    "Lead nou — Campanie Facebook",
     `
     <p style="margin:0 0 12px;color:#64748b;">Lead venit din landing page-ul dedicat campaniilor Facebook.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
@@ -54,38 +71,52 @@ export async function POST(req: NextRequest) {
       ${kv("Email", data.email)}
       ${kv("Telefon", data.phone)}
       ${kv("Sursă", "Facebook Ads — /oferta-fb")}
+      ${kv("IP", ip)}
     </table>
-    <p style="margin:16px 0 0;color:#0B2545;font-weight:600;">⏱️ Sună-l în max. 30 min pentru rată maximă de conversie.</p>
+    <p style="margin:16px 0 0;"><a href="${offerUrl}" style="color:#C8102E;">Link ofertă personalizată (trimis automat pe email)</a></p>
   `,
   );
 
   const adminResult = await sendEmail({
     to: ADMIN_EMAIL,
     subject: `🔥 [FB Lead] ${data.name} — ${data.phone}`,
-    html,
+    html: adminHtml,
     replyTo: data.email,
   });
 
   await sendEmail({
     to: data.email,
-    subject: "Am primit cererea ta — te sunăm în 30 min",
+    subject: "Oferta ta personalizată — MediaExpres",
     html: wrapEmail(
-      "Am primit cererea ta — te sunăm în 30 min",
-      `<p>Salut ${data.name.split(" ")[0]},</p><p>Un consultant MediaExpres te va contacta în <strong>maxim 30 de minute</strong> cu oferta personalizată.</p><p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>`,
+      "Oferta ta personalizată — MediaExpres",
+      `
+      <p>Salut ${firstName},</p>
+      <p>Am pregătit pentru tine <strong>oferta personalizată</strong> cu toate detaliile — pachete, prețuri și lista completă a rețelei noastre de 50 de ziare.</p>
+      <p style="margin:24px 0;text-align:center;">
+        <a href="${offerUrl}" style="display:inline-block;background:#C8102E;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:16px;">
+          Vezi oferta mea →
+        </a>
+      </p>
+      <p style="color:#64748b;font-size:13px;">Linkul este valabil 90 de zile. Pe pagina ofertei poți trimite materialele direct sau ne lași o întrebare.</p>
+      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      `,
     ),
   });
 
   if (!adminResult.ok) {
-    return NextResponse.json({ ok: false, error: "Eroare la trimiterea emailului" }, { status: 500 });
+    return NextResponse.json(
+      { ok: false, error: "Eroare la trimiterea emailului" },
+      { status: 500 },
+    );
   }
 
-  const { firstName, lastName } = splitName(data.name);
+  const { firstName: fn, lastName } = splitName(data.name);
   sendCapiEvent({
     eventName: "Lead",
     eventId: data.eventId,
     eventSourceUrl: req.headers.get("referer") || undefined,
-    user: { email: data.email, phone: data.phone, firstName, lastName, ...extractRequestUserData(req) },
-    customData: { content_name: "Oferta FB Landing", content_category: "facebook-ad" },
+    user: { email: data.email, phone: data.phone, firstName: fn, lastName, ...extractRequestUserData(req) },
+    customData: { content_name: "Oferta FB Landing", content_category: "facebook-ad", lead_source: "facebook" },
   }).catch((err) => console.error("[oferta-fb] capi error:", err));
 
   return NextResponse.json({ ok: true });
