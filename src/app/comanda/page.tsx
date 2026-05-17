@@ -30,8 +30,7 @@ export default function ComandaPage({ searchParams }: PageProps) {
         <div className="order-2 lg:order-1">
           <h1 className="h1">Comandă articol</h1>
           <p className="lead mt-4">
-            Completează formularul și un consultant te contactează în maximum 2 ore. Nu reținem
-            nimic pe card — facturarea se face după confirmarea publicării.
+            Completează formularul. Iti trimitem proforma pe email cu IBAN-ul nostru — platesti prin transfer si publicam articolul. Factura finala vine dupa publicare.
           </p>
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <Suspense>

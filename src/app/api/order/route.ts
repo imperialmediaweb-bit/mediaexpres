@@ -111,7 +111,7 @@ export async function POST(req: NextRequest) {
       ${kv("Preț", packagePrice)}
       ${kv("Titlu articol", data.articleTitle)}
     </table>
-    <p>Echipa noastră te va contacta în maximum 2 ore (în timpul programului) cu detaliile de facturare și confirmarea publicării.</p>
+    <p>Iti trimitem in scurt timp proforma cu IBAN-ul nostru pe acest email. Dupa ce vedem transferul, publicam articolul pe reteaua MediaExpres si primesti factura finala plus raportul cu link-urile.</p>
     <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
   `
   );

@@ -25,7 +25,7 @@ export default async function ContPage() {
         <h1 className="h1 mt-2">Salut, {first}</h1>
         <p className="lead mt-3 text-slate-600">
           De aici gestionezi comenzile, abonamentul, articolele si pozele. Accesul la
-          lista ziarelor si upload-ul de continut se activeaza dupa prima plata.
+          lista ziarelor si upload-ul de continut se activeaza dupa confirmarea primei plati.
         </p>
 
         <div className="mt-10 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -76,7 +76,7 @@ export default async function ContPage() {
         <div className="mt-12 rounded-2xl border border-dashed border-slate-300 p-8">
           <h2 className="h2">Prima comanda?</h2>
           <p className="lead mt-3 text-slate-600">
-            Dupa trimiterea comenzii te contactam in 2 ore cu proforma. Plata prin transfer bancar sau card.
+            Completeaza formularul de comanda. Primesti proforma pe email cu IBAN-ul nostru, faci transferul, iar noi publicam articolul. Factura finala vine dupa publicare.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="accent" size="lg" asChild>

@@ -35,7 +35,7 @@ export default async function ComenziPage() {
         <p className="eyebrow">Cont</p>
         <h1 className="h1 mt-2">Comenzile mele</h1>
         <p className="lead mt-3 text-slate-600">
-          Istoricul comenzilor primite. Dupa confirmare vei primi proforma pe email.
+          Istoricul comenzilor tale. Pentru comenzile in asteptare, proforma cu IBAN-ul a fost trimisa pe email. Articolul se publica dupa confirmarea platii.
         </p>
 
         {orders.length === 0 ? (
