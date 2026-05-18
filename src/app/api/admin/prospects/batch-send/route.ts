@@ -37,17 +37,11 @@ function htmlFromBody(body: string): string {
     .join("");
 }
 
-// Plain-text alternative — spam filters favor email-urile cu ambele MIME parts.
-// Body-ul de la AI vine deja ca text plain cu \n\n, deci e direct utilizabil.
 function textFromBody(body: string, senderName: string): string {
-  return `${body}\n\nCu drag,\n${senderName}\nMediaExpres · mediaexpress.ro\n\n---\nDacă nu vrei să mai primești emailuri, răspunde STOP.`;
+  return `${body}\n\nCu drag,\n${senderName}\nMediaExpres · mediaexpress.ro\n\n---\nDacă nu vrei să mai primeşti emailuri, răspunde STOP.`;
 }
 
 export async function POST(req: NextRequest) {
-  // OUTER try/catch — garantează că răspundem mereu cu JSON, niciodată HTML.
-  // Fără acest wrap orice throw neprins (ex: import care nu se rezolvă, DB down,
-  // OpenAI key invalid înainte de loop) ar produce un 500 HTML page din Next.js,
-  // care apoi crapă client-side JSON.parse cu "Unexpected token '<', '<!DOCTYPE'".
   try {
     const session = getSession();
     if (!session) {
@@ -197,6 +191,9 @@ export async function POST(req: NextRequest) {
         });
         if (followUp3.ok) followUpsScheduled++;
 
+        const discountCode = `START20-${p.id.slice(0, 6).toUpperCase()}`;
+        const discountExpiresAt = new Date(Date.now() + 48 * 3_600_000);
+
         await db
           .update(prospects)
           .set({
@@ -205,6 +202,8 @@ export async function POST(req: NextRequest) {
             lastEmailAt: new Date(),
             lastEmailSubject: subject,
             lastEmailBody: bodyText,
+            discountCode,
+            discountExpiresAt,
             updatedAt: new Date(),
           })
           .where(eq(prospects.id, p.id));

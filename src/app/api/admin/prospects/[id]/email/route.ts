@@ -81,6 +81,9 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ ok: false, error: "Eroare la trimitere: " + (result as { error?: string }).error }, { status: 500 });
   }
 
+  const discountCode = `START20-${p.id.slice(0, 6).toUpperCase()}`;
+  const discountExpiresAt = new Date(Date.now() + 48 * 3_600_000);
+
   await db
     .update(prospects)
     .set({
@@ -89,6 +92,8 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
       lastEmailAt: new Date(),
       lastEmailSubject: parsed.data.subject,
       lastEmailBody: parsed.data.body,
+      discountCode,
+      discountExpiresAt,
       updatedAt: new Date(),
     })
     .where(eq(prospects.id, params.id));

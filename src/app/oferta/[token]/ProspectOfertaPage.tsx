@@ -4,6 +4,7 @@ import { STANDARD_PACKAGES } from "@/data/packages";
 import { TESTIMONIALS } from "@/data/testimonials";
 import { EXISTING_PARTNERS } from "@/data/social-proof";
 import { NEWSPAPERS } from "@/data/newspapers";
+import { DiscountCountdown } from "./DiscountCountdown";
 import type { prospects } from "@/db/schema";
 import type { InferSelectModel } from "drizzle-orm/table";
 
@@ -43,7 +44,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           </h1>
           <p className="mt-3 text-white/80 max-w-2xl mx-auto">
             Distribuim comunicatele de presă pe <strong>50 de ziare online</strong> din România
-            cu raport PDF livrat în 24h. Tu trimiți tematica, noi scriem și publicăm.
+            cu raport PDF livrat în 24h. Tu trimiți tematica, noi scriem şi publicăm.
           </p>
           {agency && (
             <div className="mt-4 inline-block rounded-lg bg-brand-gold/20 border border-brand-gold/40 px-4 py-2 text-sm font-medium text-brand-gold">
@@ -59,7 +60,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           <div className="rounded-xl bg-white border border-slate-200 p-6">
             <Clock className="h-7 w-7 text-brand-red mx-auto mb-3" />
             <p className="font-semibold text-brand-navy">Publicare în 24h</p>
-            <p className="text-xs text-slate-500 mt-1">Trimiți azi, ești online mâine</p>
+            <p className="text-xs text-slate-500 mt-1">Trimiți azi, eşti online mâine</p>
           </div>
           <div className="rounded-xl bg-white border border-slate-200 p-6">
             <Newspaper className="h-7 w-7 text-brand-red mx-auto mb-3" />
@@ -121,7 +122,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           {nationalPkg && (
             <div className="mt-6 rounded-xl bg-green-50 border border-green-200 p-5">
               <p className="font-semibold text-green-800 text-sm">
-                💡 Cu <strong>Pachetul Național 50</strong> ({nationalPkg.displayPrice.toLocaleString("ro")} RON) primești:
+                💡 Cu <strong>Pachetul Național 50</strong> ({nationalPkg.displayPrice.toLocaleString("ro")} RON) primeşti:
               </p>
               <ul className="mt-2 grid sm:grid-cols-2 gap-1.5">
                 {[
@@ -148,7 +149,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
             Câteva ziare din rețeaua noastră
           </h2>
           <p className="text-slate-600 mb-4 text-sm">
-            50 de publicații online regionale și naționale cu audiențe locale reale.
+            50 de publicații online regionale şi naționale cu audiențe locale reale.
           </p>
           <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-2">
             {sampleNewspapers.map((n, i) => (
@@ -207,6 +208,14 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           </div>
         </div>
 
+        {/* Urgency discount countdown */}
+        {prospect.discountCode && prospect.discountExpiresAt && (
+          <DiscountCountdown
+            code={prospect.discountCode}
+            expiresAt={prospect.discountExpiresAt.toISOString()}
+          />
+        )}
+
         {/* CTA */}
         <div className="rounded-2xl bg-brand-navy text-white p-8 text-center">
           <h2 className="font-serif text-2xl font-bold mb-2">
@@ -214,7 +223,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           </h2>
           <p className="text-white/75 text-sm mb-6 max-w-lg mx-auto">
             Click pe buton, completezi datele firmei + tematica (2 minute),
-            noi scriem comunicatul cu AI și publicăm pe 50 de ziare în 24h.
+            noi scriem comunicatul cu AI şi publicăm pe 50 de ziare în 24h.
             Factura fiscală pe email după publicare.
           </p>
           <Link
