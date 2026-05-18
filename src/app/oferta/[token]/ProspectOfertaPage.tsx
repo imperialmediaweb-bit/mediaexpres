@@ -1,9 +1,10 @@
 import Link from "next/link";
-import { CheckCircle2, Newspaper, Users, Clock, Star } from "lucide-react";
+import { CheckCircle2, Newspaper, Users, Clock, Star, TrendingUp } from "lucide-react";
 import { STANDARD_PACKAGES } from "@/data/packages";
 import { TESTIMONIALS } from "@/data/testimonials";
 import { EXISTING_PARTNERS } from "@/data/social-proof";
 import { NEWSPAPERS } from "@/data/newspapers";
+import { getRelevantCaseStudies } from "@/data/case-studies";
 import { DiscountCountdown } from "./DiscountCountdown";
 import type { prospects } from "@/db/schema";
 import type { InferSelectModel } from "drizzle-orm/table";
@@ -30,6 +31,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
 
   const nationalPkg = packages.find((p) => p.id === "national");
   const sampleNewspapers = NEWSPAPERS.slice(0, 12);
+  const caseStudies = getRelevantCaseStudies(prospect.industry, 3);
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F8F5F0] to-white">
@@ -204,6 +206,28 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
               >
                 {p.name}
               </span>
+            ))}
+          </div>
+        </div>
+
+        {/* Case studies */}
+        <div>
+          <h2 className="font-serif text-2xl font-bold text-brand-navy mb-2 flex items-center gap-2">
+            <TrendingUp className="h-6 w-6 text-brand-red" />
+            Rezultate reale de la clienți
+          </h2>
+          <div className="grid sm:grid-cols-3 gap-4">
+            {caseStudies.map((cs, i) => (
+              <div key={i} className="rounded-xl border border-slate-200 bg-white p-5">
+                <div className="mb-3">
+                  <span className="inline-block rounded-full bg-brand-navy/10 px-2.5 py-0.5 text-xs font-semibold text-brand-navy">
+                    {cs.industry}
+                  </span>
+                  <p className="mt-2 text-xs text-slate-500">Pachet: {cs.package}</p>
+                </div>
+                <p className="text-2xl font-bold text-brand-red">{cs.metric}</p>
+                <p className="mt-2 text-xs text-slate-600">{cs.result}</p>
+              </div>
             ))}
           </div>
         </div>
