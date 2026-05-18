@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
   const matching = allEmails.filter((e) => e.subject?.includes("[FB Lead]"));
 
   if (matching.length === 0) {
-    return NextResponse.json({ ok: true, found: 0, imported: 0, message: "Nu s-au gasit emailuri [FB Lead] in Resend." });
+    return NextResponse.json({ ok: true, found: 0, imported: 0, importedList: [], errors: [] });
   }
 
   const imported: string[] = [];

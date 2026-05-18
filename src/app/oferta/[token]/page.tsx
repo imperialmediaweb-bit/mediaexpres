@@ -1,17 +1,51 @@
 import { redirect } from "next/navigation";
+import { verifyProspectToken } from "@/lib/prospect-token";
 import { verifyFbLeadToken } from "@/lib/fb-lead-token";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { OfertaSelector } from "./OfertaSelector";
+import { ProspectOfertaPage } from "./ProspectOfertaPage";
+import { db } from "@/db";
+import { prospects } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
 
 interface Props {
-  params: { token: string };
+  params: Promise<{ token: string }>;
 }
 
 export default async function OfertaPage({ params }: Props) {
-  const lead = verifyFbLeadToken(params.token);
-  if (!lead) redirect("/oferta-fb");
+  const { token } = await params;
+
+  // Try prospect token first (outreach email flow)
+  const prospectDecoded = verifyProspectToken(token);
+  if (prospectDecoded) {
+    const [prospect] = await db
+      .select()
+      .from(prospects)
+      .where(eq(prospects.id, prospectDecoded.prospectId))
+      .limit(1);
+
+    if (prospect) {
+      // Track view (fire-and-forget)
+      db.update(prospects)
+        .set({
+          viewCount: (prospect.viewCount ?? 0) + 1,
+          firstViewedAt: prospect.firstViewedAt ?? new Date(),
+          lastViewedAt: new Date(),
+          status: prospect.status === "new" || prospect.status === "contacted" ? "opened" : prospect.status,
+          updatedAt: new Date(),
+        })
+        .where(eq(prospects.id, prospect.id))
+        .catch(() => {});
+
+      return <ProspectOfertaPage token={token} prospect={prospect} />;
+    }
+  }
+
+  // Fall back to FB lead token (Facebook Ads flow)
+  const lead = verifyFbLeadToken(token);
+  if (!lead) redirect("/");
 
   const firstName = lead.name.trim().split(/\s+/)[0];
 
@@ -32,7 +66,7 @@ export default async function OfertaPage({ params }: Props) {
         </div>
 
         <OfertaSelector
-          token={params.token}
+          token={token}
           firstName={firstName}
           newspapers={NEWSPAPERS}
         />

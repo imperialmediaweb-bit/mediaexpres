@@ -5,6 +5,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -23,7 +24,11 @@ export const users = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// NOTE: `id` column added to match existing DB state (DB was created with id as PK).
+// The @auth/drizzle-adapter uses a WHERE on (provider, providerAccountId) so the
+// unique constraint below keeps data integrity without needing a composite PK.
 export const accounts = pgTable("account", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   type: text("type").$type<AdapterAccountType>().notNull(),
   provider: text("provider").notNull(),
@@ -36,7 +41,7 @@ export const accounts = pgTable("account", {
   id_token: text("id_token"),
   session_state: text("session_state"),
 }, (account) => ({
-  compoundKey: primaryKey({ columns: [account.provider, account.providerAccountId] }),
+  providerUnique: unique().on(account.provider, account.providerAccountId),
 }));
 
 export const sessions = pgTable("session", {
@@ -128,6 +133,14 @@ export const prospects = pgTable("prospect", {
   lastEmailAt: timestamp("last_email_at"),
   lastEmailSubject: text("last_email_subject"),
   lastEmailBody: text("last_email_body"),
+  // Tracking oferta page
+  viewCount: integer("view_count").notNull().default(0),
+  firstViewedAt: timestamp("first_viewed_at"),
+  lastViewedAt: timestamp("last_viewed_at"),
+  clickedCta: boolean("clicked_cta").notNull().default(false),
+  // Urgency discount code
+  discountCode: text("discount_code"),
+  discountExpiresAt: timestamp("discount_expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
