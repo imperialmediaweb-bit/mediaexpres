@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
+import { ImportLeadsButton } from "./ImportLeadsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -53,7 +54,11 @@ export default async function AdminClientiPage() {
         Toți utilizatorii care au un cont sau au făcut o plată.
       </p>
 
-      <div className="mt-6">
+      <div className="mt-6 flex flex-wrap items-start gap-3">
+        <ImportLeadsButton />
+      </div>
+
+      <div className="mt-3">
         <RecoverLeadsButton />
       </div>
 
