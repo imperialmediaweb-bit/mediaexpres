@@ -127,6 +127,8 @@ export async function POST(req: NextRequest) {
         const html = wrapEmailCold(htmlFromBody(bodyText));
         const text = textFromBody(bodyText, SENDER_NAME);
 
+        const prospectTag = [{ name: "prospect_id", value: p.id }];
+
         const initial = await sendEmail({
           to: p.email,
           subject,
@@ -134,6 +136,7 @@ export async function POST(req: NextRequest) {
           text,
           replyTo: ADMIN_EMAIL,
           listUnsubscribe,
+          tags: prospectTag,
         });
 
         if (!initial.ok) {
@@ -154,6 +157,7 @@ export async function POST(req: NextRequest) {
           replyTo: ADMIN_EMAIL,
           scheduledAt: followUp1At,
           listUnsubscribe,
+          tags: prospectTag,
         });
         if (followUp1.ok) followUpsScheduled++;
 
@@ -171,6 +175,7 @@ export async function POST(req: NextRequest) {
           replyTo: ADMIN_EMAIL,
           scheduledAt: followUp2At,
           listUnsubscribe,
+          tags: prospectTag,
         });
         if (followUp2.ok) followUpsScheduled++;
 
@@ -188,6 +193,7 @@ export async function POST(req: NextRequest) {
           replyTo: ADMIN_EMAIL,
           scheduledAt: followUp3At,
           listUnsubscribe,
+          tags: prospectTag,
         });
         if (followUp3.ok) followUpsScheduled++;
 

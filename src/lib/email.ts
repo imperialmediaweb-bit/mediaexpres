@@ -37,6 +37,8 @@ interface SendArgs {
   // RFC 2369 + RFC 8058 — obligatoriu pentru bulk senders Gmail/Yahoo din 2024.
   // Acceptă "mailto:..." sau "<https://...>" sau ambele separate prin virgulă.
   listUnsubscribe?: string;
+  // Resend tags — permite corelarea email-urilor cu entități din DB (ex: prospect_id).
+  tags?: Array<{ name: string; value: string }>;
 }
 
 export async function sendEmail(args: SendArgs) {
@@ -63,6 +65,9 @@ export async function sendEmail(args: SendArgs) {
       "List-Unsubscribe": args.listUnsubscribe,
       "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
     };
+  }
+  if (args.tags && args.tags.length > 0) {
+    (payload as unknown as { tags: typeof args.tags }).tags = args.tags;
   }
   const { data, error } = await resend.emails.send(payload);
   if (error) {

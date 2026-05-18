@@ -138,6 +138,9 @@ export const prospects = pgTable("prospect", {
   firstViewedAt: timestamp("first_viewed_at"),
   lastViewedAt: timestamp("last_viewed_at"),
   clickedCta: boolean("clicked_cta").notNull().default(false),
+  // Resend webhook tracking (open/click events)
+  openCount: integer("open_count").notNull().default(0),
+  clickCount: integer("click_count").notNull().default(0),
   // Urgency discount code
   discountCode: text("discount_code"),
   discountExpiresAt: timestamp("discount_expires_at"),
