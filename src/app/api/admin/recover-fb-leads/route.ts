@@ -24,8 +24,8 @@ interface ResendEmailFull {
 
 interface ResendListResponse {
   data: ResendEmailSummary[];
-  // Resend uses cursor-based pagination
-  next_cursor?: string;
+  // Resend uses cursor-based pagination; response field is "next" (not "next_cursor")
+  next?: string;
 }
 
 async function fetchAllEmails(apiKey: string): Promise<ResendEmailSummary[]> {
@@ -49,13 +49,13 @@ async function fetchAllEmails(apiKey: string): Promise<ResendEmailSummary[]> {
     }
 
     const data: ResendListResponse = await res.json();
-    const batch = data.data || [];
+    const batch = Array.isArray(data.data) ? data.data : [];
     all.push(...batch);
     pages++;
 
-    // Dacă primim mai puțin de 100, am ajuns la capăt
-    if (batch.length < 100 || !data.next_cursor) break;
-    cursor = data.next_cursor;
+    // Dacă primim mai puțin de 100 sau nu există cursor de continuare, am ajuns la capăt
+    if (batch.length < 100 || !data.next) break;
+    cursor = data.next;
   }
 
   return all;
@@ -81,6 +81,9 @@ export async function POST(req: NextRequest) {
 
   const matching = allEmails.filter((e) => e.subject?.includes("[FB Lead]"));
 
+  // Primele 8 subiecte scanate — ajută la debug dacă [FB Lead] nu e găsit
+  const sampleSubjects = allEmails.slice(0, 8).map((e) => e.subject || "(fără subiect)");
+
   if (matching.length === 0) {
     return NextResponse.json({
       ok: true,
@@ -89,6 +92,7 @@ export async function POST(req: NextRequest) {
       importedList: [],
       errors: [],
       scanned: allEmails.length,
+      sampleSubjects,
     });
   }
 
@@ -157,5 +161,6 @@ export async function POST(req: NextRequest) {
     importedList: imported,
     errors,
     scanned: allEmails.length,
+    sampleSubjects,
   });
 }

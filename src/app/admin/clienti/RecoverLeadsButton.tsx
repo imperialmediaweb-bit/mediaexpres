@@ -8,6 +8,8 @@ interface Result {
   imported: number;
   importedList: string[];
   errors: string[];
+  scanned: number;
+  sampleSubjects?: string[];
 }
 
 export function RecoverLeadsButton() {
@@ -58,8 +60,21 @@ export function RecoverLeadsButton() {
         <div className="mt-3 rounded-lg bg-white p-3 text-xs">
           <div className="flex items-center gap-2 font-semibold text-green-700">
             <CheckCircle2 className="h-4 w-4" />
-            Gasit {result.found} emailuri [FB Lead] — importat {result.imported}
+            Găsit {result.found} emailuri [FB Lead] — importat {result.imported}
+            <span className="ml-2 font-normal text-slate-400">(scanat {result.scanned} emailuri total)</span>
           </div>
+
+          {result.found === 0 && result.sampleSubjects && result.sampleSubjects.length > 0 && (
+            <div className="mt-2 rounded bg-slate-50 p-2">
+              <p className="text-slate-500 mb-1">Primele subiecte din Resend (pentru verificare format):</p>
+              <ul className="space-y-0.5 text-slate-600">
+                {result.sampleSubjects.map((s, i) => (
+                  <li key={i} className="truncate">· {s}</li>
+                ))}
+              </ul>
+            </div>
+          )}
+
           {result.importedList.length > 0 && (
             <ul className="mt-2 space-y-0.5 text-slate-600">
               {result.importedList.map((l, i) => <li key={i}>• {l}</li>)}
