@@ -61,7 +61,10 @@ export async function POST(req: NextRequest) {
 
   if (data.website) return NextResponse.json({ ok: true });
 
-  // Salveaza lead-ul ca user in DB (find-or-create). Nu blocam request-ul daca pica DB-ul.
+  // Salveaza lead-ul ca user in DB (find-or-create).
+  // CRITIC: dacă DB pică, semnalăm clar în email admin (subject + banner roșu).
+  let dbSaved = false;
+  let dbError: string | null = null;
   try {
     const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
     if (existing.length === 0) {
@@ -71,7 +74,9 @@ export async function POST(req: NextRequest) {
         phone: data.phone,
       });
     }
+    dbSaved = true;
   } catch (err) {
+    dbError = err instanceof Error ? err.message : String(err);
     console.error("[oferta-fb] db error:", err);
   }
 
@@ -80,8 +85,9 @@ export async function POST(req: NextRequest) {
   const firstName = data.name.trim().split(/\s+/)[0];
 
   const adminHtml = wrapEmail(
-    "Lead nou — Campanie Facebook",
+    dbSaved ? "Lead nou — Campanie Facebook" : "⚠️ LEAD NOU — DB FAILED (recuperează manual)",
     `
+    ${!dbSaved ? `<div style="background:#fee2e2;border:2px solid #dc2626;padding:12px;border-radius:8px;margin-bottom:16px;color:#991b1b;"><strong>⚠️ ATENȚIE:</strong> salvarea în baza de date a eșuat. Lead-ul nu apare în /admin/clienti. Importă-l manual din /admin/clienti → Import lead-uri Facebook. Eroare: ${dbError || "necunoscută"}</div>` : ""}
     <p style="margin:0 0 12px;color:#64748b;">Lead venit din landing page-ul dedicat campaniilor Facebook.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
       ${kv("Nume", data.name)}
@@ -89,6 +95,7 @@ export async function POST(req: NextRequest) {
       ${kv("Telefon", data.phone)}
       ${kv("Sursă", "Facebook Ads — /oferta-fb")}
       ${kv("IP", ip)}
+      ${kv("Salvat în DB", dbSaved ? "✅ Da" : "❌ NU — recuperează manual")}
     </table>
     <p style="margin:16px 0 0;"><a href="${offerUrl}" style="color:#C8102E;">Link ofertă personalizată (trimis automat pe email)</a></p>
   `,
@@ -96,7 +103,9 @@ export async function POST(req: NextRequest) {
 
   const adminResult = await sendEmail({
     to: ADMIN_EMAIL,
-    subject: `🔥 [FB Lead] ${data.name} — ${data.phone}`,
+    subject: dbSaved
+      ? `🔥 [FB Lead] ${data.name} — ${data.phone}`
+      : `⚠️ [FB Lead DB FAIL] ${data.name} — ${data.phone}`,
     html: adminHtml,
     replyTo: data.email,
   });
