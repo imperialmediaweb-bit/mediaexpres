@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { requestListSchema } from "@/lib/validators";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { REGION_COUNTS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
@@ -24,6 +27,21 @@ export async function POST(req: NextRequest) {
   }
   const data = parsed.data;
   if (data.website) return NextResponse.json({ ok: true });
+
+  // Salveaza lead-ul ca user in DB (find-or-create). Nu blocam request-ul daca pica DB-ul.
+  try {
+    const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(users).values({
+        email: data.email,
+        name: data.name,
+        phone: data.phone || null,
+        companyName: data.company || null,
+      });
+    }
+  } catch (err) {
+    console.error("[request-list] db error:", err);
+  }
 
   const firstName = data.name.split(" ")[0];
 
