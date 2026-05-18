@@ -5,6 +5,7 @@ import { users } from "@/db/schema";
 import { getSession } from "@/lib/auth";
 
 export const runtime = "nodejs";
+export const maxDuration = 60;
 
 interface ResendEmailSummary {
   id: string;
@@ -21,6 +22,45 @@ interface ResendEmailFull {
   html: string | null;
 }
 
+interface ResendListResponse {
+  data: ResendEmailSummary[];
+  // Resend uses cursor-based pagination
+  next_cursor?: string;
+}
+
+async function fetchAllEmails(apiKey: string): Promise<ResendEmailSummary[]> {
+  const all: ResendEmailSummary[] = [];
+  let cursor: string | undefined;
+  let pages = 0;
+  const MAX_PAGES = 20; // max 2000 emailuri (20 × 100)
+
+  while (pages < MAX_PAGES) {
+    const url = cursor
+      ? `https://api.resend.com/emails?limit=100&cursor=${encodeURIComponent(cursor)}`
+      : "https://api.resend.com/emails?limit=100";
+
+    const res = await fetch(url, {
+      headers: { Authorization: `Bearer ${apiKey}` },
+    });
+
+    if (!res.ok) {
+      const err = await res.text();
+      throw new Error(`Resend API error (page ${pages + 1}): ${err}`);
+    }
+
+    const data: ResendListResponse = await res.json();
+    const batch = data.data || [];
+    all.push(...batch);
+    pages++;
+
+    // Dacă primim mai puțin de 100, am ajuns la capăt
+    if (batch.length < 100 || !data.next_cursor) break;
+    cursor = data.next_cursor;
+  }
+
+  return all;
+}
+
 export async function POST(req: NextRequest) {
   const session = getSession();
   if (!session) {
@@ -32,18 +72,9 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Lipseste RESEND_API_KEY" }, { status: 500 });
   }
 
-  // Fetch emailuri din Resend — listam ultimele 100
   let allEmails: ResendEmailSummary[] = [];
   try {
-    const res = await fetch("https://api.resend.com/emails?limit=100", {
-      headers: { Authorization: `Bearer ${apiKey}` },
-    });
-    if (!res.ok) {
-      const err = await res.text();
-      return NextResponse.json({ ok: false, error: `Resend API error: ${err}` }, { status: 500 });
-    }
-    const data = await res.json();
-    allEmails = data.data || [];
+    allEmails = await fetchAllEmails(apiKey);
   } catch (err) {
     return NextResponse.json({ ok: false, error: `Fetch failed: ${String(err)}` }, { status: 500 });
   }
@@ -51,7 +82,14 @@ export async function POST(req: NextRequest) {
   const matching = allEmails.filter((e) => e.subject?.includes("[FB Lead]"));
 
   if (matching.length === 0) {
-    return NextResponse.json({ ok: true, found: 0, imported: 0, importedList: [], errors: [] });
+    return NextResponse.json({
+      ok: true,
+      found: 0,
+      imported: 0,
+      importedList: [],
+      errors: [],
+      scanned: allEmails.length,
+    });
   }
 
   const imported: string[] = [];
@@ -59,7 +97,6 @@ export async function POST(req: NextRequest) {
 
   for (const email of matching) {
     try {
-      // Ia detalii complete pentru reply_to
       const fullRes = await fetch(`https://api.resend.com/emails/${email.id}`, {
         headers: { Authorization: `Bearer ${apiKey}` },
       });
@@ -88,7 +125,11 @@ export async function POST(req: NextRequest) {
       // Fallback: extrage email din HTML body
       if (!leadEmail && full.html) {
         const matches = full.html.match(/[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}/g) || [];
-        const filtered = matches.filter((e) => !e.toLowerCase().includes("mediaexpress") && !e.toLowerCase().includes("resend"));
+        const filtered = matches.filter(
+          (e) =>
+            !e.toLowerCase().includes("mediaexpress") &&
+            !e.toLowerCase().includes("resend")
+        );
         leadEmail = filtered[0] ?? "";
       }
 
@@ -115,5 +156,6 @@ export async function POST(req: NextRequest) {
     imported: imported.length,
     importedList: imported,
     errors,
+    scanned: allEmails.length,
   });
 }
