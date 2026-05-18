@@ -79,9 +79,18 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: `Fetch failed: ${String(err)}` }, { status: 500 });
   }
 
-  // Prinde ambele formate: "[FB Lead] Nume — Telefon" și "[Lead] Cerere listă ziare — Nume"
+  // Prinde TOATE formele de admin notifications cu date de lead:
+  // - "🔥 [FB Lead] Nume — Telefon" (oferta-fb)
+  // - "⚠️ [FB Lead DB FAIL] Nume — Telefon" (oferta-fb cu DB fail)
+  // - "[Lead] Cerere listă ziare — Nume" (request-list)
+  // - "[Contact] Subiect" (contact form — extragem din replyTo + HTML)
+  // - "[Comandă] Pachet — Nume" (order checkout)
   const matching = allEmails.filter(
-    (e) => e.subject?.includes("[FB Lead]") || e.subject?.includes("[Lead]")
+    (e) =>
+      e.subject?.includes("[FB Lead]") ||
+      e.subject?.includes("[Lead]") ||
+      e.subject?.includes("[Contact]") ||
+      e.subject?.includes("[Comand")
   );
 
   // Primele 8 subiecte scanate — ajută la debug
@@ -113,19 +122,32 @@ export async function POST(req: NextRequest) {
       }
       const full: ResendEmailFull = await fullRes.json();
 
-      // Format 1: "🔥 [FB Lead] Nume — Telefon"
-      // Format 2: "[Lead] Cerere listă ziare — Nume"
+      // Format 1: "🔥 [FB Lead] Nume — Telefon" (oferta-fb)
+      // Format 2: "[Lead] Cerere listă ziare — Nume" (request-list)
+      // Format 3: "[Contact] Subiect" (contact form — nume îl luăm din body)
+      // Format 4: "[Comandă] Pachet — Nume" (order)
       let name = "";
       let phone = "";
 
       const fbMatch = email.subject.match(/\[FB Lead\]\s+(.+?)\s+[—\-–]\s+(.+)/);
       const listMatch = email.subject.match(/\[Lead\]\s+Cerere\s+list[aă]\s+ziare\s+[—\-–]\s+(.+)/i);
+      const orderMatch = email.subject.match(/\[Comand[aă]\]\s+.+?\s+[—\-–]\s+(.+)/i);
+      const contactMatch = email.subject.match(/\[Contact\]/i);
 
       if (fbMatch) {
         name = fbMatch[1].trim();
         phone = fbMatch[2].trim();
       } else if (listMatch) {
         name = listMatch[1].trim();
+      } else if (orderMatch) {
+        name = orderMatch[1].trim();
+      } else if (contactMatch) {
+        // Pentru contact, încercăm să extragem numele din HTML body (table cu key "Nume")
+        const fullText = full.html || "";
+        const nameMatch = fullText.match(/Nume[^<>]*<[^>]+>([^<]{2,80})</i);
+        const phoneMatch = fullText.match(/(?:Telefon|Phone)[^<>]*<[^>]+>([^<]{6,40})</i);
+        name = nameMatch ? nameMatch[1].trim() : "Contact lead";
+        if (phoneMatch) phone = phoneMatch[1].trim();
       } else {
         errors.push(`Subiect nerecunoscut: ${email.subject}`);
         continue;
