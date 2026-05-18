@@ -45,7 +45,6 @@ function calcScore(p: { openCount: number | null; clickCount: number | null; vie
   );
 }
 
-
 function formatDate(d: Date | null) {
   if (!d) return "—";
   return new Date(d).toLocaleDateString("ro-RO");
@@ -115,12 +114,20 @@ export default async function ProspectiPage({
 
   return (
     <div>
-      <div>
-        <h1 className="font-serif text-3xl font-bold text-brand-navy">Prospecți B2B</h1>
-        <p className="mt-2 text-sm text-slate-600">
-          Listă de firme potențial-clienți. Adaugi manual, AI generează email
-          personalizat, îl trimiți cu un click prin Resend.
-        </p>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="font-serif text-3xl font-bold text-brand-navy">Prospecți B2B</h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Listă de firme potențial-clienți. Adaugi manual, AI generează email
+            personalizat, îl trimiți cu un click prin Resend.
+          </p>
+        </div>
+        <Link
+          href="/admin/prospecti/comenzi"
+          className="shrink-0 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-brand-red hover:text-brand-red"
+        >
+          Comenzi prospecți →
+        </Link>
       </div>
 
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_320px]">
@@ -273,7 +280,7 @@ export default async function ProspectiPage({
               </h2>
               <p className="mt-1 text-xs text-slate-600">
                 38 agenții PR din România (verificate manual mai 2026), gata
-                pentru reseller program — un click și sunt în listă.
+                pentru reseller program — un click şi sunt în listă.
               </p>
               <div className="mt-3">
                 <ImportPRAgenciesButton />
@@ -286,7 +293,7 @@ export default async function ProspectiPage({
                 Import CSV bulk
               </h2>
               <p className="mt-1 text-xs text-slate-600">
-                Lipești 50-500 prospecți dintr-un CSV (Google Maps export,
+                Lipeşti 50-500 prospecți dintr-un CSV (Google Maps export,
                 Pagini Aurii, LinkedIn etc.). Auto-dedupe + filtru suppression.
               </p>
               <div className="mt-3">
@@ -317,7 +324,7 @@ export default async function ProspectiPage({
                   pentru N prospecți, fără click manual
                 </li>
                 <li>
-                  <strong>Manual:</strong> click pe prospect → revizuiești
+                  <strong>Manual:</strong> click pe prospect → revizuieşti
                   textul → trimiți unul-câte-unul
                 </li>
               </ol>
