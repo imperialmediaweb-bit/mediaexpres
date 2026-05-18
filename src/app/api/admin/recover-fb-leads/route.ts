@@ -79,9 +79,12 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: `Fetch failed: ${String(err)}` }, { status: 500 });
   }
 
-  const matching = allEmails.filter((e) => e.subject?.includes("[FB Lead]"));
+  // Prinde ambele formate: "[FB Lead] Nume — Telefon" și "[Lead] Cerere listă ziare — Nume"
+  const matching = allEmails.filter(
+    (e) => e.subject?.includes("[FB Lead]") || e.subject?.includes("[Lead]")
+  );
 
-  // Primele 8 subiecte scanate — ajută la debug dacă [FB Lead] nu e găsit
+  // Primele 8 subiecte scanate — ajută la debug
   const sampleSubjects = allEmails.slice(0, 8).map((e) => e.subject || "(fără subiect)");
 
   if (matching.length === 0) {
@@ -110,14 +113,23 @@ export async function POST(req: NextRequest) {
       }
       const full: ResendEmailFull = await fullRes.json();
 
-      // Extrage nume + telefon din subiect: "[FB Lead] Nume — Telefon"
-      const match = email.subject.match(/\[FB Lead\]\s+(.+?)\s+[—\-–]\s+(.+)/);
-      if (!match) {
+      // Format 1: "🔥 [FB Lead] Nume — Telefon"
+      // Format 2: "[Lead] Cerere listă ziare — Nume"
+      let name = "";
+      let phone = "";
+
+      const fbMatch = email.subject.match(/\[FB Lead\]\s+(.+?)\s+[—\-–]\s+(.+)/);
+      const listMatch = email.subject.match(/\[Lead\]\s+Cerere\s+list[aă]\s+ziare\s+[—\-–]\s+(.+)/i);
+
+      if (fbMatch) {
+        name = fbMatch[1].trim();
+        phone = fbMatch[2].trim();
+      } else if (listMatch) {
+        name = listMatch[1].trim();
+      } else {
         errors.push(`Subiect nerecunoscut: ${email.subject}`);
         continue;
       }
-      const name = match[1].trim();
-      const phone = match[2].trim();
 
       // Email din reply_to
       let leadEmail = "";
