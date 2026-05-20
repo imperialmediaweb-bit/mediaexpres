@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { prospects } from "@/db/schema";
 import { sendEmail, ADMIN_EMAIL, wrapEmail, kv } from "@/lib/email";
+import { isSuppressed } from "@/data/suppression-list";
 
 export const runtime = "nodejs";
 
@@ -32,6 +36,30 @@ export async function POST(req: Request) {
       );
     }
     const f = parsed.data;
+
+    // Salveaza agentia ca prospect in /admin/prospecti (status 'interested' — a aplicat singura).
+    try {
+      const existing = await db
+        .select({ id: prospects.id })
+        .from(prospects)
+        .where(eq(prospects.email, f.email))
+        .limit(1);
+      if (existing.length === 0 && !isSuppressed(f.email)) {
+        await db.insert(prospects).values({
+          companyName: f.agencyName,
+          contactName: f.contactName || null,
+          email: f.email,
+          phone: f.phone || null,
+          website: f.website || null,
+          industry: "Agenție PR / Marketing",
+          source: "parteneri",
+          status: "interested",
+          notes: `Aplicație reseller pe ${new Date().toLocaleDateString("ro-RO")}. CUI: ${f.cui}. Clienți activi: ${f.activeClients || "—"}. Volum lunar estimat: ${f.monthlyVolume || "—"}.${f.message ? ` Mesaj: ${f.message}` : ""}`,
+        });
+      }
+    } catch (err) {
+      console.error("[parteneri/apply] db error:", err);
+    }
 
     // Notificare catre admin (contact@mediaexpress.ro)
     const adminBody = `

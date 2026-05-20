@@ -174,6 +174,54 @@ export default function ParteneriPage() {
         </div>
       </section>
 
+      <section className="section bg-brand-navy text-white">
+        <div className="container max-w-4xl">
+          <p className="eyebrow text-brand-gold">Inclus in contul de partener</p>
+          <h2 className="h2 mt-2 text-white">
+            Strateg Editorial AI — planul de continut al fiecarui client
+          </h2>
+          <p className="lead mt-4 text-white/85">
+            Pentru fiecare client al vostru, AI-ul genereaza un calendar editorial cu
+            12 idei de articole pe an, adaptate industriei lui. Nu mai inventati teme —
+            aveti deja planul de continut pe 12 luni, iar AI scrie comunicatul din
+            fiecare tema. Voi reviewuiti, noi publicam pe 50 de ziare.
+          </p>
+
+          <div className="mt-8 grid gap-4 sm:grid-cols-3">
+            <div className="rounded-xl bg-white/10 p-5">
+              <CheckCircle2 className="h-6 w-6 text-brand-gold" />
+              <p className="mt-2 font-serif font-bold text-white">12 teme/an per client</p>
+              <p className="mt-1 text-sm text-white/70">
+                cu unghiul de comunicare deja definit
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-5">
+              <CheckCircle2 className="h-6 w-6 text-brand-gold" />
+              <p className="mt-2 font-serif font-bold text-white">AI scrie comunicatul</p>
+              <p className="mt-1 text-sm text-white/70">
+                din tema aleasa — voi doar aprobati
+              </p>
+            </div>
+            <div className="rounded-xl bg-white/10 p-5">
+              <CheckCircle2 className="h-6 w-6 text-brand-gold" />
+              <p className="mt-2 font-serif font-bold text-white">Distributie pe 50 ziare</p>
+              <p className="mt-1 text-sm text-white/70">
+                fiecare articol, cu raport PDF in 24h
+              </p>
+            </div>
+          </div>
+
+          <div className="mt-8">
+            <a
+              href="#aplica"
+              className="inline-flex items-center gap-2 rounded-md bg-brand-gold px-6 py-3 text-sm font-semibold text-brand-navy hover:bg-brand-gold/90"
+            >
+              Vreau acces la Strateg Editorial AI →
+            </a>
+          </div>
+        </div>
+      </section>
+
       <section className="section bg-slate-50">
         <div className="container max-w-3xl">
           <p className="eyebrow">FAQ</p>
