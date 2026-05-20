@@ -9,6 +9,7 @@ import { AddProspectForm } from "./AddProspectForm";
 import { ImportPRAgenciesButton } from "./ImportPRAgenciesButton";
 import { ImportCsvButton } from "./ImportCsvButton";
 import { BatchSendButton } from "./BatchSendButton";
+import { DiscoverButton } from "./DiscoverButton";
 
 export const dynamic = "force-dynamic";
 
@@ -284,6 +285,21 @@ export default async function ProspectiPage({
               </p>
               <div className="mt-3">
                 <ImportPRAgenciesButton />
+              </div>
+            </div>
+
+            <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-5">
+              <h2 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-indigo-600" />
+                Găsește prospecți cu AI
+              </h2>
+              <p className="mt-1 text-xs text-slate-600">
+                AI caută firme reale (agenții PR, marketing) + extrage emailul
+                lor public direct de pe site. Ca Apollo/Lusha, dar gratis.
+                Emailurile sunt reale, nu inventate.
+              </p>
+              <div className="mt-3">
+                <DiscoverButton />
               </div>
             </div>
 
