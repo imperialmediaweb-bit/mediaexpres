@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
+import { RecoverLeadsButton } from "./RecoverLeadsButton";
+import { ImportLeadsButton } from "./ImportLeadsButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,12 +27,8 @@ export default async function AdminClientiPage() {
       companyName: users.companyName,
       companyCui: users.companyCui,
       createdAt: users.createdAt,
-      paidCount: sql<number>`COALESCE(SUM(CASE WHEN ${orders.status} = 'paid' THEN 1 ELSE 0 END), 0)`.as(
-        "paid_count"
-      ),
-      totalSpent: sql<number>`COALESCE(SUM(CASE WHEN ${orders.status} = 'paid' THEN ${orders.amount} ELSE 0 END), 0)`.as(
-        "total_spent"
-      ),
+      paidCount: sql<number>`COALESCE(SUM(CASE WHEN ${orders.status} = 'paid' THEN 1 ELSE 0 END), 0)`.as("paid_count"),
+      totalSpent: sql<number>`COALESCE(SUM(CASE WHEN ${orders.status} = 'paid' THEN ${orders.amount} ELSE 0 END), 0)`.as("total_spent"),
     })
     .from(users)
     .leftJoin(orders, eq(orders.userId, users.id))
@@ -56,7 +54,15 @@ export default async function AdminClientiPage() {
         Toți utilizatorii care au un cont sau au făcut o plată.
       </p>
 
-      <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
+      <div className="mt-6 flex flex-wrap items-start gap-3">
+        <ImportLeadsButton />
+      </div>
+
+      <div className="mt-3">
+        <RecoverLeadsButton />
+      </div>
+
+      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 text-left text-xs uppercase tracking-wider text-slate-500">
             <tr>
@@ -82,23 +88,16 @@ export default async function AdminClientiPage() {
                 return (
                   <tr key={u.id} className="border-t border-slate-100">
                     <td className="px-4 py-3">
-                      <p className="font-medium text-brand-navy">
-                        {u.name || "—"}
-                      </p>
+                      <p className="font-medium text-brand-navy">{u.name || "—"}</p>
                       <p className="text-xs text-slate-500">{u.email}</p>
                     </td>
                     <td className="px-4 py-3 text-slate-600">
                       {u.companyName || <span className="text-slate-400">—</span>}
-                      {u.companyCui && (
-                        <p className="text-xs text-slate-400">{u.companyCui}</p>
-                      )}
+                      {u.companyCui && <p className="text-xs text-slate-400">{u.companyCui}</p>}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{u.paidCount}</td>
                     <td className="px-4 py-3 font-semibold">
-                      {((Number(u.totalSpent) || 0) / 100).toLocaleString("ro-RO", {
-                        style: "currency",
-                        currency: "RON",
-                      })}
+                      {((Number(u.totalSpent) || 0) / 100).toLocaleString("ro-RO", { style: "currency", currency: "RON" })}
                     </td>
                     <td className="px-4 py-3">
                       {sub ? (
@@ -109,14 +108,9 @@ export default async function AdminClientiPage() {
                         <span className="text-slate-400 text-xs">—</span>
                       )}
                     </td>
-                    <td className="px-4 py-3 text-slate-500 text-xs">
-                      {formatDate(u.createdAt)}
-                    </td>
+                    <td className="px-4 py-3 text-slate-500 text-xs">{formatDate(u.createdAt)}</td>
                     <td className="px-4 py-3 text-right">
-                      <Link
-                        href={`/admin/clienti/${u.id}`}
-                        className="text-xs font-medium text-brand-red hover:underline"
-                      >
+                      <Link href={`/admin/clienti/${u.id}`} className="text-xs font-medium text-brand-red hover:underline">
                         Deschide →
                       </Link>
                     </td>

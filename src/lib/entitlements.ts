@@ -39,8 +39,20 @@ export async function getEntitlements(userId: string): Promise<Entitlements> {
 
 export async function getUserOrders(userId: string) {
   return db
-    .select()
+    .select({
+      id: orders.id,
+      userId: orders.userId,
+      email: orders.email,
+      packageId: orders.packageId,
+      amount: orders.amount,
+      currency: orders.currency,
+      status: orders.status,
+      createdAt: orders.createdAt,
+      paidAt: orders.paidAt,
+      articleTitle: articles.title,
+    })
     .from(orders)
+    .leftJoin(articles, eq(articles.orderId, orders.id))
     .where(eq(orders.userId, userId))
     .orderBy(desc(orders.createdAt));
 }

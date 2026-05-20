@@ -11,7 +11,7 @@ export function Footer() {
           <div>
             <Logo variant="white" showTagline />
             <p className="mt-6 max-w-sm text-sm text-white/70 leading-relaxed">
-              Distribuție de comunicate de presă pe 50 de ziare românești și 37 pagini
+              Distribuție de comunicate de presă pe 50 de ziare românești și 50 pagini
               Facebook. Livrare în 24h, raport PDF complet, linkuri permanente online.
             </p>
             <div className="mt-6 flex gap-3">

@@ -133,7 +133,7 @@ export function PublicGenerateForm() {
               </h3>
               <p className="mt-2 text-sm text-white/80">
                 Pachetul Național — articolul tău apare pe 41 ziare locale + 9
-                naționale, distribuit pe 37 pagini Facebook. Plătești o singură
+                naționale, distribuit pe 50 pagini Facebook. Plătești o singură
                 dată, rămâne online permanent.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">

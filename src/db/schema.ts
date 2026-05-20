@@ -5,6 +5,7 @@ import {
   primaryKey,
   text,
   timestamp,
+  unique,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -23,7 +24,11 @@ export const users = pgTable("user", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// NOTE: `id` column added to match existing DB state (DB was created with id as PK).
+// The @auth/drizzle-adapter uses a WHERE on (provider, providerAccountId) so the
+// unique constraint below keeps data integrity without needing a composite PK.
 export const accounts = pgTable("account", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   userId: text("userId").notNull().references(() => users.id, { onDelete: "cascade" }),
   type: text("type").$type<AdapterAccountType>().notNull(),
   provider: text("provider").notNull(),
@@ -36,7 +41,7 @@ export const accounts = pgTable("account", {
   id_token: text("id_token"),
   session_state: text("session_state"),
 }, (account) => ({
-  compoundKey: primaryKey({ columns: [account.provider, account.providerAccountId] }),
+  providerUnique: unique().on(account.provider, account.providerAccountId),
 }));
 
 export const sessions = pgTable("session", {
@@ -117,19 +122,58 @@ export const prospects = pgTable("prospect", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   companyName: text("company_name").notNull(),
   contactName: text("contact_name"),
-  email: text("email").notNull(),
+  contactTitle: text("contact_title"),
+  // email poate fi null: un lead capturat din LinkedIn nu are mereu email.
+  email: text("email"),
   phone: text("phone"),
   industry: text("industry"),
   city: text("city"),
   website: text("website"),
+  linkedinUrl: text("linkedin_url"),
+  // 'manual' | 'linkedin' | 'discover' | 'csv'
+  source: text("source").notNull().default("manual"),
   notes: text("notes"),
   status: text("status").notNull().default("new"),
   emailsSent: integer("emails_sent").notNull().default(0),
   lastEmailAt: timestamp("last_email_at"),
   lastEmailSubject: text("last_email_subject"),
   lastEmailBody: text("last_email_body"),
+  // Tracking oferta page
+  viewCount: integer("view_count").notNull().default(0),
+  firstViewedAt: timestamp("first_viewed_at"),
+  lastViewedAt: timestamp("last_viewed_at"),
+  clickedCta: boolean("clicked_cta").notNull().default(false),
+  // Resend webhook tracking (open/click events)
+  openCount: integer("open_count").notNull().default(0),
+  clickCount: integer("click_count").notNull().default(0),
+  // Urgency discount code
+  discountCode: text("discount_code"),
+  discountExpiresAt: timestamp("discount_expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Comenzi venite via /oferta/[token]/comanda — pagina personalizata pentru prospects.
+// Pastram datele firmei CUMPARATOARE (pentru factura pe care o emit eu manual in soft-ul meu de facturare).
+// Lifecycle: pending -> articles_published -> invoiced -> paid (sau cancelled).
+export const prospectOrders = pgTable("prospect_order", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  prospectId: text("prospect_id").references(() => prospects.id, { onDelete: "set null" }),
+  packageId: text("package_id").notNull(),
+  buyerCompanyName: text("buyer_company_name").notNull(),
+  buyerCui: text("buyer_cui").notNull(),
+  buyerRegCom: text("buyer_reg_com"),
+  buyerAddress: text("buyer_address").notNull(),
+  buyerEmail: text("buyer_email").notNull(),
+  buyerPhone: text("buyer_phone"),
+  articleTopic: text("article_topic").notNull(),
+  articleNotes: text("article_notes"),
+  photoLinks: text("photo_links"),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  publishedAt: timestamp("published_at"),
+  invoicedAt: timestamp("invoiced_at"),
+  paidAt: timestamp("paid_at"),
 });
 
 export const publishers = pgTable("publisher", {

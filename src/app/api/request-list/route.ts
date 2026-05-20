@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { requestListSchema } from "@/lib/validators";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { REGION_COUNTS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
@@ -25,6 +28,21 @@ export async function POST(req: NextRequest) {
   const data = parsed.data;
   if (data.website) return NextResponse.json({ ok: true });
 
+  // Salveaza lead-ul ca user in DB (find-or-create). Nu blocam request-ul daca pica DB-ul.
+  try {
+    const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(users).values({
+        email: data.email,
+        name: data.name,
+        phone: data.phone || null,
+        companyName: data.company || null,
+      });
+    }
+  } catch (err) {
+    console.error("[request-list] db error:", err);
+  }
+
   const firstName = data.name.split(" ")[0];
 
   // 1) Email initial: lista rezumat + mentiune PDF
@@ -32,14 +50,14 @@ export async function POST(req: NextRequest) {
     "Lista completă a celor 50 ziare partenere",
     `
     <p>Salut ${firstName},</p>
-    <p>Îiți mulțumim pentru interesul pentru serviciile MediaExpres! Mai jos ai rezumatul rețelei noastre:</p>
+    <p>Îiti mulțumim pentru interesul pentru serviciile MediaExpres! Mai jos ai rezumatul rețelei noastre:</p>
     <table style="width:100%;border-collapse:collapse;margin:20px 0;">
       ${kv("Ziare naționale", `${REGION_COUNTS.Național} ziare`)}
       ${kv("Moldova", `${REGION_COUNTS.Moldova} ziare locale`)}
       ${kv("Transilvania", `${REGION_COUNTS.Transilvania} ziare locale`)}
       ${kv("Muntenia + București", `${REGION_COUNTS.Muntenia} ziare locale`)}
       ${kv("Banat + Oltenia", `${REGION_COUNTS.Banat} ziare locale`)}
-      ${kv("Distribuție Facebook", "37 pagini asociate")}
+      ${kv("Distribuție Facebook", "50 pagini asociate")}
     </table>
     <p>Lista detaliată cu toate numele și domeniile celor 50 ziare partenere este disponibilă ca document PDF. <strong>Pentru a proteja rețeaua noastră</strong>, trimitem documentul direct pe email după o scurtă convorbire — un membru al echipei te va contacta în maximum 24h.</p>
     <p>Dacă dorești să avansăm mai rapid, poți răspunde direct la acest email cu o scurtă descriere a proiectului.</p>

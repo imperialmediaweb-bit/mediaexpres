@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: "Cum publici comunicatul după ce îl ai?",
-    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 37 pagini Facebook în 24h. Costă 1500 RON, plătit o singură dată, rămâne online permanent.",
+    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 50 pagini Facebook în 24h. Costă 1500 RON, plătit o singură dată, rămâne online permanent.",
   },
   {
     q: "AI-ul scrie text duplicat? E penalizat de Google?",
@@ -184,7 +184,7 @@ export default function GeneratorComunicatPage() {
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-white/80">
             Comunicatul tău AI ajunge instantaneu pe 41 ziare locale + 9
-            naționale + 37 pagini Facebook. Linkurile rămân online permanent,
+            naționale + 50 pagini Facebook. Linkurile rămân online permanent,
             primești raport PDF complet cu toate URL-urile.
           </p>
           <ul className="mt-8 grid gap-3 sm:grid-cols-3 max-w-3xl mx-auto text-sm">

@@ -3,6 +3,10 @@ import { orderSchema } from "@/lib/validators";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById, SUBSCRIPTION_PLANS } from "@/data/packages";
 import { formatPrice } from "@/lib/utils";
+import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
+import { db } from "@/db";
+import { users, orders, articles } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 export const runtime = "nodejs";
 
@@ -41,24 +45,26 @@ export async function POST(req: NextRequest) {
 
   const data = parsed.data;
 
-  // Honeypot: if bots fill website field, silently succeed
   if (data.website) {
     return NextResponse.json({ ok: true });
   }
 
   let packageLabel = data.packageId;
   let packagePrice = "";
+  let packageValue: number | undefined;
   if (data.packageId.startsWith("sub-")) {
     const sub = SUBSCRIPTION_PLANS.find((s) => s.id === data.packageId.replace("sub-", ""));
     if (sub) {
       packageLabel = `Abonament ${sub.name} (${sub.description})`;
       packagePrice = `${formatPrice(sub.priceStandard)} RON/lună (standard) • ${formatPrice(sub.priceCasino)} RON/lună (cazino)`;
+      packageValue = sub.priceStandard;
     }
   } else {
     const pkg = findPackageById(data.packageId);
     if (pkg) {
       packageLabel = `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})`;
       packagePrice = `${formatPrice(pkg.price)} RON`;
+      packageValue = pkg.price;
     }
   }
 
@@ -95,7 +101,6 @@ export async function POST(req: NextRequest) {
     replyTo: data.email,
   });
 
-  // Send confirmation to customer
   const customerHtml = wrapEmail(
     "Comandă primită — MediaExpres",
     `
@@ -106,7 +111,7 @@ export async function POST(req: NextRequest) {
       ${kv("Preț", packagePrice)}
       ${kv("Titlu articol", data.articleTitle)}
     </table>
-    <p>Echipa noastră te va contacta în maximum 2 ore (în timpul programului) cu detaliile de facturare și confirmarea publicării.</p>
+    <p>Iti trimitem in scurt timp proforma cu IBAN-ul nostru pe acest email. Dupa ce vedem transferul, publicam articolul pe reteaua MediaExpres si primesti factura finala plus raportul cu link-urile.</p>
     <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
   `
   );
@@ -119,6 +124,76 @@ export async function POST(req: NextRequest) {
 
   if (!adminResult.ok) {
     return NextResponse.json({ ok: false, error: "Eroare la trimiterea emailului" }, { status: 500 });
+  }
+
+  // Meta CAPI: Lead event cu value (cat costa pachetul) ca optimization signal.
+  // E mai puternic decat Lead simplu pentru ca Meta poate optimiza catre VALUE.
+  const { firstName, lastName } = splitName(data.name);
+  const reqUser = extractRequestUserData(req);
+  sendCapiEvent({
+    eventName: "Lead",
+    eventSourceUrl: req.headers.get("referer") || undefined,
+    value: packageValue,
+    currency: "RON",
+    user: {
+      email: data.email,
+      phone: data.phone,
+      firstName,
+      lastName,
+      ...reqUser,
+    },
+    customData: {
+      content_name: packageLabel,
+      content_category: data.packageId.startsWith("sub-") ? "subscription" : "package",
+      content_ids: [data.packageId],
+    },
+  }).catch((err) => console.error("[order] capi error:", err));
+
+  // Persist order to DB (best-effort — don't fail the HTTP response if DB is down)
+  try {
+    // Find or create user
+    let userId: string;
+    const existingUsers = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existingUsers.length > 0) {
+      userId = existingUsers[0].id;
+    } else {
+      const inserted = await db
+        .insert(users)
+        .values({
+          email: data.email,
+          name: data.name,
+          phone: data.phone,
+          companyName: data.company || null,
+        })
+        .returning({ id: users.id });
+      userId = inserted[0].id;
+    }
+
+    // Create order record
+    const insertedOrders = await db
+      .insert(orders)
+      .values({
+        userId,
+        email: data.email,
+        packageId: data.packageId,
+        amount: packageValue ? packageValue * 100 : 0,
+        status: "pending_payment",
+      })
+      .returning({ id: orders.id });
+    const orderId = insertedOrders[0].id;
+
+    // Create article record
+    await db.insert(articles).values({
+      userId,
+      orderId,
+      title: data.articleTitle,
+      body: data.articleBody || null,
+      notes: data.notes || null,
+      existingUrl: data.articleUrl || null,
+      status: "draft",
+    });
+  } catch (err) {
+    console.error("[order] db persist error:", err);
   }
 
   return NextResponse.json({ ok: true });

@@ -80,7 +80,7 @@ export const STANDARD_PACKAGES: Package[] = [
     badge: "Cel mai popular",
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
-      "Distribuție pe 37 pagini Facebook",
+      "Distribuție pe 50 pagini Facebook",
       "Linkuri livrate în 24h",
       "Raport PDF complet",
       "Permanent online",
@@ -135,7 +135,7 @@ export const CASINO_PACKAGES: Package[] = [
     badge: "Recomandat iGaming",
     highlights: [
       "1 articol pe 50 de ziare",
-      "Distribuție pe 37 pagini Facebook",
+      "Distribuție pe 50 pagini Facebook",
       "Linkuri livrate în 24h",
       "Raport PDF complet",
       "Permanent online",

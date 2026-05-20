@@ -1,0 +1,26 @@
+{
+  "manifest_version": 3,
+  "name": "MediaExpres — Capturare LinkedIn",
+  "version": "1.0.0",
+  "description": "Salveaza profile LinkedIn ca prospecti in MediaExpres si genereaza mesaje de prim contact cu AI.",
+  "permissions": ["storage", "activeTab", "clipboardWrite"],
+  "host_permissions": [
+    "https://www.linkedin.com/*",
+    "https://mediaexpress.ro/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["https://www.linkedin.com/*"],
+      "js": ["content.js"],
+      "css": ["styles.css"],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "MediaExpres LinkedIn"
+  }
+}

@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { contactSchema } from "@/lib/validators";
+import { db } from "@/db";
+import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
 
@@ -20,6 +24,19 @@ export async function POST(req: NextRequest) {
   }
   const data = parsed.data;
   if (data.website) return NextResponse.json({ ok: true });
+
+  // Salveaza contactul ca user in DB (find-or-create). Nu blocam request-ul daca pica DB-ul.
+  try {
+    const existing = await db.select().from(users).where(eq(users.email, data.email)).limit(1);
+    if (existing.length === 0) {
+      await db.insert(users).values({
+        email: data.email,
+        name: data.name,
+      });
+    }
+  } catch (err) {
+    console.error("[contact] db error:", err);
+  }
 
   const html = wrapEmail(
     "Mesaj nou contact",
@@ -46,5 +63,23 @@ export async function POST(req: NextRequest) {
   if (!r.ok) {
     return NextResponse.json({ ok: false, error: "Eroare" }, { status: 500 });
   }
+
+  // Meta CAPI: Lead event server-side, hashuit (PII-safe).
+  // Daca si front-end-ul trimite fbq('track','Lead', ..., {eventID:X}) cu acelasi
+  // event_id, Meta deduplicheaza automat. In lipsa, asta e oricum valid (Lead unic).
+  const { firstName, lastName } = splitName(data.name);
+  const reqUser = extractRequestUserData(req);
+  sendCapiEvent({
+    eventName: "Lead",
+    eventSourceUrl: req.headers.get("referer") || undefined,
+    user: {
+      email: data.email,
+      firstName,
+      lastName,
+      ...reqUser,
+    },
+    customData: { content_name: "Contact Form", content_category: "contact" },
+  }).catch((err) => console.error("[contact] capi error:", err));
+
   return NextResponse.json({ ok: true });
 }

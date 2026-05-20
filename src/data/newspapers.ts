@@ -3,67 +3,73 @@ export interface Newspaper {
   region: "Moldova" | "Transilvania" | "Muntenia" | "Banat" | "Național";
   type: "local" | "national" | "tematic";
   county?: string;
-  url?: string;
+  city?: string;
+  url: string;
 }
 
-// NOTE: Această listă este folosită DOAR în admin panel (protejat)
-// și pentru generarea PDF-ului trimis clienților care completează lead-form-ul.
-// NU este expusă pe nicio pagină publică indexabilă de Google.
+// Rețeaua MediaExpres — 41 ziare locale (câte unul per județ) + 9 ziare naționale = 50 total
+// Toate sunt domenii .ro proprii, indexate Google.
 export const NEWSPAPERS: Newspaper[] = [
-  { name: "Ziar Național 1", region: "Național", type: "national" },
-  { name: "Ziar Național 2", region: "Național", type: "national" },
-  { name: "Ziar Național 3", region: "Național", type: "national" },
-  { name: "Ziar Național 4", region: "Național", type: "national" },
-  { name: "Ziar Național 5", region: "Național", type: "national" },
-  { name: "Ziar Național 6", region: "Național", type: "national" },
-  { name: "Ziar Național 7", region: "Național", type: "national" },
-  { name: "Ziar Național 8", region: "Național", type: "national" },
-  { name: "Ziar Național 9", region: "Național", type: "national" },
   // Moldova (10)
-  { name: "Ziar Iași", region: "Moldova", type: "local", county: "Iași" },
-  { name: "Ziar Bacău", region: "Moldova", type: "local", county: "Bacău" },
-  { name: "Ziar Botoșani", region: "Moldova", type: "local", county: "Botoșani" },
-  { name: "Ziar Vaslui", region: "Moldova", type: "local", county: "Vaslui" },
-  { name: "Ziar Suceava", region: "Moldova", type: "local", county: "Suceava" },
-  { name: "Ziar Neamț", region: "Moldova", type: "local", county: "Neamț" },
-  { name: "Ziar Galați", region: "Moldova", type: "local", county: "Galați" },
-  { name: "Ziar Vrancea", region: "Moldova", type: "local", county: "Vrancea" },
-  { name: "Ziar Brăila", region: "Moldova", type: "local", county: "Brăila" },
-  { name: "Ziar Buzău", region: "Moldova", type: "local", county: "Buzău" },
-  // Transilvania (10)
-  { name: "Ziar Cluj", region: "Transilvania", type: "local", county: "Cluj" },
-  { name: "Ziar Brașov", region: "Transilvania", type: "local", county: "Brașov" },
-  { name: "Ziar Sibiu", region: "Transilvania", type: "local", county: "Sibiu" },
-  { name: "Ziar Mureș", region: "Transilvania", type: "local", county: "Mureș" },
-  { name: "Ziar Alba", region: "Transilvania", type: "local", county: "Alba" },
-  { name: "Ziar Bihor", region: "Transilvania", type: "local", county: "Bihor" },
-  { name: "Ziar Maramureș", region: "Transilvania", type: "local", county: "Maramureș" },
-  { name: "Ziar Satu Mare", region: "Transilvania", type: "local", county: "Satu Mare" },
-  { name: "Ziar Hunedoara", region: "Transilvania", type: "local", county: "Hunedoara" },
-  { name: "Ziar Sălaj", region: "Transilvania", type: "local", county: "Sălaj" },
-  // Muntenia + București (10)
-  { name: "Ziar București 1", region: "Muntenia", type: "local", county: "București" },
-  { name: "Ziar București 2", region: "Muntenia", type: "local", county: "București" },
-  { name: "Ziar Prahova", region: "Muntenia", type: "local", county: "Prahova" },
-  { name: "Ziar Dâmbovița", region: "Muntenia", type: "local", county: "Dâmbovița" },
-  { name: "Ziar Argeș", region: "Muntenia", type: "local", county: "Argeș" },
-  { name: "Ziar Ilfov", region: "Muntenia", type: "local", county: "Ilfov" },
-  { name: "Ziar Giurgiu", region: "Muntenia", type: "local", county: "Giurgiu" },
-  { name: "Ziar Călărași", region: "Muntenia", type: "local", county: "Călărași" },
-  { name: "Ziar Ialomița", region: "Muntenia", type: "local", county: "Ialomița" },
-  { name: "Ziar Teleorman", region: "Muntenia", type: "local", county: "Teleorman" },
-  // Banat + Oltenia (11)
-  { name: "Ziar Timiș", region: "Banat", type: "local", county: "Timiș" },
-  { name: "Ziar Arad", region: "Banat", type: "local", county: "Arad" },
-  { name: "Ziar Caraș-Severin", region: "Banat", type: "local", county: "Caraș-Severin" },
-  { name: "Ziar Dolj", region: "Banat", type: "local", county: "Dolj" },
-  { name: "Ziar Gorj", region: "Banat", type: "local", county: "Gorj" },
-  { name: "Ziar Mehedinți", region: "Banat", type: "local", county: "Mehedinți" },
-  { name: "Ziar Olt", region: "Banat", type: "local", county: "Olt" },
-  { name: "Ziar Vâlcea", region: "Banat", type: "local", county: "Vâlcea" },
-  { name: "Ziar Constanța", region: "Muntenia", type: "local", county: "Constanța" },
-  { name: "Ziar Tulcea", region: "Muntenia", type: "local", county: "Tulcea" },
-  { name: "Ziar Covasna", region: "Transilvania", type: "local", county: "Covasna" },
+  { name: "Botoșani Expres", region: "Moldova", type: "local", county: "Botoșani", city: "Botoșani", url: "https://botosaniexpres.ro" },
+  { name: "Iași Expres", region: "Moldova", type: "local", county: "Iași", city: "Iași", url: "https://iasiexpres.ro" },
+  { name: "Suceava Expres", region: "Moldova", type: "local", county: "Suceava", city: "Suceava", url: "https://suceavaexpres.ro" },
+  { name: "Galați Expres", region: "Moldova", type: "local", county: "Galați", city: "Galați", url: "https://galatiexpres.ro" },
+  { name: "Neamț Expres", region: "Moldova", type: "local", county: "Neamț", city: "Piatra Neamț", url: "https://neamtexpres.ro" },
+  { name: "Vaslui Expres", region: "Moldova", type: "local", county: "Vaslui", city: "Vaslui", url: "https://vasluiexpres.ro" },
+  { name: "Vrancea Expres", region: "Moldova", type: "local", county: "Vrancea", city: "Focșani", url: "https://vranceaexpres.ro" },
+  { name: "Bacău Expres", region: "Moldova", type: "local", county: "Bacău", city: "Bacău", url: "https://bacauexpress.ro" },
+  { name: "Buzău Expres", region: "Moldova", type: "local", county: "Buzău", city: "Buzău", url: "https://buzauexpres.ro" },
+  { name: "Brăila Expres", region: "Moldova", type: "local", county: "Brăila", city: "Brăila", url: "https://brailaexpres.ro" },
+
+  // Transilvania (13)
+  { name: "Cluj Expres", region: "Transilvania", type: "local", county: "Cluj", city: "Cluj-Napoca", url: "https://clujexpres.ro" },
+  { name: "Brașov Expres", region: "Transilvania", type: "local", county: "Brașov", city: "Brașov", url: "https://brasovexpress.ro" },
+  { name: "Sibiu Expres", region: "Transilvania", type: "local", county: "Sibiu", city: "Sibiu", url: "https://sibiuexpres.ro" },
+  { name: "Mureș Expres", region: "Transilvania", type: "local", county: "Mureș", city: "Târgu Mureș", url: "https://muresexpres.ro" },
+  { name: "Alba Expres", region: "Transilvania", type: "local", county: "Alba", city: "Alba Iulia", url: "https://albaexpres.ro" },
+  { name: "Bihor Expres", region: "Transilvania", type: "local", county: "Bihor", city: "Oradea", url: "https://bihorexpres.ro" },
+  { name: "Maramureș Expres", region: "Transilvania", type: "local", county: "Maramureș", city: "Baia Mare", url: "https://maramuresexpres.ro" },
+  { name: "Satu Mare Expres", region: "Transilvania", type: "local", county: "Satu Mare", city: "Satu Mare", url: "https://satu-marexpres.ro" },
+  { name: "Hunedoara Expres", region: "Transilvania", type: "local", county: "Hunedoara", city: "Deva", url: "https://hunedoaraexpres.ro" },
+  { name: "Sălaj Expres", region: "Transilvania", type: "local", county: "Sălaj", city: "Zalău", url: "https://salajexpress.ro" },
+  { name: "Bistrița Expres", region: "Transilvania", type: "local", county: "Bistrița-Năsăud", city: "Bistrița", url: "https://bistrita-nasaudexpres.ro" },
+  { name: "Covasna Expres", region: "Transilvania", type: "local", county: "Covasna", city: "Sfântu Gheorghe", url: "https://covasnaexpres.ro" },
+  { name: "Harghita Expres", region: "Transilvania", type: "local", county: "Harghita", city: "Miercurea Ciuc", url: "https://harghitaexpres.ro" },
+
+  // Muntenia + București + Dobrogea (11)
+  { name: "București Expres", region: "Muntenia", type: "local", county: "București", city: "București", url: "https://bucurestiexpres.ro" },
+  { name: "Ilfov Expres", region: "Muntenia", type: "local", county: "Ilfov", city: "Buftea", url: "https://ilfovexpres.ro" },
+  { name: "Prahova Expres", region: "Muntenia", type: "local", county: "Prahova", city: "Ploiești", url: "https://prahovaexpres.ro" },
+  { name: "Dâmbovița Expres", region: "Muntenia", type: "local", county: "Dâmbovița", city: "Târgoviște", url: "https://dambovitaexpress.ro" },
+  { name: "Argeș Expres", region: "Muntenia", type: "local", county: "Argeș", city: "Pitești", url: "https://argesexpress.ro" },
+  { name: "Teleorman Expres", region: "Muntenia", type: "local", county: "Teleorman", city: "Alexandria", url: "https://teleormanexpres.ro" },
+  { name: "Giurgiu Expres", region: "Muntenia", type: "local", county: "Giurgiu", city: "Giurgiu", url: "https://giurgiuexpres.ro" },
+  { name: "Călărași Expres", region: "Muntenia", type: "local", county: "Călărași", city: "Călărași", url: "https://calarasiexpres.ro" },
+  { name: "Ialomița Expres", region: "Muntenia", type: "local", county: "Ialomița", city: "Slobozia", url: "https://ialomitaexpres.ro" },
+  { name: "Constanța Expres", region: "Muntenia", type: "local", county: "Constanța", city: "Constanța", url: "https://xn--constanaexpres-mbf.ro" },
+  { name: "Tulcea Expres", region: "Muntenia", type: "local", county: "Tulcea", city: "Tulcea", url: "https://tulceaexpres.ro" },
+
+  // Banat + Oltenia (8)
+  { name: "Timiș Expres", region: "Banat", type: "local", county: "Timiș", city: "Timișoara", url: "https://xn--timiexpres-xxd.ro" },
+  { name: "Arad Expres", region: "Banat", type: "local", county: "Arad", city: "Arad", url: "https://aradexpres.ro" },
+  { name: "Caraș-Severin Expres", region: "Banat", type: "local", county: "Caraș-Severin", city: "Reșița", url: "https://caras-severinexpres.ro" },
+  { name: "Dolj Expres", region: "Banat", type: "local", county: "Dolj", city: "Craiova", url: "https://doljexpres.ro" },
+  { name: "Gorj Expres", region: "Banat", type: "local", county: "Gorj", city: "Târgu Jiu", url: "https://gorjexpres.ro" },
+  { name: "Mehedinți Expres", region: "Banat", type: "local", county: "Mehedinți", city: "Drobeta-Turnu Severin", url: "https://mehedintiexpres.ro" },
+  { name: "Olt Expres", region: "Banat", type: "local", county: "Olt", city: "Slatina", url: "https://oltexpres.ro" },
+  { name: "Vâlcea Expres", region: "Banat", type: "local", county: "Vâlcea", city: "Râmnicu Vâlcea", url: "https://valceaexpres.ro" },
+
+  // Naționale (9)
+  { name: "România Expres", region: "Național", type: "national", url: "https://romaniaexpres.ro" },
+  { name: "AcuNews", region: "Național", type: "national", url: "https://acunews.ro" },
+  { name: "Metro News", region: "Național", type: "national", url: "https://metronews.ro" },
+  { name: "Lider News", region: "Național", type: "national", url: "https://lidernews.ro" },
+  { name: "Point News", region: "Național", type: "national", url: "https://pointnews.ro" },
+  { name: "Legio News", region: "Național", type: "national", url: "https://legionews.ro" },
+  { name: "Epoch Daily", region: "Național", type: "national", url: "https://epochdaily.ro" },
+  { name: "România Leak", region: "Național", type: "national", url: "https://romanialeak.ro" },
+  { name: "Diaspora News", region: "Național", type: "national", url: "https://diasporanews.ro" },
 ];
 
 export const REGION_COUNTS = {

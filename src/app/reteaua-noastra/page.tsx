@@ -7,7 +7,7 @@ import { CountyGrid } from "@/components/CountyGrid";
 
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
-  description: "MediaExpres distribuie pe o rețea națională de 50+ ziare și 37 pagini Facebook.",
+  description: "MediaExpres distribuie pe o rețea națională de 50+ ziare și 50 pagini Facebook.",
   alternates: { canonical: "/reteaua-noastra" },
   robots: { index: false, follow: false },
 };
@@ -53,7 +53,7 @@ export default function ReteauaPage() {
         <div className="container">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <StatCard icon={Newspaper} value={`${REGION_COUNTS.Național + REGION_COUNTS.Moldova + REGION_COUNTS.Transilvania + REGION_COUNTS.Muntenia + REGION_COUNTS.Banat}+`} label="ziare partenere" />
-            <StatCard icon={Facebook} value="37" label="pagini Facebook asociate" />
+            <StatCard icon={Facebook} value="50" label="pagini Facebook asociate" />
             <StatCard icon={Globe} value="4" label="regiuni acoperite" />
             <StatCard icon={MapPin} value="35+" label="județe din România" />
           </div>

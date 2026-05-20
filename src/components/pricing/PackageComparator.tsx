@@ -8,7 +8,7 @@ const ROWS: Array<{
 }> = [
   { label: "Număr ziare", values: ["1 județean", "10 regionale", "41 locale + 9 naționale"], highlight: true },
   { label: "Cititori estimați / lună", values: ["~3.000", "~30.000", "~250.000+"], highlight: true },
-  { label: "Pagini Facebook (distribuție)", values: ["1", "8", "37"] },
+  { label: "Pagini Facebook (distribuție)", values: ["1", "8", "50"] },
   { label: "Backlinks SEO", values: ["1", "10", "50"] },
   { label: "Acoperire geografică", values: ["1 județ", "1 zonă (5-8 jud.)", "Toată România"] },
   { label: "Livrare", values: ["≤ 24h", "≤ 24h", "≤ 24h"] },
