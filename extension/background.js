@@ -67,6 +67,13 @@ chrome.runtime.onMessage.addListener((msg, _sender, sendResponse) => {
     } else if (msg.type === "GEN_MESSAGE") {
       const result = await apiPost("/api/extension/message", msg.profile);
       sendResponse(result);
+    } else if (msg.type === "MARK_SENT") {
+      const result = await apiPost("/api/extension/sent", {
+        profile: msg.profile,
+        message: msg.message,
+        sent: !!msg.sent,
+      });
+      sendResponse(result);
     } else if (msg.type === "GET_STATUS") {
       const cfg = await getConfig();
       sendResponse({

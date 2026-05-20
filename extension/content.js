@@ -245,11 +245,16 @@
       setStatus("Eroare: " + escapeHtml(resp.error || ""), "err");
       return;
     }
+
+    // Salveaza mesajul ca draft pe prospect (creeaza prospectul daca nu exista)
+    send({ type: "MARK_SENT", profile, message: resp.message, sent: false });
+
     if (out) {
       out.hidden = false;
       out.innerHTML = `
         <textarea class="mx-msg-text" rows="5">${escapeHtml(resp.message)}</textarea>
         <button class="mx-btn mx-primary" data-act="copy">Copiaza mesajul</button>
+        <button class="mx-btn" data-act="sent">Am trimis pe LinkedIn</button>
       `;
       out.querySelector('[data-act="copy"]').addEventListener("click", async () => {
         const text = out.querySelector(".mx-msg-text").value;
@@ -260,8 +265,18 @@
           setStatus("Selecteaza textul si copiaza manual (Ctrl+C).", "info");
         }
       });
+      out.querySelector('[data-act="sent"]').addEventListener("click", async () => {
+        const text = out.querySelector(".mx-msg-text").value;
+        setStatus("Se marcheaza ca trimis...", "info");
+        const r = await send({ type: "MARK_SENT", profile, message: text, sent: true });
+        if (r.ok) {
+          setStatus("Marcat ca trimis. Prospectul e 'contacted' in admin.", "ok");
+        } else {
+          setStatus("Eroare: " + escapeHtml(r.error || ""), "err");
+        }
+      });
     }
-    setStatus("Mesaj gata. Revizuieste-l inainte sa trimiti.", "ok");
+    setStatus("Mesaj gata si salvat in admin. Revizuieste-l inainte sa trimiti.", "ok");
   }
 
   // ---- Init + re-render la navigare SPA ------------------------------------
