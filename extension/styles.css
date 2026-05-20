@@ -1,0 +1,116 @@
+/* Panoul flotant MediaExpres injectat pe LinkedIn */
+
+#mx-linkedin-panel {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  width: 280px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  box-shadow: 0 10px 30px rgba(11, 37, 69, 0.18);
+  z-index: 999999;
+  font-family: -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: #0b2545;
+  overflow: hidden;
+}
+
+#mx-linkedin-panel .mx-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  background: #0b2545;
+  color: #fff;
+}
+
+#mx-linkedin-panel .mx-logo {
+  font-weight: 700;
+  font-size: 13px;
+  letter-spacing: 0.2px;
+}
+
+#mx-linkedin-panel .mx-close {
+  background: transparent;
+  border: 0;
+  color: #fff;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 2px;
+}
+
+#mx-linkedin-panel .mx-body {
+  padding: 12px;
+}
+
+#mx-linkedin-panel .mx-name {
+  font-size: 14px;
+  font-weight: 700;
+  margin: 0 0 2px;
+}
+
+#mx-linkedin-panel .mx-muted {
+  font-size: 11px;
+  color: #64748b;
+  margin: 0 0 10px;
+}
+
+#mx-linkedin-panel .mx-btn {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  margin-top: 6px;
+  padding: 8px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0b2545;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+#mx-linkedin-panel .mx-btn:hover {
+  background: #eef2f7;
+}
+
+#mx-linkedin-panel .mx-btn.mx-primary {
+  background: #c8102e;
+  border-color: #c8102e;
+  color: #fff;
+}
+
+#mx-linkedin-panel .mx-btn.mx-primary:hover {
+  background: #a60d26;
+}
+
+#mx-linkedin-panel .mx-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+#mx-linkedin-panel .mx-msg-out {
+  margin-top: 8px;
+}
+
+#mx-linkedin-panel .mx-msg-text {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  padding: 7px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+#mx-linkedin-panel .mx-status {
+  padding: 8px 12px;
+  font-size: 11px;
+  border-top: 1px solid #e2e8f0;
+}
+
+#mx-linkedin-panel .mx-status.mx-info { color: #64748b; }
+#mx-linkedin-panel .mx-status.mx-ok { color: #15803d; background: #f0fdf4; }
+#mx-linkedin-panel .mx-status.mx-err { color: #b91c1c; background: #fef2f2; }

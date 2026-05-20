@@ -144,7 +144,7 @@ export function DiscoverButton() {
           )}
           {result.imported > 0 && (
             <p className="mt-2 text-indigo-600">
-              Sunt în tab-ul „Noi". Folosește „Auto-pilot" ca să le trimiți pitch-ul AI.
+              Sunt în tab-ul „Noi”. Folosește „Auto-pilot” ca să le trimiți pitch-ul AI.
             </p>
           )}
         </div>

@@ -62,6 +62,13 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
     return NextResponse.json({ ok: false, error: "Subject si body sunt obligatorii la trimitere" }, { status: 400 });
   }
 
+  if (!p.email) {
+    return NextResponse.json(
+      { ok: false, error: "Prospectul nu are email (capturat din LinkedIn) - contacteaza-l direct pe LinkedIn." },
+      { status: 400 }
+    );
+  }
+
   const html = wrapEmail(
     parsed.data.subject,
     parsed.data.body

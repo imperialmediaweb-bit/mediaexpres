@@ -71,8 +71,12 @@ export async function POST(req: NextRequest) {
           .orderBy(asc(prospects.createdAt))
           .limit(limit);
 
-    const rows = rawRows.filter((p) => !isSuppressed(p.email));
-    const suppressedSkipped = rawRows.length - rows.length;
+    // Prospectii fara email (ex. capturati din LinkedIn) nu pot primi outreach pe email.
+    const noEmailSkipped = rawRows.filter((p) => !p.email).length;
+    const rows = rawRows.filter(
+      (p): p is typeof p & { email: string } => !!p.email && !isSuppressed(p.email),
+    );
+    const suppressedSkipped = rawRows.length - rows.length - noEmailSkipped;
 
     if (rows.length === 0) {
       return NextResponse.json({
@@ -226,6 +230,7 @@ export async function POST(req: NextRequest) {
       failed,
       followUpsScheduled,
       suppressedSkipped,
+      noEmailSkipped,
       errors: errors.length > 0 ? errors : undefined,
     });
   } catch (e: unknown) {
