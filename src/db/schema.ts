@@ -122,11 +122,16 @@ export const prospects = pgTable("prospect", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   companyName: text("company_name").notNull(),
   contactName: text("contact_name"),
-  email: text("email").notNull(),
+  contactTitle: text("contact_title"),
+  // email poate fi null: un lead capturat din LinkedIn nu are mereu email.
+  email: text("email"),
   phone: text("phone"),
   industry: text("industry"),
   city: text("city"),
   website: text("website"),
+  linkedinUrl: text("linkedin_url"),
+  // 'manual' | 'linkedin' | 'discover' | 'csv'
+  source: text("source").notNull().default("manual"),
   notes: text("notes"),
   status: text("status").notNull().default("new"),
   emailsSent: integer("emails_sent").notNull().default(0),

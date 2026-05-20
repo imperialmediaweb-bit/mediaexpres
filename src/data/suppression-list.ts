@@ -15,6 +15,7 @@ export const SUPPRESSED_EMAILS = new Set<string>([
   "contact@emblemagroup.ro",
 ]);
 
-export function isSuppressed(email: string): boolean {
+export function isSuppressed(email: string | null | undefined): boolean {
+  if (!email) return false;
   return SUPPRESSED_EMAILS.has(email.trim().toLowerCase());
 }
