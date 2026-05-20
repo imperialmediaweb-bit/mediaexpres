@@ -25,7 +25,7 @@ export function ProspectActions({
 }: {
   prospectId: string;
   currentStatus: string;
-  email: string;
+  email: string | null;
 }) {
   const router = useRouter();
   const [subject, setSubject] = useState("");
@@ -124,32 +124,42 @@ export function ProspectActions({
         </select>
       </div>
 
-      <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-5">
-        <h3 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-purple-700" />
-          Email outreach AI
-        </h3>
-        <p className="mt-1 text-xs text-slate-500">Trimite la: <strong>{email}</strong></p>
+      {email ? (
+        <div className="rounded-xl border border-purple-200 bg-purple-50/50 p-5">
+          <h3 className="font-serif text-lg font-bold text-brand-navy flex items-center gap-2">
+            <Sparkles className="h-5 w-5 text-purple-700" />
+            Email outreach AI
+          </h3>
+          <p className="mt-1 text-xs text-slate-500">Trimite la: <strong>{email}</strong></p>
 
-        <Button type="button" variant="outline" size="sm" className="mt-3 w-full" onClick={generate} disabled={genLoading || sendLoading}>
-          {genLoading ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI scrie...</>) : (<><Sparkles className="h-3.5 w-3.5" /> Generează cu AI</>)}
-        </Button>
+          <Button type="button" variant="outline" size="sm" className="mt-3 w-full" onClick={generate} disabled={genLoading || sendLoading}>
+            {genLoading ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> AI scrie...</>) : (<><Sparkles className="h-3.5 w-3.5" /> Generează cu AI</>)}
+          </Button>
 
-        <div className="mt-4 space-y-2">
-          <div>
-            <Label className="text-xs">Subject</Label>
-            <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="mt-1" placeholder="Subiectul email-ului" />
+          <div className="mt-4 space-y-2">
+            <div>
+              <Label className="text-xs">Subject</Label>
+              <Input value={subject} onChange={(e) => setSubject(e.target.value)} className="mt-1" placeholder="Subiectul email-ului" />
+            </div>
+            <div>
+              <Label className="text-xs">Body</Label>
+              <Textarea rows={10} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 font-mono text-xs" placeholder="Textul email-ului..." />
+            </div>
           </div>
-          <div>
-            <Label className="text-xs">Body</Label>
-            <Textarea rows={10} value={body} onChange={(e) => setBody(e.target.value)} className="mt-1 font-mono text-xs" placeholder="Textul email-ului..." />
-          </div>
+
+          <Button type="button" variant="accent" size="sm" className="mt-3 w-full" onClick={send} disabled={sendLoading || genLoading || !subject || !body}>
+            {sendLoading ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> Se trimite...</>) : (<><Send className="h-3.5 w-3.5" /> Trimite cu Resend</>)}
+          </Button>
         </div>
-
-        <Button type="button" variant="accent" size="sm" className="mt-3 w-full" onClick={send} disabled={sendLoading || genLoading || !subject || !body}>
-          {sendLoading ? (<><Loader2 className="h-3.5 w-3.5 animate-spin" /> Se trimite...</>) : (<><Send className="h-3.5 w-3.5" /> Trimite cu Resend</>)}
-        </Button>
-      </div>
+      ) : (
+        <div className="rounded-xl border border-[#0a66c2]/30 bg-[#0a66c2]/5 p-5 text-sm text-slate-600">
+          <h3 className="font-serif text-lg font-bold text-brand-navy">Fără email</h3>
+          <p className="mt-1 text-xs">
+            Prospect capturat din LinkedIn fără email public. Contactează-l direct pe
+            LinkedIn (folosește extensia pentru a genera un mesaj cu AI).
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="flex items-start gap-2 rounded-md bg-red-50 p-3 text-xs text-red-700">

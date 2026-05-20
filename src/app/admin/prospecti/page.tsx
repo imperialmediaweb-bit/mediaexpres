@@ -22,6 +22,7 @@ const TABS = [
   { key: "converted", label: "Convertiți" },
   { key: "declined", label: "Refuzați" },
   { key: "hot", label: "🔥 Hot leads" },
+  { key: "linkedin", label: "Din LinkedIn" },
   { key: "all", label: "Toți" },
 ];
 
@@ -90,6 +91,8 @@ export default async function ProspectiPage({
       .where(not(inArray(prospects.status, EXCLUDED_STATUSES)));
   } else if (filter === "all") {
     rawRows = await db.select().from(prospects);
+  } else if (filter === "linkedin") {
+    rawRows = await db.select().from(prospects).where(eq(prospects.source, "linkedin"));
   } else {
     rawRows = await db.select().from(prospects).where(eq(prospects.status, filter));
   }
@@ -193,8 +196,20 @@ export default async function ProspectiPage({
                         </p>
                       </td>
                       <td className="px-4 py-3">
-                        <p>{p.contactName || "—"}</p>
-                        <p className="text-xs text-slate-500">{p.email}</p>
+                        <p className="flex items-center gap-1.5">
+                          {p.contactName || "—"}
+                          {p.source === "linkedin" && (
+                            <span className="inline-flex items-center rounded bg-[#0a66c2] px-1.5 py-0.5 text-[10px] font-bold text-white">
+                              in
+                            </span>
+                          )}
+                        </p>
+                        {p.contactTitle && (
+                          <p className="text-xs text-slate-500">{p.contactTitle}</p>
+                        )}
+                        <p className="text-xs text-slate-500">
+                          {p.email || <span className="text-slate-300">— fără email</span>}
+                        </p>
                       </td>
                       <td className="px-4 py-3">
                         <span className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${STATUS_COLORS[p.status] || STATUS_COLORS.new}`}>
