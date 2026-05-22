@@ -10,13 +10,18 @@ import { verifyExtensionKey, corsPreflight, CORS_HEADERS } from "@/lib/extension
 export const runtime = "nodejs";
 export const maxDuration = 60;
 
+// DOM-ul LinkedIn e dezordonat — taiem stringurile lungi in loc sa respingem
+// tot batch-ul. Un profil cu text aiurea nu trebuie sa pice celelalte 49.
+const capped = (max: number) =>
+  z.string().transform((s) => s.replace(/\s+/g, " ").trim().slice(0, max));
+
 const profileSchema = z.object({
-  name: z.string().min(2).max(160),
-  title: z.string().max(200).optional(),
-  company: z.string().max(200).optional(),
-  location: z.string().max(160).optional(),
+  name: capped(160),
+  title: capped(200).optional(),
+  company: capped(200).optional(),
+  location: capped(160).optional(),
   linkedinUrl: z.string().url().max(400),
-  companyWebsite: z.string().max(300).optional(),
+  companyWebsite: capped(300).optional(),
 });
 
 const schema = z.object({
@@ -78,6 +83,10 @@ export async function POST(req: NextRequest) {
   const seenInBatch = new Set<string>();
 
   for (const p of profiles) {
+    if (p.name.length < 2) {
+      errors.push("Profil fără nume valid — omis.");
+      continue;
+    }
     if (existingUrls.has(p.linkedinUrl) || seenInBatch.has(p.linkedinUrl)) {
       duplicates.push(p.name);
       continue;
