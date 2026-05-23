@@ -129,9 +129,14 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    // Daca nimic n-a intrat dar avem erori, ridicam ok:false ca sa vada userul
+    // eroarea reala in panoul extensiei (in loc de "Salvati 0 · duplicate 0").
+    const allFailed = imported.length === 0 && errors.length > 0;
+
     return NextResponse.json(
       {
-        ok: true,
+        ok: !allFailed,
+        error: allFailed ? errors[0] : undefined,
         imported: imported.length,
         duplicates: duplicates.length,
         importedList: imported,
