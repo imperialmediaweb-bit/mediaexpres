@@ -2,12 +2,13 @@
 // Foloseste Claude Opus 4.7 (Anthropic) daca ANTHROPIC_API_KEY e setat,
 // altfel face fallback la OpenAI gpt-4o-mini cu cheia OPENAI_API_KEY.
 //
-// Prompt caching: prompt-ul de sistem e identic la fiecare apel, deci marcam
-// cu cache_control ca sa platim 0.1x pe el la apelurile 2..N din aceeasi
-// fereastra de 5 min (de ex. cand userul apasa "Genereaza pentru toti" in
-// /admin/outreach pentru 25 de prospecti).
+// Prompt caching: prompt-ul de sistem e construit la pornire cu SENDER_NAME
+// din env, deci ramane identic la fiecare apel — marcam cache_control ca sa
+// platim ~0.1x pe el la apelurile 2..N din aceeasi fereastra de 5 min
+// (de ex. cand userul apasa "Genereaza pentru toti" in /admin/outreach).
 
 import Anthropic from "@anthropic-ai/sdk";
+import { SENDER_NAME } from "@/lib/email";
 
 const ANTHROPIC_MODEL = "claude-opus-4-7";
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
@@ -19,32 +20,38 @@ export interface LinkedInMessageInput {
   company?: string;
 }
 
-const SYSTEM_PROMPT = `Esti specialist B2B la MediaExpres — o retea de 50 de ziare online din Romania care distribuie comunicate de presa pentru firme si agentii PR.
+const SENDER_FIRST = SENDER_NAME.trim().split(/\s+/)[0];
 
-Scrii un mesaj SCURT pentru caseta "Add a note" cand cineva trimite invitatie de conectare pe LinkedIn (NU email, NU mesaj direct).
+const SYSTEM_PROMPT = `Esti ${SENDER_NAME}, administrator al retelei MediaExpres — o retea de 50 de ziare online din Romania unde distribuim comunicate de presa pentru firme si agentii PR.
+
+Scrii NOTA DE INVITATIE pe LinkedIn — textul care apare in caseta "Add a note" cand trimiti Connect cuiva. Destinatarul nu te cunoaste, deci e CRUCIAL sa te prezinti.
+
+STRUCTURA OBLIGATORIE (in aceasta ordine):
+1. Adresare cu prenumele destinatarului (incepi DIRECT cu numele, fara "Salut" sau "Buna ziua")
+2. Te prezinti scurt: "sunt ${SENDER_FIRST} de la MediaExpres, administram o retea de 50 ziare online din Romania unde distribuim comunicate de presa"
+3. Mentionezi pe scurt rolul/firma destinatarului ca sa fie clar ca nu e mesaj generic
+4. CTA: propui sa-i trimiti oferta pe email (intrebi adresa lui sau confirmi cea pe care o ai)
 
 REGULI:
-- MAXIM 280 caractere (limita LinkedIn e 300, lasa loc de manevra)
+- MAXIM 290 caractere total (limita LinkedIn e 300)
 - Romana cu diacritice complete (ă, â, î, ș, ț)
-- Personalizat pe FUNCTIA si FIRMA — fara generalitati
-- Adresare cu prenumele, fara "Salut" inainte (incepi direct cu prenumele)
-- Un singur CTA blând: intrebi daca e deschis(a) la o discutie scurta despre distributie de comunicate sau parteneriat reseller
+- FARA link-uri (LinkedIn flagheaza invitatiile cu URL-uri ca spam)
+- FARA emoji, hashtag-uri
+- FARA superlative ("cea mai buna", "lider de piata", "unica solutie")
+- FARA clisee ("am vazut profilul tau interesant", "imi place ce faceti")
 - FARA ghilimele in raspuns
 - FARA preambul ("iata mesajul:", "Sigur, uite:")
-- FARA emoji, link-uri, hashtag-uri
-- FARA superlative ("cea mai buna platforma", "lider de piata", "unica solutie")
-- FARA clisee de LinkedIn ("am vazut profilul tau interesant", "imi place ce faceti", "stiu ca esti ocupat dar...")
 
 EXEMPLE BUNE:
 
-Pentru un Marketing Director:
-Maria, vad ca te ocupi de marketing la TechCorp. La MediaExpres distribuim comunicate pe 50 de ziare online — daca te-ar interesa cum lucram, putem schimba 15 minute saptamana viitoare?
+Pentru Alexandra Raut, Marketing Director la Nespresso:
+Alexandra, sunt ${SENDER_FIRST} de la MediaExpres — administram o retea de 50 ziare online unde distribuim comunicate de presa. Vad ca te ocupi de marketing la Nespresso. Daca te-ar interesa cum lucram cu branduri FMCG, iti pot trimite oferta pe email — pot sa-mi confirmi adresa?
 
-Pentru un PR Specialist la o agentie:
-Andrei, lucrezi PR la Agentia X. Avem program reseller pentru agentii cu preturi de partener si raport white-label. Daca pare util, hai sa vorbim scurt.
+Pentru Cristian, PR Specialist la o agentie:
+Cristian, sunt ${SENDER_FIRST} de la MediaExpres — distribuim comunicate de presa pe 50 ziare online din Romania. Vad ca lucrezi PR la agentie — avem program reseller cu preturi de partener pentru agentii. Daca vrei oferta completa, ti-o trimit pe email.
 
-Pentru un Communication Manager:
-Ana, vad ca ai grija de comunicare la Nespresso. Distribuim comunicate pe rețeaua noastra de 50 ziare romanesti — putem discuta 10 minute despre cum am putea fi utili?
+Pentru Madalina, Communication Manager la Telekom:
+Madalina, sunt ${SENDER_FIRST} de la MediaExpres — administram o retea de 50 ziare online unde publicam comunicate. Vad ca esti Communication Manager la Telekom — daca vrei sa-ti trimit oferta pe email cu pachete si tarife, sa-mi spui adresa.
 
 Raspunde DOAR cu textul mesajului. Niciun caracter in plus.`;
 
@@ -59,7 +66,7 @@ function cleanMessage(text: string): string {
 async function generateWithClaude(input: LinkedInMessageInput): Promise<string> {
   const firstName = input.name.trim().split(/\s+/)[0];
   const userPrompt = `Destinatar: ${input.name}${input.title ? `, ${input.title}` : ""}${input.company ? `, la ${input.company}` : ""}.
-Scrie mesajul de invitatie pe LinkedIn adresat cu prenumele "${firstName}".`;
+Scrie nota de invitatie pe LinkedIn adresata cu prenumele "${firstName}".`;
 
   const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 
@@ -89,7 +96,7 @@ async function generateWithOpenAI(input: LinkedInMessageInput): Promise<string> 
 
   const firstName = input.name.trim().split(/\s+/)[0];
   const userPrompt = `Destinatar: ${input.name}${input.title ? `, ${input.title}` : ""}${input.company ? `, la ${input.company}` : ""}.
-Scrie mesajul de invitatie pe LinkedIn adresat cu prenumele "${firstName}".`;
+Scrie nota de invitatie pe LinkedIn adresata cu prenumele "${firstName}".`;
 
   const res = await fetch(OPENAI_URL, {
     method: "POST",
