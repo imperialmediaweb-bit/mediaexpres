@@ -28,47 +28,53 @@ Scrii NOTA DE INVITATIE pe LinkedIn (caseta "Add a note" la Connect). Trebuie sa
 
 ELEMENTE CARE TREBUIE SA APARA (poti varia ordinea):
 - Salut: "Bună ziua, [PRENUME]!" (mereu, in romaneste)
-- Cine esti: "sunt ${SENDER_FIRST} de la MediaExpres — rețea de 50 ziare online"
-- O OBSERVATIE INTELIGENTA legata de rolul/firma lui (nu doar "vad ca lucrati la X" — adauga un detaliu care arata ca ai gandit putin)
-- Unghi de valoare RELEVANT pentru rolul lui (nu acelasi pitch generic la toata lumea — vezi tabelul de mai jos)
-- CTA: ii propui sa-i trimiti oferta pe email, ii ceri adresa
+- Cine esti: "sunt ${SENDER_FIRST} de la MediaExpres" (cand e loc, adauga "administrator al rețelei" sau "rețea de 50 ziare online")
+- FRAMING DE OPORTUNITATE — alterneaza intre formulari de tip:
+  * "aș vrea să vă prezint o oportunitate de [tip] relevantă pentru rolul dvs."
+  * "am o propunere care cred că s-ar potrivi cu activitatea dvs. la [companie]"
+  * "vă scriu fiindcă văd o oportunitate concretă pentru [rolul lor]"
+  * "vă contactez cu o propunere de [tip] pentru [companie]"
+  NU repeta aceeasi formulare la doi prospecti consecutivi.
+- Ce face oportunitatea relevanta — UN DETALIU specific functiei/firmei (vezi tabel)
+- CTA: ii propui sa-i trimiti detaliile/oferta pe email, ii ceri adresa
 
 CUM ALEGI UNGHIUL DE VALOARE pe baza FUNCTIEI:
-- Marketing Director / CMO → vorbesti despre vizibilitate brand + SEO (link-uri din 50 domenii)
-- PR Manager / PR Specialist (in-house) → vorbesti despre coverage rapid + raport PDF pentru clienti interni
-- PR Agency / Communication Agency → vorbesti despre program reseller cu prețuri partener
-- Communication Manager → vorbesti despre amplificare mesaj corporate, autoritate
-- Founder / CEO / Antreprenor → vorbesti despre awareness ieftin pentru startup-uri
-- Sales / Business Development → vorbesti despre lead-uri din articolul ca lead-magnet
-- HR / Employer Branding → vorbesti despre vizibilitate ca angajator
-- Daca rolul nu se incadreaza → mergi pe "distributie comunicate"
+- Marketing Director / CMO → vizibilitate brand + SEO (link-uri din 50 domenii)
+- PR Manager / PR Specialist (in-house) → coverage rapid + raport PDF pentru raportari interne
+- PR Agency / Communication Agency → program reseller cu prețuri partener si raport white-label
+- Communication Manager → amplificare mesaj corporate, autoritate, distributie nationala
+- Founder / CEO / Antreprenor → awareness ieftin si rapid pentru startup-uri
+- Sales / Business Development → articolul ca lead-magnet, expunere catre prospecti
+- HR / Employer Branding → vizibilitate ca angajator, distributie campanii recrutare
+- Daca rolul nu se incadreaza clar → mergi pe "distributie comunicate de presa"
 
 REGULI ABSOLUTE:
 - MAXIM 290 caractere total (limita LinkedIn e 300)
 - Romana cu diacritice complete (ă, â, î, ș, ț, Ă, Â, Î, Ș, Ț)
-- Ton: politicos formal, dar uman — nu robotic
+- Ton: politicos formal, confident — nu robotic, nu cersit
+- Adresare cu "dvs." / "dumneavoastră" (formal romanesc)
 - FARA link-uri (LinkedIn flagheaza invitatiile cu URL ca spam)
 - FARA emoji, hashtag-uri
 - FARA superlative ("cea mai buna", "lider", "unica solutie")
-- FARA clisee de outreach ("am vazut profilul tau interesant", "imi place ce faceti", "stiu ca esti ocupat")
-- FARA fraze identice cu exemplele — ele sunt referinta, nu sablon de copiat
-- VARIAZA structura: uneori incepe cu observatia, apoi prezentarea. Alteori invers. Nu pune mereu "Sunt X de la Y" imediat dupa salut.
+- FARA clisee ("am vazut profilul tau interesant", "imi place ce faceti", "stiu ca esti ocupat")
+- FARA fraze identice cu exemplele — sunt referinta, nu sablon
+- VARIAZA structura intre prospecti — nu pune mereu elementele in aceeasi ordine
 - FARA ghilimele in jurul raspunsului
 - FARA preambul ("iata mesajul:", "Sigur, uite:")
 
-EXEMPLE (referinta de stil — nu copia structura literal, variaz-o):
+EXEMPLE (referinta de stil — variaza-le, nu copia):
 
 Pentru Alexandra Raut, Marketing Director la Nespresso:
-Bună ziua, Alexandra! Sunt ${SENDER_FIRST} de la MediaExpres — rețea de 50 ziare online. La Nespresso conținutul de brand contează enorm, iar plasarea editorială în 50 publicații pe lângă SEO-ul natural ajută vizibil. Vă pot trimite oferta pe email — îmi confirmați adresa?
+Bună ziua, Alexandra! Sunt ${SENDER_FIRST} de la MediaExpres — aș vrea să vă prezint o oportunitate de comunicare relevantă pentru rolul dvs. la Nespresso: plasare editorială pe 50 ziare online cu beneficiu SEO direct. Vă pot trimite oferta pe email — îmi confirmați adresa?
 
 Pentru Cristian, PR Specialist la PR-One:
-Bună ziua, Cristian! Lucrul cu agenții PR e zona noastră — avem program reseller cu prețuri de partener și raport white-label pe care îl predați clienților direct. Sunt ${SENDER_FIRST} de la MediaExpres. Dacă pare util, vă trimit oferta completă pe email.
+Bună ziua, Cristian! Sunt ${SENDER_FIRST}, administrator MediaExpres. Vă contactez cu o propunere pentru agenția dvs.: program reseller cu prețuri de partener și raport white-label pe care îl predați clienților. Detaliile complete vi le trimit pe email.
 
 Pentru Mădălina Săvulescu, Communication Manager la Nespresso:
-Bună ziua, Mădălina! Sunt ${SENDER_FIRST}, administrez rețeaua MediaExpres — 50 ziare online unde publicăm comunicate corporate. Pentru un brand cum e Nespresso, amplificarea pe rețea ajută la autoritate și SEO simultan. Vă trimit oferta pe email, dacă-mi spuneți adresa.
+Bună ziua, Mădălina! Am o propunere care cred că s-ar potrivi cu activitatea dvs. de comunicare la Nespresso — amplificare pe 50 de ziare online, cu raport PDF pentru rapoartări interne. Sunt ${SENDER_FIRST} de la MediaExpres. Vă trimit oferta dacă-mi spuneți adresa.
 
 Pentru Andrei Popa, Founder la TechStartup:
-Bună ziua, Andrei! Vă scriu pentru că pentru startup-uri ca al dumneavoastră publicarea pe 50 ziare e modul cel mai ieftin de awareness rapid. Sunt ${SENDER_FIRST} de la MediaExpres. Dacă vreți să vedeți pachetele, vă trimit oferta pe email.
+Bună ziua, Andrei! Vă scriu fiindcă văd o oportunitate concretă pentru un fondator de startup: publicarea pe 50 ziare e cel mai ieftin awareness rapid. Sunt ${SENDER_FIRST} de la MediaExpres. Vă trimit pachetele pe email, dacă-mi confirmați adresa.
 
 Raspunde DOAR cu textul mesajului. Niciun caracter in plus. Variaza structura — nu reproduce mecanic exemplele.`;
 
