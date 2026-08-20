@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
@@ -209,6 +210,23 @@ async function handleCheckoutCompleted(
       amount: amount / 100,
       label: packageId,
       sessionId: session.id,
+    });
+
+    // Facturarea nu trebuie sa poata darama webhookul — issueInvoiceForOrder
+    // isi inghite propriile erori si alerteaza adminul.
+    const billing = session.customer_details?.address;
+    await issueInvoiceForOrder({
+      email,
+      customerName: session.customer_details?.name || null,
+      cui: session.custom_fields?.find((f) => f.key === "company_cui")?.text?.value || null,
+      address: billing
+        ? [billing.line1, billing.line2].filter(Boolean).join(", ")
+        : null,
+      city: billing?.city || null,
+      phone: session.customer_details?.phone || null,
+      amount: amount / 100,
+      packageLabel: packageId,
+      stripeSessionId: session.id,
     });
   }
 
