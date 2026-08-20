@@ -143,6 +143,28 @@ export const CASINO_PACKAGES: Package[] = [
   },
 ];
 
+// Pachete promo, disponibile doar prin landing page-uri dedicate (nu apar in /pachete).
+export const PROMO_PACKAGES: Package[] = [
+  {
+    id: "promo-50",
+    name: "Ofertă 50 de ziare",
+    tagline: "Ofertă limitată — acoperire națională",
+    price: 500,
+    currency: "RON",
+    newspapers: 50,
+    reach: "41 ziare locale + 9 naționale",
+    category: "standard",
+    highlights: [
+      "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "Distribuție pe 50 pagini Facebook",
+      "Linkuri livrate în 24h",
+      "Raport PDF complet cu toate URL-urile",
+      "Permanent online",
+      "50 backlinks SEO dofollow",
+    ],
+  },
+];
+
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
   {
     id: "bronze",
@@ -198,5 +220,5 @@ export function getAllPackages(): Package[] {
 }
 
 export function findPackageById(id: string): Package | undefined {
-  return getAllPackages().find((p) => p.id === id);
+  return [...getAllPackages(), ...PROMO_PACKAGES].find((p) => p.id === id);
 }
