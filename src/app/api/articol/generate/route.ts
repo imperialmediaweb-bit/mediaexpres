@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyOrderToken } from "@/lib/order-token";
 import { fetchSiteContext } from "@/lib/site-context";
-import { generateAdvertorial } from "@/lib/ai";
+import { generateAdvertorial } from "@/lib/advertorial";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
