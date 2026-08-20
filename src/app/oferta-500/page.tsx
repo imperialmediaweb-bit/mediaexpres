@@ -10,7 +10,7 @@ import {
   ShieldCheck,
   Star,
 } from "lucide-react";
-import { PromoCheckoutButton } from "./PromoCheckoutButton";
+import { PromoOffer } from "./PromoOffer";
 
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
@@ -76,10 +76,37 @@ const STEPS = [
   },
 ];
 
+const CONDITIONS = [
+  {
+    title: "Articol permanent pe site",
+    detail:
+      "Odată publicat, articolul rămâne online. Nu se șterge după o perioadă, iar backlinkurile rămân active.",
+  },
+  {
+    title: "12 ore pe prima pagină",
+    detail:
+      "Articolul stă 12 ore pe pagina principală a fiecărei publicații, apoi trece în secțiunea lui permanentă.",
+  },
+  {
+    title: "3 poze incluse",
+    detail:
+      "Trimiți până la 3 imagini, dintre care una o alegi ca imagine reprezentativă a articolului.",
+  },
+  {
+    title: "Distribuire pe Facebook — opțional",
+    detail:
+      "Poți alege dacă articolul se distribuie și pe paginile de Facebook ale publicațiilor. Fără cost suplimentar.",
+  },
+];
+
 const FAQ = [
   {
     q: "De ce 500 lei și nu 1.500?",
     a: "Este o ofertă promoțională de intrare, limitată, pentru clienți noi care nu au lucrat încă cu noi. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.",
+  },
+  {
+    q: "De ce costă dublu pentru cazino și pariuri?",
+    a: "Conținutul din zona iGaming are cerințe suplimentare de conformitate (ONJN, mențiuni despre joc responsabil) și un risc editorial mai mare pentru publicații. De aceea tariful este 1.000 lei în loc de 500. Bifezi declarația la comandă. Dacă un articol de cazino este trimis nedeclarat, publicarea se oprește și suma nu se rambursează.",
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
@@ -122,27 +149,8 @@ export default function Oferta500Page() {
               toate, în 24 de ore. Cu raport PDF și 50 de backlinks reale.
             </p>
 
-            <div className="mt-10 flex items-end justify-center gap-4">
-              <div className="text-right">
-                <p className="text-sm uppercase tracking-wider text-white/50">
-                  Preț normal
-                </p>
-                <p className="font-serif text-3xl font-bold text-white/40 line-through">
-                  1.500 lei
-                </p>
-              </div>
-              <div className="text-left">
-                <p className="text-sm uppercase tracking-wider text-brand-gold">
-                  Acum
-                </p>
-                <p className="font-serif text-6xl font-bold text-brand-gold md:text-7xl">
-                  500 lei
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-10 flex justify-center">
-              <PromoCheckoutButton label="Comandă acum — 500 lei" />
+            <div className="mt-10">
+              <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
               Plată securizată cu cardul • factură fiscală • publicare în 24h
@@ -244,6 +252,32 @@ export default function Oferta500Page() {
         </div>
       </section>
 
+      {/* Conditii de publicare */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Condiții de publicare</p>
+            <h2 className="h2 mt-2">Exact ce se întâmplă cu articolul tău</h2>
+          </div>
+          <ul className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
+            {CONDITIONS.map((c) => (
+              <li
+                key={c.title}
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-5"
+              >
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+                <span>
+                  <strong className="text-brand-navy">{c.title}</strong>
+                  <span className="mt-1 block text-sm text-slate-600">
+                    {c.detail}
+                  </span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="section bg-slate-50">
         <div className="container">
@@ -282,8 +316,8 @@ export default function Oferta500Page() {
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,
             iar mâine ai raportul cu toate cele 50 de linkuri.
           </p>
-          <div className="mt-8 flex justify-center">
-            <PromoCheckoutButton label="Comandă acum — 500 lei" />
+          <div className="mt-8">
+            <PromoOffer showPrice={false} />
           </div>
         </div>
       </section>
