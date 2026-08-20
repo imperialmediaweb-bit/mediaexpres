@@ -1,0 +1,304 @@
+import type { Metadata } from "next";
+import {
+  Newspaper,
+  Globe,
+  Facebook,
+  Link as LinkIcon,
+  FileText,
+  Clock,
+  CheckCircle2,
+  ShieldCheck,
+  Star,
+} from "lucide-react";
+import { PromoCheckoutButton } from "./PromoCheckoutButton";
+
+export const metadata: Metadata = {
+  title: "Articol în 50 de ziare — 500 lei",
+  description:
+    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 24h.",
+  robots: { index: false, follow: false },
+};
+
+const INCLUDED = [
+  {
+    icon: Newspaper,
+    title: "50 de ziare online",
+    description:
+      "Articolul tău publicat pe 50 de domenii .ro diferite, fiecare cu trafic real și indexare Google.",
+  },
+  {
+    icon: Globe,
+    title: "41 locale + 9 naționale",
+    description:
+      "Câte un ziar pentru fiecare județ, plus 9 publicații naționale. Acoperire completă dintr-un singur plasament.",
+  },
+  {
+    icon: LinkIcon,
+    title: "50 backlinks dofollow",
+    description:
+      "Linkuri reale din 50 de domenii diferite, cu autoritate DA 37+. Efect direct pe SEO-ul site-ului tău.",
+  },
+  {
+    icon: Facebook,
+    title: "Distribuire pe 50 pagini Facebook",
+    description:
+      "Fiecare publicație are pagina ei de Facebook, cu între 300 și 10.000 de urmăritori. Inclus, fără cost extra.",
+  },
+  {
+    icon: FileText,
+    title: "Raport PDF complet",
+    description:
+      "Primești toate cele 50 de URL-uri plus screenshot-uri, ca dovadă verificabilă a publicării.",
+  },
+  {
+    icon: Clock,
+    title: "Publicat în 24 de ore",
+    description:
+      "De la confirmarea comenzii până la linkurile live trec maximum 24 de ore lucrătoare.",
+  },
+];
+
+const STEPS = [
+  {
+    n: "1",
+    title: "Plătești oferta",
+    text: "500 lei cu cardul, în siguranță. Primești factură fiscală automat pe email.",
+  },
+  {
+    n: "2",
+    title: "Trimiți articolul",
+    text: "Ne trimiți textul și pozele tale. Dacă nu ai text, îl scriem noi pe baza temei date de tine.",
+  },
+  {
+    n: "3",
+    title: "Primești raportul",
+    text: "În 24h ai articolul live în toate cele 50 de ziare și raportul PDF cu toate linkurile.",
+  },
+];
+
+const FAQ = [
+  {
+    q: "De ce 500 lei și nu 1.500?",
+    a: "Este o ofertă promoțională de intrare, limitată, pentru clienți noi care nu au lucrat încă cu noi. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.",
+  },
+  {
+    q: "Sunt ziare reale sau site-uri fantomă?",
+    a: "Sunt reale. Rețeaua MediaExpres include 50 de domenii .ro proprii, fiecare cu trafic SEO propriu, indexare Google și pagină de Facebook activă. Primești lista completă înainte de publicare.",
+  },
+  {
+    q: "Ce fel de conținut acceptați?",
+    a: "Acceptăm orice tip de conținut comercial legal — lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P) la articole.",
+  },
+  {
+    q: "Pot să-mi scriu eu articolul?",
+    a: "Da, iar asta e varianta recomandată. Trimiți textul tău, 3 poze și până la 3 linkuri. Dacă preferi, îl redactăm noi pe baza temei tale, la cerere.",
+  },
+  {
+    q: "Articolele rămân online permanent?",
+    a: "Da. Articolele rămân publicate permanent, nu se șterg după o perioadă. Backlinkurile rămân active.",
+  },
+  {
+    q: "Cum plătesc și primesc factură?",
+    a: "Plata se face cu cardul, prin Stripe. Factura fiscală se emite automat și o primești pe email — totul e în regulă pentru contabilitate B2B.",
+  },
+];
+
+export default function Oferta500Page() {
+  return (
+    <div className="bg-white">
+      {/* Hero */}
+      <section className="bg-brand-navy text-white">
+        <div className="container py-16 md:py-24">
+          <div className="mx-auto max-w-3xl text-center">
+            <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-gold">
+              <Star className="h-3 w-3 fill-current" /> Ofertă limitată
+            </span>
+            <h1 className="mt-5 font-serif text-4xl font-bold leading-tight md:text-6xl">
+              Articolul tău în{" "}
+              <span className="text-brand-gold">50 de ziare</span> românești
+            </h1>
+            <p className="mt-6 text-lg text-white/85 md:text-xl">
+              41 de ziare locale + 9 naționale. Un singur articol, publicat pe
+              toate, în 24 de ore. Cu raport PDF și 50 de backlinks reale.
+            </p>
+
+            <div className="mt-10 flex items-end justify-center gap-4">
+              <div className="text-right">
+                <p className="text-sm uppercase tracking-wider text-white/50">
+                  Preț normal
+                </p>
+                <p className="font-serif text-3xl font-bold text-white/40 line-through">
+                  1.500 lei
+                </p>
+              </div>
+              <div className="text-left">
+                <p className="text-sm uppercase tracking-wider text-brand-gold">
+                  Acum
+                </p>
+                <p className="font-serif text-6xl font-bold text-brand-gold md:text-7xl">
+                  500 lei
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-10 flex justify-center">
+              <PromoCheckoutButton label="Comandă acum — 500 lei" />
+            </div>
+            <p className="mt-4 text-sm text-white/60">
+              Plată securizată cu cardul • factură fiscală automată • publicare
+              în 24h
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* Stats */}
+      <section className="border-b border-slate-200 bg-slate-50">
+        <div className="container py-12">
+          <div className="grid gap-8 text-center md:grid-cols-4">
+            <Stat value="50" label="ziare online" />
+            <Stat value="320.000+" label="vizitatori unici / lună" />
+            <Stat value="50" label="backlinks dofollow" />
+            <Stat value="24h" label="până la publicare" />
+          </div>
+        </div>
+      </section>
+
+      {/* Ce include */}
+      <section className="section">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Ce include oferta</p>
+            <h2 className="h2 mt-2">Tot ce primești pentru 500 de lei</h2>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+            {INCLUDED.map((item) => (
+              <div
+                key={item.title}
+                className="rounded-xl border border-slate-200 bg-white p-6"
+              >
+                <item.icon className="h-8 w-8 text-brand-red" />
+                <h3 className="mt-4 font-serif text-lg font-bold text-brand-navy">
+                  {item.title}
+                </h3>
+                <p className="mt-2 text-sm text-slate-600">{item.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Cum functioneaza */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Cum funcționează</p>
+            <h2 className="h2 mt-2">Trei pași până la 50 de publicări</h2>
+          </div>
+          <div className="mt-12 grid gap-6 md:grid-cols-3">
+            {STEPS.map((s) => (
+              <div
+                key={s.n}
+                className="rounded-xl border border-slate-200 bg-white p-8"
+              >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-red font-serif text-xl font-bold text-white">
+                  {s.n}
+                </div>
+                <h3 className="mt-5 font-serif text-xl font-bold text-brand-navy">
+                  {s.title}
+                </h3>
+                <p className="mt-3 text-slate-600">{s.text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Comparatie */}
+      <section className="section">
+        <div className="container">
+          <div className="mx-auto max-w-3xl rounded-2xl border-2 border-brand-red/20 bg-white p-8 md:p-12">
+            <p className="eyebrow">De ce merită</p>
+            <h2 className="mt-2 font-serif text-2xl font-bold text-brand-navy md:text-3xl">
+              500 de lei pentru 50 de publicări înseamnă 10 lei pe ziar
+            </h2>
+            <p className="mt-4 text-slate-600">
+              Un singur advertorial cumpărat direct de la o publicație locală
+              costă între 150 și 400 de lei. Aici plătești 10 lei per publicare
+              și primești în plus distribuirea pe Facebook, backlinkul dofollow
+              și raportul cu dovezi.
+            </p>
+            <ul className="mt-8 space-y-3">
+              {[
+                "Fără abonament, fără obligații ulterioare",
+                "Fără costuri ascunse — 500 lei este prețul final",
+                "Factură fiscală și contract de prestări servicii",
+                "Articolele rămân online permanent",
+              ].map((p) => (
+                <li key={p} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+                  <span className="text-slate-700">{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/* FAQ */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-3xl">
+            <h2 className="h2 text-center">Întrebări frecvente</h2>
+            <div className="mt-10 space-y-4">
+              {FAQ.map((f) => (
+                <details
+                  key={f.q}
+                  className="group rounded-xl border border-slate-200 bg-white p-5"
+                >
+                  <summary className="cursor-pointer list-none font-semibold text-brand-navy marker:hidden">
+                    <span className="flex items-center justify-between gap-4">
+                      {f.q}
+                      <span className="text-xl text-brand-red transition-transform group-open:rotate-45">
+                        +
+                      </span>
+                    </span>
+                  </summary>
+                  <p className="mt-3 text-slate-600">{f.a}</p>
+                </details>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA final */}
+      <section className="bg-brand-navy text-white">
+        <div className="container py-16 text-center">
+          <ShieldCheck className="mx-auto h-10 w-10 text-brand-gold" />
+          <h2 className="h2 mt-5 text-white">
+            50 de ziare. 24 de ore. 500 de lei.
+          </h2>
+          <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
+            Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,
+            iar mâine ai raportul cu toate cele 50 de linkuri.
+          </p>
+          <div className="mt-8 flex justify-center">
+            <PromoCheckoutButton label="Comandă acum — 500 lei" />
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function Stat({ value, label }: { value: string; label: string }) {
+  return (
+    <div>
+      <p className="font-serif text-4xl font-bold text-brand-red">{value}</p>
+      <p className="mt-1 text-sm uppercase tracking-wider text-brand-navy">
+        {label}
+      </p>
+    </div>
+  );
+}
