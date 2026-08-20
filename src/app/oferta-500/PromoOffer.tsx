@@ -65,7 +65,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               Acum
             </p>
             <p className="font-serif text-6xl font-bold text-brand-gold md:text-7xl">
-              {offer.price} lei
+              {offer.price.toLocaleString("ro")} lei
             </p>
           </div>
         </div>
@@ -101,7 +101,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           ) : (
             <CreditCard className="h-5 w-5" />
           )}
-          Comandă acum — {offer.price} lei
+          Comandă acum — {offer.price.toLocaleString("ro")} lei
         </button>
       </div>
       {error && (

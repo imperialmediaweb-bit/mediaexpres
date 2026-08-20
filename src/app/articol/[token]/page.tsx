@@ -28,7 +28,7 @@ export default function ArticolPage({ params }: { params: { token: string } }) {
             Plata a fost confirmată
           </h1>
           <p className="mt-2 text-sm text-slate-600">
-            {pkg ? `${pkg.name} — ${pkg.price} RON` : "Comandă confirmată"}. Mai
+            {pkg ? `${pkg.name} — ${pkg.price.toLocaleString("ro")} RON` : "Comandă confirmată"}. Mai
             e un singur pas: trimite-ne articolul și pozele.
           </p>
         </div>
