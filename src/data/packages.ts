@@ -163,6 +163,24 @@ export const PROMO_PACKAGES: Package[] = [
       "50 backlinks SEO dofollow",
     ],
   },
+  {
+    id: "promo-50-cazino",
+    name: "Ofertă 50 de ziare — Cazino",
+    tagline: "iGaming / pariuri — tarif dublu",
+    price: 1000,
+    currency: "RON",
+    newspapers: 50,
+    reach: "41 ziare locale + 9 naționale",
+    category: "casino",
+    highlights: [
+      "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "Distribuție pe 50 pagini Facebook",
+      "Linkuri livrate în 24h",
+      "Raport PDF complet cu toate URL-urile",
+      "Permanent online",
+      "50 backlinks SEO dofollow",
+    ],
+  },
 ];
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
