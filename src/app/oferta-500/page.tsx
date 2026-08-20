@@ -62,7 +62,7 @@ const STEPS = [
   {
     n: "1",
     title: "Plătești oferta",
-    text: "500 lei cu cardul, în siguranță. Primești factură fiscală automat pe email.",
+    text: "500 lei cu cardul, în siguranță. Primești factura fiscală pe email.",
   },
   {
     n: "2",
@@ -99,7 +99,7 @@ const FAQ = [
   },
   {
     q: "Cum plătesc și primesc factură?",
-    a: "Plata se face cu cardul, prin Stripe. Factura fiscală se emite automat și o primești pe email — totul e în regulă pentru contabilitate B2B.",
+    a: "Plata se face cu cardul, prin Stripe. La checkout îți poți completa datele de firmă (CUI, nr. reg. comerț), iar factura fiscală o primești pe email — totul e în regulă pentru contabilitate B2B.",
   },
 ];
 
@@ -145,8 +145,7 @@ export default function Oferta500Page() {
               <PromoCheckoutButton label="Comandă acum — 500 lei" />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Plată securizată cu cardul • factură fiscală automată • publicare
-              în 24h
+              Plată securizată cu cardul • factură fiscală • publicare în 24h
             </p>
           </div>
         </div>
