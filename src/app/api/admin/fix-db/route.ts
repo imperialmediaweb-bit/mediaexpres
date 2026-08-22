@@ -8,8 +8,10 @@ export const runtime = "nodejs";
 // Endpoint one-shot pentru fix-uri de schema pe productie cand sandbox-ul de
 // dezvoltare nu poate ajunge la baza de date. Protejat cu EXTENSION_API_KEY.
 //
-// Apel: GET /api/admin/fix-db?key=<EXTENSION_API_KEY>
+// Apel: curl -X POST https://mediaexpress.ro/api/admin/fix-db -H "x-api-key: <EXTENSION_API_KEY>"
 //
+// POST cu cheia in header, nu GET cu cheia in query — URL-urile ajung in
+// loguri de proxy/browser si ar scurge cheia care protejeaza si /api/extension/*.
 // Operatiile sunt idempotente — pot fi rulate de mai multe ori fara probleme.
 
 function safeEqual(a: string, b: string): boolean {
@@ -19,7 +21,7 @@ function safeEqual(a: string, b: string): boolean {
   return timingSafeEqual(ab, bb);
 }
 
-export async function GET(req: NextRequest) {
+export async function POST(req: NextRequest) {
   const expected = process.env.EXTENSION_API_KEY;
   if (!expected) {
     return NextResponse.json(
@@ -27,7 +29,7 @@ export async function GET(req: NextRequest) {
       { status: 500 },
     );
   }
-  const provided = req.nextUrl.searchParams.get("key") || "";
+  const provided = req.headers.get("x-api-key") || "";
   if (!provided || !safeEqual(provided, expected)) {
     return NextResponse.json({ ok: false, error: "key invalid" }, { status: 401 });
   }

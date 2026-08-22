@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { CreditCard, Loader2 } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 
@@ -16,8 +16,26 @@ const CASINO = {
   listPrice: "2.500 lei",
 };
 
+// Bifa cazino e afisata in DOUA locuri pe pagina (hero + CTA final).
+// Starea traieste la nivel de modul ca ambele instante sa o vada la fel —
+// altfel clientul declara sus si plateste jos pe pachetul standard.
+let casinoState = false;
+const casinoListeners = new Set<() => void>();
+function setCasino(v: boolean) {
+  casinoState = v;
+  casinoListeners.forEach((fn) => fn());
+}
+function subscribeCasino(fn: () => void) {
+  casinoListeners.add(fn);
+  return () => casinoListeners.delete(fn);
+}
+function useCasino(): [boolean, (v: boolean) => void] {
+  const value = useSyncExternalStore(subscribeCasino, () => casinoState, () => false);
+  return [value, setCasino];
+}
+
 export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
-  const [isCasino, setIsCasino] = useState(false);
+  const [isCasino, setIsCasino] = useCasino();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 

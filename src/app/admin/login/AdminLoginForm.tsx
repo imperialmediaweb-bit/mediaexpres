@@ -42,7 +42,10 @@ export function AdminLoginForm() {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+    // method="post": daca userul apasa submit INAINTE de hidratarea React,
+    // browserul face submit nativ — cu GET, parola ar ajunge in URL si in
+    // logurile serverului. POST tine credentialele in body.
+    <form method="post" onSubmit={handleSubmit(onSubmit)} className="space-y-4">
       <div className="space-y-1.5">
         <Label>Utilizator</Label>
         <Input {...register("username")} autoComplete="username" />
