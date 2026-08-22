@@ -29,7 +29,14 @@ async function resolveOutcome(sessionId: string): Promise<Outcome> {
 
   try {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
-    if (session.payment_status !== "paid") return { kind: "generic" };
+    // allow_promotion_codes e activ la checkout: un cod de 100% lasa sesiunea
+    // pe "no_payment_required" — tot o comanda valida este.
+    if (
+      session.payment_status !== "paid" &&
+      session.payment_status !== "no_payment_required"
+    ) {
+      return { kind: "generic" };
+    }
 
     const email = session.customer_details?.email || session.customer_email || null;
 

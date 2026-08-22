@@ -138,7 +138,7 @@ export function defaultListUnsubscribe() {
   return `<mailto:${CONTACT}?subject=STOP&body=STOP>`;
 }
 
-function escapeHtml(value: string): string {
+export function escapeHtml(value: string): string {
   return value
     .replace(/&/g, "&amp;")
     .replace(/</g, "&lt;")

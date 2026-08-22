@@ -1,21 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyOrderToken } from "@/lib/order-token";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 
 export const runtime = "nodejs";
-
-// Tot ce vine de la client si ajunge in HTML de email trece prin asta —
-// altfel un titlu cu markup devine HTML viu in inboxul adminului.
-function esc(v: string): string {
-  return v
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
 
 const imageSchema = z.object({
   url: z.string().url().max(500),
