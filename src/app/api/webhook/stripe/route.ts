@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml, ADMIN_EMAIL } from "@/lib/email";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
@@ -203,17 +203,27 @@ async function handleCheckoutCompleted(
         ? session.payment_intent
         : session.payment_intent?.id || null;
 
-    await db.insert(orders).values({
-      userId: userId || null,
-      email: email || "",
-      packageId,
-      amount,
-      currency,
-      status: "paid",
-      stripeSessionId: session.id,
-      stripePaymentIntentId: paymentIntentId,
-      paidAt: new Date(),
-    });
+    // onConflictDoNothing + indexul unic inchid si cursa dintre doua livrari
+    // concurente: doar una reuseste insertul, cealalta se opreste aici.
+    const inserted = await db
+      .insert(orders)
+      .values({
+        userId: userId || null,
+        email: email || "",
+        packageId,
+        amount,
+        currency,
+        status: "paid",
+        stripeSessionId: session.id,
+        stripePaymentIntentId: paymentIntentId,
+        paidAt: new Date(),
+      })
+      .onConflictDoNothing({ target: orders.stripeSessionId })
+      .returning({ id: orders.id });
+    if (inserted.length === 0) {
+      console.log("[stripe-webhook] insert concurent pierdut, ignor:", session.id);
+      return;
+    }
 
     await sendConfirmationEmails({
       kind: "payment",
@@ -251,8 +261,10 @@ async function handleCheckoutCompleted(
       const isCasinoPromo = packageId === "promo-50-cazino";
       const monthlyPrice = isCasinoPromo ? 800 : 400;
       const oncePrice = isCasinoPromo ? 1000 : 500;
-      const firstName = (session.customer_details?.name || "").split(" ")[0] || "";
-      sendEmail({
+      const firstName = escapeHtml((session.customer_details?.name || "").split(" ")[0] || "");
+      // await: intr-un runtime serverless, un fire-and-forget poate fi inghetat
+      // inainte sa ajunga la Resend — iar erorile sunt deja prinse mai jos.
+      await sendEmail({
         to: email,
         subject: `Articolul tău în 50 de ziare, în fiecare lună — ${monthlyPrice} lei/lună`,
         scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
@@ -282,8 +294,22 @@ async function handleCheckoutCompleted(
   if (session.mode === "subscription" && session.subscription) {
     const subId =
       typeof session.subscription === "string" ? session.subscription : session.subscription.id;
+
+    // Retry-urile Stripe nu trebuie sa retrimita emailurile de confirmare:
+    // daca abonamentul e deja in DB, evenimentul asta a mai fost procesat.
+    const [subAlready] = await db
+      .select({ id: subscriptions.id })
+      .from(subscriptions)
+      .where(eq(subscriptions.id, subId))
+      .limit(1);
+
     const sub = await stripe.subscriptions.retrieve(subId);
     await upsertSubscription(sub, userId);
+
+    if (subAlready) {
+      console.log("[stripe-webhook] abonament deja procesat, sar emailurile:", subId);
+      return;
+    }
 
     await sendConfirmationEmails({
       kind: "subscription",
