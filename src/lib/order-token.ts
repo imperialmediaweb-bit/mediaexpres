@@ -16,7 +16,16 @@ export interface OrderTokenPayload {
 }
 
 function getSecret(): string {
-  return process.env.SESSION_SECRET || "dev-secret-change-in-production-please-32-chars";
+  const secret = process.env.SESSION_SECRET;
+  if (!secret) {
+    // In productie refuzam sa functionam cu secretul de dev din repo:
+    // oricine citeste codul ar putea falsifica tokenuri de comanda platita.
+    if (process.env.NODE_ENV === "production") {
+      throw new Error("SESSION_SECRET lipseste — tokenurile de comanda nu pot fi semnate in productie");
+    }
+    return "dev-secret-change-in-production-please-32-chars";
+  }
+  return secret;
 }
 
 function sign(payload: string): string {

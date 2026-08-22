@@ -22,6 +22,14 @@ const log = new Map<string, number[]>();
 
 function limited(key: string): boolean {
   const now = Date.now();
+
+  // Fara curatare, mapul creste cu fiecare comanda pana la restartul procesului.
+  if (log.size > 500) {
+    for (const [k, times] of log) {
+      if (times.every((t) => now - t >= RATE_LIMIT_WINDOW_MS)) log.delete(k);
+    }
+  }
+
   const recent = (log.get(key) || []).filter((t) => now - t < RATE_LIMIT_WINDOW_MS);
   recent.push(now);
   log.set(key, recent);
