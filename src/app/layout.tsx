@@ -9,6 +9,7 @@ import {
   ConversionWidgets,
 } from "@/components/conversion/ConversionWidgets";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -101,6 +102,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen font-sans flex flex-col">
         <MetaPixel />
+        <GoogleAnalytics />
         <StructuredData />
         <ConversionBanner />
         <Navbar />
