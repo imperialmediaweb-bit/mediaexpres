@@ -183,6 +183,18 @@ async function handleCheckoutCompleted(
   });
 
   if (session.mode === "payment") {
+    // Stripe livreaza evenimentele cel putin o data si reincearca la timeout.
+    // Fara gardul asta, un retry ar duplica comanda, emailurile SI factura fiscala.
+    const [already] = await db
+      .select({ id: orders.id })
+      .from(orders)
+      .where(eq(orders.stripeSessionId, session.id))
+      .limit(1);
+    if (already) {
+      console.log("[stripe-webhook] sesiune deja procesata, ignor:", session.id);
+      return;
+    }
+
     const packageId = (session.metadata?.packageId as string) || "unknown";
     const amount = session.amount_total || 0;
     const currency = (session.currency || "ron").toLowerCase();
@@ -218,7 +230,11 @@ async function handleCheckoutCompleted(
     await issueInvoiceForOrder({
       email,
       customerName: session.customer_details?.name || null,
-      cui: session.custom_fields?.find((f) => f.key === "company_cui")?.text?.value || null,
+      // CUI-ul poate veni din campul oficial de tax ID al Stripe sau din custom field.
+      cui:
+        session.customer_details?.tax_ids?.[0]?.value ||
+        session.custom_fields?.find((f) => f.key === "company_cui")?.text?.value ||
+        null,
       address: billing
         ? [billing.line1, billing.line2].filter(Boolean).join(", ")
         : null,
