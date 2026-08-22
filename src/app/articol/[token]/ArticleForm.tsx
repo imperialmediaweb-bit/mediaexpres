@@ -16,10 +16,12 @@ export function ArticleForm({
   token,
   email,
   isCasino,
+  newspapers = 50,
 }: {
   token: string;
   email: string;
   isCasino: boolean;
+  newspapers?: number;
 }) {
   const [mode, setMode] = useState<Mode>("ai");
 
@@ -187,9 +189,11 @@ export function ArticleForm({
           Materialele au ajuns la noi
         </h2>
         <p className="mt-3 text-slate-600">
-          Publicăm pe cele 50 de ziare în maximum <strong>24 de ore
-          lucrătoare</strong>. Primești raportul PDF cu toate linkurile pe{" "}
-          <strong>{email}</strong>.
+          Publicăm pe {newspapers === 1
+            ? "publicația din pachetul tău"
+            : `cele ${newspapers}${newspapers >= 20 ? " de" : ""} publicații`} în
+          maximum <strong>24 de ore lucrătoare</strong>. Primești raportul cu
+          toate linkurile pe <strong>{email}</strong>.
         </p>
       </div>
     );
