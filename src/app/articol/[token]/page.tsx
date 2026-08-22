@@ -47,6 +47,7 @@ export default function ArticolPage({ params }: { params: { token: string } }) {
           token={params.token}
           email={order.email}
           isCasino={isCasino}
+          newspapers={pkg?.newspapers ?? 50}
         />
 
         <p className="mt-8 text-center text-xs text-slate-500">

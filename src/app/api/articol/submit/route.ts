@@ -6,6 +6,17 @@ import { findPackageById } from "@/data/packages";
 
 export const runtime = "nodejs";
 
+// Tot ce vine de la client si ajunge in HTML de email trece prin asta —
+// altfel un titlu cu markup devine HTML viu in inboxul adminului.
+function esc(v: string): string {
+  return v
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 const imageSchema = z.object({
   url: z.string().url().max(500),
   publicId: z.string().max(300).optional(),
@@ -61,7 +72,7 @@ export async function POST(req: NextRequest) {
     ? d.images
         .map(
           (img, i) =>
-            `<p style="margin:4px 0;"><a href="${img.url}">${img.url}</a>${
+            `<p style="margin:4px 0;"><a href="${esc(img.url)}">${esc(img.url)}</a>${
               i === d.featuredIndex ? ' <strong style="color:#C8102E;">← REPREZENTATIVĂ</strong>' : ""
             }</p>`,
         )
@@ -84,12 +95,10 @@ export async function POST(req: NextRequest) {
       ${kv("Stripe session", order.sessionId)}
     </table>
 
-    <h3 style="margin:24px 0 8px;font-family:Georgia,serif;color:#0B1F3A;">${d.title}</h3>
-    ${d.metaDescription ? `<p style="color:#64748b;font-size:13px;"><strong>Meta:</strong> ${d.metaDescription}</p>` : ""}
-    ${d.keywords?.length ? `<p style="color:#64748b;font-size:13px;"><strong>Cuvinte-cheie:</strong> ${d.keywords.join(", ")}</p>` : ""}
-    <div style="white-space:pre-wrap;border-left:3px solid #e2e8f0;padding-left:16px;margin:16px 0;color:#334155;">${d.body
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")}</div>
+    <h3 style="margin:24px 0 8px;font-family:Georgia,serif;color:#0B1F3A;">${esc(d.title)}</h3>
+    ${d.metaDescription ? `<p style="color:#64748b;font-size:13px;"><strong>Meta:</strong> ${esc(d.metaDescription)}</p>` : ""}
+    ${d.keywords?.length ? `<p style="color:#64748b;font-size:13px;"><strong>Cuvinte-cheie:</strong> ${esc(d.keywords.join(", "))}</p>` : ""}
+    <div style="white-space:pre-wrap;border-left:3px solid #e2e8f0;padding-left:16px;margin:16px 0;color:#334155;">${esc(d.body)}</div>
 
     <h4 style="margin:24px 0 8px;color:#0B1F3A;">Imagini (${d.images.length}/3)</h4>
     ${imagesHtml}
@@ -120,9 +129,15 @@ export async function POST(req: NextRequest) {
       "Am primit articolul tău",
       `
       <p>Salut,</p>
-      <p>Am primit articolul <strong>„${d.title}"</strong> și cele ${d.images.length} imagini.</p>
-      <p>Îl publicăm pe cele 50 de ziare în maximum <strong>24 de ore lucrătoare</strong>. Când e gata, primești pe email raportul PDF cu toate linkurile.</p>
-      ${featured ? `<p style="margin:16px 0;"><img src="${featured.url}" alt="" style="max-width:100%;border-radius:8px;" /></p>` : ""}
+      <p>Am primit articolul <strong>„${esc(d.title)}"</strong> și cele ${d.images.length} imagini.</p>
+      <p>Îl publicăm ${
+        pkg?.newspapers
+          ? pkg.newspapers === 1
+            ? "pe publicația din pachetul tău"
+            : `pe cele ${pkg.newspapers}${pkg.newspapers >= 20 ? " de" : ""} publicații din pachetul tău`
+          : "în publicațiile din pachetul tău"
+      } în maximum <strong>24 de ore lucrătoare</strong>. Când e gata, primești pe email raportul cu toate linkurile.</p>
+      ${featured ? `<p style="margin:16px 0;"><img src="${esc(featured.url)}" alt="" style="max-width:100%;border-radius:8px;" /></p>` : ""}
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,
     ),
