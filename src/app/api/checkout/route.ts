@@ -83,6 +83,13 @@ export async function POST(req: NextRequest) {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        // Recuperare cos abandonat: sesiunea expira in 2h, iar Stripe emite
+        // checkout.session.expired cu un link care REDESCHIDE exact plata asta.
+        // Webhookul trimite atunci emailul de reamintire.
+        expires_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
+        after_expiration: {
+          recovery: { enabled: true, allow_promotion_codes: true },
+        },
         ...(stripeCustomerId
           ? { customer: stripeCustomerId }
           : sessionEmail
