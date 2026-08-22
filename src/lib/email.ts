@@ -31,7 +31,8 @@ interface SendArgs {
   html: string;
   text?: string;
   replyTo?: string;
-  attachments?: { filename: string; path: string }[];
+  // `path` = URL public; `content` = continut base64 (pentru fisiere generate/incarcate).
+  attachments?: { filename: string; path?: string; content?: string }[];
   // ISO string; Resend schedules the send at this time instead of now.
   scheduledAt?: string;
   // RFC 2369 + RFC 8058 — obligatoriu pentru bulk senders Gmail/Yahoo din 2024.
@@ -56,6 +57,10 @@ export async function sendEmail(args: SendArgs) {
   };
   if (args.text) {
     (payload as unknown as { text: string }).text = args.text;
+  }
+  if (args.attachments && args.attachments.length > 0) {
+    (payload as unknown as { attachments: typeof args.attachments }).attachments =
+      args.attachments;
   }
   if (args.scheduledAt) {
     (payload as unknown as { scheduledAt: string }).scheduledAt = args.scheduledAt;
