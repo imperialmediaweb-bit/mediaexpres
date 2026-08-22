@@ -81,7 +81,9 @@ export const orders = pgTable("order", {
   amount: integer("amount").notNull(),
   currency: text("currency").notNull().default("ron"),
   status: text("status").notNull().default("pending"),
-  stripeSessionId: text("stripe_session_id"),
+  // unique = plasa de siguranta pentru idempotenta webhookului Stripe:
+  // doua livrari concurente ale aceluiasi eveniment nu pot insera ambele.
+  stripeSessionId: text("stripe_session_id").unique(),
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   paidAt: timestamp("paid_at"),
