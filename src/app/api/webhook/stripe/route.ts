@@ -6,7 +6,7 @@ import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { SUBSCRIPTION_PLANS } from "@/data/packages";
+import { findSubscriptionPlanById } from "@/data/packages";
 import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
@@ -244,6 +244,39 @@ async function handleCheckoutCompleted(
       packageLabel: packageId,
       stripeSessionId: session.id,
     });
+
+    // Upsell: cine a cumparat oferta o singura data afla ca abonamentul lunar
+    // e mai ieftin. Programat la 3 zile — dupa ce si-a vazut articolul publicat.
+    if (email && (packageId === "promo-50" || packageId === "promo-50-cazino")) {
+      const isCasinoPromo = packageId === "promo-50-cazino";
+      const monthlyPrice = isCasinoPromo ? 800 : 400;
+      const oncePrice = isCasinoPromo ? 1000 : 500;
+      const firstName = (session.customer_details?.name || "").split(" ")[0] || "";
+      sendEmail({
+        to: email,
+        subject: `Articolul tău în 50 de ziare, în fiecare lună — ${monthlyPrice} lei/lună`,
+        scheduledAt: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString(),
+        html: wrapEmail(
+          "Ți-a plăcut? Fă-o lunar, mai ieftin.",
+          `
+          <p>Salut${firstName ? " " + firstName : ""},</p>
+          <p>Ai plătit <strong>${oncePrice} lei</strong> pentru articolul tău în cele 50 de ziare. Dacă vrei prezență constantă în presă, avem o variantă mai bună:</p>
+          <p style="margin:16px 0;font-size:18px;"><strong>Abonament lunar: ${monthlyPrice} lei/lună</strong> — cu ${oncePrice - monthlyPrice} lei mai puțin decât plata unică.</p>
+          <ul style="margin:16px 0;padding-left:20px;color:#334155;">
+            <li style="margin:6px 0;">1 articol nou pe cele 50 de ziare, în fiecare lună</li>
+            <li style="margin:6px 0;">50 de backlinks noi lunar — SEO-ul crește constant</li>
+            <li style="margin:6px 0;">Îți scrii articolul din cont sau îl generezi cu AI</li>
+            <li style="margin:6px 0;">Anulezi oricând, fără penalizări</li>
+          </ul>
+          <p style="margin-top:16px;">
+            <a href="${SITE.url}/oferta-500" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Activează abonamentul — ${monthlyPrice} lei/lună</a>
+          </p>
+          <p style="margin-top:16px;color:#64748b;font-size:13px;">Alege „Abonament lunar" pe pagină și plătești cu cardul, ca data trecută.</p>
+          <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+          `,
+        ),
+      }).catch((err) => console.error("[stripe-webhook] upsell email error:", err));
+    }
   }
 
   if (session.mode === "subscription" && session.subscription) {
@@ -270,7 +303,7 @@ async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
 
   const sub = await stripe.subscriptions.retrieve(subId);
   const planId = (sub.metadata?.planId as string) || "";
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+  const plan = findSubscriptionPlanById(planId);
   const included = plan?.distributionsPerMonth ?? 0;
 
   await db
@@ -309,7 +342,7 @@ async function handleSubscriptionDeleted(sub: Stripe.Subscription) {
 async function upsertSubscription(sub: Stripe.Subscription, userIdHint: string | null) {
   const planId = (sub.metadata?.planId as string) || "";
   const category = (sub.metadata?.category as string) || "standard";
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+  const plan = findSubscriptionPlanById(planId);
   const included =
     plan?.distributionsPerMonth ||
     Number(sub.metadata?.articlesIncludedPerMonth || 0);
