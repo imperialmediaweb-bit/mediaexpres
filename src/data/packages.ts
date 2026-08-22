@@ -16,7 +16,7 @@ export interface Package {
 
 export interface SubscriptionPlan {
   id: string;
-  name: "Bronze" | "Silver" | "Gold" | "Platinum";
+  name: "Bronze" | "Silver" | "Gold" | "Platinum" | "Promo Lunar";
   distributionsPerMonth: number;
   newspapersPerDistribution: 50;
   priceStandard: number;
@@ -222,6 +222,31 @@ export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
     description: "8 articole × 50 ziare pe lună",
   },
 ];
+
+// Abonament promotional, disponibil doar prin landingul /oferta-500.
+// NU apare in SUBSCRIPTION_PLANS ca sa nu fie afisat pe /pachete langa
+// planurile la pret intreg.
+export const PROMO_SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
+  {
+    id: "promo-lunar",
+    name: "Promo Lunar",
+    distributionsPerMonth: 1,
+    newspapersPerDistribution: 50,
+    // Mai ieftin decat plata unica (500 / 1.000) — stimulentul de abonare.
+    priceStandard: 400,
+    priceCasino: 800,
+    description: "1 articol × 50 ziare în fiecare lună — preț promoțional",
+  },
+];
+
+/** Cauta planul dupa id, inclusiv planurile promo nelistate public. */
+export function findSubscriptionPlanById(
+  id: string,
+): SubscriptionPlan | undefined {
+  return [...SUBSCRIPTION_PLANS, ...PROMO_SUBSCRIPTION_PLANS].find(
+    (p) => p.id === id,
+  );
+}
 
 export const PRICING_NOTE =
   "Raportul include linkurile și screenshot-urile articolelor publicate pe cele 50 de site-uri. Distribuția pe Facebook este inclusă automat în toate pachetele, dar statisticile paginilor de Facebook nu pot fi colectate în raport.";
