@@ -2,7 +2,7 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { auth } from "@/auth";
 import { getUserSubscriptions } from "@/lib/entitlements";
-import { SUBSCRIPTION_PLANS } from "@/data/packages";
+import { findSubscriptionPlanById } from "@/data/packages";
 import { Button } from "@/components/ui/button";
 import { BillingPortalButton } from "@/components/cont/BillingPortalButton";
 import { Repeat, CheckCircle2, AlertCircle } from "lucide-react";
@@ -74,7 +74,7 @@ export default async function AbonamentPage() {
                 </thead>
                 <tbody>
                   {subs.map((s) => {
-                    const plan = SUBSCRIPTION_PLANS.find((p) => p.id === s.planId);
+                    const plan = findSubscriptionPlanById(s.planId);
                     return (
                       <tr key={s.id} className="border-t border-slate-100">
                         <td className="px-4 py-3 font-medium text-brand-navy">
@@ -101,7 +101,7 @@ export default async function AbonamentPage() {
 }
 
 function ActiveSubCard({ sub }: { sub: { id: string; planId: string; category: string; status: string; articlesIncludedPerMonth: number; articlesRemaining: number; currentPeriodEnd: Date; cancelAtPeriodEnd: boolean } }) {
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === sub.planId);
+  const plan = findSubscriptionPlanById(sub.planId);
   return (
     <div className="mt-10 grid gap-6 md:grid-cols-2">
       <div className="rounded-2xl border border-brand-red/20 bg-white p-6 shadow-sm">

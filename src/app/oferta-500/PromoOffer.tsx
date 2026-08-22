@@ -1,52 +1,54 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2 } from "lucide-react";
+import { CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 
-const STANDARD = {
-  packageId: "promo-50",
-  price: 500,
-  listPrice: "1.500 lei",
-};
+// Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
+// Abonamentul lunar promo e mai ieftin decat plata unica: 400 lei/luna (cazino 800).
+const OFFERS = {
+  once: {
+    standard: { packageId: "promo-50", price: 500, listPrice: "1.500 lei", suffix: "" },
+    casino: { packageId: "promo-50-cazino", price: 1000, listPrice: "2.500 lei", suffix: "" },
+  },
+  monthly: {
+    standard: { packageId: "promo-lunar", price: 400, listPrice: "1.300 lei/lună", suffix: "/lună" },
+    casino: { packageId: "promo-lunar", price: 800, listPrice: "2.300 lei/lună", suffix: "/lună" },
+  },
+} as const;
 
-const CASINO = {
-  packageId: "promo-50-cazino",
-  price: 1000,
-  listPrice: "2.500 lei",
-};
-
-// Bifa cazino e afisata in DOUA locuri pe pagina (hero + CTA final).
+// Optiunile sunt afisate in DOUA locuri pe pagina (hero + CTA final).
 // Starea traieste la nivel de modul ca ambele instante sa o vada la fel —
-// altfel clientul declara sus si plateste jos pe pachetul standard.
-let casinoState = false;
-const casinoListeners = new Set<() => void>();
-function setCasino(v: boolean) {
-  casinoState = v;
-  casinoListeners.forEach((fn) => fn());
+// altfel clientul alege sus si plateste jos pe alta varianta.
+type Selection = { isCasino: boolean; monthly: boolean };
+let selection: Selection = { isCasino: false, monthly: false };
+const listeners = new Set<() => void>();
+const serverSnapshot: Selection = { isCasino: false, monthly: false };
+function setSelection(patch: Partial<Selection>) {
+  selection = { ...selection, ...patch };
+  listeners.forEach((fn) => fn());
 }
-function subscribeCasino(fn: () => void) {
-  casinoListeners.add(fn);
-  return () => casinoListeners.delete(fn);
+function subscribe(fn: () => void) {
+  listeners.add(fn);
+  return () => listeners.delete(fn);
 }
-function useCasino(): [boolean, (v: boolean) => void] {
-  const value = useSyncExternalStore(subscribeCasino, () => casinoState, () => false);
-  return [value, setCasino];
+function useSelection(): Selection {
+  return useSyncExternalStore(subscribe, () => selection, () => serverSnapshot);
 }
 
 export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
-  const [isCasino, setIsCasino] = useCasino();
+  const { isCasino, monthly } = useSelection();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const offer = isCasino ? CASINO : STANDARD;
+  const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
   async function go() {
     if (loading) return;
     setLoading(true);
     setError(null);
     trackPixelEvent("InitiateCheckout", {
-      content_name: isCasino ? "Oferta 500 — cazino" : "Oferta 500 — standard",
+      content_name: `Oferta 500 — ${isCasino ? "cazino" : "standard"}${monthly ? " lunar" : ""}`,
       content_category: "promo",
       value: offer.price,
       currency: "RON",
@@ -55,7 +57,14 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId: offer.packageId, mode: "package" }),
+        body: JSON.stringify({
+          packageId: offer.packageId,
+          mode: monthly
+            ? isCasino
+              ? "subscription-casino"
+              : "subscription-standard"
+            : "package",
+        }),
       });
       const body = await res.json();
       if (!res.ok || !body.ok || !body.url) throw new Error(body.error || "Eroare");
@@ -68,8 +77,31 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
 
   return (
     <div>
+      {/* O data / Lunar */}
+      <div className="mx-auto flex max-w-xs overflow-hidden rounded-full border border-white/20 bg-white/5 p-1 text-sm font-semibold">
+        {(
+          [
+            [false, "O singură dată"],
+            [true, "Abonament lunar"],
+          ] as [boolean, string][]
+        ).map(([m, label]) => (
+          <button
+            key={label}
+            type="button"
+            onClick={() => setSelection({ monthly: m })}
+            className={`flex-1 rounded-full px-4 py-2 transition ${
+              monthly === m
+                ? "bg-brand-gold text-brand-navy"
+                : "text-white/70 hover:text-white"
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+
       {showPrice && (
-        <div className="flex items-end justify-center gap-4">
+        <div className="mt-8 flex items-end justify-center gap-4">
           <div className="text-right">
             <p className="text-sm uppercase tracking-wider text-white/50">
               Preț normal
@@ -84,23 +116,36 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </p>
             <p className="font-serif text-6xl font-bold text-brand-gold md:text-7xl">
               {offer.price.toLocaleString("ro")} lei
+              {offer.suffix && (
+                <span className="text-2xl font-normal text-white/60 md:text-3xl">
+                  {offer.suffix}
+                </span>
+              )}
             </p>
           </div>
         </div>
       )}
 
-      <label className="mx-auto mt-8 flex max-w-md cursor-pointer items-start gap-3 rounded-xl border border-white/20 bg-white/5 p-4 text-left">
+      {monthly && (
+        <p className="mx-auto mt-3 flex max-w-md items-center justify-center gap-2 text-sm text-white/70">
+          <RefreshCw className="h-3.5 w-3.5" />
+          1 articol nou pe cele 50 de ziare, în fiecare lună — cu {isCasino ? "200" : "100"} lei
+          mai ieftin decât plata unică. Anulezi oricând din cont.
+        </p>
+      )}
+
+      <label className="mx-auto mt-6 flex max-w-md cursor-pointer items-start gap-3 rounded-xl border border-white/20 bg-white/5 p-4 text-left">
         <input
           type="checkbox"
           checked={isCasino}
-          onChange={(e) => setIsCasino(e.target.checked)}
+          onChange={(e) => setSelection({ isCasino: e.target.checked })}
           className="mt-0.5 h-5 w-5 shrink-0 accent-brand-gold"
         />
         <span className="text-sm text-white/80">
           Articolul este despre <strong className="text-white">cazino, pariuri
           sau iGaming</strong>
           <span className="mt-1 block text-white/55">
-            Conținutul din această categorie are tarif dublu — 1.000 lei.
+            Conținutul din această categorie are tarif dublu — {monthly ? "800 lei/lună" : "1.000 lei"}.
             Declarația e obligatorie; articolele nedeclarate se opresc de la
             publicare fără rambursare.
           </span>
@@ -119,7 +164,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           ) : (
             <CreditCard className="h-5 w-5" />
           )}
-          Comandă acum — {offer.price.toLocaleString("ro")} lei
+          {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
         </button>
       </div>
       {error && (

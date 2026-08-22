@@ -80,6 +80,9 @@ export default async function ContPage() {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="accent" size="lg" asChild>
+              <Link href="/oferta-500">🔥 Ofertă: 50 ziare — 500 lei</Link>
+            </Button>
+            <Button variant="outline" size="lg" asChild>
               <Link href="/pachete">Vezi pachete</Link>
             </Button>
             <Button variant="outline" size="lg" asChild>
