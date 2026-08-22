@@ -49,5 +49,19 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fix 2: index unic pe order.stripe_session_id — plasa de siguranta pentru
+  // idempotenta webhookului Stripe (doua livrari concurente nu pot insera ambele).
+  try {
+    await db.execute(
+      sql`CREATE UNIQUE INDEX IF NOT EXISTS "order_stripe_session_id_unique" ON "order" ("stripe_session_id")`,
+    );
+    results.push({ step: "order.stripe_session_id -> unique index", status: "OK" });
+  } catch (e) {
+    results.push({
+      step: "order.stripe_session_id -> unique index",
+      status: e instanceof Error ? e.message : String(e),
+    });
+  }
+
   return NextResponse.json({ ok: true, results });
 }

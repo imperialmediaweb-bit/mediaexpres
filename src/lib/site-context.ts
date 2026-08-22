@@ -1,14 +1,16 @@
 // Citeste site-ul clientului si extrage text curat, ca sa il dea AI-ului drept context
-// cand redacteaza advertorialul. Fara dependinte noi — doar fetch + curatare HTML.
+// cand redacteaza advertorialul. Fara dependinte noi — node:http(s) + curatare HTML.
 //
 // Securitate: URL-ul vine de la client, deci fetch-ul asta e o tinta de SSRF.
-// Apararea are doua straturi: (1) respingem hostname-uri care sunt IP-uri sau
-// nume evident interne; (2) rezolvam DNS-ul si respingem orice adresa privata,
-// loopback, link-local sau mapata IPv6 — asta prinde si trucuri gen 127.0.0.1.nip.io.
-// Redirecturile NU se urmeaza automat: fiecare hop trece prin aceleasi verificari.
+// Cererea se face prin node:http(s) cu un `lookup` custom care valideaza adresa
+// IP CHIAR LA MOMENTUL CONEXIUNII — nu inainte. Asta inchide si DNS rebinding
+// (TOCTOU): nu exista o a doua rezolvare pe care atacatorul sa o poata schimba.
+// Redirecturile nu se urmeaza automat: fiecare hop trece prin acelasi lookup.
 
-import { lookup } from "dns/promises";
+import { lookup as dnsLookup } from "dns";
 import { isIP } from "net";
+import http from "http";
+import https from "https";
 
 const MAX_CHARS = 6000;
 const TIMEOUT_MS = 8000;
@@ -54,13 +56,17 @@ export function normalizeUrl(input: string): string | null {
 }
 
 /** True daca adresa e privata / loopback / link-local / rezervata. */
-function isPrivateAddress(addr: string): boolean {
+export function isPrivateAddress(addr: string): boolean {
   const a = addr.toLowerCase();
 
   // IPv6 (inclusiv IPv4 mapat: ::ffff:10.0.0.1)
   if (a.includes(":")) {
     if (a === "::" || a === "::1") return true;
-    if (a.startsWith("fe80:") || a.startsWith("fc") || a.startsWith("fd")) return true;
+    // fc00::/7 (ULA)
+    if (a.startsWith("fc") || a.startsWith("fd")) return true;
+    // fe80::/10 = fe80: pana la febf:
+    const m6 = a.match(/^fe([89ab])[0-9a-f]:/);
+    if (m6) return true;
     const mapped = a.match(/^::ffff:(\d+\.\d+\.\d+\.\d+)$/);
     if (mapped) return isPrivateAddress(mapped[1]);
     return false;
@@ -71,24 +77,100 @@ function isPrivateAddress(addr: string): boolean {
   if (parts.length !== 4 || parts.some((p) => !Number.isInteger(p) || p < 0 || p > 255)) {
     return true; // ce nu se parseaza curat nu trece
   }
-  const [p0, p1] = parts;
+  const [p0, p1, p2] = parts;
   if (p0 === 0 || p0 === 10 || p0 === 127) return true;
+  if (p0 >= 224) return true; // multicast + rezervat
   if (p0 === 169 && p1 === 254) return true; // link-local + cloud metadata
   if (p0 === 172 && p1 >= 16 && p1 <= 31) return true;
   if (p0 === 192 && p1 === 168) return true;
+  if (p0 === 192 && p1 === 0 && p2 === 0) return true; // 192.0.0.0/24
+  if (p0 === 192 && p1 === 0 && p2 === 2) return true; // TEST-NET-1
+  if (p0 === 198 && (p1 === 18 || p1 === 19)) return true; // 198.18.0.0/15 benchmarking
   if (p0 === 100 && p1 >= 64 && p1 <= 127) return true; // CGNAT
   return false;
 }
 
-/** Rezolva hostname-ul si respinge orice adresa interna. */
-async function hostResolvesPublic(hostname: string): Promise<boolean> {
-  try {
-    const addrs = await lookup(hostname, { all: true, verbatim: true });
-    if (addrs.length === 0) return false;
-    return addrs.every((a) => !isPrivateAddress(a.address));
-  } catch {
-    return false;
-  }
+// `lookup` custom pentru http.request: rezolva si REFUZA adresele private in
+// acelasi pas cu conexiunea — atacatorul nu are o fereastra intre verificare
+// si conectare.
+const safeLookup: typeof dnsLookup = ((hostname: string, options: unknown, callback: unknown) => {
+  const cb = (typeof options === "function" ? options : callback) as (
+    err: NodeJS.ErrnoException | null,
+    address?: string | { address: string; family: number }[],
+    family?: number,
+  ) => void;
+  const opts = typeof options === "object" && options !== null ? options : {};
+
+  dnsLookup(hostname, { ...opts, all: true, verbatim: true }, (err, addresses) => {
+    if (err) return cb(err);
+    const list = (addresses as { address: string; family: number }[]) || [];
+    const publicOnly = list.filter((a) => !isPrivateAddress(a.address));
+    if (publicOnly.length === 0 || publicOnly.length !== list.length) {
+      // Orice adresa privata in raspuns = refuz total, nu doar filtrare —
+      // altfel un DNS care alterneaza raspunsurile tot ar putea strecura una.
+      const e = new Error("adresa interna refuzata") as NodeJS.ErrnoException;
+      e.code = "EPRIVATE";
+      return cb(e);
+    }
+    const first = publicOnly[0];
+    if ((opts as { all?: boolean }).all) return cb(null, publicOnly);
+    cb(null, first.address, first.family);
+  });
+}) as typeof dnsLookup;
+
+interface RawResponse {
+  status: number;
+  headers: http.IncomingHttpHeaders;
+  body: string;
+}
+
+/** GET cu lookup sigur, timeout si limita de marime. Fara redirecturi automate. */
+function safeGet(url: string, signal: AbortSignal): Promise<RawResponse> {
+  return new Promise((resolve, reject) => {
+    const parsed = new URL(url);
+    const mod = parsed.protocol === "https:" ? https : http;
+    const req = mod.request(
+      parsed,
+      {
+        method: "GET",
+        lookup: safeLookup,
+        headers: {
+          // Unele site-uri servesc 403 fara user-agent de browser.
+          "User-Agent":
+            "Mozilla/5.0 (compatible; MediaExpresBot/1.0; +https://mediaexpress.ro)",
+          Accept: "text/html,application/xhtml+xml",
+        },
+        signal,
+      },
+      (res) => {
+        const chunks: Buffer[] = [];
+        let size = 0;
+        res.on("data", (chunk: Buffer) => {
+          size += chunk.length;
+          if (size > MAX_BYTES) {
+            res.destroy();
+            resolve({
+              status: res.statusCode || 0,
+              headers: res.headers,
+              body: Buffer.concat(chunks).toString("utf8"),
+            });
+            return;
+          }
+          chunks.push(chunk);
+        });
+        res.on("end", () =>
+          resolve({
+            status: res.statusCode || 0,
+            headers: res.headers,
+            body: Buffer.concat(chunks).toString("utf8"),
+          }),
+        );
+        res.on("error", reject);
+      },
+    );
+    req.on("error", reject);
+    req.end();
+  });
 }
 
 function decodeEntities(s: string): string {
@@ -148,24 +230,11 @@ export async function fetchSiteContext(
 
   try {
     for (let hop = 0; hop <= MAX_REDIRECTS; hop++) {
-      const parsed = new URL(url);
-      if (!(await hostResolvesPublic(parsed.hostname))) return null;
-
-      const res = await fetch(url, {
-        signal: controller.signal,
-        redirect: "manual",
-        headers: {
-          // Unele site-uri servesc 403 fara user-agent de browser.
-          "User-Agent":
-            "Mozilla/5.0 (compatible; MediaExpresBot/1.0; +https://mediaexpress.ro)",
-          Accept: "text/html,application/xhtml+xml",
-        },
-        cache: "no-store",
-      });
+      const res = await safeGet(url, controller.signal);
 
       // Redirect: validam manual urmatorul hop, nu il urmam orbeste.
       if (res.status >= 300 && res.status < 400) {
-        const loc = res.headers.get("location");
+        const loc = res.headers.location;
         if (!loc) return null;
         const next = normalizeUrl(new URL(loc, url).toString());
         if (!next) return null;
@@ -173,15 +242,12 @@ export async function fetchSiteContext(
         continue;
       }
 
-      if (!res.ok) return null;
+      if (res.status < 200 || res.status >= 300) return null;
 
-      const contentType = res.headers.get("content-type") || "";
+      const contentType = res.headers["content-type"] || "";
       if (!contentType.includes("html")) return null;
 
-      const length = Number(res.headers.get("content-length") || 0);
-      if (length && length > MAX_BYTES) return null;
-
-      const html = (await res.text()).slice(0, MAX_BYTES);
+      const html = res.body.slice(0, MAX_BYTES);
 
       const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
       const title = titleMatch ? decodeEntities(titleMatch[1]).trim() : "";
@@ -195,7 +261,7 @@ export async function fetchSiteContext(
     }
     return null; // prea multe redirecturi
   } catch {
-    // Timeout, DNS, TLS, abort — toate inseamna "fara context", nu eroare fatala.
+    // Timeout, DNS, TLS, EPRIVATE, abort — toate inseamna "fara context".
     return null;
   } finally {
     clearTimeout(timer);
