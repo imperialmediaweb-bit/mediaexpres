@@ -140,6 +140,9 @@ export async function POST(req: NextRequest) {
       case "checkout.session.completed":
         await handleCheckoutCompleted(stripe, event.data.object as Stripe.Checkout.Session);
         break;
+      case "checkout.session.expired":
+        await handleCheckoutExpired(event.data.object as Stripe.Checkout.Session);
+        break;
       case "invoice.paid":
       case "invoice.payment_succeeded":
         await handleInvoicePaid(stripe, event.data.object as Stripe.Invoice);
@@ -320,6 +323,65 @@ async function handleCheckoutCompleted(
       sessionId: session.id,
     });
   }
+}
+
+/**
+ * Cos abandonat: clientul a deschis plata, si-a lasat emailul, dar n-a terminat.
+ * Stripe emite checkout.session.expired (la 2h, cf. expires_at din checkout) cu
+ * un link de recuperare care redeschide EXACT aceeasi sesiune de plata.
+ * Ii trimitem un email prietenos de reamintire cu linkul ala.
+ */
+async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
+  if (session.mode !== "payment") return;
+
+  const email = session.customer_details?.email || session.customer_email || null;
+  // Fara email n-avem cui scrie — clientul a plecat inainte sa-l completeze.
+  if (!email) return;
+
+  // Daca intre timp a platit totusi (alta sesiune), nu-l batem la cap.
+  const [alreadyPaid] = await db
+    .select({ id: orders.id })
+    .from(orders)
+    .where(eq(orders.email, email))
+    .limit(1);
+  if (alreadyPaid) {
+    console.log("[stripe-webhook] cos abandonat, dar clientul a platit deja:", email);
+    return;
+  }
+
+  const recoveryUrl = session.after_expiration?.recovery?.url || `${SITE.url}/oferta-500`;
+  const packageId = (session.metadata?.packageId as string) || "";
+  const isPromo = packageId === "promo-50" || packageId === "promo-50-cazino";
+  const amount = (session.amount_total || 0) / 100;
+  const firstName = escapeHtml((session.customer_details?.name || "").split(" ")[0] || "");
+
+  await sendEmail({
+    to: email,
+    subject: isPromo
+      ? "Oferta ta te așteaptă — articolul în 50 de ziare 📰"
+      : "Comanda ta la MediaExpres te așteaptă",
+    html: wrapEmail(
+      "Ai fost la un pas 👀",
+      `
+      <p>Salut${firstName ? " " + firstName : ""},</p>
+      <p>Ai început comanda${amount ? ` de <strong>${amount.toFixed(0)} lei</strong>` : ""} pentru publicarea articolului tău${
+        isPromo ? " în <strong>cele 50 de ziare</strong> din rețeaua MediaExpres" : ""
+      }, dar plata a rămas neterminată.</p>
+      ${
+        isPromo
+          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 24 de ore. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
+          : ""
+      }
+      <p>Comanda ta e salvată — o poți relua exact de unde ai rămas, într-un minut:</p>
+      <p style="margin-top:16px;">
+        <a href="${recoveryUrl}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Finalizează comanda →</a>
+      </p>
+      <p style="margin-top:16px;color:#64748b;font-size:13px;">Oferta e limitată pentru clienți noi — nu garantăm că prețul rămâne.</p>
+      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      `,
+    ),
+    replyTo: ADMIN_EMAIL,
+  }).catch((err) => console.error("[stripe-webhook] recovery email error:", err));
 }
 
 async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
