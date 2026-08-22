@@ -1,7 +1,7 @@
 import { and, eq, desc } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, subscriptions, articles } from "@/db/schema";
-import { SUBSCRIPTION_PLANS } from "@/data/packages";
+import { findSubscriptionPlanById } from "@/data/packages";
 
 export interface Entitlements {
   hasPaid: boolean;
@@ -74,7 +74,7 @@ export async function getUserArticles(userId: string) {
 }
 
 export function planArticlesPerMonth(planId: string): number {
-  const plan = SUBSCRIPTION_PLANS.find((p) => p.id === planId);
+  const plan = findSubscriptionPlanById(planId);
   return plan?.distributionsPerMonth ?? 0;
 }
 

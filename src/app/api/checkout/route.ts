@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getStripe } from "@/lib/stripe";
-import { findPackageById, SUBSCRIPTION_PLANS } from "@/data/packages";
+import { findPackageById, findSubscriptionPlanById } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { auth } from "@/auth";
 import { db } from "@/db";
@@ -148,7 +148,7 @@ export async function POST(req: NextRequest) {
   }
 
   // Subscription
-  const sub = SUBSCRIPTION_PLANS.find((s) => s.id === packageId);
+  const sub = findSubscriptionPlanById(packageId);
   if (!sub) {
     return NextResponse.json(
       { ok: false, error: "Abonament inexistent" },
