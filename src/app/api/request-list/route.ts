@@ -102,7 +102,7 @@ export async function POST(req: NextRequest) {
       "Testează rețeaua cu un articol mic",
       `
       <p>Salut ${firstName},</p>
-      <p>Acum câteva zile ai cerut lista rețelei MediaExpres. Dacă vrei să o testezi fără risc, pachetul <strong>Local (150 RON)</strong> publică articolul tău într-un ziar județean la alegere — linkul îl primești în 24h.</p>
+      <p>Acum câteva zile ai cerut lista rețelei MediaExpres. Dacă vrei să o testezi fără risc, pachetul <strong>Local (150 RON)</strong> publică articolul tău într-un ziar județean la alegere — linkul îl primești în 4h.</p>
       <p style="margin:24px 0;"><a href="${SITE.url}/pachete#standard" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Vezi pachetul Local</a></p>
       <p>Dacă vrei altă acoperire (10 ziare / 50 ziare / abonament), răspunde direct la acest email și îți fac recomandarea potrivită.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>

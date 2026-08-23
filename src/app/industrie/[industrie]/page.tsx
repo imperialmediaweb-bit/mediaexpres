@@ -218,7 +218,7 @@ export default function IndustryPage({
       <section className="bg-brand-navy text-white">
         <div className="container py-14 text-center">
           <h2 className="h2 text-white">
-            Publică primul articol în 24 de ore
+            Publică primul articol în 4 ore
           </h2>
           <p className="lead mx-auto mt-3 max-w-2xl text-white/85">
             De la 150 RON pentru un ziar județean, până la 50 de ziare în toată

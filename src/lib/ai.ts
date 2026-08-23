@@ -391,7 +391,7 @@ Reguli email:
     d) Cont admin dedicat + prioritate 12h
     e) BONUS unic in piata: Strateg Editorial AI - generati 5 idei de articole tailored fiecarui client al vostru in 30 sec (test gratis: mediaexpress.ro/strateg-ai)
   + social proof: "colaboram cu June, Emblema, WhitePress si magazine online romanesti"
-- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi termenii reseller + Strategul AI + lista 50 ziare:" + link. Daca NU: "Testati Strategul Editorial AI gratuit pe mediaexpress.ro/strateg-ai si aplicati pentru reseller pe mediaexpress.ro/parteneri - raspund in 24h."
+- CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi termenii reseller + Strategul AI + lista 50 ziare:" + link. Daca NU: "Testati Strategul Editorial AI gratuit pe mediaexpress.ro/strateg-ai si aplicati pentru reseller pe mediaexpress.ro/parteneri - raspund in 4h."
 - semnatura: "Echipa MediaExpres - mediaexpress.ro"
 - TON: peer-to-peer profesional
 - limba romana cu diacritice

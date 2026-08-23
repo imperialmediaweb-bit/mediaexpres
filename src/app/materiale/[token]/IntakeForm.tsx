@@ -101,7 +101,7 @@ export function IntakeForm({
           Materialele au fost trimise!
         </h2>
         <p className="mt-3 text-slate-600">
-          Publicăm pe 50 de ziare în <strong>24h</strong>. Vei primi raportul PDF cu toate
+          Publicăm pe 50 de ziare în <strong>4h</strong>. Vei primi raportul PDF cu toate
           link-urile pe emailul de facturare.
         </p>
       </div>
@@ -281,7 +281,7 @@ export function IntakeForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în 24h. Factura se emite pe email după publicare.
+        Publicăm în 4h. Factura se emite pe email după publicare.
       </p>
     </form>
   );

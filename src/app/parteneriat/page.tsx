@@ -69,7 +69,7 @@ export default function ParteneriatPage() {
               <li>✓ Site de știri activ (postări regulate, conținut editorial)</li>
               <li>✓ Trafic minim 5.000 vizite/lună (ideal 20k+)</li>
               <li>✓ Domeniu propriu, nu subdomeniu gratuit</li>
-              <li>✓ Posibilitate de publicare în maximum 24h de la primire</li>
+              <li>✓ Posibilitate de publicare în maximum 4h de la primire</li>
               <li>✓ Pagină de contact cu date firmă vizibile</li>
             </ul>
           </div>

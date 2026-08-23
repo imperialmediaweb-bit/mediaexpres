@@ -13,7 +13,7 @@ export const TESTIMONIALS: Testimonial[] = [
     company: "TechStart București",
     initials: "AP",
     quote:
-      "În 24h aveam articolul pe 50 de site-uri, cu raport PDF complet. Pentru lansarea noastră a fost exact ce aveam nevoie — zero bătaie de cap, maximă vizibilitate.",
+      "În 4h aveam articolul pe 50 de site-uri, cu raport PDF complet. Pentru lansarea noastră a fost exact ce aveam nevoie — zero bătaie de cap, maximă vizibilitate.",
   },
   {
     name: "Elena Marin",

@@ -16,7 +16,7 @@ import { NEWSPAPERS } from "@/data/newspapers";
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
   description:
-    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 24h.",
+    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 4h.",
   robots: { index: false, follow: false },
 };
 
@@ -53,9 +53,9 @@ const INCLUDED = [
   },
   {
     icon: Clock,
-    title: "Publicat în 24 de ore",
+    title: "Publicat în 4 ore",
     description:
-      "De la confirmarea comenzii până la linkurile live trec maximum 24 de ore lucrătoare.",
+      "De la confirmarea comenzii până la linkurile live trec maximum 4 ore lucrătoare.",
   },
 ];
 
@@ -73,7 +73,7 @@ const STEPS = [
   {
     n: "3",
     title: "Primești raportul",
-    text: "În 24h ai articolul live în toate cele 50 de ziare și raportul PDF cu toate linkurile.",
+    text: "În 4h ai articolul live în toate cele 50 de ziare și raportul PDF cu toate linkurile.",
   },
 ];
 
@@ -147,14 +147,14 @@ export default function Oferta500Page() {
             </h1>
             <p className="mt-6 text-lg text-white/85 md:text-xl">
               41 de ziare locale + 9 naționale. Un singur articol, publicat pe
-              toate, în 24 de ore. Cu raport PDF și 50 de backlinks reale.
+              toate, în 4 ore. Cu raport PDF și 50 de backlinks reale.
             </p>
 
             <div className="mt-10">
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Plată securizată cu cardul • factură fiscală • publicare în 24h
+              Plată securizată cu cardul • factură fiscală • publicare în 4h
             </p>
           </div>
         </div>
@@ -167,7 +167,7 @@ export default function Oferta500Page() {
             <Stat value="50" label="ziare online" />
             <Stat value="320.000+" label="vizitatori unici / lună" />
             <Stat value="50" label="backlinks dofollow" />
-            <Stat value="24h" label="până la publicare" />
+            <Stat value="4h" label="până la publicare" />
           </div>
         </div>
       </section>
@@ -372,7 +372,7 @@ export default function Oferta500Page() {
         <div className="container py-16 text-center">
           <ShieldCheck className="mx-auto h-10 w-10 text-brand-gold" />
           <h2 className="h2 mt-5 text-white">
-            50 de ziare. 24 de ore. 500 de lei.
+            50 de ziare. 4 ore. 500 de lei.
           </h2>
           <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,

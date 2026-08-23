@@ -25,7 +25,7 @@ export default function TermeniPage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">3. Termen de livrare</h2>
       <p>
         MediaExpres se angajează să publice articolul pe toate site-urile din pachetul ales în
-        maximum 24 de ore de la confirmarea plății și primirea textului.
+        maximum 4 ore de la confirmarea plății și primirea textului.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">4. Conținut interzis</h2>

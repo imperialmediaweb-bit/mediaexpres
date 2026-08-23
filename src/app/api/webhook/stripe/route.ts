@@ -402,7 +402,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
       }, dar plata a rămas neterminată.</p>
       ${
         isPromo
-          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 24 de ore. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
+          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 4 ore. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
           : ""
       }
       <p>Comanda ta e salvată — o poți relua exact de unde ai rămas, într-un minut:</p>

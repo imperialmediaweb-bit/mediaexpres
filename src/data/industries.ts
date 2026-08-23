@@ -33,7 +33,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru imobiliare",
     metaTitle: "Comunicate de presă imobiliare — publicare în 50 de ziare",
     metaDescription:
-      "Promovează ansambluri rezidențiale, agenții și proiecte imobiliare în presa din toată România. Publicare în 24h, raport cu linkuri. De la 150 RON.",
+      "Promovează ansambluri rezidențiale, agenții și proiecte imobiliare în presa din toată România. Publicare în 4h, raport cu linkuri. De la 150 RON.",
     intro: [
       "Un ansamblu rezidențial se vinde greu doar din anunțuri pe portaluri. Cumpărătorul unei locuințe caută semnale de încredere: cine e dezvoltatorul, ce a mai construit, ce spun sursele independente. Un articol în presa locală și națională e exact genul de validare pe care OLX-ul nu ți-l poate da.",
       "MediaExpres publică articolul tău în ziarele din județul unde vinzi — plus, la nevoie, în toată țara. Cumpărătorii care caută pe Google numele proiectului tău găsesc presă, nu doar reclame.",
@@ -54,7 +54,7 @@ export const INDUSTRIES: Industry[] = [
     faq: [
       { q: "Pot promova un singur apartament sau doar proiecte mari?", a: "Orice: de la un penthouse premium la un ansamblu de 500 de unități. Pentru proprietăți individuale recomandăm pachetul Local (150 RON), pentru ansambluri pachetul Național cu 50 de ziare." },
       { q: "Pot include prețurile și datele de contact în articol?", a: "Da. Articolul e advertorial — include prețuri, telefon, link către site și până la 3 fotografii ale proiectului." },
-      { q: "Cât durează publicarea?", a: "Maximum 24 de ore lucrătoare de la trimiterea materialelor. Primești raportul cu toate linkurile pe email." },
+      { q: "Cât durează publicarea?", a: "Maximum 4 ore lucrătoare de la trimiterea materialelor. Primești raportul cu toate linkurile pe email." },
     ],
     keywords: ["comunicat presa imobiliare", "promovare ansamblu rezidential", "PR dezvoltator imobiliar", "advertorial imobiliare", "publicitate proiect imobiliar"],
   },
@@ -64,7 +64,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru clinici și cabinete medicale",
     metaTitle: "PR pentru clinici medicale — articole în presa din toată țara",
     metaDescription:
-      "Adu pacienți noi cu articole în presa locală: medici noi, aparatură modernă, servicii unice în județ. Publicare în 24h, conform reglementărilor.",
+      "Adu pacienți noi cu articole în presa locală: medici noi, aparatură modernă, servicii unice în județ. Publicare în 4h, conform reglementărilor.",
     intro: [
       "Pacienții nu aleg clinica din bannere — o aleg pe cea despre care au citit, pe care le-a recomandat-o cineva, sau care apare în presă ca autoritate locală. Un medic citat într-un articol despre prevenție valorează mai mult decât zece reclame.",
       "Publicăm articole despre clinica ta în ziarele din județ și din țară: aparatura nouă, medicii care s-au alăturat echipei, campaniile de screening. Ton editorial, credibil, fără promisiuni medicale interzise de lege.",
@@ -95,7 +95,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru avocați și case de avocatură",
     metaTitle: "PR juridic — vizibilitate în presă pentru cabinete de avocatură",
     metaDescription:
-      "Poziționează-te ca autoritate juridică: comentarii pe legislație nouă, ghiduri pentru public, prezentarea echipei. Publicare în 50 de ziare în 24h.",
+      "Poziționează-te ca autoritate juridică: comentarii pe legislație nouă, ghiduri pentru public, prezentarea echipei. Publicare în 50 de ziare în 4h.",
     intro: [
       "Clienții nu compară avocații pe preț — îl caută pe cel care pare că știe. Iar „pare că știe\" se construiește public: avocatul citat în presă pe o schimbare de lege devine prima opțiune când cititorul are o problemă juridică.",
       "Publicăm analize și ghiduri semnate de cabinetul tău în presa locală și națională. Publicitatea directă e restricționată pentru avocați — dar conținutul editorial de informare juridică este exact instrumentul permis și eficient.",
@@ -116,7 +116,7 @@ export const INDUSTRIES: Industry[] = [
     faq: [
       { q: "Publicitatea pentru avocați nu e interzisă?", a: "Publicitatea agresivă da, conținutul de informare juridică nu. Articolele noastre sunt educative — formatul folosit de toate casele mari de avocatură din România." },
       { q: "Putem semna articolul cu numele avocatului?", a: "Da, recomandat chiar — numele și fotografia avocatului construiesc brandul personal care aduce clienți." },
-      { q: "Cât de repede apare articolul?", a: "În 24 de ore lucrătoare pe toate publicațiile alese, cu raport complet cu linkuri." },
+      { q: "Cât de repede apare articolul?", a: "În 4 ore lucrătoare pe toate publicațiile alese, cu raport complet cu linkuri." },
     ],
     keywords: ["PR avocat", "comunicat presa cabinet avocatura", "promovare avocat", "articole juridice presa", "marketing juridic"],
   },
@@ -126,7 +126,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru startup-uri și companii IT",
     metaTitle: "PR pentru startup-uri — lansări și finanțări în presa din România",
     metaDescription:
-      "Lansezi un produs, ai închis o rundă de finanțare, angajezi masiv? Publicăm știrea în 50 de ziare în 24h — vizibilitate pentru clienți și investitori.",
+      "Lansezi un produs, ai închis o rundă de finanțare, angajezi masiv? Publicăm știrea în 50 de ziare în 4h — vizibilitate pentru clienți și investitori.",
     intro: [
       "În tech, presa nu e vanitate — e due diligence. Investitorii care îți primesc pitch-ul te caută pe Google. Clienții enterprise la fel. Candidații seniori la fel. Dacă nu găsesc nimic, pari mai mic decât ești.",
       "Publicăm lansările, rundele de finanțare și milestone-urile tale în presa din toată țara. Un layer de legitimitate pe care îl construiești cu un articol pe lună, nu cu ani de așteptat să te remarce un jurnalist.",
@@ -186,9 +186,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "restaurante-horeca",
     name: "restaurante și HoReCa",
     heading: "Comunicate de presă pentru restaurante, cafenele și hoteluri",
-    metaTitle: "PR HoReCa — restaurantul tău în presa locală în 24h",
+    metaTitle: "PR HoReCa — restaurantul tău în presa locală în 4h",
     metaDescription:
-      "Deschidere de local, meniu nou, chef premiat? Publică în ziarele orașului tău și umple mesele. Articole cu poze, de la 150 RON, publicate în 24h.",
+      "Deschidere de local, meniu nou, chef premiat? Publică în ziarele orașului tău și umple mesele. Articole cu poze, de la 150 RON, publicate în 4h.",
     intro: [
       "Un local nou are 6 luni să devină „locul acela despre care se vorbește\" — sau rămâne gol. Presa locală e acceleratorul: articolul despre deschidere ajunge exact la publicul din oraș care caută un loc nou de încercat.",
       "Publicăm în ziarele din județul tău articole cu care te lauzi apoi pe Instagram: deschiderea, meniul de sezon, chef-ul, evenimentele. Cu fotografii care fac poftă.",
@@ -219,7 +219,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru firme de construcții și amenajări",
     metaTitle: "PR construcții — proiectele tale în presa din toată România",
     metaDescription:
-      "Câștigă licitații și clienți mari: firmele de construcții vizibile în presă inspiră încredere. Publicare proiecte, echipamente, angajări — în 24h.",
+      "Câștigă licitații și clienți mari: firmele de construcții vizibile în presă inspiră încredere. Publicare proiecte, echipamente, angajări — în 4h.",
     intro: [
       "În construcții, contractele mari se dau firmelor care par solide. Iar soliditatea se demonstrează public: proiecte finalizate în presă, echipamente noi, echipe în creștere. Beneficiarul care te caută pe Google înainte de licitație trebuie să găsească dovezi, nu doar site-ul tău.",
       "Publicăm portofoliul tău ca știri: lucrarea predată la termen, utilajul nou din flotă, șantierul deschis. Fiecare articol e o referință publică permanentă.",
@@ -250,7 +250,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru dealeri auto și service-uri",
     metaTitle: "PR auto — dealeri, service-uri și parcuri auto în presă",
     metaDescription:
-      "Lansări de modele, oferte de sezon, service-uri autorizate — publicate în ziarele din județul tău în 24h. Adu clienți în showroom cu presa locală.",
+      "Lansări de modele, oferte de sezon, service-uri autorizate — publicate în ziarele din județul tău în 4h. Adu clienți în showroom cu presa locală.",
     intro: [
       "Mașina e a doua cea mai mare achiziție a unei familii — și se cumpără local. Clientul care intră în showroom a citit înainte: despre model, despre dealer, despre ofertele momentului. Presa județeană e canalul care îl aduce pe ușă.",
       "Publicăm lansările, ofertele și serviciile tale în presa din zona de unde vin clienții. De la dealeri de mărci noi la parcuri de rulate și service-uri specializate.",
@@ -271,7 +271,7 @@ export const INDUSTRIES: Industry[] = [
     faq: [
       { q: "Pot promova oferte cu preț și termen limită?", a: "Da — advertorialele cu ofertă concretă („până pe 30 iunie\") sunt printre cele mai eficiente formate auto." },
       { q: "Publicați și pentru service-uri mici?", a: "Da, pachetul Local de 150 RON e gândit exact pentru afaceri de cartier — un articol bun în ziarul județului." },
-      { q: "Cât durează de la comandă la publicare?", a: "24 de ore lucrătoare, cu raport pe email cu toate linkurile." },
+      { q: "Cât durează de la comandă la publicare?", a: "4 ore lucrătoare, cu raport pe email cu toate linkurile." },
     ],
     keywords: ["promovare dealer auto", "PR service auto", "comunicat presa auto", "publicitate parc auto", "promovare service presa"],
   },
@@ -281,7 +281,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru școli private, grădinițe și cursuri",
     metaTitle: "PR educație — școli, grădinițe și furnizori de cursuri în presă",
     metaDescription:
-      "Umple locurile la înscrieri: părinții aleg școlile despre care citesc. Articole despre rezultate, profesori, programe — publicate în 24h în presa locală.",
+      "Umple locurile la înscrieri: părinții aleg școlile despre care citesc. Articole despre rezultate, profesori, programe — publicate în 4h în presa locală.",
     intro: [
       "Părinții nu aleg grădinița din pliante — o aleg pe cea despre care au citit lucruri bune și pe care o recomandă alți părinți. Presa locală e locul unde se formează exact această reputație, cu luni înainte de perioada de înscrieri.",
       "Publicăm articole despre rezultatele elevilor tăi, programele speciale, profesorii remarcabili. Când vine sesiunea de înscrieri, numele instituției e deja cunoscut și asociat cu performanța.",
@@ -312,7 +312,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru saloane, clinici estetice și spa",
     metaTitle: "PR beauty — saloane și clinici estetice în presa locală",
     metaDescription:
-      "Clientele noi vin din încredere: publică în presa orașului deschiderea, aparatura nouă, specialiștii tăi. Articole cu poze, publicate în 24h.",
+      "Clientele noi vin din încredere: publică în presa orașului deschiderea, aparatura nouă, specialiștii tăi. Articole cu poze, publicate în 4h.",
     intro: [
       "În beauty, clienta nouă vine pe recomandare — sau pe reputație publică. Între două saloane cu prețuri identice, câștigă cel despre care a citit ceva: aparatura de ultimă generație, specialista cu certificări, transformările reale.",
       "Publicăm în presa orașului tău articolele care construiesc exact această reputație. Iar linkurile rămân permanent — oricine caută numele salonului găsește presă, nu doar Instagram.",
@@ -374,7 +374,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru pensiuni, hoteluri și atracții turistice",
     metaTitle: "PR turism — pensiunea ta în presa din toată România",
     metaDescription:
-      "Turiștii vin din alte județe — presa națională îi aduce. Publică oferte de sezon, evenimente și povestea locului în 50 de ziare, în 24h.",
+      "Turiștii vin din alte județe — presa națională îi aduce. Publică oferte de sezon, evenimente și povestea locului în 50 de ziare, în 4h.",
     intro: [
       "Turismul e industria în care clientul e mereu în alt județ decât tine. Pensiunea din Bucovina trăiește din bucureșteni, iar litoralul din ardeleni. De asta presa națională — nu cea locală — e canalul care umple camerele.",
       "Publicăm povestea locului tău în toate cele 50 de ziare: ofertele de sezon, evenimentele, experiențele unice. Cititorul care plănuiește city-break-ul următor te descoperă exact când caută idei.",
@@ -405,7 +405,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru ONG-uri și campanii sociale",
     metaTitle: "PR pentru ONG-uri — campaniile tale în presa din toată țara",
     metaDescription:
-      "Strângeri de fonduri, campanii de 3,5%, proiecte comunitare — vizibilitatea în presă aduce donatori și voluntari. Publicare în 24h, în 50 de ziare.",
+      "Strângeri de fonduri, campanii de 3,5%, proiecte comunitare — vizibilitatea în presă aduce donatori și voluntari. Publicare în 4h, în 50 de ziare.",
     intro: [
       "Cauzele bune nevăzute rămân nefinanțate. Donatorii dau către organizațiile despre care au citit, companiile sponsorizează proiecte cu vizibilitate, iar formularul de 3,5% se completează pentru ONG-urile cu nume cunoscut.",
       "Publicăm campaniile tale în presa locală și națională: strângerile de fonduri, rezultatele proiectelor, poveștile beneficiarilor. Transparența publică care transformă simpatia în donații.",

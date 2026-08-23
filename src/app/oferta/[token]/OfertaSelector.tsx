@@ -33,7 +33,7 @@ const PACKAGES: Array<{
     tagline: "1 ziar județean la alegere",
     price: 150,
     reach: "1 ziar din rețea",
-    highlights: ["1 articol pe 1 ziar județean", "Distribuție Facebook", "Link în 24h"],
+    highlights: ["1 articol pe 1 ziar județean", "Distribuție Facebook", "Link în 4h"],
   },
   {
     id: "regional",
@@ -41,7 +41,7 @@ const PACKAGES: Array<{
     tagline: "10 ziare dintr-o zonă",
     price: 500,
     reach: "10 ziare per regiune",
-    highlights: ["1 articol pe 10 ziare regionale", "Distribuție Facebook", "Linkuri în 24h"],
+    highlights: ["1 articol pe 10 ziare regionale", "Distribuție Facebook", "Linkuri în 4h"],
   },
   {
     id: "national",

@@ -99,7 +99,7 @@ export async function POST(req: NextRequest) {
       `
       <p>Salut ${lead.name.trim().split(/\s+/)[0]},</p>
       <p>Am primit materialele tale pentru pachetul <strong>${pkgLabel}</strong>.</p>
-      <p>Publicăm pe cele 50 de ziare în <strong>24 de ore</strong>. Vei primi pe acest email raportul PDF cu toate link-urile și screenshot-urile.</p>
+      <p>Publicăm pe cele 50 de ziare în <strong>4 ore</strong>. Vei primi pe acest email raportul PDF cu toate link-urile și screenshot-urile.</p>
       <p>Factura se emite pe emailul <strong>${d.firmInvoiceEmail}</strong> după publicare.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,

@@ -82,11 +82,11 @@ export function ApplicationForm() {
           Aplicatie primita!
         </h3>
         <p className="mt-3 text-slate-700">
-          Va contactam pe email in maxim 24h lucratoare cu fie aprobarea +
+          Va contactam pe email in maxim 4h lucratoare cu fie aprobarea +
           credentialele de cont reseller, fie cu intrebari clarificatoare.
         </p>
         <p className="mt-4 text-xs text-slate-500">
-          Daca nu ne vedeti email-ul in 24h, verificati folder-ul Spam sau
+          Daca nu ne vedeti email-ul in 4h, verificati folder-ul Spam sau
           scrieti la contact@mediaexpress.ro
         </p>
       </div>
@@ -201,7 +201,7 @@ export function ApplicationForm() {
       </Button>
 
       <p className="text-xs text-slate-500 text-center">
-        Va raspundem in 24h lucratoare pe email-ul de mai sus.
+        Va raspundem in 4h lucratoare pe email-ul de mai sus.
       </p>
     </div>
   );

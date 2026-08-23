@@ -2,9 +2,9 @@ export const SITE = {
   name: "MediaExpres",
   domain: "mediaexpress.ro",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro",
-  tagline: "Articolul tău în 50 de ziare românești în 24h",
+  tagline: "Articolul tău în 50 de ziare românești în 4h",
   description:
-    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 24h, raport PDF, linkuri permanente.",
+    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 4h, raport PDF, linkuri permanente.",
   email: "contact@mediaexpress.ro",
   phone: "+40 700 000 000",
   address: "București, România",
@@ -52,6 +52,6 @@ export const FOOTER_LINKS = {
 export const STATS = [
   { value: "50+", label: "ziare partenere" },
   { value: "50", label: "pagini Facebook" },
-  { value: "24h", label: "timp de livrare" },
+  { value: "4h", label: "timp de livrare" },
   { value: "10k+", label: "articole publicate" },
 ];
