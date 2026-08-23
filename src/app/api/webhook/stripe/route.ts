@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { findSubscriptionPlanById } from "@/data/packages";
+import { sendCapiEvent, splitName } from "@/lib/meta-capi";
 import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
@@ -228,6 +229,22 @@ async function handleCheckoutCompleted(
       return;
     }
 
+    // Purchase server-side (Conversions API): sursa de adevar pentru optimizarea
+    // reclamelor Meta pe vanzari. event_id = session.id, deci un eventual retry
+    // al webhookului e deduplicat de Meta. Email+telefon = match quality mare.
+    await sendCapiEvent({
+      eventName: "Purchase",
+      eventId: session.id,
+      value: amount / 100,
+      currency: "RON",
+      user: {
+        email: email || undefined,
+        phone: session.customer_details?.phone || undefined,
+        ...splitName(session.customer_details?.name || ""),
+      },
+      customData: { content_name: packageId, content_category: "package" },
+    }).catch((err) => console.error("[stripe-webhook] capi purchase error:", err));
+
     await sendConfirmationEmails({
       kind: "payment",
       email,
@@ -313,6 +330,22 @@ async function handleCheckoutCompleted(
       console.log("[stripe-webhook] abonament deja procesat, sar emailurile:", subId);
       return;
     }
+
+    await sendCapiEvent({
+      eventName: "Purchase",
+      eventId: session.id,
+      value: (session.amount_total || 0) / 100,
+      currency: "RON",
+      user: {
+        email: email || undefined,
+        phone: session.customer_details?.phone || undefined,
+        ...splitName(session.customer_details?.name || ""),
+      },
+      customData: {
+        content_name: (session.metadata?.planId as string) || "abonament",
+        content_category: "subscription",
+      },
+    }).catch((err) => console.error("[stripe-webhook] capi purchase error:", err));
 
     await sendConfirmationEmails({
       kind: "subscription",
