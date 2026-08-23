@@ -3,6 +3,7 @@ import { SITE } from "@/data/site";
 import { getAllSlugs } from "@/lib/mdx";
 import { COUNTIES } from "@/data/counties";
 import { TEMPLATES } from "@/data/templates";
+import { INDUSTRIES } from "@/data/industries";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const base = SITE.url;
@@ -17,6 +18,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/despre`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.6 },
     { url: `${base}/contact`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.6 },
     { url: `${base}/blog`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.7 },
+    { url: `${base}/strateg-ai`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.7 },
+    { url: `${base}/parteneriat`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 },
+    { url: `${base}/parteneri`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.5 },
     { url: `${base}/legal/termeni`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.3 },
     { url: `${base}/legal/confidentialitate`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.3 },
     { url: `${base}/legal/cookies`, lastModified: now, changeFrequency: "yearly" as const, priority: 0.3 },
@@ -44,5 +48,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.65,
   }));
 
-  return [...staticPages, ...blog, ...counties, ...templates];
+  const industries = INDUSTRIES.map((i) => ({
+    url: `${base}/comunicate-presa-${i.slug}`,
+    lastModified: now,
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...blog, ...counties, ...templates, ...industries];
 }

@@ -5,6 +5,15 @@ const nextConfig = {
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
   },
+  // Next.js nu suporta segmente dinamice partiale ("prefix-[param]") ca nume de
+  // folder — rutele reale traiesc in /judet/[judet] si /industrie/[industrie],
+  // iar rewrites pastreaza URL-urile SEO fara redirect.
+  async rewrites() {
+    return [
+      { source: "/publicare-comunicat-:judet", destination: "/judet/:judet" },
+      { source: "/comunicate-presa-:industrie", destination: "/industrie/:industrie" },
+    ];
+  },
   async headers() {
     return [
       {
