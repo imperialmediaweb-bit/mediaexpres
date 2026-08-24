@@ -147,8 +147,8 @@ const FAQ = [
 export default function Oferta500Page() {
   return (
     <div className="bg-white">
-      {/* Hero */}
-      <section className="bg-brand-navy text-white">
+      {/* Hero — id-ul e tinta barei fixe de pe mobil ("Comanda acum") */}
+      <section id="oferta" className="bg-brand-navy text-white">
         <div className="container py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-gold">
