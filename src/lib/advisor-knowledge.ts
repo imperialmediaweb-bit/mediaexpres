@@ -4,6 +4,8 @@ import {
   PROMO_PACKAGES,
   SUBSCRIPTION_PLANS,
   PROMO_SUBSCRIPTION_PLANS,
+  PROMO_DEADLINE,
+  isPromoDeadlineActive,
   type Package,
   type SubscriptionPlan,
 } from "@/data/packages";
@@ -78,7 +80,9 @@ ${CASINO_PACKAGES.map(pkgLine).join("\n")}
 ABONAMENTE LUNARE (pret per articol mai mic decat plata unica):
 ${SUBSCRIPTION_PLANS.map(subLine).join("\n")}
 
-OFERTA PROMO ACTIVA (arma de inchidere cand clientul ezita pe pret):
+OFERTA PROMO ACTIVA (arma de inchidere cand clientul ezita pe pret)${
+    isPromoDeadlineActive() ? ` — VALABILA PANA PE ${PROMO_DEADLINE.label.toUpperCase()}, foloseste termenul ca urgenta reala` : ""
+  }:
 - ${promo?.name}: ${promo?.price} RON o singura data - EXACT acelasi lucru ca pachetul National 50 (${
     STANDARD_PACKAGES.find((p) => p.id === "national")?.price
   } RON), la pret de intrare pentru clienti NOI. Adica ${Math.round(

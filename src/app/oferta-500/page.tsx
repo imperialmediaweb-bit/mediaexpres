@@ -11,6 +11,7 @@ import {
   Star,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
+import { PROMO_DEADLINE, isPromoDeadlineActive } from "@/data/packages";
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { BankTransferBox } from "@/components/BankTransferBox";
 
@@ -20,6 +21,10 @@ export const metadata: Metadata = {
     "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 4h.",
   robots: { index: false, follow: false },
 };
+
+// Pagina se regenereaza din ora in ora ca mentiunea termenului limita sa
+// dispara singura dupa expirare, fara redeploy.
+export const revalidate = 3600;
 
 const INCLUDED = [
   {
@@ -104,7 +109,7 @@ const CONDITIONS = [
 const FAQ = [
   {
     q: "De ce 500 lei și nu 1.500?",
-    a: "Este o ofertă promoțională de intrare, limitată, pentru clienți noi care nu au lucrat încă cu noi. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.",
+    a: `Este o ofertă promoțională de intrare, pentru clienți noi care nu au lucrat încă cu noi${isPromoDeadlineActive() ? `, valabilă până pe ${PROMO_DEADLINE.label}` : ""}. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.`,
   },
   {
     q: "De ce costă dublu pentru cazino și pariuri?",
@@ -144,7 +149,10 @@ export default function Oferta500Page() {
         <div className="container py-16 md:py-24">
           <div className="mx-auto max-w-3xl text-center">
             <span className="inline-flex items-center gap-2 rounded-full bg-brand-gold/15 px-4 py-1.5 text-xs font-bold uppercase tracking-wider text-brand-gold">
-              <Star className="h-3 w-3 fill-current" /> Ofertă limitată
+              <Star className="h-3 w-3 fill-current" />
+              {isPromoDeadlineActive()
+                ? `Ofertă limitată — valabilă până pe ${PROMO_DEADLINE.label}`
+                : "Ofertă limitată"}
             </span>
             <h1 className="mt-5 font-serif text-4xl font-bold leading-tight md:text-6xl">
               Articolul tău în{" "}

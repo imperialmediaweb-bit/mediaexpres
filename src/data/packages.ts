@@ -144,6 +144,21 @@ export const CASINO_PACKAGES: Package[] = [
   },
 ];
 
+// Termenul ofertei promo. Un singur loc: pagina /oferta-500, emailul cu lista
+// si chatbotul il citesc de aici. Dupa expirare, mentiunea DISPARE SINGURA de
+// peste tot (isPromoDeadlineActive intoarce false) — oferta ramane functionala,
+// dar nu mai afisam un termen depasit. Cand prelungesti oferta, schimbi doar
+// aici data si eticheta.
+export const PROMO_DEADLINE = {
+  // Sfarsitul zilei de 31 august, ora Romaniei.
+  iso: "2026-08-31T23:59:59+03:00",
+  label: "31 august",
+};
+
+export function isPromoDeadlineActive(): boolean {
+  return Date.now() < new Date(PROMO_DEADLINE.iso).getTime();
+}
+
 // Pachete promo, disponibile doar prin landing page-uri dedicate (nu apar in /pachete).
 export const PROMO_PACKAGES: Package[] = [
   {
