@@ -23,6 +23,17 @@ const schema = z.object({
   template: z.enum(["brand", "personal"]).default("brand"),
   // ISO; lipsa = trimite acum
   scheduledAt: z.string().datetime({ offset: true }).optional(),
+  // Atasamente (ex. factura PDF): continut base64. Limita ~5MB per fisier
+  // (base64 umfla cu ~33%, deci 7M caractere ≈ 5MB reale).
+  attachments: z
+    .array(
+      z.object({
+        filename: z.string().min(1).max(200),
+        content: z.string().min(1).max(7_000_000),
+      }),
+    )
+    .max(3)
+    .optional(),
 });
 
 /** Text simplu -> HTML de email: escapat + paragrafe pe linii goale. */
@@ -86,6 +97,7 @@ export async function POST(req: NextRequest) {
       html,
       replyTo: ADMIN_EMAIL,
       ...(d.scheduledAt ? { scheduledAt: d.scheduledAt } : {}),
+      ...(d.attachments?.length ? { attachments: d.attachments } : {}),
     });
     results.push({ to, ok: r.ok, ...(r.ok ? {} : { error: (r as { error?: string }).error }) });
   }
