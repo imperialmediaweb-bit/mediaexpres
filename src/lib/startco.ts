@@ -73,9 +73,12 @@ async function startcoFetch<T>(
 /** Tip de serie, conform enum-ului lor. */
 export type SeriesType = "invoice" | "receipt";
 
+// Confirmat pe raspunsul real al API-ului (24 aug): campul cu numele seriei
+// se cheama `series`, nu `name` — ex: {"id":1554,"series":"1","start":1,"type":"invoice"}.
 export interface StartcoSeries {
   id: number;
-  name: string;
+  series: string;
+  start?: number;
   type: SeriesType;
 }
 
@@ -93,7 +96,7 @@ export async function seriesExists(): Promise<boolean> {
   const wanted = STARTCO_SERIES.trim().toLowerCase();
   const all = await listSeries();
   return all.some(
-    (s) => s.type === "invoice" && s.name.trim().toLowerCase() === wanted,
+    (s) => s.type === "invoice" && s.series.trim().toLowerCase() === wanted,
   );
 }
 

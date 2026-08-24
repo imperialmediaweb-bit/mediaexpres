@@ -156,7 +156,7 @@ export async function issueInvoiceForOrder(
     if (err instanceof StartcoError && err.code !== "NO_TOKEN") {
       try {
         const all = await listSeries();
-        const invoiceSeries = all.filter((s) => s.type === "invoice").map((s) => s.name);
+        const invoiceSeries = all.filter((s) => s.type === "invoice").map((s) => s.series);
         const match = invoiceSeries.some(
           (n) => n.trim().toLowerCase() === STARTCO_SERIES.trim().toLowerCase(),
         );
