@@ -6,6 +6,7 @@ import { users, orders, subscriptions } from "@/db/schema";
 import { desc, eq, sql } from "drizzle-orm";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
 import { ImportLeadsButton } from "./ImportLeadsButton";
+import { SendListButton } from "./SendListButton";
 
 export const dynamic = "force-dynamic";
 
@@ -109,8 +110,9 @@ export default async function AdminClientiPage() {
                       )}
                     </td>
                     <td className="px-4 py-3 text-slate-500 text-xs">{formatDate(u.createdAt)}</td>
-                    <td className="px-4 py-3 text-right">
-                      <Link href={`/admin/clienti/${u.id}`} className="text-xs font-medium text-brand-red hover:underline">
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <SendListButton email={u.email} name={u.name} />
+                      <Link href={`/admin/clienti/${u.id}`} className="ml-3 text-xs font-medium text-brand-red hover:underline">
                         Deschide →
                       </Link>
                     </td>

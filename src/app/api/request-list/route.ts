@@ -4,8 +4,8 @@ import { requestListSchema } from "@/lib/validators";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
-import { REGION_COUNTS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
+import { buildListEmail, LIST_EMAIL_SUBJECT } from "@/lib/list-email";
 
 export const runtime = "nodejs";
 
@@ -45,30 +45,13 @@ export async function POST(req: NextRequest) {
 
   const firstName = data.name.split(" ")[0];
 
-  // 1) Email initial: lista rezumat + mentiune PDF
-  const customerHtml = wrapEmail(
-    "Lista completă a celor 50 ziare partenere",
-    `
-    <p>Salut ${firstName},</p>
-    <p>Îiti mulțumim pentru interesul pentru serviciile MediaExpres! Mai jos ai rezumatul rețelei noastre:</p>
-    <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-      ${kv("Ziare naționale", `${REGION_COUNTS.Național} ziare`)}
-      ${kv("Moldova", `${REGION_COUNTS.Moldova} ziare locale`)}
-      ${kv("Transilvania", `${REGION_COUNTS.Transilvania} ziare locale`)}
-      ${kv("Muntenia + București", `${REGION_COUNTS.Muntenia} ziare locale`)}
-      ${kv("Banat + Oltenia", `${REGION_COUNTS.Banat} ziare locale`)}
-      ${kv("Distribuție Facebook", "50 pagini asociate")}
-    </table>
-    <p>Lista detaliată cu toate numele și domeniile celor 50 ziare partenere este disponibilă ca document PDF. <strong>Pentru a proteja rețeaua noastră</strong>, trimitem documentul direct pe email după o scurtă convorbire — un membru al echipei te va contacta în maximum 24h.</p>
-    <p>Dacă dorești să avansăm mai rapid, poți răspunde direct la acest email cu o scurtă descriere a proiectului.</p>
-    <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
-  `
-  );
-
+  // 1) Email initial: LISTA COMPLETA, direct in email, din sablonul unic
+  // (lib/list-email.ts). Nu promitem apeluri — nu suna nimeni pe nimeni.
   await sendEmail({
     to: data.email,
-    subject: "Rețeaua MediaExpres — detalii pentru tine",
-    html: customerHtml,
+    subject: LIST_EMAIL_SUBJECT,
+    html: buildListEmail(firstName),
+    replyTo: ADMIN_EMAIL,
   });
 
   // 2) Notificare admin — lead nou
@@ -81,7 +64,7 @@ export async function POST(req: NextRequest) {
       ${kv("Telefon", data.phone || "—")}
       ${kv("Companie", data.company || "—")}
     </table>
-    <p style="margin-top:20px;color:#64748b;">Contactează lead-ul în 24h pentru a trimite lista detaliată și a iniția vânzarea.</p>
+    <p style="margin-top:20px;color:#64748b;">Lead-ul a primit AUTOMAT lista completă cu cele 50 de ziare + linkul spre oferta de 500 lei. Follow-up automat în ziua 3 și ziua 7. Nu trebuie să faci nimic — intervii doar dacă răspunde.</p>
   `
   );
   await sendEmail({

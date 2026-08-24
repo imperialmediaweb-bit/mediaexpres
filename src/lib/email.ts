@@ -87,19 +87,22 @@ export const ADMIN_EMAIL = CONTACT;
 // Wrapper bogat-brand pentru email-uri tranzacționale unde clientul așteaptă "MediaExpres"
 // (confirmare comandă, factură, raport, etc). Pentru cold outreach folosește wrapEmailCold.
 export function wrapEmail(title: string, body: string) {
+  // Paleta e cea a site-ului (tailwind.config.ts → brand): rosu #c1121f,
+  // negru #111111, crem #faf7f2, auriu #c9a14a. Emailurile aratau alta firma
+  // pentru ca ramasesera pe o paleta veche navy/gold.
   return `<!DOCTYPE html>
 <html>
-<body style="margin:0;padding:0;background:#F8F5F0;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#0B2545;">
+<body style="margin:0;padding:0;background:#faf7f2;font-family:-apple-system,Segoe UI,Roboto,sans-serif;color:#1a1a1a;">
   <div style="max-width:600px;margin:0 auto;padding:32px 24px;">
-    <div style="background:#0B2545;color:#F8F5F0;padding:24px;border-radius:12px 12px 0 0;">
-      <h1 style="margin:0;font-size:24px;font-family:Georgia,serif;">Media<span style="color:#E4B363;">Expres</span></h1>
-      <p style="margin:6px 0 0 0;font-size:12px;color:#E4B363;letter-spacing:1px;text-transform:uppercase;">Distributie comunicate de presa</p>
+    <div style="background:#111111;color:#faf7f2;padding:24px;border-radius:12px 12px 0 0;">
+      <h1 style="margin:0;font-size:24px;font-family:Georgia,serif;letter-spacing:0.5px;">MEDIA<span style="color:#c1121f;">EXPRES</span></h1>
+      <p style="margin:6px 0 0 0;font-size:11px;color:#c9a14a;letter-spacing:2px;text-transform:uppercase;">Presă &middot; Distribuție &middot; Impact</p>
     </div>
-    <div style="background:#fff;padding:32px 24px;border-radius:0 0 12px 12px;border:1px solid #eee;">
-      <h2 style="margin:0 0 16px 0;font-family:Georgia,serif;color:#0B2545;">${title}</h2>
+    <div style="background:#fff;padding:32px 24px;border-radius:0 0 12px 12px;border:1px solid #e5e5e5;">
+      <h2 style="margin:0 0 16px 0;font-family:Georgia,serif;color:#111111;">${title}</h2>
       ${body}
-      <div style="margin-top:32px;padding-top:24px;border-top:1px solid #eee;text-align:center;">
-        <a href="https://mediaexpress.ro/pachete" style="display:inline-block;background:#C8102E;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Vezi pachetele &amp; preturile</a>
+      <div style="margin-top:32px;padding-top:24px;border-top:1px solid #e5e5e5;text-align:center;">
+        <a href="https://mediaexpress.ro/pachete" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Vezi pachetele &amp; preturile</a>
       </div>
     </div>
     <div style="text-align:center;margin-top:24px;font-size:11px;color:#94a3b8;line-height:1.6;">
