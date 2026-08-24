@@ -1,5 +1,5 @@
 import { NEWSPAPERS } from "@/data/newspapers";
-import { PROMO_DEADLINE, isPromoDeadlineActive } from "@/data/packages";
+import { promoDeadlineLabel } from "@/data/packages";
 import { wrapEmail, bankTransferEmailBox } from "@/lib/email";
 import { SITE } from "@/data/site";
 
@@ -44,6 +44,7 @@ const bonus = NEWSPAPERS.length - OFFICIAL_TOTAL;
 export const LIST_EMAIL_SUBJECT = `Lista completă — cele ${OFFICIAL_TOTAL} de ziare MediaExpres`;
 
 export function buildListEmail(firstName: string): string {
+  const deadline = promoDeadlineLabel();
   return wrapEmail(
     `Lista completă a celor ${OFFICIAL_TOTAL} de ziare`,
     `
@@ -54,7 +55,7 @@ export function buildListEmail(firstName: string): string {
         : ""
     }</p>
     ${newspaperListHtml()}
-    <p style="margin-top:24px;">Un articol publicat pe toată rețeaua, cu raport complet cu linkuri, costă <strong>500 lei</strong> (ofertă de intrare${isPromoDeadlineActive() ? `, <strong>valabilă până pe ${PROMO_DEADLINE.label}</strong>` : ""}) — publicare în maximum 4 ore lucrătoare. Articolul rămâne permanent online.</p>
+    <p style="margin-top:24px;">Un articol publicat pe toată rețeaua, cu raport complet cu linkuri, costă <strong>500 lei</strong> (ofertă de intrare${deadline ? `, <strong>valabilă până pe ${deadline}</strong>` : ""}) — publicare în maximum 4 ore lucrătoare. Articolul rămâne permanent online.</p>
     <p><strong>Fără conținut duplicat:</strong> fiecare ziar primește o variantă unică a articolului — alt titlu, altă formulare, același mesaj și aceleași linkuri către site-ul tău.</p>
     <p>Cum funcționează: plătești online cu cardul (primești automat <strong>factură fiscală</strong>), apoi ne dai articolul tău sau îl scriem noi din datele firmei tale — plus până la 3 poze.</p>
     <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Comandă acum — 500 lei</a></p>

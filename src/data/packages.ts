@@ -144,19 +144,47 @@ export const CASINO_PACKAGES: Package[] = [
   },
 ];
 
-// Termenul ofertei promo. Un singur loc: pagina /oferta-500, emailul cu lista
-// si chatbotul il citesc de aici. Dupa expirare, mentiunea DISPARE SINGURA de
-// peste tot (isPromoDeadlineActive intoarce false) — oferta ramane functionala,
-// dar nu mai afisam un termen depasit. Cand prelungesti oferta, schimbi doar
-// aici data si eticheta.
-export const PROMO_DEADLINE = {
-  // Sfarsitul zilei de 31 august, ora Romaniei.
-  iso: "2026-08-31T23:59:59+03:00",
-  label: "31 august",
+// Termenul RULANT al ofertei promo. Un singur loc: pagina /oferta-500, emailul
+// cu lista si chatbotul il citesc de aici.
+//
+// Cum functioneaza: primul termen afisat e `anchorIso`. Cand trece, termenul
+// se PRELUNGESTE SINGUR cu `periodDays` zile (14 sept -> 28 sept -> 12 oct...),
+// pana cel tarziu la `hardEndIso` — dupa care orice mentiune de termen dispare
+// de peste tot, iar oferta ramane functionala fara termen afisat. Nimic de
+// intretinut manual; anuntarea prelungirii pe email o face
+// /api/cron/promo-announce (idempotent, o data per termen).
+export const PROMO_ROLLING = {
+  // Primul termen: 14 septembrie, sfarsitul zilei, ora Romaniei.
+  anchorIso: "2026-09-14T23:59:59+03:00",
+  periodDays: 14,
+  // Ultima prelungire posibila: 31 decembrie (ora de iarna, +02:00).
+  hardEndIso: "2026-12-31T23:59:59+02:00",
 };
 
-export function isPromoDeadlineActive(): boolean {
-  return Date.now() < new Date(PROMO_DEADLINE.iso).getTime();
+/** Termenul curent al ofertei, sau null dupa 31 decembrie. `now` e param pentru teste. */
+export function currentPromoDeadline(now: number = Date.now()): Date | null {
+  const anchor = new Date(PROMO_ROLLING.anchorIso).getTime();
+  const hardEnd = new Date(PROMO_ROLLING.hardEndIso).getTime();
+  if (now >= hardEnd) return null;
+  const period = PROMO_ROLLING.periodDays * 86_400_000;
+  let t = anchor;
+  while (t <= now) t += period;
+  return new Date(Math.min(t, hardEnd));
+}
+
+/** "14 septembrie" — data curenta a ofertei in romana, sau null dupa final. */
+export function promoDeadlineLabel(now: number = Date.now()): string | null {
+  const d = currentPromoDeadline(now);
+  if (!d) return null;
+  return new Intl.DateTimeFormat("ro-RO", {
+    day: "numeric",
+    month: "long",
+    timeZone: "Europe/Bucharest",
+  }).format(d);
+}
+
+export function isPromoDeadlineActive(now: number = Date.now()): boolean {
+  return currentPromoDeadline(now) !== null;
 }
 
 // Pachete promo, disponibile doar prin landing page-uri dedicate (nu apar in /pachete).

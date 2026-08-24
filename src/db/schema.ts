@@ -178,6 +178,16 @@ export const prospectOrders = pgTable("prospect_order", {
   paidAt: timestamp("paid_at"),
 });
 
+// O linie per termen ANUNTAT al ofertei promo. Unicitatea pe deadline_label e
+// garantia ca /api/cron/promo-announce trimite anuntul de prelungire O SINGURA
+// data per termen, oricat de des ar fi apelat cronul.
+export const promoAnnouncements = pgTable("promo_announcement", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  deadlineLabel: text("deadline_label").unique().notNull(),
+  sentCount: integer("sent_count").notNull().default(0),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const publishers = pgTable("publisher", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   siteName: text("site_name").notNull(),
