@@ -1,4 +1,5 @@
 import { Resend } from "resend";
+import { SITE } from "@/data/site";
 
 function getResend() {
   const key = process.env.RESEND_API_KEY;
@@ -139,6 +140,24 @@ export function wrapEmailCold(bodyHtml: string, senderName: string = SENDER_NAME
 // Combină mailto (RFC 2369) cu o nota One-Click-compatibilă (RFC 8058).
 export function defaultListUnsubscribe() {
   return `<mailto:${CONTACT}?subject=STOP&body=STOP>`;
+}
+
+// Caseta cu datele de plata prin transfer bancar (OP), refolosita in orice
+// email care ofera plata prin OP. Datele vin din SITE.billing — un singur loc.
+// Factura pentru OP se emite manual, dupa confirmarea platii; fara proforma.
+export function bankTransferEmailBox(amount: string, paymentDetails: string): string {
+  return `
+    <div style="margin:20px 0;padding:16px;background:#faf7f2;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;">
+      <p style="margin:0 0 10px;"><strong>Plata prin transfer bancar (OP)</strong> — direct în contul nostru:</p>
+      <table style="width:100%;border-collapse:collapse;font-size:14px;">
+        <tr><td style="padding:3px 0;color:#64748b;width:110px;">Beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.company}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">IBAN</td><td style="padding:3px 0;font-weight:600;font-family:monospace;">${SITE.billing.iban}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Banca</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.bank}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Suma</td><td style="padding:3px 0;font-weight:600;">${amount}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Detalii plată</td><td style="padding:3px 0;">${paymentDetails}</td></tr>
+      </table>
+      <p style="margin:10px 0 0;color:#64748b;">După plată, răspunde la acest email cu <strong>dovada plății</strong> și datele de facturare (denumire firmă, CUI, adresă). Publicăm în maximum 4 ore lucrătoare de la primirea materialelor și îți livrăm împreună <strong>raportul cu toate linkurile și factura fiscală</strong>.</p>
+    </div>`;
 }
 
 export function escapeHtml(value: string): string {

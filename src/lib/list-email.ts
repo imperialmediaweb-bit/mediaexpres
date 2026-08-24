@@ -1,5 +1,5 @@
 import { NEWSPAPERS } from "@/data/newspapers";
-import { wrapEmail } from "@/lib/email";
+import { wrapEmail, bankTransferEmailBox } from "@/lib/email";
 import { SITE } from "@/data/site";
 
 // UN SINGUR sablon pentru emailul cu lista retelei, generat din ACELEASI date
@@ -56,17 +56,7 @@ export function buildListEmail(firstName: string): string {
     <p style="margin-top:24px;">Un articol publicat pe toată rețeaua, cu raport complet cu linkuri, costă <strong>500 lei</strong> (ofertă de intrare) — publicare în maximum 4 ore lucrătoare. Articolul rămâne permanent online.</p>
     <p>Cum funcționează: plătești online cu cardul (primești automat <strong>factură fiscală</strong>), apoi ne dai articolul tău sau îl scriem noi din datele firmei tale — plus până la 3 poze.</p>
     <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Comandă acum — 500 lei</a></p>
-    <div style="margin:20px 0;padding:16px;background:#faf7f2;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;">
-      <p style="margin:0 0 10px;"><strong>Preferi transfer bancar (OP)?</strong> Plătești direct în contul nostru:</p>
-      <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:3px 0;color:#64748b;width:110px;">Beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.company}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">IBAN</td><td style="padding:3px 0;font-weight:600;font-family:monospace;">${SITE.billing.iban}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">Banca</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.bank}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">Suma</td><td style="padding:3px 0;font-weight:600;">500 lei</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">Detalii plată</td><td style="padding:3px 0;">Publicare articol — 50 de ziare</td></tr>
-      </table>
-      <p style="margin:10px 0 0;color:#64748b;">După plată, răspunde la acest email cu <strong>dovada plății</strong> + datele de facturare (denumire firmă, CUI, adresă) + articolul sau site-ul firmei. Publicăm în maximum 4 ore lucrătoare și îți livrăm împreună <strong>raportul cu toate linkurile și factura fiscală</strong>.</p>
-    </div>
+    ${bankTransferEmailBox("500 lei", "Publicare articol — 50 de ziare")}
     <p>Ai întrebări? Răspunde direct la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
     <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
     `,

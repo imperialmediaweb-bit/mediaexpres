@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
+import { BankTransferBox } from "@/components/BankTransferBox";
 
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
@@ -293,6 +294,13 @@ export default function Oferta500Page() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Plata prin transfer bancar */}
+      <section className="section">
+        <div className="container">
+          <BankTransferBox note="Nu e obligatoriu cardul. Poți plăti prin OP: 500 lei (standard) sau 1.000 lei (cazino/iGaming)." />
         </div>
       </section>
 

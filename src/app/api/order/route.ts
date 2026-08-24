@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { orderSchema } from "@/lib/validators";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { findPackageById, SUBSCRIPTION_PLANS } from "@/data/packages";
 import { formatPrice } from "@/lib/utils";
 import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-capi";
@@ -111,7 +111,8 @@ export async function POST(req: NextRequest) {
       ${kv("Preț", packagePrice)}
       ${kv("Titlu articol", data.articleTitle)}
     </table>
-    <p>Iti trimitem in scurt timp proforma cu IBAN-ul nostru pe acest email. Dupa ce vedem transferul, publicam articolul pe reteaua MediaExpres si primesti factura finala plus raportul cu link-urile.</p>
+    <p>Poți plăti direct prin transfer bancar, cu datele de mai jos — fără proformă, fără alți pași:</p>
+    ${bankTransferEmailBox(packagePrice, `Comandă ${packageLabel}`)}
     <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
   `
   );

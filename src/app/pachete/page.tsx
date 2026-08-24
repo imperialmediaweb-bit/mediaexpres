@@ -9,6 +9,7 @@ import { CtaBanner } from "@/components/home/CtaBanner";
 import { RequestListModal } from "@/components/forms/RequestListModal";
 import { STANDARD_PACKAGES, CASINO_PACKAGES } from "@/data/packages";
 import { PackagesStructuredData } from "@/components/seo/StructuredData";
+import { BankTransferBox } from "@/components/BankTransferBox";
 import { Mail } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -87,6 +88,8 @@ export default function PacheteTPage() {
           </section>
 
           <PricingNote />
+
+          <BankTransferBox note="Orice pachet cu plată unică se poate achita și prin OP — suma e prețul pachetului ales." />
 
           {/* Lead Magnet — Request List */}
           <section className="relative overflow-hidden rounded-2xl bg-brand-navy p-10 text-white lg:p-16">
