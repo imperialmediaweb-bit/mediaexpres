@@ -4,12 +4,15 @@ import { MapPin, Newspaper, Facebook, Globe, Mail } from "lucide-react";
 import { RequestListModal } from "@/components/forms/RequestListModal";
 import { REGION_COUNTS } from "@/data/newspapers";
 import { CountyGrid } from "@/components/CountyGrid";
+import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
-  description: "MediaExpres distribuie pe o rețea națională de 50+ ziare și 50 pagini Facebook.",
+  description:
+    "Lista completă a celor 50 de ziare MediaExpres: 41 locale + 9 naționale, cu link către fiecare publicație. Plus 50 pagini Facebook asociate.",
   alternates: { canonical: "/reteaua-noastra" },
-  robots: { index: false, follow: false },
+  // Pagina e in sitemap si e continutul unic al retelei — trebuie indexata.
+  // Avea noindex din perioada in care lista era ascunsa dupa formular.
 };
 
 const REGIONS = [
@@ -111,21 +114,34 @@ export default function ReteauaPage() {
             </div>
           </div>
 
+          <div className="mt-20">
+            <div className="mx-auto max-w-2xl text-center">
+              <p className="eyebrow">Transparență totală</p>
+              <h2 className="h2 mt-2">Lista completă a ziarelor</h2>
+              <p className="lead mt-4">
+                Nu cumperi pe încredere. Astea sunt publicațiile — dă click pe
+                oricare și convinge-te că sunt reale.
+              </p>
+            </div>
+            <div className="mt-10">
+              <NewspaperDirectory />
+            </div>
+          </div>
+
           <div className="mt-16 rounded-2xl bg-brand-navy p-10 text-white text-center lg:p-16">
             <Mail className="mx-auto h-10 w-10 text-brand-gold" />
             <h3 className="mt-5 font-serif text-3xl font-bold">
-              Vrei lista completă a ziarelor partenere?
+              Vrei lista și pe email?
             </h3>
             <p className="mx-auto mt-4 max-w-2xl text-white/85">
-              Din respect pentru rețeaua noastră și pentru a o proteja de abuzuri SEO, numele și
-              URL-urile exacte ale celor 50 de ziare le trimitem direct pe email după completarea
-              unui formular scurt. Gratuit, fără obligații.
+              Ți-o trimitem automat, pe loc — cu link către fiecare ziar, prețuri
+              și pașii de comandă. Gratuit, fără obligații.
             </p>
             <div className="mt-8">
               <RequestListModal
                 trigger={
                   <Button variant="gold" size="lg">
-                    <Mail className="h-4 w-4" /> Solicită lista completă
+                    <Mail className="h-4 w-4" /> Primește lista pe email
                   </Button>
                 }
               />
