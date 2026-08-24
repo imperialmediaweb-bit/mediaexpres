@@ -15,6 +15,13 @@ export const SITE = {
     facebook: "https://facebook.com/mediaexpres",
     linkedin: "https://linkedin.com/company/mediaexpres",
   },
+  // Datele de plata prin transfer bancar (OP). Apar in emailul cu lista si
+  // oriunde oferim plata prin OP — factura pentru OP se emite manual.
+  billing: {
+    company: "LEGIO WEB DEVELOPMENT TOOLS S.R.L.",
+    iban: "RO15BTRLRONCRT0652757201",
+    bank: "Banca Transilvania",
+  },
 };
 
 export const NAV_LINKS = [
