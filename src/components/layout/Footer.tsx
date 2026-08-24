@@ -1,5 +1,13 @@
 import Link from "next/link";
-import { Mail, Phone, MapPin, Clock, Facebook, Linkedin } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Clock,
+  Facebook,
+  Linkedin,
+  MessageCircle,
+} from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { SITE, FOOTER_LINKS } from "@/data/site";
 
@@ -50,6 +58,17 @@ export function Footer() {
                 <Phone className="h-4 w-4 mt-0.5 text-brand-gold" />
                 <a href={`tel:${SITE.phone.replace(/\s/g, "")}`} className="hover:text-white">
                   {SITE.phone}
+                </a>
+              </li>
+              <li className="flex items-start gap-3">
+                <MessageCircle className="h-4 w-4 mt-0.5 text-brand-gold" />
+                <a
+                  href={`https://wa.me/${SITE.whatsapp}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="hover:text-white"
+                >
+                  Scrie-ne pe WhatsApp
                 </a>
               </li>
               <li className="flex items-start gap-3">

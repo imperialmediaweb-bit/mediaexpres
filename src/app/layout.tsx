@@ -8,6 +8,7 @@ import {
   ConversionBanner,
   ConversionWidgets,
 } from "@/components/conversion/ConversionWidgets";
+import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import "./globals.css";
@@ -109,6 +110,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <main className="flex-1">{children}</main>
         <Footer />
         <ConversionWidgets />
+        <WhatsAppButton />
       </body>
     </html>
   );

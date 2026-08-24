@@ -6,7 +6,9 @@ export const SITE = {
   description:
     "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 4h, raport PDF, linkuri permanente.",
   email: "contact@mediaexpress.ro",
-  phone: "+40 700 000 000",
+  phone: "+40 758 169 388",
+  // Acelasi numar, in formatul cerut de wa.me: prefix de tara fara "+" si fara spatii.
+  whatsapp: "40758169388",
   address: "București, România",
   schedule: "Luni – Vineri, 09:00 – 18:00",
   social: {
