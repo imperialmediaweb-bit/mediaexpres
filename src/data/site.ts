@@ -20,6 +20,9 @@ export const SITE = {
 export const NAV_LINKS = [
   { href: "/", label: "Acasă" },
   { href: "/pachete", label: "Pachete" },
+  // Landingul reclamei. Un lead a scris ca a vazut reclama, a intrat pe site
+  // si nu a mai gasit oferta — pagina nu era nicaieri in meniu.
+  { href: "/oferta-500", label: "Ofertă 500 lei" },
   { href: "/reteaua-noastra", label: "Rețeaua noastră" },
   { href: "/blog", label: "Blog" },
   { href: "/despre", label: "Despre" },
