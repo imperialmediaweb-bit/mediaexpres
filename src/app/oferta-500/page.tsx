@@ -24,9 +24,9 @@ export const metadata: Metadata = {
 const INCLUDED = [
   {
     icon: Newspaper,
-    title: "50 de ziare online",
+    title: "50 de articole unice",
     description:
-      "Articolul tău publicat pe 50 de domenii .ro diferite, fiecare cu trafic real și indexare Google.",
+      "Nu publicăm copii: fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, același mesaj. Zero conținut duplicat.",
   },
   {
     icon: Globe,
@@ -109,6 +109,10 @@ const FAQ = [
   {
     q: "De ce costă dublu pentru cazino și pariuri?",
     a: "Conținutul din zona iGaming are cerințe suplimentare de conformitate (ONJN, mențiuni despre joc responsabil) și un risc editorial mai mare pentru publicații. De aceea tariful este 1.000 lei în loc de 500. Bifezi declarația la comandă. Dacă un articol de cazino este trimis nedeclarat, publicarea se oprește și suma nu se rambursează.",
+  },
+  {
+    q: "E același articol copiat pe toate ziarele? Nu penalizează Google?",
+    a: "Nu e copiat. Fiecare ziar primește o variantă unică a articolului: alt titlu, altă formulare, altă adresă URL — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Zero conținut duplicat între publicații. Iar „canibalizarea” de care se vorbește e o problemă doar între paginile propriului tău site — articolele apar pe domeniile noastre și trimit linkuri către tine, exact ce contează pentru SEO.",
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",

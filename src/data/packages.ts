@@ -80,6 +80,7 @@ export const STANDARD_PACKAGES: Package[] = [
     badge: "Cel mai popular",
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
       "Linkuri livrate în 4h",
       "Raport PDF complet",
@@ -156,6 +157,7 @@ export const PROMO_PACKAGES: Package[] = [
     category: "standard",
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
       "Linkuri livrate în 4h",
       "Raport PDF complet cu toate URL-urile",
@@ -174,6 +176,7 @@ export const PROMO_PACKAGES: Package[] = [
     category: "casino",
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
       "Linkuri livrate în 4h",
       "Raport PDF complet cu toate URL-urile",
