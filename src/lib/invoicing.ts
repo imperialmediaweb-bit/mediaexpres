@@ -2,6 +2,8 @@ import {
   createInvoice,
   recordInvoicePayment,
   isStartcoConfigured,
+  listSeries,
+  STARTCO_SERIES,
   StartcoError,
   INVOICE_PRODUCT_NAME,
 } from "@/lib/startco";
@@ -142,10 +144,30 @@ export async function issueInvoiceForOrder(
       ),
     });
   } catch (err) {
-    const reason =
+    let reason =
       err instanceof StartcoError
         ? `StartCo a refuzat factura: ${err.message} (cod ${err.code})`
         : `Eroare neasteptata: ${err instanceof Error ? err.message : String(err)}`;
+
+    // Auto-diagnostic: cel mai frecvent motiv de refuz e seria gresita
+    // (STARTCO_SERIES trebuie sa fie NUMELE unei serii de facturi din cont,
+    // nu numele tokenului). La orice refuz, punem in alerta seriile reale,
+    // ca emailul sa spuna singur care e valoarea corecta.
+    if (err instanceof StartcoError && err.code !== "NO_TOKEN") {
+      try {
+        const all = await listSeries();
+        const invoiceSeries = all.filter((s) => s.type === "invoice").map((s) => s.name);
+        const match = invoiceSeries.some(
+          (n) => n.trim().toLowerCase() === STARTCO_SERIES.trim().toLowerCase(),
+        );
+        reason += ` — Seria configurata: "${STARTCO_SERIES}". Serii de facturi existente in cont: ${
+          invoiceSeries.length ? invoiceSeries.map((n) => `"${n}"`).join(", ") : "niciuna"
+        }.${match ? "" : " SERIA CONFIGURATA NU EXISTA — seteaza STARTCO_SERIES in Railway pe una din seriile de mai sus."}`;
+      } catch {
+        // daca nici listarea seriilor nu merge, ramane motivul de baza
+      }
+    }
+
     console.error("[invoicing] emitere esuata:", err);
     await alertManualInvoice(input, reason).catch((e) =>
       console.error("[invoicing] nici alerta nu a plecat:", e),
