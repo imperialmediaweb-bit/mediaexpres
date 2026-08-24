@@ -178,6 +178,33 @@ export const prospectOrders = pgTable("prospect_order", {
   paidAt: timestamp("paid_at"),
 });
 
+// Materialele trimise de clienti dupa plata (formularul /articol/[token]).
+// Inainte, fluxul trimitea totul DOAR pe email catre adresa de contact — care
+// facea bounce — si articolul unui client platitor a ramas de negasit in admin.
+// De-acum orice trimitere se salveaza AICI inainte de orice email.
+export const orderSubmissions = pgTable("order_submission", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  stripeSessionId: text("stripe_session_id").notNull(),
+  email: text("email").notNull(),
+  packageId: text("package_id").notNull(),
+  title: text("title").notNull(),
+  body: text("body").notNull(),
+  metaDescription: text("meta_description"),
+  keywords: text("keywords"),
+  companyName: text("company_name"),
+  siteUrl: text("site_url"),
+  contactPhone: text("contact_phone"),
+  // JSON: [{url, publicId}] — pozele din Cloudinary; featuredIndex arata reprezentativa.
+  images: text("images").notNull().default("[]"),
+  featuredIndex: integer("featured_index").notNull().default(0),
+  facebookOptIn: boolean("facebook_opt_in").notNull().default(true),
+  generatedByAi: boolean("generated_by_ai").notNull().default(false),
+  isCasino: boolean("is_casino").notNull().default(false),
+  status: text("status").notNull().default("pending"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  publishedAt: timestamp("published_at"),
+});
+
 // O linie per termen ANUNTAT al ofertei promo. Unicitatea pe deadline_label e
 // garantia ca /api/cron/promo-announce trimite anuntul de prelungire O SINGURA
 // data per termen, oricat de des ar fi apelat cronul.

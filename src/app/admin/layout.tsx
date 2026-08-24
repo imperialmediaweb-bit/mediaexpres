@@ -6,6 +6,7 @@ import { LogoutButton } from "./ziare/LogoutButton";
 import {
   LayoutDashboard,
   Users,
+  Inbox,
   FileText,
   ShoppingBag,
   Repeat,
@@ -26,6 +27,7 @@ export const dynamic = "force-dynamic";
 const NAV = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/clienti", label: "Clienti", icon: Users },
+  { href: "/admin/materiale", label: "Materiale", icon: Inbox },
   { href: "/admin/articole", label: "Articole", icon: FileText },
   { href: "/admin/comenzi", label: "Comenzi", icon: ShoppingBag },
   { href: "/admin/rapoarte", label: "Raport publicare", icon: ClipboardCheck },

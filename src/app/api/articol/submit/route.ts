@@ -3,6 +3,8 @@ import { z } from "zod";
 import { verifyOrderToken } from "@/lib/order-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
+import { db } from "@/db";
+import { orderSubmissions } from "@/db/schema";
 
 export const runtime = "nodejs";
 
@@ -56,6 +58,32 @@ export async function POST(req: NextRequest) {
 
   // featuredIndex vine din UI, dar poate depasi numarul real de poze.
   const featured = d.images[d.featuredIndex] ?? d.images[0];
+
+  // SALVAREA E PRIMA, inainte de orice email. Un articol platit care a trait
+  // doar intr-un email catre o adresa cu bounce a fost de negasit in admin —
+  // nu se mai intampla. Daca DB-ul pica, mergem totusi mai departe pe email
+  // (best-effort dublu), dar niciodata invers.
+  try {
+    await db.insert(orderSubmissions).values({
+      stripeSessionId: order.sessionId,
+      email: order.email,
+      packageId: order.packageId,
+      title: d.title,
+      body: d.body,
+      metaDescription: d.metaDescription || null,
+      keywords: d.keywords?.length ? d.keywords.join(", ") : null,
+      companyName: d.companyName || null,
+      siteUrl: d.siteUrl || null,
+      contactPhone: d.contactPhone || null,
+      images: JSON.stringify(d.images),
+      featuredIndex: d.featuredIndex,
+      facebookOptIn: d.facebookOptIn,
+      generatedByAi: d.generatedByAi,
+      isCasino,
+    });
+  } catch (err) {
+    console.error("[articol/submit] NU am putut salva in DB (continui pe email):", err);
+  }
 
   const imagesHtml = d.images.length
     ? d.images
@@ -118,7 +146,11 @@ export async function POST(req: NextRequest) {
       "Am primit articolul tău",
       `
       <p>Salut,</p>
-      <p>Am primit articolul <strong>„${esc(d.title)}"</strong> și cele ${d.images.length} imagini.</p>
+      <p>Am primit articolul <strong>„${esc(d.title)}"</strong>${
+        d.images.length
+          ? ` și ${d.images.length === 1 ? "imaginea atașată" : `cele ${d.images.length} imagini`}`
+          : ""
+      }.</p>
       <p>Îl publicăm ${
         pkg?.newspapers
           ? pkg.newspapers === 1
