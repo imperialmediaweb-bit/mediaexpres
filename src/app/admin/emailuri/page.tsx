@@ -1,7 +1,8 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { listResendEmails, aggregateStats } from "@/lib/resend-stats";
-import { ExternalLink, AlertCircle } from "lucide-react";
+import { ArrowRight, AlertCircle } from "lucide-react";
 
 export const dynamic = "force-dynamic";
 
@@ -30,12 +31,28 @@ function toDisplay(to: string[] | string): string {
   return to || "—";
 }
 
-export default async function EmailuriPage() {
+export default async function EmailuriPage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/emailuri");
 
-  const { data: emails, ok, error, hint, totalFetched, fromDomain } =
+  const { data: all, ok, error, hint, totalFetched, fromDomain } =
     await listResendEmails(100);
+
+  // Cautare dupa destinatar sau subiect, ca sa poti scoate repede tot ce s-a
+  // schimbat cu o anumita persoana fara sa ai acces la vreo casuta de email.
+  const q = (searchParams?.q || "").trim().toLowerCase();
+  const emails = q
+    ? all.filter(
+        (e) =>
+          toDisplay(e.to).toLowerCase().includes(q) ||
+          (e.subject || "").toLowerCase().includes(q),
+      )
+    : all;
+
   const stats = aggregateStats(emails);
 
   return (
@@ -47,6 +64,30 @@ export default async function EmailuriPage() {
           cu statistici de deschidere și click. Datele se citesc live din Resend API.
         </p>
       </div>
+
+      <form method="get" className="mt-5 flex max-w-lg gap-2">
+        <input
+          type="search"
+          name="q"
+          defaultValue={q}
+          placeholder="Caută după adresă sau subiect — ex: contact@netsim.ro"
+          className="flex-1 rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-navy focus:outline-none"
+        />
+        <button
+          type="submit"
+          className="rounded-lg bg-brand-navy px-4 py-2 text-sm font-semibold text-white hover:bg-brand-navy/90"
+        >
+          Caută
+        </button>
+        {q && (
+          <Link
+            href="/admin/emailuri"
+            className="self-center text-sm text-slate-500 hover:text-brand-navy"
+          >
+            Renunță
+          </Link>
+        )}
+      </form>
 
       {!ok && (
         <div className="mt-6 flex gap-3 rounded-xl border-2 border-amber-300 bg-amber-50 p-4 text-sm text-amber-900">
@@ -122,14 +163,12 @@ export default async function EmailuriPage() {
                       {formatDateTime(e.created_at)}
                     </td>
                     <td className="px-4 py-3 text-right">
-                      <a
-                        href={`https://resend.com/emails/${e.id}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
+                      <Link
+                        href={`/admin/emailuri/${e.id}`}
                         className="inline-flex items-center gap-1 text-xs font-medium text-brand-red hover:underline"
                       >
-                        Detalii <ExternalLink className="h-3 w-3" />
-                      </a>
+                        Vezi conținutul <ArrowRight className="h-3 w-3" />
+                      </Link>
                     </td>
                   </tr>
                 );

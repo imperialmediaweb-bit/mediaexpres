@@ -99,6 +99,51 @@ export async function listResendEmails(limit = 100): Promise<ListEmailsResult> {
   }
 }
 
+export interface ResendEmailDetail extends ResendEmailItem {
+  html?: string | null;
+  text?: string | null;
+  reply_to?: string[] | string | null;
+}
+
+/**
+ * Aduce UN email complet, cu tot cu continut.
+ *
+ * Formularele site-ului (contact, cerere lista, comanda) nu salveaza in baza de
+ * date ce a scris omul — trimit doar un email catre adresa de contact. Cine nu
+ * are acces la cutia aia nu poate afla niciodata ce a vrut clientul. Resend
+ * pastreaza insa corpul emailului, deci il citim de acolo si il aratam in admin.
+ */
+export async function getResendEmail(
+  id: string,
+): Promise<{ ok: boolean; data?: ResendEmailDetail; error?: string; hint?: string }> {
+  const key = process.env.RESEND_API_KEY;
+  if (!key) {
+    return { ok: false, error: "RESEND_API_KEY lipsește din env" };
+  }
+  try {
+    const res = await fetch(`https://api.resend.com/emails/${encodeURIComponent(id)}`, {
+      headers: { Authorization: `Bearer ${key}` },
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      const body = await res.text().catch(() => "");
+      return {
+        ok: false,
+        error: `Resend API ${res.status}: ${body.slice(0, 200)}`,
+        hint:
+          res.status === 404
+            ? "Emailul nu mai există în Resend (retenția e limitată în timp)."
+            : res.status === 401
+              ? "API key invalid sau revocat."
+              : undefined,
+      };
+    }
+    return { ok: true, data: (await res.json()) as ResendEmailDetail };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  }
+}
+
 export interface EmailStats {
   total: number;
   delivered: number;
