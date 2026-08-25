@@ -6,6 +6,7 @@ import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 import { buildListEmail, LIST_EMAIL_SUBJECT } from "@/lib/list-email";
+import { promoDeadlineLabel } from "@/data/packages";
 
 export const runtime = "nodejs";
 
@@ -43,6 +44,9 @@ export async function POST(req: NextRequest) {
     console.error("[request-list] db error:", err);
   }
 
+  // Termenul curent al ofertei — null dupa expirarea finala, caz in care
+  // follow-upurile nu mai promit o data care nu exista.
+  const deadlineLabel = promoDeadlineLabel();
   const firstName = data.name.split(" ")[0];
 
   // 1) Email initial: LISTA COMPLETA, direct in email, din sablonul unic
@@ -78,39 +82,54 @@ export async function POST(req: NextRequest) {
     replyTo: data.email,
   });
 
-  // 3) Drip follow-up: ziua 3 — soft nudge cu pachet entry-level
+  // 3) Follow-up ziua 3 — apasa pe ACEEASI oferta ca reclama si ca site-ul.
+  // Inainte trimitea omul spre pachetul Local, 150 lei, un singur ziar: ii
+  // aratam lista cu 50 de ziare si apoi il impingeam spre cel mai mic pachet.
   const day3 = new Date(Date.now() + 3 * DAY_MS).toISOString();
   await sendEmail({
     to: data.email,
-    subject: "Testează rețeaua cu un articol mic",
+    subject: "Toate cele 50 de ziare, pentru 500 de lei",
     scheduledAt: day3,
     replyTo: ADMIN_EMAIL,
     html: wrapEmail(
-      "Testează rețeaua cu un articol mic",
+      "Toate cele 50 de ziare, pentru 500 de lei",
       `
       <p>Salut ${firstName},</p>
-      <p>Acum câteva zile ai cerut lista rețelei MediaExpres. Dacă vrei să o testezi fără risc, pachetul <strong>Local (150 RON)</strong> publică articolul tău într-un ziar județean la alegere — linkul îl primești în 4h.</p>
-      <p style="margin:24px 0;"><a href="${SITE.url}/pachete#standard" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Vezi pachetul Local</a></p>
-      <p>Dacă vrei altă acoperire (10 ziare / 50 ziare / abonament), răspunde direct la acest email și îți fac recomandarea potrivită.</p>
+      <p>Acum câteva zile ai cerut lista rețelei MediaExpres. Îți scriu pentru un singur lucru: <strong>oferta de intrare${deadlineLabel ? `, valabilă până pe ${deadlineLabel}` : ""}</strong>.</p>
+      <p>Un articol publicat pe <strong>toate cele 50 de ziare</strong> — 41 locale + 9 naționale — pentru <strong>500 de lei</strong> în loc de 1.500. Nu un ziar, nu zece. Toate.</p>
+      <ul style="margin:16px 0;padding-left:20px;line-height:1.7;">
+        <li><strong>Articol unic pe fiecare ziar</strong> — nu același text copiat de 50 de ori</li>
+        <li>50 de backlinks dofollow permanente, din 50 de domenii .ro diferite</li>
+        <li>Publicare în maximum 4 ore lucrătoare</li>
+        <li>Raport cu toate linkurile + factură fiscală</li>
+      </ul>
+      <p>Dacă nu ai articol scris, îl redactăm noi — ai nevoie doar de site-ul firmei și două propoziții.</p>
+      <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">Vezi oferta de 500 lei</a></p>
+      <p>Ai o întrebare înainte să comanzi? Răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `
     ),
   });
 
-  // 4) Drip follow-up: ziua 7 — last call cu reducere
+  // 4) Follow-up ziua 7 — urgenta REALA (termenul ofertei), nu o reducere
+  // inventata pe care trebuia sa o confirmi manual la fiecare raspuns.
   const day7 = new Date(Date.now() + 7 * DAY_MS).toISOString();
   await sendEmail({
     to: data.email,
-    subject: "Ultimă chemare — reducere la primul articol",
+    subject: deadlineLabel
+      ? `Oferta de 500 lei expiră pe ${deadlineLabel}`
+      : "Oferta de 500 lei — ultima chemare",
     scheduledAt: day7,
     replyTo: ADMIN_EMAIL,
     html: wrapEmail(
-      "Reducere la primul articol — ofertă limitată",
+      deadlineLabel ? `Expiră pe ${deadlineLabel}` : "Ultima chemare",
       `
       <p>Salut ${firstName},</p>
-      <p>Vreau să-ți fac oferta corectă pentru primul articol. Dacă alegi să publici cu noi în următoarele 48h, îți aplic automat <strong>o reducere</strong> la pachetul ales.</p>
-      <p>Răspunde la acest email cu <strong>„da”</strong> și îți confirm reducerea pe loc.</p>
-      <p style="margin:24px 0;"><a href="${SITE.url}/pachete" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Vezi toate pachetele</a></p>
+      <p>Ultimul mesaj pe tema asta${deadlineLabel ? `: oferta de intrare expiră pe <strong>${deadlineLabel}</strong>` : ""}.</p>
+      <p><strong>500 de lei</strong> pentru un articol pe toate cele 50 de ziare, în loc de 1.500. După expirare, același lucru costă prețul întreg.</p>
+      <p>Dacă ai ezitat pentru că nu ai text scris — îl scriem noi, fără cost suplimentar. Dacă ai ezitat din alt motiv, răspunde-mi cu el; poate am o soluție.</p>
+      <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">Comandă acum — 500 lei</a></p>
+      <p style="font-size:14px;color:#64748b;">Preferi transfer bancar? Ai datele și formularul aici: <a href="${SITE.url}/comanda/transfer?pachet=promo-50" style="color:#c1121f;">${SITE.domain}/comanda/transfer</a></p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `
     ),
