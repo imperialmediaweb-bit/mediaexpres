@@ -43,10 +43,22 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Emailul clientului nu e valid" }, { status: 400 });
   }
 
-  const links = linksRaw
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => /^https?:\/\/\S+$/i.test(l));
+  // Accepta doua formate in aceeasi caseta:
+  //   1. doar linkuri, unul pe rand
+  //   2. titlu pe un rand, linkul pe randul urmator (cum le da campania)
+  // Titlul e pastrat: cand fiecare publicatie are alt titlu, raportul devine
+  // dovada vizibila ca articolele sunt unice, nu copii.
+  const rawLines = linksRaw.split(/\r?\n/).map((l) => l.trim());
+  const entries: { url: string; title?: string }[] = [];
+  for (let i = 0; i < rawLines.length; i++) {
+    const line = rawLines[i];
+    if (!/^https?:\/\/\S+$/i.test(line)) continue;
+    const prev = rawLines[i - 1] || "";
+    const title =
+      prev && !/^https?:\/\//i.test(prev) && prev.length <= 300 ? prev : undefined;
+    entries.push(title ? { url: line, title } : { url: line });
+  }
+  const links = entries.map((e) => e.url);
 
   const hasFile = file instanceof File && file.size > 0;
 
@@ -85,7 +97,9 @@ export async function POST(req: NextRequest) {
       email: email.toLowerCase(),
       clientName: clientName || null,
       articleTitle: articleTitle || null,
-      links: JSON.stringify(links),
+      // Salvam obiecte {url, title}. Rapoartele vechi au string[] simplu —
+      // cititorii trateaza ambele forme.
+      links: JSON.stringify(entries),
     });
     // Clientul fara cont primeste unul implicit (login cu magic link pe email).
     const [existing] = await db
@@ -101,11 +115,19 @@ export async function POST(req: NextRequest) {
   }
 
   const firstName = clientName.split(/\s+/)[0] || "";
-  const linksHtml = links.length
-    ? `<ol style="padding-left:20px;margin:16px 0;">${links
+  const esc = (s: string) =>
+    s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const linksHtml = entries.length
+    ? `<ol style="padding-left:20px;margin:16px 0;">${entries
         .map(
-          (l) =>
-            `<li style="margin:6px 0;"><a href="${l}" style="color:#0B1F3A;">${l.replace(/^https?:\/\//, "")}</a></li>`,
+          (e) =>
+            `<li style="margin:10px 0;">${
+              e.title
+                ? `<strong style="color:#111111;">${esc(e.title)}</strong><br/>`
+                : ""
+            }<a href="${esc(e.url)}" style="color:#c1121f;font-size:13px;">${esc(
+              e.url.replace(/^https?:\/\//, ""),
+            )}</a></li>`,
         )
         .join("")}</ol>`
     : "";

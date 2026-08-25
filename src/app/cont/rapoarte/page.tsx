@@ -45,9 +45,19 @@ export default async function RapoartePage() {
         ) : (
           <div className="mt-8 space-y-6">
             {rows.map((r) => {
-              let links: string[] = [];
+              // Rapoartele noi contin {url, title}; cele vechi doar sirul URL-ului.
+              let links: { url: string; title?: string }[] = [];
               try {
-                links = JSON.parse(r.links || "[]");
+                const raw = JSON.parse(r.links || "[]") as unknown[];
+                links = raw
+                  .map((x) =>
+                    typeof x === "string"
+                      ? { url: x }
+                      : (x as { url?: string; title?: string })?.url
+                        ? { url: (x as { url: string }).url, title: (x as { title?: string }).title }
+                        : null,
+                  )
+                  .filter((x): x is { url: string; title?: string } => x !== null);
               } catch {
                 links = [];
               }
@@ -67,19 +77,24 @@ export default async function RapoartePage() {
                     {links.length === 1 ? "publicație" : "publicații"}
                   </p>
                   {links.length > 0 && (
-                    <ol className="mt-4 grid gap-1.5 text-sm sm:grid-cols-2">
+                    <ol className="mt-4 space-y-2.5 text-sm">
                       {links.map((l, i) => (
-                        <li key={`${l}-${i}`} className="flex gap-2">
+                        <li key={`${l.url}-${i}`} className="flex gap-2">
                           <span className="shrink-0 text-slate-400">{i + 1}.</span>
-                          <a
-                            href={l}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="min-w-0 truncate text-brand-red hover:underline"
-                            title={l}
-                          >
-                            {l.replace(/^https?:\/\//, "").split("/")[0]}
-                          </a>
+                          <span className="min-w-0">
+                            {l.title && (
+                              <span className="block font-medium text-brand-navy">{l.title}</span>
+                            )}
+                            <a
+                              href={l.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="block truncate text-brand-red hover:underline"
+                              title={l.url}
+                            >
+                              {l.url.replace(/^https?:\/\//, "")}
+                            </a>
+                          </span>
                         </li>
                       ))}
                     </ol>
