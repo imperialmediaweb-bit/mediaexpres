@@ -77,5 +77,106 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fix 4: tabelele si coloanele adaugate dupa ce s-a descoperit ca
+  // `drizzle-kit push` NU rula la pornire — railway.json suprascria comanda de
+  // start din nixpacks.toml cu `npm run start`, fara push. Migrarile de mai jos
+  // sunt idempotente (IF NOT EXISTS), deci ruleaza fara grija de cate ori vrei.
+  const migrations: { step: string; query: ReturnType<typeof sql> }[] = [
+    {
+      step: "order_submission: coloane pentru plata prin OP",
+      query: sql`
+        ALTER TABLE "order_submission"
+          ADD COLUMN IF NOT EXISTS "payment_method" text NOT NULL DEFAULT 'card',
+          ADD COLUMN IF NOT EXISTS "payment_proof" text,
+          ADD COLUMN IF NOT EXISTS "company_cui" text,
+          ADD COLUMN IF NOT EXISTS "company_address" text,
+          ADD COLUMN IF NOT EXISTS "unique_per_site" boolean NOT NULL DEFAULT true
+      `,
+    },
+    {
+      step: "tabel client_message (mesajele din contul clientului)",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "client_message" (
+          "id" text PRIMARY KEY NOT NULL,
+          "email" text NOT NULL,
+          "from_client" boolean NOT NULL DEFAULT true,
+          "body" text NOT NULL,
+          "attachments" text NOT NULL DEFAULT '[]',
+          "handled" boolean NOT NULL DEFAULT false,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `,
+    },
+    {
+      step: "index pe client_message.email",
+      query: sql`CREATE INDEX IF NOT EXISTS "client_message_email_idx" ON "client_message" ("email")`,
+    },
+    {
+      step: "tabel promo_announcement (anuntul de prelungire)",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "promo_announcement" (
+          "id" text PRIMARY KEY NOT NULL,
+          "deadline_label" text NOT NULL UNIQUE,
+          "sent_count" integer NOT NULL DEFAULT 0,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `,
+    },
+    {
+      step: "tabel publication_report (rapoartele clientilor)",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "publication_report" (
+          "id" text PRIMARY KEY NOT NULL,
+          "email" text NOT NULL,
+          "client_name" text,
+          "article_title" text,
+          "links" text NOT NULL DEFAULT '[]',
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `,
+    },
+    {
+      step: "tabel order_submission (materialele trimise de clienti)",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "order_submission" (
+          "id" text PRIMARY KEY NOT NULL,
+          "stripe_session_id" text NOT NULL UNIQUE,
+          "email" text NOT NULL,
+          "package_id" text NOT NULL,
+          "title" text NOT NULL,
+          "body" text NOT NULL,
+          "meta_description" text,
+          "keywords" text,
+          "company_name" text,
+          "site_url" text,
+          "contact_phone" text,
+          "images" text NOT NULL DEFAULT '[]',
+          "featured_index" integer NOT NULL DEFAULT 0,
+          "facebook_opt_in" boolean NOT NULL DEFAULT true,
+          "unique_per_site" boolean NOT NULL DEFAULT true,
+          "generated_by_ai" boolean NOT NULL DEFAULT false,
+          "is_casino" boolean NOT NULL DEFAULT false,
+          "payment_method" text NOT NULL DEFAULT 'card',
+          "payment_proof" text,
+          "company_cui" text,
+          "company_address" text,
+          "status" text NOT NULL DEFAULT 'pending',
+          "created_at" timestamp DEFAULT now() NOT NULL,
+          "published_at" timestamp
+        )
+      `,
+    },
+  ];
+
+  // Tabelele se creeaza INAINTE de coloanele adaugate pe ele.
+  for (const m of [...migrations].reverse()) {
+    try {
+      await db.execute(m.query);
+      results.push({ step: m.step, status: "OK" });
+    } catch (e) {
+      results.push({ step: m.step, status: e instanceof Error ? e.message : String(e) });
+    }
+  }
+
   return NextResponse.json({ ok: true, results });
 }

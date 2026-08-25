@@ -4,7 +4,8 @@
     "builder": "NIXPACKS"
   },
   "deploy": {
-    "startCommand": "npm run start",
+    "//": "startCommand de aici SUPRASCRIE [start] din nixpacks.toml. Era `npm run start`, fara `drizzle-kit push` — asa ca tabelele si coloanele noi nu ajungeau niciodata in productie, iar paginile care le foloseau crapau cu eroare de server. `start:railway` face push-ul si abia apoi porneste serverul; daca push-ul da warning, pornirea continua oricum.",
+    "startCommand": "npm run start:railway",
     "healthcheckPath": "/",
     "healthcheckTimeout": 100,
     "restartPolicyType": "ON_FAILURE",
