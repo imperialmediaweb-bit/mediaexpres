@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Star,
   Zap,
+  CreditCard,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
 import { promoDeadlineLabel } from "@/data/packages";
@@ -292,6 +293,22 @@ export default function Oferta500Page() {
           </div>
           <div className="mt-10">
             <NewspaperDirectory />
+          </div>
+
+          {/* Omul tocmai a verificat ca ziarele sunt reale — momentul cu cea mai
+              mare incredere din toata pagina. Fara buton aici, trebuia sa se
+              intoarca singur sus. */}
+          <div className="mt-10 text-center">
+            <a
+              href="#oferta"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
+            >
+              <CreditCard className="h-5 w-5" />
+              Comandă acum — 500 lei
+            </a>
+            <p className="mt-3 text-sm text-slate-500">
+              Publicare în 4 ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
+            </p>
           </div>
         </div>
       </section>

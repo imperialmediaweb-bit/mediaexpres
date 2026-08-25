@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2, RefreshCw, ChevronDown } from "lucide-react";
+import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { SITE } from "@/data/site";
 
@@ -237,8 +237,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               butonul si pleca fara sa afle ca poate verifica ziarele inainte. */}
           <a
             href="#lista-ziare"
-            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/80 underline decoration-white/30 underline-offset-4 transition hover:text-brand-gold hover:decoration-brand-gold"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-brand-gold/60 bg-brand-gold/10 px-6 py-3 text-base font-bold text-brand-gold transition hover:border-brand-gold hover:bg-brand-gold/20 sm:w-auto"
           >
+            <Newspaper className="h-5 w-5" />
             Vezi lista celor 50 de ziare
             <ChevronDown className="h-4 w-4" />
           </a>
