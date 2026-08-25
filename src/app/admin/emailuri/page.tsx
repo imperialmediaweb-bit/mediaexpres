@@ -7,6 +7,11 @@ import { ArrowRight, AlertCircle } from "lucide-react";
 export const dynamic = "force-dynamic";
 
 const EVENT_STYLES: Record<string, { label: string; className: string }> = {
+  // Follow-up-urile pleaca la 3 si 7 zile. Fara starea asta, cadeau pe "Trimis"
+  // si pareau plecate toate odata cu emailul initial.
+  scheduled: { label: "Programat", className: "bg-violet-100 text-violet-800" },
+  queued: { label: "În așteptare", className: "bg-slate-100 text-slate-600" },
+  canceled: { label: "Anulat", className: "bg-slate-100 text-slate-500" },
   sent: { label: "Trimis", className: "bg-slate-100 text-slate-700" },
   delivered: { label: "Livrat", className: "bg-blue-100 text-blue-800" },
   delivery_delayed: { label: "Întârziat", className: "bg-amber-100 text-amber-800" },
@@ -130,7 +135,7 @@ export default async function EmailuriPage({
               <th className="px-4 py-3">Destinatar</th>
               <th className="px-4 py-3">Subject</th>
               <th className="px-4 py-3">Status</th>
-              <th className="px-4 py-3">Trimis</th>
+              <th className="px-4 py-3">Când pleacă</th>
               <th className="px-4 py-3"></th>
             </tr>
           </thead>
@@ -160,7 +165,19 @@ export default async function EmailuriPage({
                       </span>
                     </td>
                     <td className="px-4 py-3 text-xs text-slate-500">
-                      {formatDateTime(e.created_at)}
+                      {e.scheduled_at ? (
+                        <>
+                          <span className="font-medium text-violet-700">
+                            pleacă {formatDateTime(e.scheduled_at)}
+                          </span>
+                          <br />
+                          <span className="text-slate-400">
+                            creat {formatDateTime(e.created_at)}
+                          </span>
+                        </>
+                      ) : (
+                        formatDateTime(e.created_at)
+                      )}
                     </td>
                     <td className="px-4 py-3 text-right">
                       <Link

@@ -42,6 +42,11 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
       if (!res.ok || !body.ok) throw new Error(body.error || "Eroare");
       setStatus("success");
       reset();
+      // Lista e publica oricum — nu are sens sa punem omul sa astepte un email
+      // ca s-o vada. Il ducem direct la ea; emailul ramane ca sa o aiba salvata.
+      setTimeout(() => {
+        window.location.href = successHref || "/reteaua-noastra";
+      }, 1200);
     } catch (e: unknown) {
       setStatus("error");
       setErrorMsg(e instanceof Error ? e.message : "Eroare");
@@ -55,20 +60,18 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
           <Mail className="h-10 w-10 text-green-600" />
         </div>
         <h3 className="font-serif text-2xl font-semibold text-brand-navy">
-          Lista pleacă spre tine!
+          Gata — te ducem la listă
         </h3>
         <p className="text-slate-600">
-          Verifică inbox-ul în următoarele 2 minute. Dacă nu primești email, verifică folder-ul
-          de spam sau scrie-ne direct.
+          Vezi imediat toate cele 50 de publicații, cu link către fiecare. Ți-am trimis-o
+          și pe email, ca s-o ai salvată.
         </p>
-        {successHref && (
-          <Button variant="accent" size="lg" asChild className="mt-2">
-            <Link href={successHref}>
-              {successCtaLabel || "Vezi prețurile acum"}
-              <ArrowRight className="h-4 w-4" />
-            </Link>
-          </Button>
-        )}
+        <Button variant="accent" size="lg" asChild className="mt-2">
+          <Link href={successHref || "/reteaua-noastra"}>
+            {successCtaLabel || "Vezi lista acum"}
+            <ArrowRight className="h-4 w-4" />
+          </Link>
+        </Button>
       </div>
     );
   }

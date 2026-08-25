@@ -8,6 +8,8 @@ export interface ResendEmailItem {
   to: string[] | string;
   subject: string;
   created_at: string;
+  /** Prezent doar la emailurile programate (drip-ul de follow-up). */
+  scheduled_at?: string | null;
   last_event:
     | "sent"
     | "delivered"

@@ -28,6 +28,8 @@ export default async function MaterialePage() {
     .limit(100);
 
   const pending = rows.filter((r) => r.status === "pending").length;
+  // Comenzile prin OP asteapta confirmarea incasarii inainte de publicare.
+  const awaitingPayment = rows.filter((r) => r.status === "pending_payment").length;
 
   return (
     <div>
@@ -35,7 +37,12 @@ export default async function MaterialePage() {
       <p className="mt-2 text-sm text-slate-600">
         Articolele trimise de clienți după plată — text, poze și contact, într-un singur loc.
         {pending > 0 && (
-          <strong className="ml-2 text-brand-red">{pending} în așteptare.</strong>
+          <strong className="ml-2 text-brand-red">{pending} de publicat.</strong>
+        )}
+        {awaitingPayment > 0 && (
+          <strong className="ml-2 text-amber-700">
+            {awaitingPayment} așteaptă confirmarea plății (OP).
+          </strong>
         )}
       </p>
 
@@ -54,23 +61,43 @@ export default async function MaterialePage() {
               images = [];
             }
             const isPending = r.status === "pending";
+            // OP: materialele au ajuns, dar incasarea nu e confirmata. Fara
+            // starea asta distincta, comanda aparea verde, ca si cum ar fi
+            // fost publicata — exact greseala care duce la publicare neplatita.
+            const awaitingPay = r.status === "pending_payment";
+            let proof: { url: string; name: string } | null = null;
+            try {
+              proof = r.paymentProof ? JSON.parse(r.paymentProof) : null;
+            } catch {
+              proof = null;
+            }
             return (
               <div
                 key={r.id}
                 className={`rounded-xl border bg-white ${
-                  isPending ? "border-brand-red/40" : "border-slate-200"
+                  awaitingPay
+                    ? "border-amber-400"
+                    : isPending
+                      ? "border-brand-red/40"
+                      : "border-slate-200"
                 }`}
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-slate-100 px-5 py-4">
                   <div>
                     <span
                       className={`mr-3 inline-flex rounded-full px-2.5 py-0.5 text-xs font-semibold ${
-                        isPending
-                          ? "bg-red-100 text-red-800"
-                          : "bg-emerald-100 text-emerald-800"
+                        awaitingPay
+                          ? "bg-amber-100 text-amber-900"
+                          : isPending
+                            ? "bg-red-100 text-red-800"
+                            : "bg-emerald-100 text-emerald-800"
                       }`}
                     >
-                      {isPending ? "DE PUBLICAT" : "Publicat"}
+                      {awaitingPay
+                        ? "⚠️ VERIFICĂ PLATA (OP)"
+                        : isPending
+                          ? "DE PUBLICAT"
+                          : "Publicat"}
                     </span>
                     {r.isCasino && (
                       <span className="mr-3 inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
@@ -81,7 +108,7 @@ export default async function MaterialePage() {
                       {fmt(r.createdAt)} · {pkg ? `${pkg.name} — ${pkg.price} RON` : r.packageId}
                     </span>
                   </div>
-                  {isPending && <MarkPublishedButton id={r.id} />}
+                  {(isPending || awaitingPay) && <MarkPublishedButton id={r.id} />}
                 </div>
 
                 <div className="grid gap-x-8 gap-y-1 px-5 py-4 text-sm sm:grid-cols-2">
@@ -103,8 +130,41 @@ export default async function MaterialePage() {
                       <strong className="text-amber-700">IDENTIC pe toate (cerut de client)</strong>
                     )}
                   </p>
-                  <p><span className="text-slate-500">Stripe:</span> <span className="font-mono text-xs">{r.stripeSessionId}</span></p>
+                  <p>
+                    <span className="text-slate-500">Plată:</span>{" "}
+                    {r.paymentMethod === "op" ? (
+                      <strong className="text-amber-700">transfer bancar (OP)</strong>
+                    ) : (
+                      "card (Stripe)"
+                    )}
+                  </p>
+                  <p><span className="text-slate-500">Referință:</span> <span className="font-mono text-xs">{r.stripeSessionId}</span></p>
+                  {r.companyCui && (
+                    <p><span className="text-slate-500">CUI:</span> <strong>{r.companyCui}</strong></p>
+                  )}
+                  {r.companyAddress && (
+                    <p className="sm:col-span-2"><span className="text-slate-500">Adresă facturare:</span> {r.companyAddress}</p>
+                  )}
                 </div>
+
+                {proof && (
+                  <div className="border-t border-slate-100 bg-amber-50/60 px-5 py-3 text-sm">
+                    <span className="text-slate-600">Dovada plății:</span>{" "}
+                    <a
+                      href={proof.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="font-semibold text-brand-red hover:underline"
+                    >
+                      {proof.name}
+                    </a>
+                    {awaitingPay && (
+                      <span className="ml-2 text-amber-800">
+                        — verifică extrasul înainte de publicare
+                      </span>
+                    )}
+                  </div>
+                )}
 
                 <div className="border-t border-slate-100 px-5 py-4">
                   <h2 className="font-serif text-lg font-bold text-brand-navy">{r.title}</h2>

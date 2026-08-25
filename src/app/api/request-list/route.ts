@@ -3,7 +3,7 @@ import { eq } from "drizzle-orm";
 import { requestListSchema } from "@/lib/validators";
 import { db } from "@/db";
 import { users } from "@/db/schema";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 import { buildListEmail, LIST_EMAIL_SUBJECT } from "@/lib/list-email";
 
@@ -64,7 +64,11 @@ export async function POST(req: NextRequest) {
       ${kv("Telefon", data.phone || "—")}
       ${kv("Companie", data.company || "—")}
     </table>
-    <p style="margin-top:20px;color:#64748b;">Lead-ul a primit AUTOMAT lista completă cu cele 50 de ziare + linkul spre oferta de 500 lei. Follow-up automat în ziua 3 și ziua 7. Nu trebuie să faci nimic — intervii doar dacă răspunde.</p>
+    <p style="margin-top:20px;color:#64748b;">Lead-ul a primit AUTOMAT lista completă cu cele 50 de ziare + linkul spre oferta de 500 lei, și a fost dus direct la listă pe site. Follow-up automat în ziua 3 și ziua 7. Nu trebuie să faci nimic — intervii doar dacă răspunde.</p>
+    <p style="margin-top:16px;">
+      <a href="${SITE.url}/admin/emailuri?q=${encodeURIComponent(data.email)}" style="display:inline-block;background:#c1121f;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Vezi conversația cu el →</a>
+    </p>
+    <p style="margin-top:12px;font-size:13px;color:#64748b;">Vrei să-i scrii personal? Răspunde direct la acest email — ajunge la ${esc(data.email)}.</p>
   `
   );
   await sendEmail({
