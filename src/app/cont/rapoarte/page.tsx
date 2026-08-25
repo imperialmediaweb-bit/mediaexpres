@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { FileSpreadsheet, FileText } from "lucide-react";
 import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
@@ -76,6 +77,23 @@ export default async function RapoartePage() {
                     Publicat în <strong>{links.length}</strong>{" "}
                     {links.length === 1 ? "publicație" : "publicații"}
                   </p>
+
+                  <div className="mt-4 flex flex-wrap gap-2">
+                    <a
+                      href={`/api/cont/raport/${r.id}?format=xlsx`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-brand-navy transition hover:border-brand-navy hover:bg-slate-50"
+                    >
+                      <FileSpreadsheet className="h-4 w-4 text-emerald-600" />
+                      Descarcă Excel
+                    </a>
+                    <a
+                      href={`/api/cont/raport/${r.id}?format=pdf`}
+                      className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-brand-navy transition hover:border-brand-navy hover:bg-slate-50"
+                    >
+                      <FileText className="h-4 w-4 text-brand-red" />
+                      Descarcă PDF
+                    </a>
+                  </div>
                   {links.length > 0 && (
                     <ol className="mt-4 space-y-2.5 text-sm">
                       {links.map((l, i) => (
