@@ -18,6 +18,7 @@ import { promoDeadlineLabel } from "@/data/packages";
 const deadline = promoDeadlineLabel();
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { BankTransferBox } from "@/components/BankTransferBox";
+import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
 
 export const metadata: Metadata = {
@@ -318,6 +319,20 @@ export default function Oferta500Page() {
               </li>
             ))}
           </ul>
+        </div>
+      </section>
+
+      {/* Recomandari — imediat dupa lista, cand omul tocmai a verificat ca
+          ziarele sunt reale si intreaba "dar altii ce zic?" */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Ce spun clienții</p>
+            <h2 className="h2 mt-2">Nu doar noi zicem</h2>
+          </div>
+          <div className="mt-10">
+            <ClientTestimonials />
+          </div>
         </div>
       </section>
 
