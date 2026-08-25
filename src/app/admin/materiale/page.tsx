@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 import { desc } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
@@ -108,7 +109,15 @@ export default async function MaterialePage() {
                       {fmt(r.createdAt)} · {pkg ? `${pkg.name} — ${pkg.price} RON` : r.packageId}
                     </span>
                   </div>
-                  {(isPending || awaitingPay) && <MarkPublishedButton id={r.id} />}
+                  <div className="flex items-center gap-3">
+                    {(isPending || awaitingPay) && <MarkPublishedButton id={r.id} />}
+                    <Link
+                      href={`/admin/materiale/${r.id}`}
+                      className="text-sm font-semibold text-brand-red hover:underline"
+                    >
+                      Deschide →
+                    </Link>
+                  </div>
                 </div>
 
                 <div className="grid gap-x-8 gap-y-1 px-5 py-4 text-sm sm:grid-cols-2">

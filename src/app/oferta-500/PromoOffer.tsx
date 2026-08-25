@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2, RefreshCw } from "lucide-react";
+import { CreditCard, Loader2, RefreshCw, ChevronDown } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { SITE } from "@/data/site";
 
@@ -223,7 +223,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           )}
         </form>
       ) : (
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex flex-col items-center gap-3">
           <button
             type="button"
             onClick={start}
@@ -233,6 +233,15 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <CreditCard className="h-5 w-5" />
             {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
           </button>
+          {/* Lista e mai jos pe pagina, dar nimeni nu stia — omul vedea pretul si
+              butonul si pleca fara sa afle ca poate verifica ziarele inainte. */}
+          <a
+            href="#lista-ziare"
+            className="inline-flex items-center gap-1.5 text-sm font-semibold text-white/80 underline decoration-white/30 underline-offset-4 transition hover:text-brand-gold hover:decoration-brand-gold"
+          >
+            Vezi lista celor 50 de ziare
+            <ChevronDown className="h-4 w-4" />
+          </a>
         </div>
       )}
       {/* Ce se intampla DUPA plata, spus inainte de plata. Un lead a scris pe
@@ -244,8 +253,11 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         </p>
         <ol className="mt-2 space-y-1.5 text-sm text-white/85">
           <li>
-            <strong className="text-white">1.</strong> Ești dus direct la un formular
-            unde trimiți articolul și până la 3 poze.
+            <strong className="text-white">1.</strong>{" "}
+            <strong className="text-white">Cu cardul:</strong> ești dus direct la un
+            formular unde trimiți articolul și până la 3 poze.{" "}
+            <strong className="text-white">Prin OP:</strong> completezi totul pe pagina
+            de transfer, odată cu dovada plății.
           </li>
           <li>
             <strong className="text-white">2.</strong> Nu ai articol scris?{" "}
@@ -255,11 +267,19 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           </li>
           <li>
             <strong className="text-white">3.</strong> Publicăm în maximum 4 ore
-            lucrătoare, pe toate ziarele.
+            lucrătoare, pe toate ziarele.{" "}
+            <span className="text-white/60">
+              (La plata prin OP, cronometrul pornește după ce confirmăm încasarea în
+              extras — câteva ore lucrătoare, în funcție de bancă.)
+            </span>
           </li>
           <li>
             <strong className="text-white">4.</strong> Primești pe email raportul cu
-            toate linkurile și factura fiscală.
+            toate linkurile și factura fiscală.{" "}
+            <span className="text-white/60">
+              Cu cardul, factura se emite automat; prin OP, imediat după confirmarea
+              plății.
+            </span>
           </li>
         </ol>
         {!monthly && (

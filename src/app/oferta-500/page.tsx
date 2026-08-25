@@ -9,6 +9,7 @@ import {
   CheckCircle2,
   ShieldCheck,
   Star,
+  Zap,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
 import { promoDeadlineLabel } from "@/data/packages";
@@ -33,9 +34,15 @@ export const revalidate = 3600;
 const INCLUDED = [
   {
     icon: Newspaper,
-    title: "50 de articole unice",
+    title: "50 de articole UNICE",
     description:
-      "Nu publicăm copii: fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, același mesaj. Zero conținut duplicat.",
+      "Nu publicăm copii. Fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, altă adresă — cu același mesaj și aceleași linkuri. Google vede 50 de articole diferite, nu unul copiat de 50 de ori.",
+  },
+  {
+    icon: Zap,
+    title: "Trimise imediat la indexare",
+    description:
+      "După publicare, fiecare articol e trimis automat către Google pentru indexare. Nu aștepți să te descopere singur — intri în rezultate în ore, nu în săptămâni.",
   },
   {
     icon: Globe,
@@ -45,9 +52,9 @@ const INCLUDED = [
   },
   {
     icon: LinkIcon,
-    title: "50 backlinks dofollow",
+    title: "50 backlinks dofollow, DA 37+",
     description:
-      "Linkuri reale din 50 de domenii diferite, cu autoritate DA 37+. Efect direct pe SEO-ul site-ului tău.",
+      "Linkuri reale, permanente, din 50 de domenii .ro diferite — nu de pe subpagini ale aceluiași site. Autoritate de domeniu 37+, efect direct și durabil pe SEO-ul tău.",
   },
   {
     icon: Facebook,
@@ -270,8 +277,9 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* Lista ziarelor — vizibila inainte de plata, cu linkuri */}
-      <section className="section">
+      {/* Lista ziarelor — vizibila inainte de plata, cu linkuri.
+          id-ul e tinta butonului "Vezi lista" de sub CTA. */}
+      <section id="lista-ziare" className="section scroll-mt-20">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Transparență totală</p>
