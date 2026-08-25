@@ -40,24 +40,44 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   const { isCasino, monthly } = useSelection();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Pasul de email dinainte de plata. Stripe capteaza emailul abia pe pagina lui,
+  // deci cine pleaca de acolo mai devreme ramanea complet necunoscut si nu putea
+  // fi recuperat. Aici il cerem noi, il salvam ca lead si il trimitem precompletat
+  // mai departe — omul are un camp mai putin de scris la Stripe.
+  const [askEmail, setAskEmail] = useState(false);
+  const [email, setEmail] = useState("");
 
   const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
-  async function go() {
+  function start() {
     if (loading) return;
-    setLoading(true);
     setError(null);
+    // Evenimentul de pixel pleaca la intentia reala de comanda, nu dupa email —
+    // altfel am pierde din masuratoare exact oamenii care ezita.
     trackPixelEvent("InitiateCheckout", {
       content_name: `Oferta 500 — ${isCasino ? "cazino" : "standard"}${monthly ? " lunar" : ""}`,
       content_category: "promo",
       value: offer.price,
       currency: "RON",
     });
+    setAskEmail(true);
+  }
+
+  async function go() {
+    if (loading) return;
+    const clean = email.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
+      setError("Scrie o adresă de email validă — acolo primești factura.");
+      return;
+    }
+    setLoading(true);
+    setError(null);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
+          email: clean,
           packageId: offer.packageId,
           mode: monthly
             ? isCasino
@@ -152,21 +172,57 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         </span>
       </label>
 
-      <div className="mt-6 flex justify-center">
-        <button
-          type="button"
-          onClick={go}
-          disabled={loading}
-          className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto"
+      {askEmail ? (
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            void go();
+          }}
+          className="mt-6 rounded-xl border border-white/20 bg-white/5 p-4"
         >
-          {loading ? (
-            <Loader2 className="h-5 w-5 animate-spin" />
-          ) : (
+          <label className="block text-left">
+            <span className="text-sm font-semibold text-white">
+              Emailul tău — acolo primești factura și raportul
+            </span>
+            <input
+              type="email"
+              autoFocus
+              required
+              value={email}
+              onChange={(ev) => setEmail(ev.target.value)}
+              placeholder="nume@firma.ro"
+              className="mt-2 w-full rounded-lg border border-white/20 bg-white px-4 py-3 text-base text-brand-navy placeholder:text-slate-400 focus:border-brand-gold focus:outline-none"
+            />
+          </label>
+          <button
+            type="submit"
+            disabled={loading}
+            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60"
+          >
+            {loading ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <CreditCard className="h-5 w-5" />
+            )}
+            Continuă spre plată — {offer.price.toLocaleString("ro")} lei{offer.suffix}
+          </button>
+          <p className="mt-2 text-center text-xs text-white/60">
+            Plată securizată prin Stripe · factură fiscală automată
+          </p>
+        </form>
+      ) : (
+        <div className="mt-6 flex justify-center">
+          <button
+            type="button"
+            onClick={start}
+            disabled={loading}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto"
+          >
             <CreditCard className="h-5 w-5" />
-          )}
-          {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
-        </button>
-      </div>
+            {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
+          </button>
+        </div>
+      )}
       {error && (
         <p className="mt-3 text-center text-sm text-red-300">{error}</p>
       )}

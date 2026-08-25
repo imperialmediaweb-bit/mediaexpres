@@ -43,6 +43,25 @@ export async function POST(req: NextRequest) {
   const userId = session?.user?.id;
   const sessionEmail = session?.user?.email || email;
 
+  // Salvam emailul ca lead INAINTE de plata. Stripe il capteaza abia pe pagina
+  // lui, deci cine pleaca de acolo mai devreme ramanea complet necunoscut —
+  // fara email, recuperarea cosului abandonat nu are cui sa scrie.
+  if (email && !userId) {
+    try {
+      const [existing] = await db
+        .select({ id: users.id })
+        .from(users)
+        .where(eq(users.email, email))
+        .limit(1);
+      if (!existing) {
+        await db.insert(users).values({ email });
+      }
+    } catch (err) {
+      // Un lead nesalvat nu trebuie sa blocheze o plata.
+      console.error("[checkout] nu am putut salva lead-ul:", err);
+    }
+  }
+
   // If logged in, try to reuse existing Stripe customer
   let stripeCustomerId: string | undefined;
   if (userId) {
