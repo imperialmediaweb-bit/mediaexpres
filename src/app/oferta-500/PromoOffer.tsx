@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { CreditCard, Loader2, RefreshCw } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
+import { SITE } from "@/data/site";
 
 // Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
 // Abonamentul lunar promo e mai ieftin decat plata unica: 400 lei/luna (cazino 800).
@@ -223,6 +224,40 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           </button>
         </div>
       )}
+      {/* Ce se intampla DUPA plata, spus inainte de plata. Un lead a scris pe
+          WhatsApp: "se cere plata, dar informatii despre articol nimic" —
+          fluxul exista, dar omul nu-l vedea nicaieri si pleca. */}
+      <div className="mt-5 rounded-xl border border-white/15 bg-white/5 p-4 text-left">
+        <p className="text-xs font-bold uppercase tracking-wider text-brand-gold">
+          Ce se întâmplă după plată
+        </p>
+        <ol className="mt-2 space-y-1.5 text-sm text-white/85">
+          <li>
+            <strong className="text-white">1.</strong> Ești dus direct la un formular
+            unde trimiți articolul și până la 3 poze.
+          </li>
+          <li>
+            <strong className="text-white">2.</strong> Nu ai articol scris?{" "}
+            <strong className="text-white">Îl scriem noi</strong> — ne dai site-ul
+            firmei și 1–2 propoziții. Îl citești și îl poți modifica înainte de
+            publicare.
+          </li>
+          <li>
+            <strong className="text-white">3.</strong> Publicăm în maximum 4 ore
+            lucrătoare, pe toate ziarele.
+          </li>
+          <li>
+            <strong className="text-white">4.</strong> Primești pe email raportul cu
+            toate linkurile și factura fiscală.
+          </li>
+        </ol>
+        <p className="mt-3 text-xs text-white/60">
+          Preferi să ne trimiți totul pe WhatsApp? Scrie-ne la{" "}
+          <strong className="text-white/80">{SITE.phone}</strong> — articol, poze și
+          date de facturare, iar noi ne ocupăm de rest.
+        </p>
+      </div>
+
       {error && (
         <p className="mt-3 text-center text-sm text-red-300">{error}</p>
       )}
