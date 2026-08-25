@@ -63,5 +63,19 @@ export async function POST(req: NextRequest) {
     });
   }
 
+  // Fix 3: o plata = o singura trimitere de materiale. Fara indexul asta,
+  // tokenul de acces (valabil 90 de zile) permitea publicari gratuite repetate.
+  try {
+    await db.execute(
+      sql`CREATE UNIQUE INDEX IF NOT EXISTS "order_submission_stripe_session_id_unique" ON "order_submission" ("stripe_session_id")`,
+    );
+    results.push({ step: "order_submission.stripe_session_id -> unique index", status: "OK" });
+  } catch (e) {
+    results.push({
+      step: "order_submission.stripe_session_id -> unique index",
+      status: e instanceof Error ? e.message : String(e),
+    });
+  }
+
   return NextResponse.json({ ok: true, results });
 }

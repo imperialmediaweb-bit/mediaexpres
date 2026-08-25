@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
+import { db } from "@/db";
+import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
+import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
 
@@ -74,6 +78,28 @@ export async function POST(req: NextRequest) {
     ];
   }
 
+  // Raportul se salveaza si in DB, ca sa apara permanent in contul clientului
+  // (/cont/rapoarte). Emailul ramane canalul principal; contul e arhiva lui.
+  try {
+    await db.insert(publicationReports).values({
+      email: email.toLowerCase(),
+      clientName: clientName || null,
+      articleTitle: articleTitle || null,
+      links: JSON.stringify(links),
+    });
+    // Clientul fara cont primeste unul implicit (login cu magic link pe email).
+    const [existing] = await db
+      .select({ id: users.id })
+      .from(users)
+      .where(eq(users.email, email.toLowerCase()))
+      .limit(1);
+    if (!existing) {
+      await db.insert(users).values({ email: email.toLowerCase(), name: clientName || null });
+    }
+  } catch (err) {
+    console.error("[raport] nu am putut salva raportul in DB (email pleaca oricum):", err);
+  }
+
   const firstName = clientName.split(/\s+/)[0] || "";
   const linksHtml = links.length
     ? `<ol style="padding-left:20px;margin:16px 0;">${links
@@ -101,6 +127,7 @@ export async function POST(req: NextRequest) {
       ${links.length ? `<p>Linkurile, ca să le verifici pe fiecare:</p>${linksHtml}` : ""}
       ${hasFile ? '<p>Găsești lista completă și în fișierul atașat.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, iar backlinkurile rămân active.</p>
+      <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul tău: intră pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primești link de conectare).</p>
       <p style="margin-top:24px;">Mulțumim pentru încredere!<br/><strong>Echipa MediaExpres</strong></p>
       `,
     ),

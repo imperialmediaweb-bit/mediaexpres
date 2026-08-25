@@ -47,6 +47,12 @@ export default async function ContLayout({
                 Articole
               </Link>
               <Link
+                href="/cont/rapoarte"
+                className="text-brand-navy hover:text-brand-red"
+              >
+                Rapoarte
+              </Link>
+              <Link
                 href="/cont/calendar"
                 className="text-brand-navy hover:text-brand-red"
               >

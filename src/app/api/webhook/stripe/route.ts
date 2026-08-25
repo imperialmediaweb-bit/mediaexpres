@@ -5,9 +5,10 @@ import { sendEmail, wrapEmail, kv, escapeHtml, ADMIN_EMAIL } from "@/lib/email";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq, gte } from "drizzle-orm";
 import { findSubscriptionPlanById } from "@/data/packages";
 import { sendCapiEvent, splitName } from "@/lib/meta-capi";
+import { signOrderToken } from "@/lib/order-token";
 import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
@@ -355,6 +356,27 @@ async function handleCheckoutCompleted(
       label: (session.metadata?.planId as string) || "abonament",
       sessionId: session.id,
     });
+
+    // Abonamentele nu primeau NICIODATA factura fiscala — nici la prima plata,
+    // nici la reinnoiri — desi formularul si FAQ-ul promit factura. Acum se
+    // emite la fel ca la plata unica.
+    const subBilling = session.customer_details?.address;
+    await issueInvoiceForOrder({
+      email,
+      customerName: session.customer_details?.name || null,
+      cui:
+        session.customer_details?.tax_ids?.[0]?.value ||
+        session.custom_fields?.find((f) => f.key === "company_cui")?.text?.value ||
+        null,
+      address: subBilling
+        ? [subBilling.line1, subBilling.line2].filter(Boolean).join(", ")
+        : null,
+      city: subBilling?.city || null,
+      phone: session.customer_details?.phone || null,
+      amount: (session.amount_total || 0) / 100,
+      packageLabel: (session.metadata?.planId as string) || "abonament",
+      stripeSessionId: session.id,
+    });
   }
 }
 
@@ -371,11 +393,14 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   // Fara email n-avem cui scrie — clientul a plecat inainte sa-l completeze.
   if (!email) return;
 
-  // Daca intre timp a platit totusi (alta sesiune), nu-l batem la cap.
+  // Daca a platit CHIAR pentru cosul asta (alta sesiune, in aceeasi zi), nu-l
+  // batem la cap. Verificarea pe tot istoricul ar exclude clientii fideli:
+  // cine a cumparat in iunie si abandoneaza in august n-ar primi nimic.
+  const since = new Date(Date.now() - 24 * 60 * 60 * 1000);
   const [alreadyPaid] = await db
     .select({ id: orders.id })
     .from(orders)
-    .where(eq(orders.email, email))
+    .where(and(eq(orders.email, email), gte(orders.createdAt, since)))
     .limit(1);
   if (alreadyPaid) {
     console.log("[stripe-webhook] cos abandonat, dar clientul a platit deja:", email);
@@ -528,7 +553,9 @@ async function sendConfirmationEmails(args: {
   sessionId: string;
 }) {
   const { kind, email, customerName, amount, label, sessionId } = args;
-  const firstName = (customerName || "").split(" ")[0] || "";
+  // Numele vine din formularul Stripe, deci e input de la client: escapat
+  // inainte de a intra in HTML-ul emailului.
+  const firstName = escapeHtml((customerName || "").split(" ")[0] || "");
 
   const adminHtml = wrapEmail(
     kind === "payment" ? "Plata primita — Stripe" : "Abonament nou — Stripe",
@@ -556,6 +583,15 @@ async function sendConfirmationEmails(args: {
   });
 
   if (email) {
+    // Linkul catre formularul de articol, direct in email. Pana acum el se
+    // emitea DOAR pe pagina de multumire — cine inchidea tabul dupa plata sau
+    // prindea o eroare de retea ramanea fara nicio cale spre trimiterea
+    // materialelor, desi platise.
+    const articleUrl =
+      kind === "payment"
+        ? `${SITE.url}/articol/${signOrderToken({ sessionId, email, packageId: label })}`
+        : null;
+
     const customerHtml = wrapEmail(
       kind === "payment" ? "Plata confirmata — MediaExpres" : "Abonament activ — MediaExpres",
       `
@@ -563,11 +599,19 @@ async function sendConfirmationEmails(args: {
       <p>Multumim pentru plata! Am primit <strong>${amount.toFixed(2)} RON</strong>${
         kind === "subscription" ? " pentru primul ciclu al abonamentului" : ""
       }.</p>
-      <p>Intra in cont pentru a gestiona comanda, a incarca pozele si a genera articolul:</p>
-      <p style="margin-top:16px;">
-        <a href="${SITE.url}/cont" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Intra in cont</a>
+      ${
+        articleUrl
+          ? `<p>Următorul pas: trimite-ne articolul și pozele. Durează 2 minute, iar dacă nu ai textul scris, îl redactăm noi din datele firmei tale.</p>
+      <p style="margin:16px 0;">
+        <a href="${articleUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimite articolul →</a>
       </p>
-      <p style="margin-top:16px;color:#64748b;font-size:13px;">Daca nu ai inca cont, apasa pe "Intra in cont", pune emailul de mai sus si primesti un link magic.</p>
+      <p style="color:#64748b;font-size:13px;">Publicăm în maximum 4 ore lucrătoare de la primirea materialelor și îți trimitem raportul cu toate linkurile.</p>`
+          : `<p>Intra in cont pentru a gestiona comanda, a incarca pozele si a genera articolul:</p>
+      <p style="margin-top:16px;">
+        <a href="${SITE.url}/cont" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Intra in cont</a>
+      </p>`
+      }
+      <p style="margin-top:16px;color:#64748b;font-size:13px;">Comanda ta e salvată și în cont: intră pe <a href="${SITE.url}/cont" style="color:#c1121f;">${SITE.domain}/cont</a> cu emailul de mai sus și primești un link de conectare.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
     `
     );

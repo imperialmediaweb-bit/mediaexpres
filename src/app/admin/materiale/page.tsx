@@ -95,6 +95,14 @@ export default async function MaterialePage() {
                     ) : "—"}
                   </p>
                   <p><span className="text-slate-500">Facebook:</span> {r.facebookOptIn ? "da" : "NU (refuzat)"}</p>
+                  <p>
+                    <span className="text-slate-500">Publicare:</span>{" "}
+                    {r.uniquePerSite ? (
+                      "variantă unică pe fiecare ziar"
+                    ) : (
+                      <strong className="text-amber-700">IDENTIC pe toate (cerut de client)</strong>
+                    )}
+                  </p>
                   <p><span className="text-slate-500">Stripe:</span> <span className="font-mono text-xs">{r.stripeSessionId}</span></p>
                 </div>
 

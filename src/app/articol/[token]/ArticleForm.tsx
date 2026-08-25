@@ -39,6 +39,10 @@ export function ArticleForm({
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  // Implicit rescriem unic pentru fiecare ziar (fara continut duplicat).
+  // Clientul poate cere textul identic peste tot — comunicat oficial, text
+  // aprobat juridic — caz in care nu atingem nimic.
+  const [uniquePerSite, setUniquePerSite] = useState(true);
 
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -169,6 +173,7 @@ export function ArticleForm({
           images,
           featuredIndex,
           facebookOptIn,
+          uniquePerSite,
           generatedByAi,
         }),
       });
@@ -449,7 +454,54 @@ export function ArticleForm({
         )}
       </section>
 
-      {/* 4. Facebook */}
+      {/* 4. Cum se publică pe cele 50 de ziare */}
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <p className="font-semibold text-brand-navy">Cum publicăm pe cele 50 de ziare</p>
+        <div className="mt-4 space-y-3">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="radio"
+              name="rewriteMode"
+              checked={uniquePerSite}
+              onChange={() => setUniquePerSite(true)}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-brand-red"
+            />
+            <span>
+              <strong className="text-brand-navy">
+                Variantă unică pentru fiecare ziar{" "}
+                <span className="text-brand-red">(recomandat)</span>
+              </strong>
+              <span className="mt-1 block text-sm text-slate-600">
+                Fiecare publicație primește alt titlu și altă formulare, cu
+                același mesaj, aceleași cifre și aceleași linkuri către
+                site-ul tău. Zero conținut duplicat între ziare — mai bine
+                pentru SEO.
+              </span>
+            </span>
+          </label>
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="radio"
+              name="rewriteMode"
+              checked={!uniquePerSite}
+              onChange={() => setUniquePerSite(false)}
+              className="mt-0.5 h-5 w-5 shrink-0 accent-brand-red"
+            />
+            <span>
+              <strong className="text-brand-navy">
+                Exact textul meu, identic pe toate
+              </strong>
+              <span className="mt-1 block text-sm text-slate-600">
+                Nu modificăm nimic. Alege asta dacă textul e aprobat juridic
+                sau e un comunicat oficial care trebuie publicat cuvânt cu
+                cuvânt.
+              </span>
+            </span>
+          </label>
+        </div>
+      </section>
+
+      {/* 5. Facebook */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <label className="flex cursor-pointer items-start gap-3">
           <input

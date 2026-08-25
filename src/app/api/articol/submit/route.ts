@@ -5,6 +5,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/
 import { findPackageById } from "@/data/packages";
 import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
+import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
 
@@ -25,6 +26,7 @@ const schema = z.object({
   images: z.array(imageSchema).max(3).default([]),
   featuredIndex: z.number().int().min(0).max(2).default(0),
   facebookOptIn: z.boolean().default(true),
+  uniquePerSite: z.boolean().default(true),
   generatedByAi: z.boolean().default(false),
 });
 
@@ -63,26 +65,48 @@ export async function POST(req: NextRequest) {
   // doar intr-un email catre o adresa cu bounce a fost de negasit in admin —
   // nu se mai intampla. Daca DB-ul pica, mergem totusi mai departe pe email
   // (best-effort dublu), dar niciodata invers.
+  // O plata = o singura trimitere. Insertul e si garda: indexul unic pe
+  // stripeSessionId respinge a doua trimitere pe aceeasi comanda.
+  let alreadySubmitted = false;
   try {
-    await db.insert(orderSubmissions).values({
-      stripeSessionId: order.sessionId,
-      email: order.email,
-      packageId: order.packageId,
-      title: d.title,
-      body: d.body,
-      metaDescription: d.metaDescription || null,
-      keywords: d.keywords?.length ? d.keywords.join(", ") : null,
-      companyName: d.companyName || null,
-      siteUrl: d.siteUrl || null,
-      contactPhone: d.contactPhone || null,
-      images: JSON.stringify(d.images),
-      featuredIndex: d.featuredIndex,
-      facebookOptIn: d.facebookOptIn,
-      generatedByAi: d.generatedByAi,
-      isCasino,
-    });
+    const inserted = await db
+      .insert(orderSubmissions)
+      .values({
+        stripeSessionId: order.sessionId,
+        email: order.email,
+        packageId: order.packageId,
+        title: d.title,
+        body: d.body,
+        metaDescription: d.metaDescription || null,
+        keywords: d.keywords?.length ? d.keywords.join(", ") : null,
+        companyName: d.companyName || null,
+        siteUrl: d.siteUrl || null,
+        contactPhone: d.contactPhone || null,
+        images: JSON.stringify(d.images),
+        featuredIndex: d.featuredIndex,
+        facebookOptIn: d.facebookOptIn,
+        uniquePerSite: d.uniquePerSite,
+        generatedByAi: d.generatedByAi,
+        isCasino,
+      })
+      .onConflictDoNothing({ target: orderSubmissions.stripeSessionId })
+      .returning({ id: orderSubmissions.id });
+    alreadySubmitted = inserted.length === 0;
   } catch (err) {
     console.error("[articol/submit] NU am putut salva in DB (continui pe email):", err);
+  }
+
+  if (alreadySubmitted) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          "Ai trimis deja materialele pentru această comandă. Dacă vrei să le modifici, răspunde la emailul de confirmare sau scrie-ne pe WhatsApp la " +
+          SITE.phone +
+          ".",
+      },
+      { status: 409 },
+    );
   }
 
   const imagesHtml = d.images.length
@@ -107,6 +131,7 @@ export async function POST(req: NextRequest) {
       ${kv("Telefon", d.contactPhone || "—")}
       ${kv("Firmă", d.companyName || "—")}
       ${kv("Site", d.siteUrl || "—")}
+      ${kv("Publicare", d.uniquePerSite ? "Variantă unică pe fiecare ziar" : "⚠️ IDENTIC pe toate — clientul a cerut textul neschimbat")}
       ${kv("Distribuire Facebook", d.facebookOptIn ? "✅ Da" : "❌ Nu (clientul a refuzat)")}
       ${kv("Scris cu AI", d.generatedByAi ? "Da" : "Nu — text propriu")}
       ${kv("Stripe session", order.sessionId)}

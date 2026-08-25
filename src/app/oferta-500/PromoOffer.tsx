@@ -109,7 +109,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             key={label}
             type="button"
             onClick={() => setSelection({ monthly: m })}
-            className={`flex-1 rounded-full px-4 py-2 transition ${
+            className={`flex-1 rounded-full px-4 py-3 transition ${
               monthly === m
                 ? "bg-brand-gold text-brand-navy"
                 : "text-white/70 hover:text-white"
@@ -159,7 +159,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           type="checkbox"
           checked={isCasino}
           onChange={(e) => setSelection({ isCasino: e.target.checked })}
-          className="mt-0.5 h-5 w-5 shrink-0 accent-brand-gold"
+          className="mt-0.5 h-6 w-6 shrink-0 accent-brand-gold"
         />
         <span className="text-sm text-white/80">
           Articolul este despre <strong className="text-white">cazino, pariuri

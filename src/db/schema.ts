@@ -184,7 +184,10 @@ export const prospectOrders = pgTable("prospect_order", {
 // De-acum orice trimitere se salveaza AICI inainte de orice email.
 export const orderSubmissions = pgTable("order_submission", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
-  stripeSessionId: text("stripe_session_id").notNull(),
+  // UNIC: o plata = o singura trimitere de materiale. Tokenul de acces e valabil
+  // 90 de zile, deci fara constrangerea asta acelasi client putea retrimite
+  // articole la nesfarsit pe aceeasi plata, iar adminul nu avea cum sa observe.
+  stripeSessionId: text("stripe_session_id").unique().notNull(),
   email: text("email").notNull(),
   packageId: text("package_id").notNull(),
   title: text("title").notNull(),
@@ -198,11 +201,28 @@ export const orderSubmissions = pgTable("order_submission", {
   images: text("images").notNull().default("[]"),
   featuredIndex: integer("featured_index").notNull().default(0),
   facebookOptIn: boolean("facebook_opt_in").notNull().default(true),
+  // true = varianta rescrisa unic pe fiecare ziar (implicit); false = clientul
+  // a cerut EXACT textul lui, identic peste tot (comunicat oficial/juridic).
+  uniquePerSite: boolean("unique_per_site").notNull().default(true),
   generatedByAi: boolean("generated_by_ai").notNull().default(false),
   isCasino: boolean("is_casino").notNull().default(false),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   publishedAt: timestamp("published_at"),
+});
+
+// Rapoartele de publicare trimise clientilor. Pana acum raportul exista DOAR
+// in emailul trimis — clientul care il pierdea nu-l mai putea revedea. Acum se
+// salveaza si aici, iar clientul il vede oricand in contul lui (/cont/rapoarte),
+// legat prin adresa de email.
+export const publicationReports = pgTable("publication_report", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull(),
+  clientName: text("client_name"),
+  articleTitle: text("article_title"),
+  // JSON: string[] — linkurile articolelor publicate.
+  links: text("links").notNull().default("[]"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
 // O linie per termen ANUNTAT al ofertei promo. Unicitatea pe deadline_label e

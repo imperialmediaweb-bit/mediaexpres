@@ -37,7 +37,7 @@ export function NewspaperDirectory() {
                       href={p.url}
                       target="_blank"
                       rel="noopener"
-                      className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-slate-700 transition hover:bg-red-50 hover:text-brand-red"
+                      className="flex items-center gap-2 rounded-lg px-3 py-3 text-sm text-slate-700 transition hover:bg-red-50 hover:text-brand-red"
                     >
                       <Newspaper className="h-4 w-4 shrink-0 text-slate-400" />
                       <span>

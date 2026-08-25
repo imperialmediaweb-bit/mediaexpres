@@ -61,7 +61,8 @@ export function buildAdvisorKnowledge(): string {
 
 LIVRARE SI CONDITII (raspunde exact asa cand esti intrebat):
 - PUBLICARE IN MAXIM 4 ORE LUCRATOARE de la primirea materialelor
-- ARTICOL UNIC PE FIECARE ZIAR: nu publicam copii identice — fiecare publicatie primeste o varianta rescrisa (alt titlu, alta formulare, acelasi mesaj si aceleasi linkuri). Zero continut duplicat. Daca clientul intreaba de "duplicate content" sau "canibalizare Google": canibalizarea e o problema doar intre paginile propriului site; articolele noastre sunt pe domeniile retelei si trimit linkuri catre clientul nostru
+- ARTICOL UNIC PE FIECARE ZIAR (implicit): nu publicam copii identice — fiecare publicatie primeste o varianta rescrisa (alt titlu, alta formulare, acelasi mesaj si aceleasi linkuri). Zero continut duplicat. Daca clientul intreaba de "duplicate content" sau "canibalizare Google": canibalizarea e o problema doar intre paginile propriului site; articolele noastre sunt pe domeniile retelei si trimit linkuri catre clientul nostru
+- EXCEPTIE la cerere: daca clientul vrea EXACT textul lui, neschimbat, in toate ziarele (comunicat oficial, text aprobat juridic etc.), publicam acelasi articol identic peste tot. Doar sa mentioneze asta cand trimite materialele
 - Articolul ramane PERMANENT online - nu se sterge, backlinkurile raman active
 - 12 ore pe prima pagina a fiecarei publicatii, apoi in sectiunea permanenta
 - Pana la 3 poze incluse, una aleasa ca imagine reprezentativa

@@ -89,7 +89,7 @@ export function Logo({
         </div>
         {showTagline ? (
           <span
-            className="mt-1 text-[9px] font-headline font-semibold uppercase tracking-[0.28em]"
+            className="mt-1 text-[11px] font-headline font-semibold uppercase tracking-[0.22em]"
             style={{ color: taglineColor }}
           >
             Presă · Distribuție · Impact
