@@ -9,6 +9,7 @@ import {
   type SubscriptionPlan,
 } from "@/data/packages";
 import { COUNTIES } from "@/data/counties";
+import { SITE } from "@/data/site";
 
 // Baza de cunostinte a consultantului, generata DIN datele reale ale platformei.
 // Motivul: preturile si pachetele erau scrise de mana in promptul chatbotului si
@@ -68,7 +69,33 @@ LIVRARE SI CONDITII (raspunde exact asa cand esti intrebat):
 - Raport cu toate URL-urile, trimis pe email dupa publicare
 - Articol redactional, FARA eticheta (P)
 - Pana la 3 linkuri dofollow permanente catre site-ul clientului
-- Factura fiscala; plata cu cardul online sau prin transfer
+- Factura fiscala; plata cu cardul online sau prin transfer bancar (OP)
+
+PLATA SI FACTURA (raspunde concret, cu datele de mai jos — sunt reale):
+- Cu CARDUL, online, pe ${SITE.url}/oferta-500 — plata securizata prin Stripe.
+  Factura fiscala se emite AUTOMAT dupa plata si pleaca pe email, plus in
+  eFactura (SPV). Nu trebuie sa ceara nimeni nimic.
+- Prin TRANSFER BANCAR (OP), daca prefera: beneficiar ${SITE.billing.company},
+  IBAN ${SITE.billing.iban}, ${SITE.billing.bank}, detalii plata "Publicare
+  articol". Dupa plata trimite dovada + datele de facturare (denumire firma,
+  CUI, adresa) si primeste raportul cu linkurile si factura impreuna.
+  ATENTIE: abonamentele lunare se platesc DOAR cu cardul (OP nu e recurent).
+- Factura e pe firma ${SITE.billing.company}. Firma NU e platitoare de TVA,
+  deci pe factura nu apare TVA — pretul afisat e pretul final.
+- Se poate factura pe firma clientului (cu CUI) sau pe persoana fizica.
+
+CE SE INTAMPLA DUPA PLATA (pasii, in ordine):
+1. Clientul e redirectionat catre un formular unde trimite articolul si pana
+   la 3 poze (una aleasa ca imagine reprezentativa).
+2. Daca NU are articol scris: da site-ul firmei + 1-2 propozitii despre ce
+   vrea sa comunice, iar echipa il redacteaza. Il poate citi si modifica.
+3. Publicarea: maximum 4 ore lucratoare de la primirea materialelor.
+4. Primeste pe email raportul cu TOATE linkurile (fisier Excel).
+- Daca cineva intreaba "unde apare exact": lista completa a publicatiilor, cu
+  link catre fiecare, e publica pe ${SITE.url}/reteaua-noastra si pe pagina
+  ofertei. Invita-l sa dea click si sa verifice singur.
+- Nu inventa termene, preturi sau conditii care nu sunt scrise aici. Daca nu
+  stii un raspuns, spune sa scrie pe WhatsApp la ${SITE.phone}.
 
 PACHETE STANDARD (plata unica):
 ${STANDARD_PACKAGES.map(pkgLine).join("\n")}

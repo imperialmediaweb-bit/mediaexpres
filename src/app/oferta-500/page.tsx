@@ -17,6 +17,7 @@ import { promoDeadlineLabel } from "@/data/packages";
 const deadline = promoDeadlineLabel();
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { BankTransferBox } from "@/components/BankTransferBox";
+import { OfferChatBubble } from "@/components/OfferChatBubble";
 
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
@@ -362,6 +363,9 @@ export default function Oferta500Page() {
           </div>
         </div>
       </section>
+
+      {/* Consultantul raspunde la nesiguranta de dinainte de plata */}
+      <OfferChatBubble />
     </div>
   );
 }
