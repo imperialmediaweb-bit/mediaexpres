@@ -206,6 +206,15 @@ export const orderSubmissions = pgTable("order_submission", {
   uniquePerSite: boolean("unique_per_site").notNull().default(true),
   generatedByAi: boolean("generated_by_ai").notNull().default(false),
   isCasino: boolean("is_casino").notNull().default(false),
+  // "card" = platit prin Stripe (confirmarea vine din webhook);
+  // "op" = transfer bancar, unde clientul incarca dovada, iar plata se
+  // confirma manual de noi inainte de publicare.
+  paymentMethod: text("payment_method").notNull().default("card"),
+  // JSON: {url, name} — dovada platii incarcata la comenzile prin OP.
+  paymentProof: text("payment_proof"),
+  // Date de facturare, cerute explicit la OP (la card vin din Stripe).
+  companyCui: text("company_cui"),
+  companyAddress: text("company_address"),
   status: text("status").notNull().default("pending"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   publishedAt: timestamp("published_at"),

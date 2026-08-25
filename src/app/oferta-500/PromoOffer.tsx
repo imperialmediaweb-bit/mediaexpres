@@ -210,6 +210,17 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           <p className="mt-2 text-center text-xs text-white/60">
             Plată securizată prin Stripe · factură fiscală automată
           </p>
+          {!monthly && (
+            <p className="mt-3 border-t border-white/10 pt-3 text-center text-xs text-white/70">
+              Preferi transfer bancar?{" "}
+              <a
+                href={`/comanda/transfer?pachet=${offer.packageId}`}
+                className="font-semibold text-brand-gold underline"
+              >
+                Comandă prin OP →
+              </a>
+            </p>
+          )}
         </form>
       ) : (
         <div className="mt-6 flex justify-center">
@@ -251,11 +262,20 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             toate linkurile și factura fiscală.
           </li>
         </ol>
-        <p className="mt-3 text-xs text-white/60">
-          Preferi să ne trimiți totul pe WhatsApp? Scrie-ne la{" "}
-          <strong className="text-white/80">{SITE.phone}</strong> — articol, poze și
-          date de facturare, iar noi ne ocupăm de rest.
-        </p>
+        {!monthly && (
+          <p className="mt-3 border-t border-white/10 pt-3 text-xs text-white/70">
+            <strong className="text-white/90">Plătești prin transfer bancar (OP)?</strong>{" "}
+            <a
+              href={`/comanda/transfer?pachet=${offer.packageId}`}
+              className="font-semibold text-brand-gold underline"
+            >
+              Mergi pe traseul pentru OP
+            </a>{" "}
+            — acolo ai datele de plată și încarci dovada, articolul, pozele și datele de
+            facturare, într-un singur pas. Sau ne trimiți totul pe WhatsApp la{" "}
+            <strong className="text-white/90">{SITE.phone}</strong>.
+          </p>
+        )}
       </div>
 
       {error && (
