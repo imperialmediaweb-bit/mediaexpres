@@ -225,6 +225,25 @@ export const publicationReports = pgTable("publication_report", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Conversatia client <-> MediaExpres, din contul clientului.
+// Motivul: clientii cer modificari si trimit materiale (capturi, sigle,
+// referinte) pe email, iar cererile se pierdeau intre notificari. Aici stau
+// legate de client, cu istoric si status, si se vad in admin ca sarcini.
+// Legatura se face pe EMAIL, nu pe userId: raportul si comanda pot exista
+// inainte ca omul sa-si activeze contul.
+export const clientMessages = pgTable("client_message", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull(),
+  // true = scris de client; false = raspunsul nostru.
+  fromClient: boolean("from_client").notNull().default(true),
+  body: text("body").notNull(),
+  // JSON: [{url, name}] — fisiere urcate in Cloudinary de client.
+  attachments: text("attachments").notNull().default("[]"),
+  // Doar pentru mesajele clientului: cat timp e false, apare ca sarcina in admin.
+  handled: boolean("handled").notNull().default(false),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // O linie per termen ANUNTAT al ofertei promo. Unicitatea pe deadline_label e
 // garantia ca /api/cron/promo-announce trimite anuntul de prelungire O SINGURA
 // data per termen, oricat de des ar fi apelat cronul.
