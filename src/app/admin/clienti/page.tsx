@@ -7,6 +7,7 @@ import { desc, eq, sql } from "drizzle-orm";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
 import { ImportLeadsButton } from "./ImportLeadsButton";
 import { SendListButton } from "./SendListButton";
+import { SendListToAnyone } from "./SendListToAnyone";
 
 export const dynamic = "force-dynamic";
 
@@ -61,6 +62,10 @@ export default async function AdminClientiPage() {
 
       <div className="mt-3">
         <RecoverLeadsButton />
+      </div>
+
+      <div className="my-6">
+        <SendListToAnyone />
       </div>
 
       <div className="overflow-hidden rounded-xl border border-slate-200 bg-white">

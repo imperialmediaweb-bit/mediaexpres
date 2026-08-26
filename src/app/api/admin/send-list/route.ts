@@ -46,8 +46,17 @@ export async function POST(req: NextRequest) {
   });
 
   if (!result.ok) {
+    // Resend raspunde in engleza, cu texte de genul "Internal server error".
+    // Afisat ca atare in admin nu spune nimic despre ce e de facut, asa ca
+    // pastram detaliul in log si aratam un mesaj care indica cauza probabila.
+    console.error("[send-list] Resend a refuzat trimiterea:", result.error);
     return NextResponse.json(
-      { ok: false, error: result.error || "Trimiterea a eșuat" },
+      {
+        ok: false,
+        error:
+          "Emailul nu a plecat. Verifică RESEND_API_KEY și FROM_EMAIL în Railway, " +
+          "apoi încearcă din nou. Detaliul complet e în logurile serverului.",
+      },
       { status: 502 },
     );
   }
