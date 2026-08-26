@@ -110,13 +110,29 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   console.log("\n=== 6. Mobil 390px ===");
   await p.goto(B + "/oferta-500", { waitUntil: "domcontentloaded" });
   await p.waitForTimeout(1400);
-  const bar = await p.locator('a[href="#oferta"]').boundingBox();
+  // Bara fixa, NU butonul din corpul paginii: ambele duc la #oferta, deci
+  // selectorul trebuie ancorat pe containerul fix, altfel prinde doua elemente.
+  const bar = await p.locator('div.fixed.bottom-0 a[href="#oferta"]').boundingBox();
   const wa = await p.locator('a[aria-label*="WhatsApp"]').boundingBox();
   const chat = await p.getByRole("button", { name: /Ai o întrebare/ }).boundingBox();
   check(!!bar, "bara fixa 'Comanda acum' apare");
   check(!!wa && !!bar && wa.y + wa.height <= bar.y + 2, "WhatsApp nu acopera bara de comanda");
   check(!!chat && !!bar && chat.y + chat.height <= bar.y + 2, "consultantul nu acopera bara de comanda");
   check(!!wa && !!chat && (chat.x + chat.width) <= wa.x, "consultantul si WhatsApp nu se suprapun");
+
+  // Regresie: butonul flotant de WhatsApp e tot z-40 si sta fix in dreapta-jos,
+  // exact peste butonul de trimitere al chatului deschis. Cand chatul era si el
+  // z-40, WhatsApp fura atingerea si omul nu putea trimite nimic din chat.
+  await p.getByRole("button", { name: /Ai o întrebare/ }).click();
+  const panel = p.locator('[data-chat="panel"]');
+  await panel.waitFor();
+  const trimite = panel.locator("button[aria-label=Trimite]");
+  const acoperit = await trimite.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    const sus = document.elementFromPoint(r.x + r.width / 2, r.y + r.height / 2);
+    return !el.contains(sus) && sus !== el;
+  });
+  check(!acoperit, "butonul de trimitere din chat nu e acoperit de WhatsApp");
   // fara scroll orizontal
   const sw = await p.evaluate(() => document.documentElement.scrollWidth);
   check(sw <= 391, `fara scroll orizontal (${sw}px)`);

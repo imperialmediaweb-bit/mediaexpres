@@ -2,35 +2,7 @@
 
 import { useState } from "react";
 import { Loader2, Upload, X, CheckCircle2, FileCheck } from "lucide-react";
-
-interface Uploaded {
-  url: string;
-  name: string;
-}
-
-const MAX_BYTES = 8 * 1024 * 1024;
-
-async function signAndUpload(file: File): Promise<Uploaded> {
-  const signRes = await fetch("/api/comanda/transfer/upload-sign", { method: "POST" });
-  const sign = await signRes.json();
-  if (!signRes.ok || !sign.ok) throw new Error(sign.error || "Nu am putut pregăti încărcarea");
-
-  const fd = new FormData();
-  fd.append("file", file);
-  fd.append("api_key", sign.apiKey);
-  fd.append("timestamp", String(sign.timestamp));
-  fd.append("signature", sign.signature);
-  if (sign.folder) fd.append("folder", sign.folder);
-
-  // `auto` accepta si PDF, nu doar imagini — dovada plarii vine des ca PDF.
-  const up = await fetch(`https://api.cloudinary.com/v1_1/${sign.cloudName}/auto/upload`, {
-    method: "POST",
-    body: fd,
-  });
-  const res = await up.json();
-  if (!up.ok || !res.secure_url) throw new Error("Încărcarea a eșuat");
-  return { url: res.secure_url, name: file.name };
-}
+import { signAndUpload, MAX_UPLOAD_BYTES as MAX_BYTES, type Uploaded } from "@/lib/upload-client";
 
 export function TransferForm({
   packageId,
