@@ -5,6 +5,8 @@ import { db } from "@/db";
 import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { pingIndexNow } from "@/lib/indexnow";
+import { submitToGoogle } from "@/lib/google-indexing";
 
 export const runtime = "nodejs";
 
@@ -112,6 +114,19 @@ export async function POST(req: NextRequest) {
     }
   } catch (err) {
     console.error("[raport] nu am putut salva raportul in DB (email pleaca oricum):", err);
+  }
+
+  // Articolele tocmai publicate sunt anuntate imediat la motoarele de cautare.
+  // Fara asta, un articol nou astepta sa fie descoperit de crawler — zile sau
+  // saptamani. Clientul plateste pentru backlinkuri care conteaza abia dupa
+  // indexare, deci minutele astea sunt parte din produs, nu un moft.
+  // Nu asteptam raspunsul si nu blocam nimic: indexarea e bonus, emailul e
+  // obligatia.
+  if (links.length > 0) {
+    void Promise.all([
+      pingIndexNow(links),
+      submitToGoogle(links),
+    ]).catch((err) => console.error("[raport] indexare esuata:", err));
   }
 
   const firstName = clientName.split(/\s+/)[0] || "";

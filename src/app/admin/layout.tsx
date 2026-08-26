@@ -12,6 +12,7 @@ import {
   ShoppingBag,
   Repeat,
   Newspaper,
+  Zap,
   Send,
   Mail,
   ClipboardCheck,
@@ -38,6 +39,7 @@ const NAV = [
   { href: "/admin/emailuri", label: "Emailuri", icon: Mail },
   { href: "/admin/trimite-email", label: "Trimite email", icon: SendHorizonal },
   { href: "/admin/ziare", label: "Ziare", icon: Newspaper },
+  { href: "/admin/seo", label: "SEO & indexare", icon: Zap },
 ];
 
 export default function AdminLayout({
