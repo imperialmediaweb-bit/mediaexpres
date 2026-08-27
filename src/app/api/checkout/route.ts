@@ -7,6 +7,7 @@ import { auth } from "@/auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { extractRequestUserData } from "@/lib/meta-capi";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,19 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false, error: "Date invalide" }, { status: 400 });
   }
   const { packageId, mode, email } = parsed.data;
+
+  // Cookie-urile de atribuire Meta (_fbp si mai ales _fbc, care contine
+  // fbclid-ul din linkul reclamei) exista DOAR in browserul clientului.
+  // Purchase se trimite insa din webhookul Stripe, care vine de la Stripe —
+  // acolo cookie-urile nu mai sunt nicaieri. Fara ele Meta primeste evenimentul
+  // si il potriveste pe email, dar nu-l poate lega de reclama care a adus omul,
+  // asa ca in Ads Manager coloana Purchases ramane goala desi ai vandut.
+  // Le trecem prin metadata sesiunii, singurul loc care supravietuieste drumului.
+  const fbAttr = extractRequestUserData(req);
+  const fbMeta = {
+    ...(fbAttr.fbp ? { fbp: fbAttr.fbp } : {}),
+    ...(fbAttr.fbc ? { fbc: fbAttr.fbc } : {}),
+  };
 
   const session = await auth();
   const userId = session?.user?.id;
@@ -133,6 +147,7 @@ export async function POST(req: NextRequest) {
           mode,
           category: pkg.category,
           ...(userId ? { userId } : {}),
+          ...fbMeta,
         },
         client_reference_id: userId || undefined,
         billing_address_collection: "required",
@@ -213,6 +228,7 @@ export async function POST(req: NextRequest) {
         category,
         mode,
         ...(userId ? { userId } : {}),
+        ...fbMeta,
       },
       subscription_data: {
         metadata: {

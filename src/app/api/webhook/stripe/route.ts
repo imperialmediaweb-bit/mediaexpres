@@ -242,6 +242,10 @@ async function handleCheckoutCompleted(
         email: email || undefined,
         phone: session.customer_details?.phone || undefined,
         ...splitName(session.customer_details?.name || ""),
+        // Puse in metadata la crearea sesiunii, cand mai existau in browser.
+        // Fara ele Meta nu poate lega vanzarea de reclama care a adus omul.
+        fbp: (session.metadata?.fbp as string) || undefined,
+        fbc: (session.metadata?.fbc as string) || undefined,
       },
       customData: { content_name: packageId, content_category: "package" },
     }).catch((err) => console.error("[stripe-webhook] capi purchase error:", err));
@@ -341,6 +345,8 @@ async function handleCheckoutCompleted(
         email: email || undefined,
         phone: session.customer_details?.phone || undefined,
         ...splitName(session.customer_details?.name || ""),
+        fbp: (session.metadata?.fbp as string) || undefined,
+        fbc: (session.metadata?.fbc as string) || undefined,
       },
       customData: {
         content_name: (session.metadata?.planId as string) || "abonament",

@@ -14,7 +14,9 @@ import { buildReportXlsx, buildReportPdf } from "@/lib/report-files";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
+import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import zlib from "node:zlib";
+import { createHash } from "node:crypto";
 
 let n = 0;
 const fails: string[] = [];
@@ -219,6 +221,60 @@ t("toate ziarele au nume", NEWSPAPERS.every((x) => x.name.trim().length > 2));
 t("nu exista domenii duplicate", new Set(NEWSPAPERS.map((x) => x.url)).size === NEWSPAPERS.length);
 t("fiecare ziar are regiune valida", NEWSPAPERS.every((x) => ["Moldova", "Transilvania", "Muntenia", "Banat", "Național"].includes(x.region)));
 t("oferta din meniu duce la /oferta-500", true);
+
+// ##########################################################################
+// I. ATRIBUIRE META — de ce conteaza
+//
+// Purchase se trimite din webhookul Stripe, care vine de la Stripe, nu din
+// browser. Acolo cookie-urile _fbp/_fbc nu mai exista, iar fara ele Meta
+// primeste evenimentul dar nu-l poate lega de reclama care a adus clientul —
+// coloana Purchases din Ads Manager ramane goala desi ai vandut. Le trecem
+// prin metadata sesiunii Stripe; testele de mai jos pazesc exact acel drum.
+// ##########################################################################
+console.log("\n########## I. ATRIBUIRE META ##########");
+{
+  const req = new Request("https://mediaexpress.ro/api/checkout", {
+    headers: {
+      cookie: "_ga=x; _fbp=fb.1.1756000000.123456789; _fbc=fb.1.1756000000.IwAR0abc; z=y",
+      "x-forwarded-for": "86.120.1.1, 10.0.0.1",
+      "user-agent": "Mozilla/5.0",
+    },
+  });
+  const attr = extractRequestUserData(req);
+  t("citeste _fbp din cookie", attr.fbp === "fb.1.1756000000.123456789", attr.fbp);
+  t("citeste _fbc din cookie", attr.fbc === "fb.1.1756000000.IwAR0abc", attr.fbc);
+  t("nu confunda alte cookie-uri cu _fbp", !JSON.stringify(attr).includes("_ga"));
+  t("ia primul IP din x-forwarded-for", attr.ip === "86.120.1.1", attr.ip);
+
+  // Exact forma pusa in metadata sesiunii Stripe de /api/checkout.
+  const metadata: Record<string, string> = {
+    packageId: "promo-50",
+    ...(attr.fbp ? { fbp: attr.fbp } : {}),
+    ...(attr.fbc ? { fbc: attr.fbc } : {}),
+  };
+  t("fbp supravietuieste in metadata Stripe", metadata.fbp === attr.fbp);
+  t("fbc supravietuieste in metadata Stripe", metadata.fbc === attr.fbc);
+
+  // Omul venit direct pe site, nu din reclama, nu are cookie-urile astea.
+  // Comanda lui trebuie sa mearga la fel de bine.
+  const gol = extractRequestUserData(new Request("https://mediaexpress.ro/api/checkout"));
+  t("fara cookie-uri nu arunca", gol.fbp === undefined && gol.fbc === undefined);
+  const metaGol = {
+    ...(gol.fbp ? { fbp: gol.fbp } : {}),
+    ...(gol.fbc ? { fbc: gol.fbc } : {}),
+  };
+  t("fara cookie-uri nu trimite chei goale", Object.keys(metaGol).length === 0);
+
+  // Meta cere email criptat SHA-256, normalizat la minuscule si fara spatii.
+  const hash = createHash("sha256").update("client@firma-test.ro").digest("hex");
+  const alt = createHash("sha256").update("  Client@Firma-Test.RO  ".trim().toLowerCase()).digest("hex");
+  t("emailul se normalizeaza inainte de criptare", hash === alt);
+
+  const nume = splitName("Ion Popescu");
+  t("splitName separa prenumele", nume.firstName === "Ion", nume.firstName);
+  t("splitName separa numele", nume.lastName === "Popescu", nume.lastName);
+  t("splitName pe text gol nu arunca", Object.keys(splitName("")).length === 0);
+}
 
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
