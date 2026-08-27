@@ -295,7 +295,7 @@ export function findSubscriptionPlanById(
 }
 
 export const PRICING_NOTE =
-  "Raportul include linkurile și screenshot-urile articolelor publicate pe cele 50 de site-uri. Distribuția pe Facebook este inclusă automat în toate pachetele, dar statisticile paginilor de Facebook nu pot fi colectate în raport.";
+  "Raportul include linkurile tuturor articolelor publicate pe cele 50 de site-uri. Distribuția pe Facebook este inclusă automat în toate pachetele, dar statisticile paginilor de Facebook nu pot fi colectate în raport.";
 
 export const SUBSCRIPTION_BENEFITS = [
   "Distribuție Facebook inclusă automat",

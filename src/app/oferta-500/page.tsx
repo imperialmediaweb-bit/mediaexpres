@@ -68,7 +68,7 @@ const INCLUDED = [
     icon: FileText,
     title: "Raport PDF complet",
     description:
-      "Primești toate cele 50 de URL-uri plus screenshot-uri, ca dovadă verificabilă a publicării.",
+      "Primești toate cele 50 de URL-uri, în PDF și Excel — dă click pe fiecare și verifici publicarea.",
   },
   {
     icon: Clock,

@@ -5,7 +5,7 @@ import { Newspaper, Clock, ShieldCheck, TrendingUp, Star } from "lucide-react";
 export const metadata: Metadata = {
   title: "Apari în 50 de ziare românești — Ofertă specială",
   description:
-    "Distribuție în 50 de ziare online din România. Raport PDF cu screenshot-uri în 4h. De la 150 RON.",
+    "Distribuție în 50 de ziare online din România. Raport PDF cu toate linkurile, în 4h. De la 150 RON.",
   robots: { index: false, follow: false },
 };
 
@@ -24,7 +24,7 @@ export default function OfertaFbPage() {
             </h1>
             <p className="mt-4 text-lg text-slate-600">
               Comunicatul tău publicat pe rețeaua MediaExpres — 50 de ziare online cu trafic
-              real. Raport PDF cu screenshot-uri în 4h.
+              real. Raport PDF cu toate linkurile, în 4h.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               <li className="flex items-start gap-3">
@@ -44,7 +44,7 @@ export default function OfertaFbPage() {
               <li className="flex items-start gap-3">
                 <ShieldCheck className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
-                  <strong className="text-brand-navy">Raport PDF</strong> cu screenshot-uri
+                  <strong className="text-brand-navy">Raport PDF</strong> cu toate linkurile
                   și link-uri verificabile
                 </span>
               </li>
@@ -113,7 +113,7 @@ export default function OfertaFbPage() {
           />
           <FaqItem
             q="Cum primesc dovada că s-a publicat?"
-            a="În 4h de la confirmare primești un raport PDF cu URL-urile fiecărui articol publicat plus screenshot-uri."
+            a="În 4h de la confirmare primești un raport PDF cu URL-urile fiecărui articol publicat."
           />
           <FaqItem
             q="Pot să-mi scriu eu articolul?"

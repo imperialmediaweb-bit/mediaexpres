@@ -23,7 +23,7 @@ const STEPS = [
     icon: FileCheck2,
     title: "Primești raport PDF",
     description:
-      "Raport complet cu URL-urile și screenshot-urile tuturor publicărilor. Permanent online.",
+      "Raport PDF și Excel cu URL-urile tuturor publicărilor. Permanent online.",
   },
 ];
 
@@ -35,8 +35,8 @@ export function HowItWorks() {
           <p className="eyebrow">Simplu ca 1-2-3-4</p>
           <h2 className="h2 mt-2">Cum funcționează</h2>
           <p className="lead mt-4">
-            Proces simplu, rezultate mari. În mai puțin de 4h ești pe prima pagină a celor mai
-            citite ziare românești.
+            Proces simplu, rezultate mari. În mai puțin de 4h ești pe prima pagină a celor 50 de
+            ziare din rețea.
           </p>
         </div>
 

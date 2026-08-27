@@ -44,7 +44,7 @@ export default function TermeniPage() {
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">6. Raport de publicare</h2>
       <p>
-        Raportul PDF include URL-urile și screenshot-urile articolelor publicate. Distribuția pe
+        Raportul PDF include URL-urile articolelor publicate. Distribuția pe
         Facebook este inclusă automat, dar statisticile paginilor de Facebook nu pot fi colectate
         în raport.
       </p>

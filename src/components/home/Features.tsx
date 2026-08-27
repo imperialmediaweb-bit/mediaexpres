@@ -26,7 +26,7 @@ const FEATURES = [
   {
     icon: FileText,
     title: "Raport PDF complet",
-    description: "URL-uri + screenshot-uri pentru toate articolele publicate.",
+    description: "URL-urile tuturor articolelor publicate, în PDF și Excel.",
   },
   {
     icon: Link2,

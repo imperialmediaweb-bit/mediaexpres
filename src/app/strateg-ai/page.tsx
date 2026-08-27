@@ -190,7 +190,7 @@ export default function StrategAiPage() {
               icon={CheckCircle2}
               big="12h"
               title="raport PDF garantat"
-              desc="In 12 ore primesti raport cu toate URL-urile + screenshot-uri + factura post-publicare."
+              desc="In 12 ore primesti raport cu toate URL-urile + factura post-publicare."
             />
           </div>
 

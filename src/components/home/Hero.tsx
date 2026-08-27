@@ -60,7 +60,7 @@ export function Hero() {
 
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/85">
             Distribuție rapidă de comunicate de presă pe 50 de ziare și 50 pagini Facebook.
-            Primești raport PDF complet cu linkuri și screenshot-uri. Publicare permanentă,
+            Primești raport PDF și Excel cu toate linkurile. Publicare permanentă,
             backlinks SEO incluse.
           </p>
 
@@ -128,7 +128,7 @@ function HeroVisual() {
         </div>
 
         <h3 className="mt-4 font-serif text-xl font-bold leading-tight">
-          Compania ta, pe prima pagină a celor mai citite ziare din România
+          Compania ta, pe prima pagină a 50 de ziare online din toată țara
         </h3>
 
         <div className="mt-3 grid gap-3 sm:grid-cols-[1fr_0.7fr]">

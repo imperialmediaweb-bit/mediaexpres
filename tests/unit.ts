@@ -7,6 +7,7 @@ import {
   PROMO_PACKAGES,
   STANDARD_PACKAGES,
   PROMO_ROLLING,
+  PRICING_NOTE,
 } from "@/data/packages";
 import { buildListEmail, LIST_EMAIL_SUBJECT, newspaperListHtml } from "@/lib/list-email";
 import { buildAdvisorKnowledge } from "@/lib/advisor-knowledge";
@@ -275,6 +276,38 @@ console.log("\n########## I. ATRIBUIRE META ##########");
   t("splitName separa numele", nume.lastName === "Popescu", nume.lastName);
   t("splitName pe text gol nu arunca", Object.keys(splitName("")).length === 0);
 }
+
+// ##########################################################################
+// J. PROMISIUNI — nu vindem ce nu livram
+//
+// Site-ul a promis in 15 locuri, inclusiv in Termeni si conditii, "raport cu
+// screenshot-uri". Nu exista cod de capturi in niciunul dintre cele doua
+// repouri — nici puppeteer, nici playwright, nimic. Textele au fost corectate
+// sa spuna ce chiar livram: linkurile, in PDF si Excel.
+//
+// Testul de mai jos exista ca sa nu reapara promisiunea la urmatoarea
+// rescriere de copy. Daca cineva chiar construieste capturile, se sterge
+// testul odata cu functia noua — deliberat, nu din greseala.
+// ##########################################################################
+console.log("\n########## J. PROMISIUNI ##########");
+t(
+  "PRICING_NOTE nu promite screenshot-uri",
+  !/screenshot/i.test(PRICING_NOTE),
+  PRICING_NOTE.slice(0, 60),
+);
+t(
+  "emailul cu lista nu promite screenshot-uri",
+  !/screenshot/i.test(buildListEmail("Test")),
+);
+t(
+  "raportul PDF chiar contine linkurile promise",
+  buildReportPdf({
+    entries: [{ url: "https://ziar-test.ro/articol", title: "Titlu" }],
+    date: new Date("2026-08-27T10:00:00Z"),
+    siteName: "MediaExpres",
+    siteUrl: "https://mediaexpress.ro",
+  }).toString("latin1").includes("ziar-test.ro"),
+);
 
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);

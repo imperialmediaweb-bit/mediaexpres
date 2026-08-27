@@ -17,7 +17,7 @@ const VALUES = [
     icon: Target,
     title: "Rezultate măsurabile",
     description:
-      "Fiecare articol publicat e documentat cu URL și screenshot. Vezi exact ce cumperi.",
+      "Fiecare articol publicat e documentat cu URL-ul lui. Vezi exact ce cumperi.",
   },
   {
     icon: Users,
@@ -73,7 +73,7 @@ export default function DesprePage() {
               </p>
               <p>
                 Totul cu prețuri fixe, transparente, livrare în 4h și raport PDF complet —
-                documentat la link și screenshot.
+                documentat cu linkul fiecărei publicări.
               </p>
             </div>
           </div>
