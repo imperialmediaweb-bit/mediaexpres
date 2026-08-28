@@ -131,6 +131,50 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.close();
 }
 
+// ---------- BARA CU TERMENUL OFERTEI ----------
+{
+  console.log("\n=== 5c. Termenul din bara de sus e real ===");
+  // Bara calcula termenul ca "3 zile de la prima vizita a acestui browser" si
+  // il tinea in localStorage. Fiecare om vedea mereu 3 zile, incognito il
+  // resetа, si contrazicea "pana pe 14 septembrie" de pe /oferta-500. Acum
+  // numara catre termenul real din PROMO_ROLLING, acelasi pentru toata lumea.
+  const citeste = async (p) => {
+    for (let i = 0; i < 30; i++) {
+      if (await p.locator("div.bg-brand-red").count()) {
+        const s = (await p.locator("div.bg-brand-red").first().innerText()).replace(/\s+/g, " ").trim();
+        if (/\d+z/.test(s)) return s;
+      }
+      await p.waitForTimeout(500);
+    }
+    return null;
+  };
+  const zile = (s) => (s && s.match(/(\d+)z/) ? parseInt(s.match(/(\d+)z/)[1], 10) : null);
+
+  const texte = [];
+  for (const u of ["/oferta", "/pachete"]) {
+    // Context nou = vizitator nou, fara nimic in localStorage.
+    const p = await (await b.newContext()).newPage();
+    await p.goto(B + u, { waitUntil: "networkidle" });
+    texte.push({ u, s: await citeste(p), p });
+  }
+
+  check(texte.every((x) => zile(x.s) !== null), "bara apare pe /oferta si /pachete");
+  check(new Set(texte.map((x) => zile(x.s))).size === 1,
+    `acelasi termen pentru vizitatori diferiti (${texte.map((x) => zile(x.s)).join(" / ")} zile)`);
+  check(zile(texte[0].s) !== 3, `nu mai e cronometrul fals de 3 zile (${zile(texte[0].s)} zile)`);
+  check(/septembrie|octombrie|noiembrie|decembrie/i.test(texte[0].s || ""),
+    "arata data reala a ofertei, nu doar un numarator");
+  check(await texte[0].p.locator('div.bg-brand-red a[href="/oferta-500"]').count() > 0,
+    "bara duce spre comanda");
+
+  // Reincarcarea nu trebuie sa porneasca numaratoarea de la capat.
+  const inainte = zile(texte[0].s);
+  await texte[0].p.reload({ waitUntil: "networkidle" });
+  check(zile(await citeste(texte[0].p)) === inainte, "reincarcarea nu reseteaza termenul");
+
+  for (const x of texte) await x.p.close();
+}
+
 // ---------- MOBIL ----------
 {
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();

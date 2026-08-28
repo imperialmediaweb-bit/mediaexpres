@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
-  Mail,
   Newspaper,
   Facebook,
   Link as LinkIcon,
@@ -55,7 +55,7 @@ const BENEFITS = [
 
 const CONDITIONS = [
   "Articol permanent pe site-ul nostru.",
-  "O zi de expunere pe pagina principală.",
+  "12 ore pe pagina principală, apoi permanent în secțiunea proprie.",
   "Distribuire pe paginile noastre de Facebook.",
   "3 poze și 3 linkuri dofollow incluse.",
   "Servicii de redactare articole — la cerere.",
@@ -78,20 +78,22 @@ export default function OfertaPage() {
             fiecare județ), 9 ziare naționale și 1 ziar dedicat diasporei.
             Vizibilitate locală și națională într-un singur plasament.
           </p>
-          <div className="mt-8">
-            <RequestListModal
-              successHref="/pachete"
-              successCtaLabel="Vezi prețurile acum"
-              trigger={
-                <Button variant="gold" size="lg">
-                  <Mail className="h-4 w-4" /> Cere lista ziarelor și
-                  prețurile
-                </Button>
-              }
-            />
+          {/*
+            Pagina asta a fost construita cand lista si preturile erau ascunse
+            dupa formular: singurul indemn era "cere-le pe email". Intre timp
+            lista e publica pe /reteaua-noastra si preturile pe /pachete, deci
+            formularul nu mai pazeste nimic — doar amana omul cu un pas.
+          */}
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button asChild variant="accent" size="lg">
+              <Link href="/oferta-500">Comandă acum — 500 lei</Link>
+            </Button>
+            <Button asChild variant="gold" size="lg">
+              <Link href="/reteaua-noastra">Vezi lista celor 50 de ziare</Link>
+            </Button>
           </div>
           <p className="mt-4 text-xs text-white/60">
-            PDF gratuit pe email • lista celor 50+ publicații • zero spam
+            Lista e publică • prețurile sunt pe site • fără formular obligatoriu
           </p>
         </div>
       </section>
@@ -150,7 +152,7 @@ export default function OfertaPage() {
         </div>
       </section>
 
-      {/* Packages descriptive — no price CTA, only lead magnet */}
+      {/* Pachete descriptive; preturile si butoanele de plata sunt pe /pachete */}
       <section className="section bg-white">
         <div className="container">
           <div className="max-w-2xl text-center mx-auto">
@@ -158,8 +160,11 @@ export default function OfertaPage() {
             <h2 className="h2 mt-2">Alege acoperirea potrivită</h2>
             <p className="lead mt-4">
               Două variante simple: un singur portal sau întreaga rețea.
-              Primești tarifele complete și abonamentele lunare în PDF-ul cu
-              lista ziarelor.
+              Tarifele complete și abonamentele lunare sunt publice pe{" "}
+              <Link href="/pachete" className="font-semibold text-brand-red hover:underline">
+                pagina de pachete
+              </Link>
+              .
             </p>
           </div>
           <div className="mt-10 grid gap-6 md:grid-cols-2">
@@ -218,36 +223,47 @@ export default function OfertaPage() {
               </h2>
             </div>
             <p className="mt-4 text-slate-600">
-              Transfer bancar, cu factură fiscală și contract de prestări
-              servicii — tot ce îți trebuie pentru contabilitate B2B.
+              Card online sau ordin de plată (transfer bancar) — în ambele cazuri
+              primești factură fiscală. La card, factura se emite automat imediat după
+              plată; la OP, o trimitem odată cu raportul de publicare.
             </p>
           </div>
         </div>
       </section>
 
-      {/* Final CTA: single lead magnet */}
+      {/* Final: comanda pe primul loc, emailul ca varianta pentru cine amana */}
       <section className="bg-brand-navy text-white">
         <div className="container py-16 text-center">
-          <Mail className="mx-auto h-10 w-10 text-brand-gold" />
-          <h2 className="h2 mt-5 text-white">
-            Primește lista celor 50+ ziare și prețurile complete
+          <h2 className="h2 mt-2 text-white">
+            Un articol, 50 de ziare, 500 de lei
           </h2>
           <p className="lead mt-4 mx-auto max-w-2xl text-white/85">
-            PDF gratuit pe email în maximum 2 minute: lista completă a
-            publicațiilor, tarifele pe pachet și abonamentele lunare. Fără
-            obligații, fără spam.
+            Publicare în maximum 4 ore lucrătoare, raport cu toate linkurile și
+            factură fiscală. Plătești cu cardul sau prin ordin de plată.
           </p>
-          <div className="mt-8">
+          <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+            <Button asChild variant="accent" size="lg">
+              <Link href="/oferta-500">Comandă acum — 500 lei</Link>
+            </Button>
+            <Button asChild variant="gold" size="lg">
+              <Link href="/pachete">Vezi toate pachetele</Link>
+            </Button>
+          </div>
+          <p className="mt-8 text-sm text-white/70">
+            Nu comanzi azi?{" "}
             <RequestListModal
               successHref="/pachete"
               successCtaLabel="Vezi prețurile acum"
               trigger={
-                <Button variant="gold" size="lg">
-                  <Mail className="h-4 w-4" /> Cere oferta pe email
-                </Button>
+                <button
+                  type="button"
+                  className="font-semibold text-brand-gold underline underline-offset-4 hover:text-brand-gold-light"
+                >
+                  Îți trimitem lista pe email
+                </button>
               }
             />
-          </div>
+          </p>
         </div>
       </section>
     </>
