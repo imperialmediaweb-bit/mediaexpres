@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { MapPin, Newspaper, Facebook, Globe, Mail } from "lucide-react";
 import { RequestListModal } from "@/components/forms/RequestListModal";
@@ -126,22 +127,59 @@ export default function ReteauaPage() {
             <div className="mt-10">
               <NewspaperDirectory />
             </div>
+
+            {/*
+              Momentul de maxima convingere: omul tocmai a parcurs toate cele 50
+              de publicatii si s-a lamurit ca exista. Pana acum singurul buton de
+              pe intreaga pagina era "Primeste lista pe email" — asa ca oricine
+              ajungea aici convins nu avea ce sa faca decat sa-si lase adresa.
+              De-aia veneau numai cereri de lista si nicio comanda: comanda nu
+              era oferita nicaieri.
+            */}
+            <div className="mt-12 rounded-2xl border-2 border-brand-red bg-brand-red/5 p-8 text-center md:p-12">
+              <h3 className="font-serif text-2xl font-bold text-brand-navy md:text-3xl">
+                Le-ai văzut. Articolul tău poate fi în toate, azi.
+              </h3>
+              <p className="mx-auto mt-4 max-w-xl text-slate-600">
+                Publicare în maximum 4 ore lucrătoare, în toate cele 50 de ziare de mai sus.
+                Primești raportul cu fiecare link și factură fiscală. Plătești cu cardul sau
+                prin ordin de plată.
+              </p>
+              <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">
+                {/* accent = rosu, aceeasi culoare ca butonul de comanda din
+                    restul site-ului; default e navy si s-ar citi ca secundar. */}
+                <Button asChild variant="accent" size="lg">
+                  <Link href="/oferta-500">Comandă acum — 500 lei →</Link>
+                </Button>
+                <Button asChild variant="outline" size="lg">
+                  <Link href="/pachete">Vezi toate pachetele</Link>
+                </Button>
+              </div>
+              <p className="mt-5 text-sm text-slate-500">
+                Preț de listă 1.500 lei. Oferta de intrare e 500 lei — adică 10 lei pe ziar.
+              </p>
+            </div>
           </div>
 
-          <div className="mt-16 rounded-2xl bg-brand-navy p-10 text-white text-center lg:p-16">
-            <Mail className="mx-auto h-10 w-10 text-brand-gold" />
-            <h3 className="mt-5 font-serif text-3xl font-bold">
-              Vrei lista și pe email?
-            </h3>
-            <p className="mx-auto mt-4 max-w-2xl text-white/85">
-              Ți-o trimitem automat, pe loc — cu link către fiecare ziar, prețuri
-              și pașii de comandă. Gratuit, fără obligații.
+          {/*
+            Secundar, nu principal: lista e deja vizibila mai sus, deci asta e
+            doar pentru cine vrea s-o pastreze sau s-o arate cuiva. Cand era
+            singurul indemn de pe pagina, fura toti oamenii deja convinsi.
+          */}
+          <div className="mt-16 rounded-xl border border-slate-200 bg-white p-6 text-center">
+            <p className="flex items-center justify-center gap-2 font-semibold text-brand-navy">
+              <Mail className="h-4 w-4 text-brand-gold" />
+              Nu comanzi acum?
             </p>
-            <div className="mt-8">
+            <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
+              Îți trimitem lista pe email, cu link către fiecare ziar și specificațiile
+              articolului — o ai la îndemână când te hotărăști.
+            </p>
+            <div className="mt-4">
               <RequestListModal
                 trigger={
-                  <Button variant="gold" size="lg">
-                    <Mail className="h-4 w-4" /> Primește lista pe email
+                  <Button variant="outline">
+                    <Mail className="h-4 w-4" /> Trimite-mi lista pe email
                   </Button>
                 }
               />

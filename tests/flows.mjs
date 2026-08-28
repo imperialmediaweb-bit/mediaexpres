@@ -104,6 +104,33 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.close();
 }
 
+// ---------- RETEAUA: sa se poata si COMANDA, nu doar cere lista ----------
+{
+  const p = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  console.log("\n=== 5b. /reteaua-noastra duce spre comanda ===");
+  await p.goto(B + "/reteaua-noastra", { waitUntil: "networkidle" });
+
+  // Pagina a avut o perioada UN SINGUR buton pe tot cuprinsul ei —
+  // "Primeste lista pe email". Cine ajungea convins la finalul listei nu avea
+  // ce sa faca decat sa-si lase adresa, si nu se vindea nimic. Blocul de
+  // comanda de sub lista e reparatia; testul asta il pazeste.
+  const cta = p.locator('a[href="/oferta-500"]');
+  check((await cta.count()) > 0, "exista indemn la comanda");
+  check(await p.locator("text=Le-ai văzut").isVisible(), "blocul de comanda apare sub lista");
+
+  const yCta = (await p.locator("text=Le-ai văzut").boundingBox()).y;
+  const yMail = (await p.locator("text=Trimite-mi lista pe email").boundingBox()).y;
+  check(yCta < yMail, "comanda vine inaintea formularului de email");
+
+  // Lista trebuie sa ramana publica — a fost ascunsa dupa formular candva.
+  const externe = await p.locator('a[href^="https://"]').count();
+  check(externe >= 45, `lista ramane publica (${externe} linkuri catre ziare)`);
+
+  // Formularul nu se sterge, doar se retrogradeaza: e util cui nu e decis.
+  check(await p.locator("text=Trimite-mi lista pe email").isVisible(), "formularul ramane disponibil");
+  await p.close();
+}
+
 // ---------- MOBIL ----------
 {
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })).newPage();
