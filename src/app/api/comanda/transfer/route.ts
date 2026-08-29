@@ -35,13 +35,14 @@ const schema = z.object({
 });
 
 /**
- * Comanda platita prin transfer bancar (OP).
+ * Comanda prin transfer bancar (OP) — plasata INAINTE de plata.
  *
- * La plata cu cardul, Stripe confirma incasarea si abia apoi clientul ajunge la
- * formularul de materiale. La OP nu exista o astfel de confirmare automata:
- * clientul incarca dovada platii odata cu articolul, iar comanda ramane in
- * asteptare pana cand verificam extrasul. De aceea status-ul e distinct
- * ("pending_payment") — sa nu ajunga din greseala la publicare neplatita.
+ * La card, Stripe confirma incasarea automat. La OP, ordinea e cea fireasca
+ * intre firme: clientul trimite comanda (materiale + date de facturare),
+ * primeste automat factura pe email si plateste pe baza ei. Comanda sta in
+ * "pending_payment" pana cand adminul vede banii in extras si confirma —
+ * gardul din PATCH /api/admin/materiale/[id] refuza publicarea inainte.
+ * Dovada platii e optionala, doar ca accelerator de confirmare.
  */
 export async function POST(req: NextRequest) {
   let raw: unknown;

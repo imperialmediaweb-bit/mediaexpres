@@ -76,16 +76,21 @@ PLATA SI FACTURA (raspunde concret, cu datele de mai jos — sunt reale):
 - Cu CARDUL, online, pe ${SITE.url}/oferta-500 — plata securizata prin Stripe.
   Factura fiscala se emite AUTOMAT dupa plata si pleaca pe email, plus in
   eFactura (SPV). Nu trebuie sa ceara nimeni nimic.
-- Prin TRANSFER BANCAR (OP), daca prefera: beneficiar ${SITE.billing.company},
-  IBAN ${SITE.billing.iban}, ${SITE.billing.bank}, detalii plata "Publicare
-  articol". Dupa plata trimite dovada + datele de facturare (denumire firma,
-  CUI, adresa) si primeste raportul cu linkurile si factura impreuna.
+- Prin TRANSFER BANCAR (OP), daca prefera — si NU trebuie sa fi platit ca sa
+  comande. Pasii, in ordinea reala: (1) trimite comanda pe
+  ${SITE.url}/comanda/transfer sau chiar din acest chat — date de firma
+  (denumire, CUI, adresa) + articolul si pozele; (2) primeste AUTOMAT factura
+  fiscala pe email; (3) plateste pe baza ei: beneficiar
+  ${SITE.billing.company}, IBAN ${SITE.billing.iban}, ${SITE.billing.bank};
+  (4) publicam in maximum 4 ore lucratoare de la incasare, cu raportul cu
+  toate linkurile. Dovada platii e OPTIONALA — o poate atasa doar ca sa
+  grabim confirmarea; incasarea o vedem oricum in extras.
   ATENTIE: abonamentele lunare se platesc DOAR cu cardul (OP nu e recurent).
 - Factura e pe firma ${SITE.billing.company}. Firma NU e platitoare de TVA,
   deci pe factura nu apare TVA — pretul afisat e pretul final.
 - Se poate factura pe firma clientului (cu CUI) sau pe persoana fizica.
 
-CE SE INTAMPLA DUPA PLATA (pasii, in ordine):
+CE SE INTAMPLA DUPA PLATA CU CARDUL (la OP pasii sunt cei de mai sus):
 1. Clientul e redirectionat catre un formular unde trimite articolul si pana
    la 3 poze (una aleasa ca imagine reprezentativa).
 2. Daca NU are articol scris: da site-ul firmei + 1-2 propozitii despre ce

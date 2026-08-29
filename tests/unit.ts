@@ -98,9 +98,12 @@ console.log("\n########## D. CASETA DE TRANSFER BANCAR ##########");
 const box = bankTransferEmailBox("500 lei", "Publicare articol");
 t("caseta contine IBAN", box.includes(SITE.billing.iban));
 t("caseta contine suma", box.includes("500 lei"));
-t("caseta cere dovada platii", /dovada pl[aă][tț]ii/i.test(box));
-t("caseta cere date de facturare", /CUI/i.test(box));
-t("caseta promite raport si factura", /raportul/i.test(box) && /factura/i.test(box));
+// Intors odata cu fluxul: dovada nu mai e o obligatie — incasarea se vede in
+// extras. Caseta trebuie sa spuna exact asta, nu sa reinvie cerinta veche.
+t("caseta NU mai cere dovada ca obligatie", !/răspunde.*cu.*dovada/i.test(box));
+t("caseta spune ca incasarea se vede in extras", /extras/i.test(box));
+t("caseta pastreaza drumul pentru comanda direct de pe email", /CUI/i.test(box));
+t("caseta promite raportul si publicarea in 4 ore", /raportul/i.test(box) && /4 ore/i.test(box));
 
 console.log("\n########## E. CUNOSTINTELE CONSULTANTULUI ##########");
 const k = buildAdvisorKnowledge();
