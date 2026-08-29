@@ -62,6 +62,7 @@ export default async function MaterialePage() {
               images = [];
             }
             const isPending = r.status === "pending";
+            const isPaid = r.status === "paid";
             // OP: materialele au ajuns, dar incasarea nu e confirmata. Fara
             // starea asta distincta, comanda aparea verde, ca si cum ar fi
             // fost publicata — exact greseala care duce la publicare neplatita.
@@ -95,10 +96,12 @@ export default async function MaterialePage() {
                       }`}
                     >
                       {awaitingPay
-                        ? "⚠️ VERIFICĂ PLATA (OP)"
-                        : isPending
-                          ? "DE PUBLICAT"
-                          : "Publicat"}
+                        ? "⚠️ NEÎNCASATĂ (OP) — trimite factura"
+                        : isPaid
+                          ? "✅ ÎNCASATĂ — de publicat"
+                          : isPending
+                            ? "DE PUBLICAT"
+                            : "Publicat"}
                     </span>
                     {r.isCasino && (
                       <span className="mr-3 inline-flex rounded-full bg-amber-100 px-2.5 py-0.5 text-xs font-semibold text-amber-800">
@@ -110,7 +113,9 @@ export default async function MaterialePage() {
                     </span>
                   </div>
                   <div className="flex items-center gap-3">
-                    {(isPending || awaitingPay) && <MarkPublishedButton id={r.id} />}
+                    {/* Pe OP neincasat NU oferim publicarea din lista: intai
+                        se confirma plata, in pagina comenzii. */}
+                    {(isPending || isPaid) && <MarkPublishedButton id={r.id} />}
                     <Link
                       href={`/admin/materiale/${r.id}`}
                       className="text-sm font-semibold text-brand-red hover:underline"

@@ -44,10 +44,13 @@ t("request-list: fara consimtamant GDPR -> 400", (await post("/api/request-list"
 t("request-list: email invalid -> 400", (await post("/api/request-list", { name: "Ion Popescu", email: "gresit", gdprConsent: true })).status === 400);
 t("request-list: nume prea scurt -> 400", (await post("/api/request-list", { name: "I", email: "a@b.ro", gdprConsent: true })).status === 400);
 t("transfer OP: corp gol -> 400", (await post("/api/comanda/transfer", {})).status === 400);
-t("transfer OP: fara dovada platii -> 400", (await post("/api/comanda/transfer", {
-  packageId: "promo-50", email: "a@b.ro", contactPhone: "0740000000", companyName: "Firma SRL",
+// Regula s-a INTORS deliberat: dovada platii e optionala. Cerinta veche il
+// obliga pe client sa fi platit inainte sa fi primit vreo factura — cerc
+// vicios care a tinut conversia OP la zero. Acum: comanda -> factura -> plata.
+t("transfer OP: fara dovada platii -> 200 (comanda intai, plata dupa factura)", (await post("/api/comanda/transfer", {
+  packageId: "promo-50", email: "api-fara-dovada@test.ro", contactPhone: "0740000000", companyName: "Firma SRL",
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
-})).status === 400);
+})).status === 200);
 t("transfer OP: articol prea scurt -> 400", (await post("/api/comanda/transfer", {
   packageId: "promo-50", email: "a@b.ro", contactPhone: "0740000000", companyName: "Firma SRL",
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "scurt",

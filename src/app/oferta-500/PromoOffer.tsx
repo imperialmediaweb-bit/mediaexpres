@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper } from "lucide-react";
+import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { SITE } from "@/data/site";
 
@@ -155,23 +155,37 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         </p>
       )}
 
-      <label className="mx-auto mt-6 flex max-w-md cursor-pointer items-start gap-3 rounded-xl border border-white/20 bg-white/5 p-4 text-left">
-        <input
-          type="checkbox"
-          checked={isCasino}
-          onChange={(e) => setSelection({ isCasino: e.target.checked })}
-          className="mt-0.5 h-6 w-6 shrink-0 accent-brand-gold"
-        />
-        <span className="text-sm text-white/80">
-          Articolul este despre <strong className="text-white">cazino, pariuri
-          sau iGaming</strong>
-          <span className="mt-1 block text-white/55">
-            Conținutul din această categorie are tarif dublu — {monthly ? "800 lei/lună" : "1.000 lei"}.
-            Declarația e obligatorie; articolele nedeclarate se opresc de la
-            publicare fără rambursare.
+      {/* Colapsata prin design: ~95% dintre vizitatori nu au legatura cu
+          jocurile de noroc. Desfasurata in hero, caseta ii intreba pe toti de
+          cazinouri si le arata "fara rambursare" inainte de orice alt text
+          despre bani — si impingea butonul de comanda sub marginea ecranului
+          pe telefon. Bifata ramane obligatorie pentru cine chiar e in nisa,
+          deci <details> ramane deschis dupa bifare. */}
+      <details
+        open={isCasino}
+        className="mx-auto mt-5 max-w-md rounded-xl border border-white/15 bg-white/5 text-left"
+      >
+        <summary className="cursor-pointer list-none px-4 py-2.5 text-sm text-white/65 hover:text-white/90">
+          Articolul e despre cazino sau pariuri? <span className="underline decoration-dotted underline-offset-2">Tarif diferit — apasă aici</span>
+        </summary>
+        <label className="flex cursor-pointer items-start gap-3 px-4 pb-4 pt-1">
+          <input
+            type="checkbox"
+            checked={isCasino}
+            onChange={(e) => setSelection({ isCasino: e.target.checked })}
+            className="mt-0.5 h-6 w-6 shrink-0 accent-brand-gold"
+          />
+          <span className="text-sm text-white/80">
+            Da, articolul este despre <strong className="text-white">cazino, pariuri
+            sau iGaming</strong>
+            <span className="mt-1 block text-white/55">
+              Conținutul din această categorie are tarif de {monthly ? "800 lei/lună" : "1.000 lei"} —
+              cerințe suplimentare de conformitate (ONJN, joc responsabil).
+              Bifarea e obligatorie pentru articolele din nișă.
+            </span>
           </span>
-        </span>
-      </label>
+        </label>
+      </details>
 
       {askEmail ? (
         <form
@@ -195,32 +209,72 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               className="mt-2 w-full rounded-lg border border-white/20 bg-white px-4 py-3 text-base text-brand-navy placeholder:text-slate-400 focus:border-brand-gold focus:outline-none"
             />
           </label>
-          <button
-            type="submit"
-            disabled={loading}
-            className="mt-3 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60"
-          >
-            {loading ? (
-              <Loader2 className="h-5 w-5 animate-spin" />
-            ) : (
-              <CreditCard className="h-5 w-5" />
-            )}
-            Continuă spre plată — {offer.price.toLocaleString("ro")} lei{offer.suffix}
-          </button>
-          <p className="mt-2 text-center text-xs text-white/60">
-            Plată securizată prin Stripe · factură fiscală automată
+          {/*
+            Cele doua metode, ca alegere egala.
+            Inainte, cardul era un buton rosu mare iar transferul bancar o
+            notita gri de 12px sub el. Din 8 oameni care au ajuns pana aici, 0
+            au platit — o firma din Romania nu scoate cardul personal pentru un
+            serviciu B2B de 500 de lei, vrea ordin de plata si factura. Optiunea
+            exista, dar nu o vedea nimeni.
+          */}
+          <p className="mt-4 text-center text-sm font-semibold text-white">
+            Cum plătești?
           </p>
-          {!monthly && (
-            <p className="mt-3 border-t border-white/10 pt-3 text-center text-xs text-white/70">
-              Preferi transfer bancar?{" "}
+          <div className={`mt-2 grid gap-2 ${monthly ? "" : "sm:grid-cols-2"}`}>
+            <button
+              type="submit"
+              disabled={loading}
+              className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg bg-brand-red px-6 py-3.5 font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60"
+            >
+              <span className="inline-flex items-center gap-2 text-base">
+                {loading ? (
+                  <Loader2 className="h-5 w-5 animate-spin" />
+                ) : (
+                  <CreditCard className="h-5 w-5" />
+                )}
+                Card — plătesc acum
+              </span>
+              <span className="text-xs font-normal text-white/80">
+                factură automată pe email
+              </span>
+            </button>
+
+            {!monthly && (
               <a
                 href={`/comanda/transfer?pachet=${offer.packageId}`}
-                className="font-semibold text-brand-gold underline"
+                className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-brand-gold bg-brand-gold/10 px-6 py-3.5 font-bold text-brand-gold transition hover:bg-brand-gold/20"
               >
-                Comandă prin OP →
+                <span className="inline-flex items-center gap-2 text-base">
+                  <Landmark className="h-5 w-5" />
+                  Ordin de plată
+                </span>
+                <span className="text-xs font-normal text-brand-gold/80">
+                  transfer bancar, cu factură
+                </span>
               </a>
-            </p>
-          )}
+            )}
+          </div>
+          {/* A treia cale: omul care nu are incredere sa plateasca unui
+              necunoscut vrea intai sa vorbeasca cu cineva. Tina Digi a facut
+              exact asta pe cont propriu; acum drumul exista in pagina.
+              Evenimentul Contact il face vizibil in Ads Manager — altfel
+              conversatiile astea par ca reclama n-a produs nimic. */}
+          <a
+            href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
+              `Bună ziua! Vreau articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}) — am câteva întrebări înainte de comandă.`,
+            )}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => trackPixelEvent("Contact", { content_name: "WhatsApp din oferta" })}
+            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Ai întrebări? Scrie-ne pe WhatsApp
+          </a>
+          <p className="mt-3 text-center text-xs text-white/60">
+            {offer.price.toLocaleString("ro")} lei{offer.suffix} · factură fiscală în ambele
+            cazuri · publicare în 4 ore lucrătoare
+          </p>
         </form>
       ) : (
         <div className="mt-6 flex flex-col items-center gap-3">
@@ -233,6 +287,15 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <CreditCard className="h-5 w-5" />
             {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
           </button>
+          {/* Singura promisiune cu bani inapoi de pe pagina — pana acum
+              existau doar mentiuni negative ("fara rambursare"). Riscul e al
+              nostru si e mic: publicarea o controlam noi. Frica pe care o
+              stinge e exact cea care opreste prima comanda catre un
+              necunoscut. */}
+          <p className="inline-flex items-center gap-1.5 text-sm text-white/75">
+            <ShieldCheck className="h-4 w-4 text-brand-gold" />
+            Nu publicăm în 4 ore lucrătoare? Îți dăm toți banii înapoi.
+          </p>
           {/* Lista e mai jos pe pagina, dar nimeni nu stia — omul vedea pretul si
               butonul si pleca fara sa afle ca poate verifica ziarele inainte. */}
           <a

@@ -215,6 +215,10 @@ export const STEPS: Step[] = [
     id: "proof",
     kind: "proof",
     skip: (d) => d.method !== "op",
+    // Sarit de cei mai multi, prin design: clientul comanda INTAI, primeste
+    // factura pe email si plateste dupa. Pasul ramane pentru cine a platit
+    // deja si vrea sa grabeasca verificarea.
+    skippable: true,
     ask: (d) => bankDetailsText(priceOf(d)),
   },
   {
@@ -235,7 +239,8 @@ export function bankDetailsText(amount: number): string {
     `Suma: ${amount} lei`,
     "Detalii plată: Publicare articol — 50 de ziare",
     "",
-    "După ce faci transferul, încarcă aici dovada (captură din aplicația băncii sau ordinul de plată în PDF).",
+    "Nu trebuie să plătești acum ca să comanzi: după ce trimiți comanda primești factura pe email și plătești pe baza ei.",
+    "Ai făcut deja transferul? Încarcă dovada și confirmăm mai repede — altfel apasă butonul roșu și plătești după ce primești factura.",
   ].join("\n");
 }
 

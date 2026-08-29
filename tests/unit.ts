@@ -16,6 +16,7 @@ import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
+import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
 import zlib from "node:zlib";
 import { createHash } from "node:crypto";
 
@@ -308,6 +309,30 @@ t(
     siteUrl: "https://mediaexpress.ro",
   }).toString("latin1").includes("ziar-test.ro"),
 );
+
+
+// ##########################################################################
+// K. FLUXUL OP — comanda intai, plata dupa factura
+//
+// Regula veche cerea dovada platii ca sa poti comanda: clientul trebuia sa fi
+// platit inainte sa fi primit vreun document. Zero conversii. Verificarile de
+// aici pazesc regula noua la nivel de schema si de pasi din chat.
+// ##########################################################################
+console.log("\n########## K. FLUXUL OP ##########");
+{
+  t(
+    "pasul de dovada din chat e optional (skippable)",
+    STEPS.some((st) => st.id === "proof" && st.skippable === true),
+  );
+  const proofStep = STEPS.find((st) => st.id === "proof");
+  const textPas = proofStep ? proofStep.ask(EMPTY_ORDER) : "";
+  t(
+    "chatul spune ca nu trebuie platit inainte",
+    /Nu trebuie să plătești acum/.test(textPas),
+    textPas.slice(0, 60),
+  );
+  t("pasul de dovada arata IBAN-ul", textPas.includes(SITE.billing.iban));
+}
 
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);

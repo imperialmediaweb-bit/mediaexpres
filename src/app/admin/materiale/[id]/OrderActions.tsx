@@ -27,7 +27,7 @@ export function OrderActions({
 }) {
   const router = useRouter();
   const [links, setLinks] = useState("");
-  const [busy, setBusy] = useState<null | "publish" | "report" | "mail">(null);
+  const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [mailSubject, setMailSubject] = useState(`Comanda ta — ${articleTitle}`.slice(0, 120));
   const [mailBody, setMailBody] = useState("");
@@ -39,11 +39,15 @@ export function OrderActions({
     .map((l) => l.trim())
     .filter((l) => /^https?:\/\/\S+$/i.test(l)).length;
 
-  async function markPublished() {
-    setBusy("publish");
+  async function patch(action: "publish" | "confirm_payment", busyKey: "publish" | "confirm") {
+    setBusy(busyKey);
     setMsg(null);
     try {
-      const r = await fetch(`/api/admin/materiale/${id}`, { method: "PATCH" });
+      const r = await fetch(`/api/admin/materiale/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action }),
+      });
       const j = await r.json();
       if (!r.ok || !j.ok) throw new Error(j.error || "Eroare");
       router.refresh();
@@ -53,6 +57,8 @@ export function OrderActions({
       setBusy(null);
     }
   }
+  const markPublished = () => patch("publish", "publish");
+  const confirmPayment = () => patch("confirm_payment", "confirm");
 
   async function sendReport() {
     if (linkCount === 0) {
@@ -135,12 +141,38 @@ export function OrderActions({
           <p className="mt-2 flex items-center gap-2 text-sm text-emerald-700">
             <CheckCircle2 className="h-4 w-4" /> Marcată ca publicată.
           </p>
+        ) : awaitingPayment ? (
+          <>
+            {/* Comanda OP neincasata: publicarea e blocata pana confirmi banii.
+                Fara asta, 50 de articole permanente puteau pleca pe o comanda
+                neplatita, dintr-un singur click grabit. */}
+            <p className="mt-1 text-sm text-slate-600">
+              Clientul plătește <strong>după ce îi trimiți factura</strong> — emite-o în
+              StartCo pe datele din alertă. Când vezi banii în extras, confirmă aici.
+            </p>
+            <button
+              type="button"
+              onClick={confirmPayment}
+              disabled={busy !== null}
+              className="mt-3 inline-flex items-center gap-2 rounded-lg bg-emerald-600 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-700 disabled:opacity-60"
+            >
+              {busy === "confirm" ? <Loader2 className="h-4 w-4 animate-spin" /> : <CheckCircle2 className="h-4 w-4" />}
+              Confirmă plata — am văzut banii în extras
+            </button>
+            <button
+              type="button"
+              disabled
+              title="Se deblochează după confirmarea plății"
+              className="mt-3 ml-2 inline-flex cursor-not-allowed items-center gap-2 rounded-lg bg-slate-200 px-4 py-2 text-sm font-semibold text-slate-400"
+            >
+              <CheckCircle2 className="h-4 w-4" />
+              Marchează publicat
+            </button>
+          </>
         ) : (
           <>
             <p className="mt-1 text-sm text-slate-600">
-              {awaitingPayment
-                ? "Verifică întâi încasarea în extras — plata prin OP nu se confirmă automat."
-                : "După ce ai publicat articolul în rețea, marchează comanda aici."}
+              După ce ai publicat articolul în rețea, marchează comanda aici.
             </p>
             <button
               type="button"

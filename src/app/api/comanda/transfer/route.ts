@@ -3,7 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orderSubmissions, users } from "@/db/schema";
-import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
 
@@ -23,7 +23,11 @@ const schema = z.object({
   siteUrl: z.string().max(300).optional(),
   images: z.array(fileSchema).max(3).default([]),
   featuredIndex: z.number().int().min(0).max(2).default(0),
-  paymentProof: fileSchema,
+  // Optionala prin decizie de flux, nu din comoditate: cerinta obligatorie il
+  // punea pe client sa fi platit INAINTE sa fi primit vreo factura — iar o
+  // firma nu vireaza bani fara document. Incasarea o vedem in extras oricum;
+  // dovada ramane un accelerator pentru cine o are deja.
+  paymentProof: fileSchema.optional(),
   facebookOptIn: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
   isCasino: z.boolean().default(false),
@@ -83,7 +87,7 @@ export async function POST(req: NextRequest) {
       uniquePerSite: d.uniquePerSite,
       isCasino: d.isCasino,
       paymentMethod: "op",
-      paymentProof: JSON.stringify(d.paymentProof),
+      paymentProof: d.paymentProof ? JSON.stringify(d.paymentProof) : null,
       status: "pending_payment",
     });
 
@@ -117,18 +121,23 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Comandă nouă prin transfer bancar",
       `
-      <p style="color:#b91c1c;"><strong>Verifică extrasul înainte de publicare.</strong> Clientul a încărcat dovada plății, dar încasarea nu e confirmată automat.</p>
-      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-        ${kv("Pachet", `${pkg.name} — ${pkg.price} RON`)}
-        ${kv("Firmă", d.companyName)}
+      <p style="color:#b91c1c;"><strong>Pasul tău acum: emite factura în StartCo și trimite-i-o.</strong> Clientul așteaptă factura ca să poată plăti — contabilitatea lui nu virează bani fără document. Publici abia după ce vezi încasarea în extras.</p>
+      <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
+      <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
+        ${kv("Denumire", d.companyName)}
         ${kv("CUI", d.companyCui)}
         ${kv("Adresă", d.companyAddress)}
         ${kv("Email", email)}
+        ${kv("Sumă", `${pkg.price} RON`)}
+        ${kv("Serviciu", `${pkg.name}`)}
+      </table>
+      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         ${kv("Telefon", d.contactPhone)}
         ${kv("Categorie", d.isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
         ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}
+        ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
       </table>
-      <p><strong>Dovada plății:</strong> <a href="${esc(d.paymentProof.url)}">${esc(d.paymentProof.name)}</a></p>
+      ${d.paymentProof ? `<p><strong>Dovada plății:</strong> <a href="${esc(d.paymentProof.url)}">${esc(d.paymentProof.name)}</a></p>` : ""}
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>
       <div style="white-space:pre-wrap;border-left:3px solid #e5e5e5;padding-left:16px;margin:12px 0;color:#334155;">${esc(d.body.slice(0, 1500))}${d.body.length > 1500 ? "…" : ""}</div>
       <p><strong>Poze:</strong> ${d.images.length}/3</p>
@@ -144,8 +153,15 @@ export async function POST(req: NextRequest) {
       "Comandă primită",
       `
       <p>Salut,</p>
-      <p>Am primit materialele și dovada plății pentru <strong>${esc(pkg.name)}</strong> (${pkg.price} lei).</p>
-      <p>Verificăm încasarea în extrasul bancar — de obicei durează câteva ore lucrătoare, în funcție de bancă. Imediat după confirmare publicăm articolul, în maximum 4 ore lucrătoare, și primești pe email raportul cu toate linkurile și factura fiscală.</p>
+      <p>Am primit comanda și materialele pentru <strong>${esc(pkg.name)}</strong> — ${pkg.price} lei.</p>
+      <p><strong>Ce urmează, în ordine:</strong></p>
+      <ol style="padding-left:20px;margin:8px 0 16px;">
+        <li style="margin:6px 0;"><strong>Îți trimitem factura fiscală</strong> pe acest email, în scurt timp.</li>
+        <li style="margin:6px 0;"><strong>Plătești prin transfer bancar</strong> — datele contului sunt mai jos, ca să le ai la îndemână.</li>
+        <li style="margin:6px 0;"><strong>Publicăm în maximum 4 ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
+      </ol>
+      ${d.paymentProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
+      ${bankTransferEmailBox(`${pkg.price} lei`, `${esc(pkg.name)} — ${esc(d.companyName)}`)}
       <p>Dacă între timp ai întrebări, răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,

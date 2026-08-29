@@ -108,16 +108,20 @@ console.log("\n=== 1. Comanda prin OP, cu articol ===");
   check(await seen("RO15BTRLRONCRT0652757201"), "arata IBAN-ul in conversatie");
   check(await seen("Suma: 500 lei"), "arata suma de plata");
 
-  await proof();
-  check(await seen("dovada.png"), "dovada incarcata apare in conversatie");
-  check(await seen("Dovada plății"), "arata rezumatul inainte de trimitere");
+  // Drumul implicit de-acum: comanda pleaca FARA dovada platii — clientul
+  // primeste factura pe email si plateste pe baza ei. Cerinta veche il obliga
+  // sa fi platit inainte sa aiba vreun document, si nu trimitea nimeni.
+  check(await seen("Nu trebuie să plătești acum"), "chatul spune ca plata vine dupa factura");
+  check(await btn("Trimit comanda, plătesc după factură").isVisible(), "exista drumul fara dovada");
+  await btn("Trimit comanda, plătesc după factură").click(); await wait();
+  check(await seen("după factura primită pe email"), "rezumatul arata plata dupa factura");
 
   await btn("Trimite comanda").click(); await wait(8000);
-  check(status === 200, "serverul accepta comanda", `HTTP ${status}`);
+  check(status === 200, "serverul accepta comanda FARA dovada", `HTTP ${status}`);
   check(sent?.email === "client@firma-test.ro", "trimite emailul clientului");
   check(sent?.companyCui === "RO12345678", "trimite CUI-ul");
   check(sent?.companyAddress?.includes("Exemplu"), "trimite adresa de facturare");
-  check(!!sent?.paymentProof?.url, "trimite dovada platii");
+  check(!("paymentProof" in (sent || {})), "nu trimite camp de dovada gol");
   check(await seen("Am primit comanda ta"), "confirma comanda in chat");
   await p.close();
 }

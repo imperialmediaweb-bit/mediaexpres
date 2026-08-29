@@ -228,7 +228,7 @@ export function OfferChatBubble() {
           ...buildSubmission(data),
           images,
           featuredIndex: 0,
-          paymentProof: proof,
+          ...(proof ? { paymentProof: proof } : {}),
           facebookOptIn: true,
           uniquePerSite: true,
         }),
@@ -382,7 +382,7 @@ export function OfferChatBubble() {
             <Row k="Articol" v={data.hasArticle ? data.title : "îl redactăm noi din tema ta"} />
             {data.siteUrl && <Row k="Site" v={data.siteUrl} />}
             <Row k="Poze" v={images.length ? `${images.length} încărcate` : "fără"} />
-            <Row k="Dovada plății" v={proof?.name || "—"} />
+            <Row k="Plata" v={proof ? `dovadă atașată: ${proof.name}` : "după factura primită pe email"} />
           </div>
         )}
 
@@ -440,21 +440,34 @@ export function OfferChatBubble() {
             </button>
           </div>
         ) : current?.kind === "proof" ? (
-          <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-red px-3 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90">
-            {uploading ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
-            ) : (
-              <Upload className="h-4 w-4" />
-            )}
-            Încarcă dovada plății
-            <input
-              type="file"
-              accept="image/*,application/pdf"
-              hidden
+          <div className="grid gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                echo("Trimit comanda, plătesc după factură");
+                goToNext(step, data);
+              }}
               disabled={uploading}
-              onChange={(e) => void upload(e.target.files, "proof")}
-            />
-          </label>
+              className="rounded-lg bg-brand-red px-3 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90 disabled:opacity-60"
+            >
+              Trimit comanda, plătesc după factură
+            </button>
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-navy">
+              {uploading ? (
+                <Loader2 className="h-4 w-4 animate-spin" />
+              ) : (
+                <Upload className="h-4 w-4" />
+              )}
+              Am plătit deja — încarc dovada
+              <input
+                type="file"
+                accept="image/*,application/pdf"
+                hidden
+                disabled={uploading}
+                onChange={(e) => void upload(e.target.files, "proof")}
+              />
+            </label>
+          </div>
         ) : current?.kind === "review" ? (
           <button
             type="button"

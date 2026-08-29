@@ -43,6 +43,12 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   for (let i = 0; i < n; i++) labels.push((await cta.nth(i).innerText()).trim());
   check(labels.every((l) => /500/.test(l)), "toate arata 500 lei");
 
+  // Caseta de cazino e colapsata intr-un <details> — intentionat: ~95% dintre
+  // vizitatori n-au legatura cu jocurile de noroc, iar desfasurata impingea
+  // butonul de comanda sub marginea ecranului pe telefon. Testul o deschide
+  // intai, exact ca un client din nisa.
+  await p.locator("summary", { hasText: "cazino" }).first().click();
+  await p.waitForTimeout(300);
   const cb = p.locator('input[type="checkbox"]').first();
   await cb.check({ force: true });
   await p.waitForTimeout(500);
@@ -66,11 +72,11 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   const calls = await p.evaluate(() => window.__fbq);
   check(calls.filter((c) => c[1] === "InitiateCheckout").length === 1, "pixel InitiateCheckout trimis la click");
   await p.locator('input[type="email"]').first().fill("gresit");
-  await p.getByRole("button", { name: /Continuă spre plată/ }).first().click();
+  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(400);
   check(sent === null, "email invalid: blocat local, fara cerere la server");
   await p.locator('input[type="email"]').first().fill("test@firma.ro");
-  await p.getByRole("button", { name: /Continuă spre plată/ }).first().click();
+  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(900);
   check(sent?.email === "test@firma.ro" && sent?.packageId === "promo-50", `trimis la server: ${JSON.stringify(sent)}`);
 
@@ -97,11 +103,88 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(t.includes("500 lei"), "suma pachetului");
   check((await p.locator('input[required]').count()) >= 6, "campuri de facturare obligatorii");
   check(t.includes("Încarcă dovada plății"), "incarcare dovada");
+  // Dovada platii e OPTIONALA prin design: cerinta veche il obliga pe client
+  // sa fi platit inainte sa fi primit vreo factura — cerc vicios care a tinut
+  // conversia OP la zero. Verificam si textul, si serverul.
+  check(t.includes("Nu trebuie să fi plătit"), "spune ca se comanda fara plata facuta");
+  check(/opțional/i.test(t), "dovada e marcata optional");
+
+  const MARK = `flows-op-${Date.now()}@test.ro`;
+  let opStatus = null;
+  p.on("response", (r) => {
+    if (r.url().includes("/api/comanda/transfer") && r.request().method() === "POST")
+      opStatus = r.status();
+  });
+  await p.fill('input[type="email"]', MARK);
+  await p.fill('input[type="tel"]', "0758169388");
+  await p.fill('input[placeholder="Firma Mea SRL"]', "Flows OP SRL");
+  await p.fill('input[placeholder="RO12345678"]', "RO4242");
+  await p.fill('input[placeholder="Str., nr., oraș, județ"]', "Str. Flows 1, Cluj");
+  // titlul n-are placeholder: il gasim prin h2-ul unic al sectiunii lui
+  await p.locator('h2:has-text("3. Articolul")').locator("..").locator("input").first()
+    .fill("Titlu de test din suita flows");
+  await p.locator("textarea").first().fill("F".repeat(150));
+  await p.locator("button", { hasText: "Trimite comanda" }).click();
+  await p.waitForTimeout(6000);
+  check(opStatus === 200, `comanda pleaca FARA dovada platii (HTTP ${opStatus})`);
+
   // pachet cazino -> suma dubla
   await p.goto(B + "/comanda/transfer?pachet=promo-50-cazino", { waitUntil: "domcontentloaded" });
   await p.waitForTimeout(700);
   check((await p.locator("body").innerText()).includes("1.000 lei"), "cazino prin OP: 1.000 lei");
   await p.close();
+
+  // ---------- 5d. Adminul nu poate publica o comanda OP neincasata ----------
+  {
+    const a = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+    console.log("\n=== 5d. Gardul de plata din admin ===");
+    const { readFileSync } = await import("node:fs");
+    const env = Object.fromEntries(readFileSync(".env.local", "utf8").split("\n")
+      .filter((l) => l.includes("=") && !l.startsWith("#"))
+      .map((l) => [l.slice(0, l.indexOf("=")).trim(), l.slice(l.indexOf("=") + 1).trim()]));
+    await a.goto(B + "/admin/login");
+    await a.fill('input[name="username"]', env.ADMIN_USER);
+    await a.fill('input[name="password"]', env.ADMIN_PASSWORD);
+    await a.click('button[type="submit"]');
+    await a.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 20000 });
+
+    // deschidem exact comanda creata mai sus, dupa emailul ei unic
+    await a.goto(B + "/admin/materiale", { waitUntil: "networkidle" });
+    const card = a.locator("div.rounded-xl", { hasText: MARK }).first();
+    check(await card.isVisible(), "comanda din test apare in lista");
+    check((await card.locator("button", { hasText: "Marchează publicat" }).count()) === 0,
+      "lista NU ofera publicarea pe OP neincasat");
+    await card.locator("a", { hasText: "Deschide" }).click();
+    await a.waitForLoadState("networkidle");
+
+    check(await a.locator("text=NEÎNCASATĂ").first().isVisible(), "badge NEINCASATA in detaliu");
+    // butonul e componenta de client: asteptam hidratarea, nu doar networkidle
+    const confirmBtn = a.locator("button", { hasText: "Confirmă plata" });
+    await confirmBtn.waitFor({ timeout: 15000 });
+    check(await confirmBtn.isVisible(), "exista Confirma plata");
+    check(await a.locator("button", { hasText: "Marchează publicat" }).isDisabled(),
+      "Marcheaza publicat e blocat");
+
+    // gardul de pe SERVER, nu doar din UI: publish direct pe API -> 409
+    const orderId = a.url().split("/").pop();
+    const api = await a.evaluate(async (id) => {
+      const r = await fetch(`/api/admin/materiale/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "publish" }),
+      });
+      return r.status;
+    }, orderId);
+    check(api === 409, `serverul refuza publicarea neincasata (HTTP ${api})`);
+
+    // confirmarea deblocheaza publicarea
+    await a.locator("button", { hasText: "Confirmă plata" }).click();
+    await a.waitForTimeout(2000);
+    check(await a.locator("text=ÎNCASATĂ").first().isVisible(), "starea devine INCASATA");
+    check(!(await a.locator("button", { hasText: "Marchează publicat" }).isDisabled()),
+      "publicarea s-a deblocat");
+    await a.close();
+  }
 }
 
 // ---------- RETEAUA: sa se poata si COMANDA, nu doar cere lista ----------

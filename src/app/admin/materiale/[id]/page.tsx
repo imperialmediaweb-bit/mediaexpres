@@ -48,6 +48,7 @@ export default async function MaterialDetailPage({
   const pkg = findPackageById(r.packageId);
   const isPublished = r.status === "published";
   const awaitingPay = r.status === "pending_payment";
+  const isPaid = r.status === "paid";
 
   let images: { url: string; publicId?: string }[] = [];
   try {
@@ -96,7 +97,7 @@ export default async function MaterialDetailPage({
                 : "bg-red-100 text-red-800"
           }`}
         >
-          {awaitingPay ? "⚠️ VERIFICĂ PLATA (OP)" : isPublished ? "Publicat" : "DE PUBLICAT"}
+          {awaitingPay ? "⚠️ NEÎNCASATĂ (OP)" : isPaid ? "✅ ÎNCASATĂ — de publicat" : isPublished ? "Publicat" : "DE PUBLICAT"}
         </span>
         {r.isCasino && (
           <span className="inline-flex rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-800">

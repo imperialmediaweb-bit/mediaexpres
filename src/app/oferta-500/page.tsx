@@ -78,21 +78,25 @@ const INCLUDED = [
   },
 ];
 
+// Ordinea pasilor e psihologia paginii: varianta veche incepea cu "Platesti" —
+// adica cerea banii inainte sa ofere ceva, cea mai grea incadrare posibila
+// pentru un vanzator necunoscut dintr-o reclama. Aceeasi realitate, spusa in
+// ordinea in care omul se simte in siguranta.
 const STEPS = [
   {
     n: "1",
-    title: "Plătești oferta",
-    text: "500 lei cu cardul, în siguranță. Primești factura fiscală pe email.",
+    title: "Trimiți articolul",
+    text: "Textul și pozele tale — sau doar tema, și îl scriem noi. Alegi cum plătești: card sau ordin de plată, cu factură fiscală.",
   },
   {
     n: "2",
-    title: "Trimiți articolul",
-    text: "Ne trimiți textul și pozele tale. Dacă nu ai text, îl scriem noi pe baza temei date de tine.",
+    title: "Primești factura și plătești",
+    text: "La card, factura vine automat după plată. La OP, îți trimitem factura pe email și plătești pe baza ei — ca între firme.",
   },
   {
     n: "3",
-    title: "Primești raportul",
-    text: "În 4h ai articolul live în toate cele 50 de ziare și raportul PDF cu toate linkurile.",
+    title: "Publicăm și primești raportul",
+    text: "În maximum 4 ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
   },
 ];
 
@@ -125,6 +129,10 @@ const FAQ = [
     a: `Este o ofertă promoțională de intrare, pentru clienți noi care nu au lucrat încă cu noi${deadline ? `, valabilă până pe ${deadline}` : ""}. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.`,
   },
   {
+    q: "Cum plătesc și primesc factură?",
+    a: "Cum îți e mai ușor: cu cardul (prin Stripe, factura vine automat pe email) sau prin ordin de plată — comanzi, îți trimitem factura fiscală, iar contabilitatea ta plătește pe baza ei. Nu trebuie să fi plătit ca să comanzi.",
+  },
+  {
     q: "De ce costă dublu pentru cazino și pariuri?",
     a: "Conținutul din zona iGaming are cerințe suplimentare de conformitate (ONJN, mențiuni despre joc responsabil) și un risc editorial mai mare pentru publicații. De aceea tariful este 1.000 lei în loc de 500. Bifezi declarația la comandă. Dacă un articol de cazino este trimis nedeclarat, publicarea se oprește și suma nu se rambursează.",
   },
@@ -148,10 +156,7 @@ const FAQ = [
     q: "Articolele rămân online permanent?",
     a: "Da. Articolele rămân publicate permanent, nu se șterg după o perioadă. Backlinkurile rămân active.",
   },
-  {
-    q: "Cum plătesc și primesc factură?",
-    a: "Plata se face cu cardul, prin Stripe. La checkout îți poți completa datele de firmă (CUI, nr. reg. comerț), iar factura fiscală o primești pe email — totul e în regulă pentru contabilitate B2B.",
-  },
+
 ];
 
 export default function Oferta500Page() {
@@ -180,7 +185,7 @@ export default function Oferta500Page() {
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Plată securizată cu cardul • factură fiscală • publicare în 4h
+              Card sau ordin de plată • factură fiscală • publicare în 4h
             </p>
           </div>
         </div>
@@ -191,9 +196,28 @@ export default function Oferta500Page() {
         <div className="container py-12">
           <div className="grid gap-8 text-center md:grid-cols-4">
             <Stat value="50" label="ziare online" />
-            <Stat value="320.000+" label="vizitatori unici / lună" />
+            {/* "320.000+ vizitatori" era neverificabila si argumentul gresit:
+                omul nu cumpara traficul site-urilor noastre, ci aparitia in
+                presa si linkurile. Domeniile sunt verificabile — lista e mai
+                jos in pagina. */}
+            <Stat value="50" label="domenii .ro proprii" />
             <Stat value="50" label="backlinks dofollow" />
             <Stat value="4h" label="până la publicare" />
+          </div>
+        </div>
+      </section>
+
+      {/* Dovada sociala vine devreme: increderea se castiga inainte de pret,
+          nu dupa. Titlul e la singular cinstit — avem un client care a scris,
+          nu un cor; "Nu doar noi zicem" promitea plural si livra unul. */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Ce spun clienții</p>
+            <h2 className="h2 mt-2">Din partea unui client, nu a noastră</h2>
+          </div>
+          <div className="mt-10">
+            <ClientTestimonials />
           </div>
         </div>
       </section>
@@ -336,20 +360,6 @@ export default function Oferta500Page() {
               </li>
             ))}
           </ul>
-        </div>
-      </section>
-
-      {/* Recomandari — imediat dupa lista, cand omul tocmai a verificat ca
-          ziarele sunt reale si intreaba "dar altii ce zic?" */}
-      <section className="section bg-slate-50">
-        <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Ce spun clienții</p>
-            <h2 className="h2 mt-2">Nu doar noi zicem</h2>
-          </div>
-          <div className="mt-10">
-            <ClientTestimonials />
-          </div>
         </div>
       </section>
 

@@ -18,10 +18,19 @@ export interface IssueInvoiceInput {
   address?: string | null;
   city?: string | null;
   phone?: string | null;
-  /** Suma incasata, in RON (nu bani). */
+  /** Suma facturata, in RON (nu bani). */
   amount: number;
   packageLabel: string;
   stripeSessionId: string;
+  /**
+   * La card, banii sunt deja in cont cand emitem, deci factura se marcheaza
+   * incasata pe loc. La ordin de plata e invers: clientul are nevoie de
+   * factura CA SA poata plati — contabilitatea lui nu vireaza fara document.
+   * Emitem deci factura neincasata si o marcam manual cand vedem extrasul.
+   */
+  markPaid?: boolean;
+  /** Textul de pe factura; implicit e cel de la plata cu cardul. */
+  mentions?: string;
 }
 
 /** Alerta catre admin cand factura trebuie emisa de mana. */
@@ -87,21 +96,26 @@ export async function issueInvoiceForOrder(
         phone: input.phone || undefined,
       },
       amount: input.amount,
-      mentions: `Achitat online cu cardul. Ref: ${input.stripeSessionId}`,
+      mentions:
+        input.mentions || `Achitat online cu cardul. Ref: ${input.stripeSessionId}`,
     });
 
     // Marcarea ca incasata e separata de emitere: daca esueaza, factura ramane
     // valida si o marcam manual, in loc sa fie stearsa prin rollback.
-    let paymentRecorded = true;
-    try {
-      await recordInvoicePayment({
-        invoiceId: invoice.id,
-        amount: input.amount,
-        reference: input.stripeSessionId,
-      });
-    } catch (err) {
-      paymentRecorded = false;
-      console.error("[invoicing] nu am putut inregistra plata:", err);
+    // La OP sarim peste tot pasul: banii n-au intrat inca.
+    const shouldMarkPaid = input.markPaid !== false;
+    let paymentRecorded = shouldMarkPaid;
+    if (shouldMarkPaid) {
+      try {
+        await recordInvoicePayment({
+          invoiceId: invoice.id,
+          amount: input.amount,
+          reference: input.stripeSessionId,
+        });
+      } catch (err) {
+        paymentRecorded = false;
+        console.error("[invoicing] nu am putut inregistra plata:", err);
+      }
     }
 
     if (input.email && invoice.shareUrl) {

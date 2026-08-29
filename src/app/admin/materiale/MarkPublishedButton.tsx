@@ -11,7 +11,11 @@ export function MarkPublishedButton({ id }: { id: string }) {
     if (busy) return;
     setBusy(true);
     try {
-      const res = await fetch(`/api/admin/materiale/${id}`, { method: "PATCH" });
+      const res = await fetch(`/api/admin/materiale/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "publish" }),
+      });
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare");
       router.refresh();

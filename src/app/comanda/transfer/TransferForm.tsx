@@ -66,10 +66,9 @@ export function TransferForm({
 
   async function submit() {
     if (busy) return;
-    if (!proof) {
-      setError("Încarcă dovada plății (captură din aplicația băncii sau ordinul de plată).");
-      return;
-    }
+    // Dovada platii NU mai e ceruta: clientul comanda intai, primeste factura
+    // pe email si plateste dupa. Cerinta veche il obliga sa fi platit inainte
+    // sa aiba vreun document — de-asta nu trimitea nimeni formularul.
     if (f.body.trim().length < 100) {
       setError("Articolul trebuie să aibă minimum 100 de caractere.");
       return;
@@ -87,7 +86,7 @@ export function TransferForm({
           email: f.email.trim(),
           images,
           featuredIndex: 0,
-          paymentProof: proof,
+          ...(proof ? { paymentProof: proof } : {}),
           facebookOptIn,
           uniquePerSite,
         }),
@@ -110,9 +109,10 @@ export function TransferForm({
           Am primit comanda ta
         </h2>
         <p className="mx-auto mt-3 max-w-lg text-sm text-emerald-800">
-          Verificăm încasarea în extrasul bancar — de obicei câteva ore lucrătoare, în
-          funcție de bancă. Imediat după confirmare publicăm articolul în maximum 4 ore
-          lucrătoare și primești pe email raportul cu toate linkurile și factura fiscală.
+          Ți-am trimis pe email confirmarea cu pașii următori. Primești în scurt timp
+          <strong> factura fiscală</strong>, plătești prin transfer pe baza ei, iar imediat
+          ce vedem încasarea publicăm articolul — în maximum 4 ore lucrătoare — și îți
+          trimitem raportul cu toate cele 50 de linkuri.
         </p>
       </div>
     );
@@ -154,9 +154,13 @@ export function TransferForm({
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-serif text-lg font-bold text-brand-navy">2. Dovada plății</h2>
+        <h2 className="font-serif text-lg font-bold text-brand-navy">
+          2. Dovada plății <span className="ml-1 rounded-full bg-slate-100 px-2 py-0.5 text-xs font-medium text-slate-500 align-middle">opțional</span>
+        </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Captură din aplicația băncii sau ordinul de plată (imagine sau PDF).
+          <strong>Nu trebuie să fi plătit ca să comanzi.</strong> După trimitere primești
+          factura pe email și plătești pe baza ei. Dacă ai făcut deja transferul,
+          încarcă dovada aici (imagine sau PDF) și confirmăm mai repede.
         </p>
         {proof ? (
           <div className="mt-4 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
