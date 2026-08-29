@@ -147,8 +147,9 @@ export function OrderActions({
                 Fara asta, 50 de articole permanente puteau pleca pe o comanda
                 neplatita, dintr-un singur click grabit. */}
             <p className="mt-1 text-sm text-slate-600">
-              Clientul plătește <strong>după ce îi trimiți factura</strong> — emite-o în
-              StartCo pe datele din alertă. Când vezi banii în extras, confirmă aici.
+              Factura s-a emis <strong>automat</strong> și a plecat la client — el plătește
+              pe baza ei. Când vezi banii în extras, confirmă aici. (Dacă emiterea a
+              eșuat, ai primit alertă pe email și o faci manual în StartCo.)
             </p>
             <button
               type="button"

@@ -6,6 +6,7 @@ import { orderSubmissions, users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
+import { issueInvoiceForOrder } from "@/lib/invoicing";
 
 export const runtime = "nodejs";
 
@@ -121,7 +122,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Comandă nouă prin transfer bancar",
       `
-      <p style="color:#b91c1c;"><strong>Pasul tău acum: emite factura în StartCo și trimite-i-o.</strong> Clientul așteaptă factura ca să poată plăti — contabilitatea lui nu virează bani fără document. Publici abia după ce vezi încasarea în extras.</p>
+      <p style="color:#b91c1c;"><strong>Factura se emite automat în StartCo și pleacă la client</strong> — dacă emiterea eșuează primești o alertă separată și o faci manual pe datele de mai jos. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
         ${kv("Denumire", d.companyName)}
@@ -167,6 +168,25 @@ export async function POST(req: NextRequest) {
       `,
     ),
   }).catch((e) => console.error("[comanda/transfer] mail client:", e));
+
+  // Factura pleaca AUTOMAT, neincasata (markPaid: false): clientul nu poate
+  // plati fara document, iar fiecare ora de asteptare pana la factura e o
+  // sansa sa se razgandeasca. Best-effort prin design — issueInvoiceForOrder
+  // isi inghite propriile erori si alerteaza adminul; comanda e deja salvata,
+  // raspunsul catre client nu asteapta si nu depinde de StartCo.
+  // Acopera si formularul, si comanda din chat: amandoua trec pe aici.
+  void issueInvoiceForOrder({
+    email,
+    customerName: d.companyName,
+    cui: d.companyCui,
+    address: d.companyAddress,
+    phone: d.contactPhone,
+    amount: pkg.price,
+    packageLabel: pkg.name,
+    stripeSessionId: reference,
+    markPaid: false,
+    mentions: `Plata prin transfer bancar (OP). Ref: ${reference}`,
+  }).catch((e) => console.error("[comanda/transfer] factura automata:", e));
 
   return NextResponse.json({ ok: true });
 }

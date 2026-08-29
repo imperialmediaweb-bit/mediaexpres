@@ -7,7 +7,7 @@ import {
   StartcoError,
   INVOICE_PRODUCT_NAME,
 } from "@/lib/startco";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { SITE } from "@/data/site";
 
 export interface IssueInvoiceInput {
@@ -42,7 +42,7 @@ async function alertManualInvoice(input: IssueInvoiceInput, reason: string) {
       "Factura nu a putut fi emisa automat",
       `
       <p style="color:#b91c1c;"><strong>Motiv:</strong> ${reason}</p>
-      <p>Plata a intrat, dar factura trebuie emisa manual in StartCo.</p>
+      <p>${input.markPaid === false ? "Comanda prin OP e inregistrata, dar factura NU s-a emis — clientul nu poate plati pana n-o primeste. Emite-o manual in StartCo, urgent." : "Plata a intrat, dar factura trebuie emisa manual in StartCo."}</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         ${kv("Client", input.customerName || "—")}
         ${kv("Email", input.email || "—")}
@@ -119,18 +119,29 @@ export async function issueInvoiceForOrder(
     }
 
     if (input.email && invoice.shareUrl) {
+      // La card factura e chitanta; la OP e INSTRUMENTUL de plata — clientul
+      // o da contabilitatii si abia atunci pleaca banii. Emailul trebuie sa
+      // spuna asta si sa aiba IBAN-ul la indemana.
+      const dePlata = input.markPaid === false;
       await sendEmail({
         to: input.email,
-        subject: `Factura ${invoice.series} ${invoice.number} — MediaExpres`,
+        subject: dePlata
+          ? `Factura ${invoice.series} ${invoice.number} — de plată prin transfer`
+          : `Factura ${invoice.series} ${invoice.number} — MediaExpres`,
         html: wrapEmail(
-          "Factura ta",
+          dePlata ? "Factura ta — o dai la plată" : "Factura ta",
           `
           <p>Salut,</p>
           <p>Ai mai jos factura pentru <strong>${INVOICE_PRODUCT_NAME}</strong> — ${input.amount.toFixed(2)} RON.</p>
           <p style="margin-top:16px;">
             <a href="${invoice.shareUrl}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Vezi factura</a>
           </p>
-          <p style="margin-top:16px;color:#64748b;font-size:13px;">Linkul e permanent — il poti da contabilitatii oricand.</p>
+          ${
+            dePlata
+              ? `<p style="margin-top:16px;">Dă factura la contabilitate și fă transferul — la detalii scrie <strong>Factura ${invoice.series} ${invoice.number}</strong>. Imediat ce vedem încasarea, publicăm articolul în maximum 4 ore lucrătoare și primești raportul cu toate cele 50 de linkuri.</p>
+                 ${bankTransferEmailBox(`${input.amount.toFixed(2)} RON`, `Factura ${invoice.series} ${invoice.number}`)}`
+              : `<p style="margin-top:16px;color:#64748b;font-size:13px;">Linkul e permanent — il poti da contabilitatii oricand.</p>`
+          }
           <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
           `,
         ),
@@ -148,7 +159,7 @@ export async function issueInvoiceForOrder(
           ${kv("Client", input.customerName || input.email || "—")}
           ${kv("CUI", input.cui)}
           ${kv("Total", `${invoice.total} ${invoice.currency}`)}
-          ${kv("Status", paymentRecorded ? "Incasata" : "⚠️ Emisa — marcheaz-o incasata manual")}
+          ${kv("Status", input.markPaid === false ? "Emisa NEincasata (OP) — marcheaz-o dupa extras" : paymentRecorded ? "Incasata" : "⚠️ Emisa — marcheaz-o incasata manual")}
           ${kv("Link", invoice.shareUrl || "—")}
         </table>
         ${!input.email ? '<p style="color:#b91c1c;">Clientul nu are email — factura nu i-a fost trimisa.</p>' : ""}
