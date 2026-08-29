@@ -8,6 +8,7 @@ import { users, orders, subscriptions } from "@/db/schema";
 import { and, eq, gte } from "drizzle-orm";
 import { findSubscriptionPlanById } from "@/data/packages";
 import { sendCapiEvent, splitName } from "@/lib/meta-capi";
+import { sendGaPurchase } from "@/lib/ga-mp";
 import { signOrderToken } from "@/lib/order-token";
 import { SITE } from "@/data/site";
 
@@ -250,6 +251,16 @@ async function handleCheckoutCompleted(
       customData: { content_name: packageId, content_category: "package" },
     }).catch((err) => console.error("[stripe-webhook] capi purchase error:", err));
 
+    // Acelasi purchase, spre GA4: pagina de multumire redirectioneaza
+    // instant, deci browserul nu are unde sa-l trimita. transaction_id =
+    // sesiunea Stripe, ca un retry de webhook sa nu numere de doua ori.
+    sendGaPurchase({
+      sessionId: session.id,
+      value: amount / 100,
+      clientId: (session.metadata?.gacid as string) || undefined,
+      itemName: packageId,
+    }).catch((err) => console.error("[stripe-webhook] ga purchase error:", err));
+
     await sendConfirmationEmails({
       kind: "payment",
       email,
@@ -353,6 +364,13 @@ async function handleCheckoutCompleted(
         content_category: "subscription",
       },
     }).catch((err) => console.error("[stripe-webhook] capi purchase error:", err));
+
+    sendGaPurchase({
+      sessionId: session.id,
+      value: (session.amount_total || 0) / 100,
+      clientId: (session.metadata?.gacid as string) || undefined,
+      itemName: (session.metadata?.planId as string) || "abonament",
+    }).catch((err) => console.error("[stripe-webhook] ga purchase error:", err));
 
     await sendConfirmationEmails({
       kind: "subscription",

@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
+import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { CheckCircle2, Loader2 } from "lucide-react";
 
 function makeEventId(): string {
@@ -42,6 +43,7 @@ export function OfertaFbForm() {
         { content_name: "Oferta FB Landing", content_category: "facebook-ad" },
         eventId,
       );
+      trackGaEvent("generate_lead", { source: "oferta_fb" });
       setSuccess(true);
     } catch {
       setError("Conexiune nereușită. Verifică internetul și încearcă din nou.");

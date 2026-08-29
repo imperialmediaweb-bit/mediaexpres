@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { SITE } from "@/data/site";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
+import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { hasStickyMobileCta } from "@/components/conversion/ConversionWidgets";
 
 const PREFILL =
@@ -37,7 +38,10 @@ export function WhatsAppButton() {
       href={HREF}
       target="_blank"
       rel="noopener noreferrer"
-      onClick={() => trackPixelEvent("Contact", { content_name: "whatsapp" })}
+      onClick={() => {
+        trackPixelEvent("Contact", { content_name: "whatsapp" });
+        trackGaEvent("contact", { method: "whatsapp_flotant" });
+      }}
       aria-label={`Scrie-ne pe WhatsApp la ${SITE.phone}`}
       className={`fixed right-4 ${bottom} z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/20 transition hover:scale-105 hover:bg-[#20BA5A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] lg:bottom-6`}
     >

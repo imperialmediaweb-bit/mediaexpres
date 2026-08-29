@@ -3,6 +3,7 @@
 import { useState, useSyncExternalStore } from "react";
 import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
+import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
 
 // Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
@@ -61,6 +62,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
       value: offer.price,
       currency: "RON",
     });
+    // Oglinda in GA4 — fara ea, Analytics arata "Evenimente importante: 0"
+    // si rata de conversie a reclamei nu se poate citi nicaieri.
+    trackGaEvent("begin_checkout", { value: offer.price, currency: "RON" });
     setAskEmail(true);
   }
 
@@ -267,7 +271,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             )}`}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => trackPixelEvent("Contact", { content_name: "WhatsApp din oferta" })}
+            onClick={() => {
+              trackPixelEvent("Contact", { content_name: "WhatsApp din oferta" });
+              trackGaEvent("contact", { method: "whatsapp_oferta" });
+            }}
             className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
           >
             <MessageCircle className="h-4 w-4" />

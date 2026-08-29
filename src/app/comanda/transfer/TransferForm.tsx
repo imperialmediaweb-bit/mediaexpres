@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { Loader2, Upload, X, CheckCircle2, FileCheck } from "lucide-react";
 import { signAndUpload, MAX_UPLOAD_BYTES as MAX_BYTES, type Uploaded } from "@/lib/upload-client";
+import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 
 export function TransferForm({
   packageId,
@@ -96,6 +97,9 @@ export function TransferForm({
       });
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare");
+      // Comanda OP e o initiere de checkout in GA4 — altfel toata calea de
+      // transfer bancar era invizibila in masurarea conversiei.
+      trackGaEvent("begin_checkout", { value: price, currency: "RON", payment_type: "op" });
       setDone(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare");

@@ -10,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { requestListSchema, type RequestListInput } from "@/lib/validators";
+import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 
 interface RequestListFormProps {
   successHref?: string;
@@ -40,6 +41,8 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
       });
       const body = await res.json();
       if (!res.ok || !body.ok) throw new Error(body.error || "Eroare");
+      // Lead in GA4: cererea de lista e prima conversie masurabila a paginii.
+      trackGaEvent("generate_lead", { source: "lista_ziare" });
       setStatus("success");
       reset();
       // Lista e publica oricum — nu are sens sa punem omul sa astepte un email

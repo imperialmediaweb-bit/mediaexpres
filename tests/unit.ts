@@ -17,6 +17,7 @@ import { SITE } from "@/data/site";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
+import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
 import zlib from "node:zlib";
 import { createHash } from "node:crypto";
 
@@ -332,6 +333,31 @@ console.log("\n########## K. FLUXUL OP ##########");
     textPas.slice(0, 60),
   );
   t("pasul de dovada arata IBAN-ul", textPas.includes(SITE.billing.iban));
+}
+
+
+// ##########################################################################
+// L. GA4 MEASUREMENT PROTOCOL — purchase de pe server
+//
+// Cumparatorul cu plata unica e redirectionat instant de pe pagina de
+// multumire, deci purchase nu se poate trimite din browser. Pleaca din
+// webhookul Stripe prin Measurement Protocol; verificarile de aici pazesc
+// forma payload-ului si comportamentul fara chei.
+// ##########################################################################
+console.log("\n########## L. GA4 SERVER-SIDE ##########");
+{
+  // extragerea client_id-ului din cookie-ul _ga
+  const req = new Request("https://mediaexpress.ro/api/checkout", {
+    headers: { cookie: "x=1; _ga=GA1.1.111222333.1756000000; _ga_ABC=GS1.1.x" },
+  });
+  t("citeste client_id din cookie-ul _ga", extractGaClientId(req) === "111222333.1756000000",
+    extractGaClientId(req));
+  t("fara cookie _ga nu arunca",
+    extractGaClientId(new Request("https://mediaexpress.ro/")) === undefined);
+
+  // fara GA_API_SECRET, trimiterea tace — nu exista drum fara secret
+  const res = await sendGaPurchase({ sessionId: "cs_test_x", value: 500 });
+  t("fara GA_API_SECRET se dezactiveaza singur", res.skipped === true && res.ok === false);
 }
 
 console.log("\n" + "=".repeat(64));

@@ -71,6 +71,16 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check((await p.locator('input[type="email"]').count()) > 0, "campul de email apare");
   const calls = await p.evaluate(() => window.__fbq);
   check(calls.filter((c) => c[1] === "InitiateCheckout").length === 1, "pixel InitiateCheckout trimis la click");
+  // GA raporta doar page_view ("Evenimente importante: 0"); begin_checkout e
+  // oglinda evenimentului de pixel, ca funnelul sa fie vizibil si in Analytics.
+  // Citim dataLayer-ul REAL: un interceptor pe window.gtag ar fi suprascris de
+  // declaratia globala `function gtag()` din scriptul inline al tagului.
+  const bc = await p.evaluate(() =>
+    (window.dataLayer || [])
+      .map((e) => Array.from(e))
+      .filter((e) => e[0] === "event" && e[1] === "begin_checkout"),
+  );
+  check(bc.length === 1 && bc[0][2]?.value === 500, "GA begin_checkout cu valoarea 500");
   await p.locator('input[type="email"]').first().fill("gresit");
   await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(400);
@@ -88,6 +98,25 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   const ziare = await p.locator('a[rel="noopener"][target="_blank"]').count();
   check(ziare >= 50, `lista ziarelor pe pagina: ${ziare} linkuri`);
   check((await p.locator('a[href*="/comanda/transfer"]').count()) >= 1, "link catre fluxul OP");
+  await p.close();
+}
+
+// ---------- GA NU MASOARA ADMINUL ----------
+{
+  const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+  console.log("\n=== 4b. GA tace pe /admin ===");
+  // 422 de afisari "Admin" intr-o saptamana erau vizitele proprietarului —
+  // ingropau rata de conversie reala sub zgomot intern.
+  const gaRequests = [];
+  p.on("request", (r) => {
+    if (r.url().includes("googletagmanager.com")) gaRequests.push(r.url());
+  });
+  await p.goto(B + "/admin/login", { waitUntil: "networkidle" });
+  await p.waitForTimeout(1000);
+  check(gaRequests.length === 0, `scriptul GA nu se incarca pe /admin (${gaRequests.length} cereri)`);
+  await p.goto(B + "/oferta-500", { waitUntil: "networkidle" });
+  await p.waitForTimeout(1500);
+  check(gaRequests.length > 0, "dar pe paginile publice se incarca");
   await p.close();
 }
 
