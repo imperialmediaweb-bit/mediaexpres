@@ -101,6 +101,59 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.close();
 }
 
+// ---------- POPUP-UL DE IESIRE VINDE, NU DEVIAZA ----------
+{
+  const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
+  console.log("\n=== 4a. Exit-intent pe pagina de vanzare ===");
+  await p.goto(B + "/oferta-500", { waitUntil: "networkidle" });
+  await p.waitForTimeout(800);
+  // declansam iesirea: mouseleave NU bubbleaza, deci trebuie emis chiar pe
+  // document, unde asculta componenta — exact ce face browserul cand mouse-ul
+  // paraseste viewportul pe sus
+  await p.evaluate(() => {
+    document.dispatchEvent(new MouseEvent("mouseleave", { clientY: 0 }));
+  });
+  await p.waitForTimeout(600);
+  const dialog = p.locator('[role="dialog"]');
+  check(await dialog.isVisible(), "popupul apare la intentia de iesire");
+  const txt = (await dialog.innerText()).replace(/\s+/g, " ");
+  // Varianta veche oferea aici formularul de lista — il scotea pe om din
+  // drumul de cumparare exact in momentul deciziei. Acum vinde.
+  check(/banii înapoi/i.test(txt), "conduce cu garantia");
+  check(await dialog.locator('a[href="/oferta-500#oferta"]').isVisible(), "butonul principal e comanda");
+  check(await dialog.locator('a[href*="wa.me"]').isVisible(), "WhatsApp pentru intrebari");
+  check(!(await dialog.locator("input[type=email]").isVisible()), "emailul NU e primul plan");
+  await dialog.locator("button", { hasText: "pe email" }).click();
+  // primul <input> e honeypot-ul anti-spam, ascuns intentionat — cautam unul vizibil
+  const vizibil = dialog.locator("input:visible").first();
+  await vizibil.waitFor({ timeout: 5000 });
+  check(await vizibil.isVisible(), "formularul de email ramane la un click");
+  await p.close();
+}
+
+// ---------- PUNTEA TELEFON -> BIROU ----------
+{
+  const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
+  console.log("\n=== 4c. Emailul de continuare la alegerea OP ===");
+  let continua = null;
+  await p.route("**/api/oferta/continua", async (r) => {
+    continua = JSON.parse(r.request().postData() || "{}");
+    await r.fulfill({ json: { ok: true } });
+  });
+  await p.goto(B + "/oferta-500", { waitUntil: "networkidle" });
+  await p.locator("#oferta button", { hasText: "Comandă acum" }).first().click();
+  await p.waitForTimeout(400);
+  await p.locator("#oferta input[type=email]").fill("punte@firma.ro");
+  await p.waitForTimeout(200);
+  // click pe OP fara sa navigam efectiv (route-ul de mai sus nu opreste nav,
+  // dar cererea keepalive pleaca inainte)
+  await p.locator('#oferta a[href*="/comanda/transfer"]').first().click();
+  await p.waitForTimeout(1500);
+  check(continua?.email === "punte@firma.ro" && continua?.packageId === "promo-50",
+    "clickul pe OP trimite emailul de continuare (linkul inapoi in inbox)");
+  await p.close();
+}
+
 // ---------- GA NU MASOARA ADMINUL ----------
 {
   const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();

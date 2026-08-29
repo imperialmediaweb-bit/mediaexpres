@@ -248,6 +248,22 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 // Emailul scris mai sus pleaca in link: altfel omul care alege
                 // OP il scrie a doua oara pe formular — frictiune gratuita.
                 href={`/comanda/transfer?pachet=${offer.packageId}${/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) ? `&email=${encodeURIComponent(email.trim())}` : ""}`}
+                onClick={() => {
+                  // Puntea telefon -> birou: cine alege OP primeste pe loc un
+                  // email cu datele de plata si linkul precompletat, ca sa
+                  // poata termina de pe alt dispozitiv. keepalive: cererea
+                  // supravietuieste navigarii care incepe chiar acum.
+                  const clean = email.trim();
+                  if (/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
+                    void fetch("/api/oferta/continua", {
+                      method: "POST",
+                      keepalive: true,
+                      headers: { "Content-Type": "application/json" },
+                      body: JSON.stringify({ email: clean, packageId: offer.packageId }),
+                    }).catch(() => {});
+                  }
+                  trackGaEvent("select_content", { content_type: "plata_op" });
+                }}
                 className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-brand-gold bg-brand-gold/10 px-6 py-3.5 font-bold text-brand-gold transition hover:bg-brand-gold/20"
               >
                 <span className="inline-flex items-center gap-2 text-base">

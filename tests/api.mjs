@@ -70,6 +70,16 @@ t("transfer OP: url de dovada invalid -> 400", (await post("/api/comanda/transfe
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
   paymentProof: { url: "nu-e-url", name: "a.pdf" },
 })).status === 400);
+// Puntea telefon->birou: emailul cu linkul de continuare a comenzii OP.
+t("oferta/continua: email invalid -> 400", (await post("/api/oferta/continua", {
+  email: "gresit", packageId: "promo-50",
+})).status === 400);
+t("oferta/continua: pachet inexistent -> 400", (await post("/api/oferta/continua", {
+  email: "a@b.ro", packageId: "inventat",
+})).status === 400);
+t("oferta/continua: cerere valida -> 200", (await post("/api/oferta/continua", {
+  email: "continua-test@test.ro", packageId: "promo-50",
+})).status === 200);
 t("articol/submit: token invalid -> 403", (await post("/api/articol/submit", {
   token: "token-inventat-lung", title: "Titlu test", body: "x".repeat(150),
 })).status === 403);

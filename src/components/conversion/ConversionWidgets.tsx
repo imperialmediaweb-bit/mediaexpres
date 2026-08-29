@@ -43,22 +43,26 @@ export function ConversionWidgets() {
   if (!pathname || pathname.startsWith("/admin")) return null;
   if (!matches(pathname, COMMERCIAL_PATHS)) return null;
 
-  // Pe landingul platit omul a venit SA CUMPERE. Popup-ul de "primeste oferta
-  // pe email" si bara de "cere oferta gratuita" il scot din drumul spre plata —
-  // aici bara duce direct la butonul de comanda si nu sare niciun formular.
+  // Pe landingul platit omul a venit SA CUMPERE — bara de jos duce direct la
+  // butonul de comanda. Popup-ul de iesire e montat SI aici: candva lipsea,
+  // pentru ca varianta lui veche deturna spre un formular de email; acum vinde
+  // (garantie + comanda + WhatsApp), deci are ce cauta fix pe pagina platita.
   if (matches(pathname, ["/oferta-500"])) {
     // Fara pret in eticheta: bara e vizibila permanent, iar clientul poate
     // comuta intre cazino (1.000) si abonament (400). Un pret fix aici ar
     // contrazice pe ecran pretul real din 3 din 4 combinatii.
     return (
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md lg:hidden">
-        <a
-          href="#oferta"
-          className="block w-full rounded-lg bg-brand-red px-4 py-3 text-center text-base font-bold text-white"
-        >
-          Comandă acum
-        </a>
-      </div>
+      <>
+        <ExitIntentPopup />
+        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md lg:hidden">
+          <a
+            href="#oferta"
+            className="block w-full rounded-lg bg-brand-red px-4 py-3 text-center text-base font-bold text-white"
+          >
+            Comandă acum
+          </a>
+        </div>
+      </>
     );
   }
 
