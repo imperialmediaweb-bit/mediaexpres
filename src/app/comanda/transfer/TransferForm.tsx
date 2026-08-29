@@ -8,13 +8,16 @@ export function TransferForm({
   packageId,
   price,
   isCasino,
+  // Emailul scris deja pe pagina de oferta — sa nu-l ceara nimeni de doua ori.
+  initialEmail = "",
 }: {
   packageId: string;
   price: number;
   isCasino: boolean;
+  initialEmail?: string;
 }) {
   const [f, setF] = useState({
-    email: "",
+    email: initialEmail,
     contactPhone: "",
     companyName: "",
     companyCui: "",

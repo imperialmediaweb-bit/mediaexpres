@@ -241,7 +241,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
 
             {!monthly && (
               <a
-                href={`/comanda/transfer?pachet=${offer.packageId}`}
+                // Emailul scris mai sus pleaca in link: altfel omul care alege
+                // OP il scrie a doua oara pe formular — frictiune gratuita.
+                href={`/comanda/transfer?pachet=${offer.packageId}${/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) ? `&email=${encodeURIComponent(email.trim())}` : ""}`}
                 className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-brand-gold bg-brand-gold/10 px-6 py-3.5 font-bold text-brand-gold transition hover:bg-brand-gold/20"
               >
                 <span className="inline-flex items-center gap-2 text-base">

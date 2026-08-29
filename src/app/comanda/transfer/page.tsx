@@ -18,7 +18,7 @@ export const metadata: Metadata = {
 export default function TransferPage({
   searchParams,
 }: {
-  searchParams: { pachet?: string };
+  searchParams: { pachet?: string; email?: string };
 }) {
   const pkg = findPackageById(searchParams.pachet || "promo-50");
   if (!pkg) notFound();
@@ -71,7 +71,12 @@ export default function TransferPage({
         </div>
 
         <div className="mt-8">
-          <TransferForm packageId={pkg.id} price={pkg.price} isCasino={isCasino} />
+          <TransferForm
+            packageId={pkg.id}
+            price={pkg.price}
+            isCasino={isCasino}
+            initialEmail={searchParams.email || ""}
+          />
         </div>
 
         <p className="mt-8 text-center text-sm text-slate-500">

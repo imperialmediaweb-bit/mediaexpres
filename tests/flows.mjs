@@ -109,6 +109,17 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(t.includes("Nu trebuie să fi plătit"), "spune ca se comanda fara plata facuta");
   check(/opțional/i.test(t), "dovada e marcata optional");
 
+  // Emailul scris pe pagina de oferta ajunge precompletat aici — omul nu-l
+  // scrie de doua ori. Il verificam direct prin parametrul de query.
+  await p.goto(B + "/comanda/transfer?pachet=promo-50&email=precompletat%40firma.ro", { waitUntil: "domcontentloaded" });
+  await p.waitForTimeout(700);
+  check(
+    (await p.locator('input[type="email"]').first().inputValue()) === "precompletat@firma.ro",
+    "emailul din oferta vine precompletat in formular",
+  );
+  await p.goto(B + "/comanda/transfer?pachet=promo-50", { waitUntil: "domcontentloaded" });
+  await p.waitForTimeout(700);
+
   const MARK = `flows-op-${Date.now()}@test.ro`;
   let opStatus = null;
   p.on("response", (r) => {
