@@ -122,10 +122,15 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  // Verificarea articolului se face INAINTE de plata, nu dupa. Daca textul
-  // atinge conținut interzis, nu pleaca nici factura, nici datele de plata:
-  // fara bani virati nu exista ce restitui daca articolul nu se poate publica.
-  // Comanda ramane salvata si asteapta un ochi de om.
+  // Trierea NU opreste comanda. A fost, o vreme, o oprire: factura astepta
+  // pana citea cineva articolul. Dar omul care a apasat "trimite" si primeste
+  // "revenim in maximum o zi" nu asteapta — pleaca, si pierdem o vanzare buna
+  // pentru un articol care in 9 cazuri din 10 era in regula.
+  //
+  // Aparearea reala e in alta parte: clientul bifeaza declaratia INAINTE de
+  // plata, iar Termenii spun ca la declaratie falsa banii nu se restituie. Deci
+  // riscul nu mai e financiar. Trierea ramane ca sa nu publicam din greseala —
+  // e o alerta catre noi, inainte de publicare, nu o piedica pentru client.
   const screening = screenContent(d.title, d.body);
 
   await sendEmail({
@@ -135,7 +140,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Comandă nouă prin transfer bancar",
       `
-      ${screening.flagged ? '<p style="color:#b91c1c;"><strong>🛑 FACTURA NU S-A EMIS — comanda e oprită la verificare de conținut.</strong> Vezi alerta separată cu textul integral. Clientul a fost anunțat că verificăm și că nu are nimic de plătit până atunci.</p>' : ""}
+      ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, factura a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
       <p style="color:#b91c1c;"><strong>Factura se emite automat în StartCo și pleacă la client</strong> — dacă emiterea eșuează primești o alertă separată și o faci manual pe datele de mai jos. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
@@ -163,25 +168,8 @@ export async function POST(req: NextRequest) {
 
   sendEmail({
     to: email,
-    subject: screening.flagged
-      ? "Am primit comanda ta — o verificăm înainte de factură"
-      : "Am primit comanda ta — MediaExpres",
-    html: screening.flagged
-      ? wrapEmail(
-          "Comandă primită — o verificăm întâi",
-          `
-      <p>Salut,</p>
-      <p>Am primit comanda pentru <strong>${esc(pkg.name)}</strong>. Înainte de a-ți emite factura, un coleg citește articolul: publicăm în 50 de ziare reale, iar unele subiecte au reguli stricte de conținut.</p>
-      <p><strong>Nu ai de plătit nimic până atunci</strong> — nu ți-am trimis factură și nu ți-am cerut niciun ban. Îți răspundem în maximum o zi lucrătoare:</p>
-      <ul style="padding-left:20px;margin:8px 0 16px;">
-        <li style="margin:6px 0;">dacă articolul e în regulă, primești factura și mergem mai departe;</li>
-        <li style="margin:6px 0;">dacă nu îl putem publica, îți spunem clar de ce — și nu ai pierdut nimic.</li>
-      </ul>
-      <p>Poți vedea regulile în <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>. Dacă vrei să lămurim mai repede, scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
-      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
-      `,
-        )
-      : wrapEmail(
+    subject: "Am primit comanda ta — MediaExpres",
+    html: wrapEmail(
       "Comandă primită",
       `
       <p>Salut,</p>
@@ -194,6 +182,7 @@ export async function POST(req: NextRequest) {
       </ol>
       ${d.paymentProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
       ${bankTransferEmailBox(`${pkg.price} lei`, `${esc(pkg.name)} — ${esc(d.companyName)}`)}
+      <p style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:13px;color:#78350f;"><strong>De reținut:</strong> la comandă ai declarat că articolul nu prezintă tratamente sau metode de vindecare pentru boli și nu conține alt conținut interzis. Dacă la verificare se dovedește altfel, comanda se anulează, articolul nu se publică <strong>și suma plătită nu se restituie</strong> (art. 4 din <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>). Dacă ai un dubiu, întreabă-ne ÎNAINTE să plătești — răspundem repede.</p>
       <p>Dacă între timp ai întrebări, răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,
@@ -210,11 +199,12 @@ export async function POST(req: NextRequest) {
     await sendEmail({
       to: ADMIN_EMAIL,
       replyTo: email,
-      subject: `🛑 VERIFICĂ ÎNAINTE DE FACTURĂ — ${d.companyName}`,
+      subject: `⚠️ CITEȘTE ÎNAINTE SĂ PUBLICI — ${d.companyName}`,
       html: wrapEmail(
-        "Comandă oprită automat înainte de facturare",
+        "Articol de citit înainte de publicare",
         `
-        <p style="color:#b91c1c;"><strong>Factura NU a fost emisă și clientul NU a primit date de plată pentru ea.</strong> Textul conține termeni din zona medicală, iar regula e simplă: verificăm articolul cât timp nu s-a mișcat niciun leu.</p>
+        <p style="color:#b91c1c;"><strong>Comanda a mers normal — factura a plecat, clientul poate plăti.</strong> Alerta asta e doar pentru tine: textul conține termeni din zona interzisă și trebuie citit <strong>înainte de publicare</strong>.</p>
+        <p>Nu e o urgență financiară. Clientul a bifat la comandă declarația că articolul nu prezintă tratamente sau conținut interzis, iar art. 4 din Termeni spune că, dacă declarația e falsă, <strong>banii nu se restituie</strong>. Deci dacă nu se poate publica, nu ai de returnat nimic — doar de anunțat clientul.</p>
         ${kv("Motiv", screening.reason || "conținut interzis")}
         ${kv("Termeni găsiți", screening.hits.join(", "))}
         <table style="width:100%;border-collapse:collapse;margin:16px 0;">
@@ -226,13 +216,12 @@ export async function POST(req: NextRequest) {
         </table>
         <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>
         <div style="white-space:pre-wrap;border-left:3px solid #e5e5e5;padding-left:16px;margin:12px 0;color:#334155;">${esc(d.body.slice(0, 4000))}${d.body.length > 4000 ? "…" : ""}</div>
-        <p><strong>E în regulă?</strong> Emite factura manual în StartCo și mergi mai departe.<br/>
-        <strong>Nu e?</strong> Răspunde-i clientului că nu putem publica — nu are ce restitui, n-a plătit nimic.</p>
+        <p><strong>E în regulă?</strong> Publică normal, după ce vezi încasarea.<br/>
+        <strong>Nu e?</strong> Scrie-i clientului că nu îl putem publica și de ce. Banii rămân la noi — a declarat altceva decât a trimis.</p>
         <p style="margin-top:16px;"><a href="${SITE.url}/admin/materiale">Vezi comanda în admin →</a></p>
         `,
       ),
     }).catch((e) => console.error("[comanda/transfer] alerta continut:", e));
-    return NextResponse.json({ ok: true, review: true });
   }
 
   void issueInvoiceForOrder({

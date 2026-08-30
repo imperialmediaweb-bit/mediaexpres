@@ -491,5 +491,93 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
 }
 
 console.log("\n" + "=".repeat(60));
+// ---------- 8. POZELE CHIAR SE INCARCA ----------
+// Trei clienti la rand nu au reusit sa adauge poze, si nimeni nu a stiut pana
+// nu s-au plans ei. Testul repeta exact gestul lor: alege un fisier, il vede
+// aparut ca miniatura, trimite comanda si verifica ca URL-ul pozei chiar a
+// ajuns la server. Cloudinary e interceptat — nu depindem de chei sau de
+// internet — dar TOT restul lantului (semnare, FormData, stari React, payload)
+// e cel real.
+{
+  console.log("\n=== 8. Incarcarea pozelor, cap-coada ===");
+  const p = await (await b.newContext({ viewport: { width: 1200, height: 1000 } })).newPage();
+
+  // PNG 1x1 valid — miniatura chiar se randeaza din el.
+  const PIXEL = Buffer.from(
+    "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==",
+    "base64",
+  );
+  let semnat = false;
+  let laCloudinary = null;
+  await p.route("**/api/comanda/transfer/upload-sign", async (r) => {
+    semnat = true;
+    await r.continue();
+  });
+  await p.route("**/api.cloudinary.com/**", async (r) => {
+    laCloudinary = r.request().postData() || "";
+    await r.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ secure_url: "https://res.cloudinary.com/test/poza-flows.png" }),
+    });
+  });
+  let comanda = null;
+  await p.route("**/api/comanda/transfer", async (r) => {
+    comanda = r.request().postDataJSON();
+    await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true }) });
+  });
+
+  await p.goto(B + "/comanda/transfer?pachet=promo-50", { waitUntil: "domcontentloaded" });
+  await p.waitForTimeout(800);
+
+  await p.setInputFiles('h2:has-text("3. Articolul") ~ div input[type=file][accept="image/*"]', {
+    name: "poza-client.png",
+    mimeType: "image/png",
+    buffer: PIXEL,
+  });
+  await p.waitForTimeout(1200);
+
+  check(semnat, "browserul cere semnatura de la server");
+  check(
+    (laCloudinary || "").includes("signature") && (laCloudinary || "").includes("api_key"),
+    "trimite la Cloudinary fisierul semnat",
+  );
+  check(
+    (await p.locator('img[src*="poza-flows"]').count()) === 1,
+    "miniatura pozei apare in formular",
+  );
+
+  // Un fisier FARA tip MIME — cazul telefoanelor — nu mai e inghitit tacut.
+  await p.setInputFiles('h2:has-text("3. Articolul") ~ div input[type=file][accept="image/*"]', {
+    name: "poza-telefon.heic",
+    mimeType: "application/octet-stream",
+    buffer: PIXEL,
+  });
+  await p.waitForTimeout(1200);
+  check(
+    (await p.locator("img[src*='poza-flows']").count()) === 2,
+    "fisierul fara tip MIME se incarca (era ignorat in tacere)",
+  );
+
+  // Acum tot drumul pana la server, cu poza in comanda.
+  await p.fill('input[type="email"]', "poze-flows@test.ro");
+  await p.fill('input[type="tel"]', "0758169388");
+  await p.fill('input[placeholder="Firma Mea SRL"]', "Poze Flows SRL");
+  await p.fill('input[placeholder="RO12345678"]', "RO777");
+  await p.fill('input[placeholder="Str., nr., oraș, județ"]', "Str. Poze 1, Iasi");
+  await p.locator('h2:has-text("3. Articolul")').locator("..").locator("input").first()
+    .fill("Titlu test poze");
+  await p.locator("textarea").first().fill("P".repeat(150));
+  await p.locator('input[name="contentDeclaration"]').check();
+  await p.locator("button", { hasText: "Trimite comanda" }).click();
+  await p.waitForTimeout(1500);
+
+  check(
+    comanda?.images?.length === 2 && comanda.images[0].url.includes("poza-flows"),
+    `pozele ajung in comanda trimisa la server (${comanda?.images?.length ?? 0} poze)`,
+  );
+  await p.close();
+}
+
 console.log(fails.length === 0 ? "TOATE VERIFICARILE AU TRECUT" : `ESUATE (${fails.length}):\n` + fails.map((f) => " x " + f).join("\n"));
 await b.close();

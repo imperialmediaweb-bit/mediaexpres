@@ -64,9 +64,12 @@ t("transfer OP: declaratie bifata pe fals -> 400", (await post("/api/comanda/tra
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
   contentDeclaration: false,
 })).status === 400);
-// Articolul suspect intra la verificare, nu la facturare: raspunsul spune
-// `review: true`, iar factura NU pleaca. Restul comenzii e valid, deci un 400
-// aici ar fi gresit — comanda exista, doar plata asteapta.
+// Regula s-a schimbat INCA o data, de data asta la cererea proprietarului:
+// articolul suspect NU mai tine comanda pe loc. "Revenim in maximum o zi" il
+// facea pe client sa plece — iar apararea reala e declaratia semnata inainte
+// de plata + art. 4 din Termeni (declaratie falsa = fara restituire). Trierea
+// a devenit o alerta catre admin INAINTE DE PUBLICARE; pentru client, comanda
+// merge identic cu oricare alta.
 {
   const r = await post("/api/comanda/transfer", {
     packageId: "promo-50", email: "api-continut-medical@test.ro", contactPhone: "0740000000",
@@ -75,8 +78,10 @@ t("transfer OP: declaratie bifata pe fals -> 400", (await post("/api/comanda/tra
     body: "Bolnavii de cancer se pot vindeca cu un tratament pe baza de sucuri si apa alcalina. " + "x".repeat(100),
     contentDeclaration: true,
   });
-  t("transfer OP: articol medical -> oprit inainte de factura", r.status === 200 && r.body?.review === true);
+  t("transfer OP: articol suspect NU blocheaza comanda", r.status === 200 && r.body?.ok === true);
+  t("transfer OP: clientul nu afla ca e la verificare", r.body?.review === undefined);
 }
+
 t("transfer OP: articol prea scurt -> 400", (await post("/api/comanda/transfer", {
   packageId: "promo-50", email: "a@b.ro", contactPhone: "0740000000", companyName: "Firma SRL",
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "scurt",
