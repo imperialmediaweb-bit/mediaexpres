@@ -10,7 +10,7 @@ astea trebuie sa poata fi rulate de oricine, oricand, cu un singur `node`.
 | `unit.ts` | 122 | logica pura: termenul rulant al ofertei, preturi si pachete, emailul cu lista, cunostintele consultantului, generatoarele de .xlsx si .pdf (validate byte cu byte), integritatea datelor retelei |
 | `api.mjs` | 40 | securitate (fiecare endpoint refuza fara sesiune/cheie) si validarea datelor de intrare |
 | `pages.mjs` | 27 | fiecare pagina publica, de admin si de cont raspunde 200, fara erori JavaScript |
-| `flows.mjs` | 62 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |
+| `flows.mjs` | 63 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |
 | `chat.mjs` | 33 | comanda facuta integral din chat: OP cu articol, cazino, scurtatura spre Stripe, comanda fara articol scris |
 
 ## Cum le rulezi

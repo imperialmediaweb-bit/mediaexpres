@@ -403,6 +403,21 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(urls.some((u) => u.includes("/reteaua-noastra")), "/reteaua-noastra in sitemap");
   const html = await (await p.goto(B + "/reteaua-noastra")).text();
   check(!/noindex/.test(html), "reteaua-noastra e indexabila");
+
+  // Clasa intreaga de bug-uri, nu doar o instanta: /reteaua-noastra a stat
+  // luni de zile SI in sitemap, SI pe disallow in robots.txt — Google primea
+  // o harta cu un drum pe care tot noi il interziceam, deci pagina nu se
+  // putea indexa. Verificam ca nicio adresa din sitemap nu e blocata de
+  // vreo regula disallow.
+  const robots = await (await p.goto(B + "/robots.txt")).text();
+  const disallows = [...robots.matchAll(/^Disallow:\s*(\S+)/gim)]
+    .map((m) => m[1].replace(/\*$/, ""));
+  const blocate = urls.filter((u) => {
+    const path = new URL(u).pathname;
+    return disallows.some((d) => path === d || path.startsWith(d.endsWith("/") ? d : d + "/") || path.startsWith(d));
+  });
+  check(blocate.length === 0,
+    `niciun URL din sitemap nu e blocat de robots.txt${blocate.length ? ` (${blocate.slice(0, 3).join(", ")})` : ""}`);
   await p.close();
 }
 
