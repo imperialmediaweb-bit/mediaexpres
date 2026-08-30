@@ -52,6 +52,34 @@ for (const [path, label] of PAGES) {
   }
   const real = errs.filter((e) => !/TUNNEL|ERR_/.test(e));
   if (st !== 200 || real.length) bad.push(`${path} (${label}) -> ${st} ${real[0] || ""}`);
+
+  // AUDITUL AUTOMAT DE CONTINUT — pe textul RANDAT, nu pe surse.
+  //
+  // De ce exista: fiecare schimbare de conditii comerciale a lasat in urma
+  // texte pe regula veche, gasite abia la cate un audit de mana ("proforma"
+  // traia in 6 locuri la luni dupa ce s-a renuntat la ea; "factura dupa
+  // publicare" promitea ordinea inversa a fluxului). Un audit de mana prinde
+  // ce cauta omul in ziua aia; asta cauta ACELEASI lucruri la fiecare rulare,
+  // pe fiecare pagina, inclusiv in textele asamblate la runtime pe care un
+  // grep pe surse nu le vede. Lista creste cu fiecare regula care se schimba.
+  if (st === 200 && !/sitemap|robots/.test(path) && !path.startsWith("/admin") && !path.startsWith("/cont")) {
+    const text = await p.evaluate(() => document.body?.innerText || "");
+    const INTERZISE = [
+      [/proform/i, "proforma nu mai exista — direct factura fiscala"],
+      [/\b[îi]n (maximum )?4 ore\b/i, "promisiunea veche de 4 ore"],
+      [/\b224\s*(de )?(h|ore)\b/i, "cifra stricata 224"],
+      [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
+      [/320\.000|320k|vizitatori unici/i, "cifre de vizitatori — nu le mai folosim"],
+      [/ziare(le|lor)? partenere|site-uri(le)? partenere/i, "ziarele sunt PROPRII, nu partenere"],
+      [/factur[ăa][^.!?]{0,60}după publicare/i, "ordinea e factura -> plata -> publicare"],
+      [/plata (se face )?după publicare/i, "ordinea e factura -> plata -> publicare"],
+    ];
+    for (const [re, motiv] of INTERZISE) {
+      const m = text.match(re);
+      if (m) bad.push(`${path}: ${motiv} → "${m[0]}"`);
+    }
+  }
+
   console.log(`${path.padEnd(40)}${String(st).padStart(3)}  ${real.length ? real[0] : ""}`);
 }
 

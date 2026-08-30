@@ -112,7 +112,7 @@ export default function PacheteTPage() {
                 </h3>
                 <p className="mt-4 text-white/85 leading-relaxed">
                   Completează formularul și îți trimitem în maximum 2 minute PDF-ul cu toate
-                  ziarele partenere, regiunile acoperite și detaliile de publicare. Zero obligații,
+                  ziarele din rețeaua noastră, regiunile acoperite și detaliile de publicare. Zero obligații,
                   zero spam.
                 </p>
               </div>
