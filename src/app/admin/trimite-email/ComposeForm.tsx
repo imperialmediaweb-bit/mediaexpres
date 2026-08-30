@@ -11,9 +11,40 @@ export function ComposeForm() {
   const [when, setWhen] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
 
+  // Atasamente (ex. factura PDF). Ruta accepta maximum 3 fisiere, ~5MB
+  // fiecare — proprietarul a incercat sa trimita o factura de aici si n-a
+  // avut cum: serverul stia, formularul nu avea butonul.
+  const [attachments, setAttachments] = useState<{ filename: string; content: string; size: number }[]>([]);
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+
+  const MAX_FILE = 5 * 1024 * 1024;
+  async function addFiles(list: FileList | null) {
+    if (!list?.length) return;
+    setError(null);
+    const next = [...attachments];
+    for (const f of Array.from(list)) {
+      if (next.length >= 3) {
+        setError("Maximum 3 atașamente per email.");
+        break;
+      }
+      if (f.size > MAX_FILE) {
+        setError(`„${f.name}" depășește 5MB — atașează un fișier mai mic.`);
+        continue;
+      }
+      // FileReader -> data URL -> pastram doar base64-ul de dupa virgula,
+      // exact formatul pe care ruta il da mai departe la Resend.
+      const content = await new Promise<string>((resolve, reject) => {
+        const r = new FileReader();
+        r.onload = () => resolve(String(r.result).split(",")[1] || "");
+        r.onerror = () => reject(new Error("Nu am putut citi fișierul"));
+        r.readAsDataURL(f);
+      });
+      next.push({ filename: f.name, content, size: f.size });
+    }
+    setAttachments(next);
+  }
 
   const recipients = recipientsRaw
     .split(/[\n,;]+/)
@@ -47,6 +78,9 @@ export function ComposeForm() {
           template,
           ...(when === "later"
             ? { scheduledAt: new Date(scheduledAt).toISOString() }
+            : {}),
+          ...(attachments.length
+            ? { attachments: attachments.map(({ filename, content }) => ({ filename, content })) }
             : {}),
         }),
       });
@@ -113,6 +147,50 @@ export function ComposeForm() {
           placeholder={"Salut,\n\nScrie mesajul aici. Liniile goale despart paragrafele.\n\nMulțumim!"}
           className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm leading-relaxed focus:border-brand-red focus:outline-none"
         />
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Atașamente <span className="font-normal text-slate-400">(opțional — factură PDF, imagini, Excel; max. 3 × 5MB)</span>
+        </label>
+        {attachments.length > 0 && (
+          <ul className="mb-2 space-y-1">
+            {attachments.map((a, i) => (
+              <li
+                key={`${a.filename}-${i}`}
+                className="flex items-center gap-2 rounded-lg bg-slate-50 px-3 py-2 text-sm text-slate-700"
+              >
+                <span className="min-w-0 flex-1 truncate">📎 {a.filename}</span>
+                <span className="shrink-0 text-xs text-slate-400">
+                  {(a.size / 1024 / 1024).toFixed(1)}MB
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setAttachments(attachments.filter((_, j) => j !== i))}
+                  aria-label={`Șterge ${a.filename}`}
+                  className="shrink-0 text-slate-400 hover:text-red-600"
+                >
+                  ✕
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {attachments.length < 3 && (
+          <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-dashed border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:border-brand-red hover:text-brand-red">
+            📎 {attachments.length ? "Mai adaugă un fișier" : "Atașează un fișier (ex. factura PDF)"}
+            <input
+              type="file"
+              hidden
+              multiple
+              accept=".pdf,image/*,.xlsx,.csv"
+              onChange={(e) => {
+                void addFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">

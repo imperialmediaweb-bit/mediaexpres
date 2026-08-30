@@ -154,6 +154,54 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.close();
 }
 
+// ---------- ATASAMENTE LA TRIMITE EMAIL ----------
+{
+  const a = await (await b.newContext({ viewport: { width: 1280, height: 900 } })).newPage();
+  console.log("\n=== 4d. Factura se poate atasa din admin ===");
+  // Proprietarul a vrut sa trimita factura PDF de pe domeniul lui si n-a
+  // avut cum: ruta stia de atasamente, formularul nu avea butonul.
+  const { readFileSync } = await import("node:fs");
+  const env = Object.fromEntries(readFileSync(".env.local", "utf8").split("\n")
+    .filter((l) => l.includes("=") && !l.startsWith("#"))
+    .map((l) => [l.slice(0, l.indexOf("=")).trim(), l.slice(l.indexOf("=") + 1).trim()]));
+  await a.goto(B + "/admin/login");
+  await a.fill('input[name="username"]', env.ADMIN_USER);
+  await a.fill('input[name="password"]', env.ADMIN_PASSWORD);
+  await a.click('button[type="submit"]');
+  await a.waitForURL((u) => !u.pathname.includes("/login"), { timeout: 20000 });
+  await a.goto(B + "/admin/trimite-email", { waitUntil: "networkidle" });
+
+  check(await a.locator("text=Atașează un fișier").isVisible(), "campul de atasare exista");
+  const pdf = Buffer.concat([Buffer.from("%PDF-1.4\n"), Buffer.alloc(100 * 1024, 0x20)]);
+  await a.locator('input[type="file"]').setInputFiles({ name: "factura-test.pdf", mimeType: "application/pdf", buffer: pdf });
+  await a.waitForTimeout(700);
+  check(await a.locator("li", { hasText: "factura-test.pdf" }).isVisible(), "fisierul apare in lista");
+
+  let sent = null;
+  await a.route("**/api/admin/send-email", async (r) => {
+    sent = JSON.parse(r.request().postData() || "{}");
+    await r.fulfill({ json: { ok: true, sent: 1 } });
+  });
+  await a.fill("textarea >> nth=0", "client-atasament@test.ro");
+  await a.fill('input[placeholder="Subiectul emailului"]', "Factura fiscala");
+  await a.fill("textarea >> nth=1", "Buna ziua,\n\nAveti atasata factura.\n\nMultumim!");
+  await a.locator("button", { hasText: "Trimite acum" }).click();
+  await a.waitForTimeout(1200);
+  check(sent?.attachments?.length === 1 && sent.attachments[0].filename === "factura-test.pdf",
+    "atasamentul pleaca in payload");
+  check(Buffer.from(sent?.attachments?.[0]?.content || "", "base64").subarray(0, 5).toString() === "%PDF-",
+    "base64-ul se decodeaza inapoi in PDF");
+
+  // fisier peste limita: refuzat cu mesaj, si NU intra in LISTA (cautam <li>,
+  // nu textul brut — mesajul de eroare contine si el numele fisierului)
+  const mare = Buffer.alloc(6 * 1024 * 1024, 0x41);
+  await a.locator('input[type="file"]').setInputFiles({ name: "prea-mare.pdf", mimeType: "application/pdf", buffer: mare });
+  await a.waitForTimeout(700);
+  check(await a.locator("text=depășește 5MB").isVisible(), "6MB refuzat cu mesaj in romana");
+  check((await a.locator("li", { hasText: "prea-mare.pdf" }).count()) === 0, "si nu intra in lista");
+  await a.close();
+}
+
 // ---------- GA NU MASOARA ADMINUL ----------
 {
   const p = await (await b.newContext({ viewport: { width: 1280, height: 800 } })).newPage();
