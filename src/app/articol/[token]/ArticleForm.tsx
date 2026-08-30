@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles, Upload, X, Star, CheckCircle2 } from "lucide-react";
+import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
+import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
 type Mode = "ai" | "write";
 
@@ -35,6 +37,7 @@ export function ArticleForm({
   const [metaDescription, setMetaDescription] = useState("");
   const [keywords, setKeywords] = useState<string[]>([]);
   const [generatedByAi, setGeneratedByAi] = useState(false);
+  const [contentDeclaration, setContentDeclaration] = useState(false);
 
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
@@ -155,6 +158,10 @@ export function ArticleForm({
       setError("Textul articolului e prea scurt (minim 100 de caractere).");
       return;
     }
+    if (!contentDeclaration) {
+      setError(CONTENT_DECLARATION_ERROR);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -174,6 +181,7 @@ export function ArticleForm({
           featuredIndex,
           facebookOptIn,
           uniquePerSite,
+          contentDeclaration,
           generatedByAi,
         }),
       });
@@ -197,7 +205,7 @@ export function ArticleForm({
           Publicăm pe {newspapers === 1
             ? "publicația din pachetul tău"
             : `cele ${newspapers}${newspapers >= 20 ? " de" : ""} publicații`} în
-          maximum <strong>4 ore lucrătoare</strong>. Primești raportul cu
+          maximum <strong>24 de ore lucrătoare</strong>. Primești raportul cu
           toate linkurile pe <strong>{email}</strong>.
         </p>
       </div>
@@ -523,6 +531,8 @@ export function ArticleForm({
         </label>
       </section>
 
+      <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
+
       {error && (
         <p className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>
       )}
@@ -543,7 +553,7 @@ export function ArticleForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în maximum 4 ore lucrătoare de la primire.
+        Publicăm în maximum 24 de ore lucrătoare de la primire.
       </p>
     </form>
   );

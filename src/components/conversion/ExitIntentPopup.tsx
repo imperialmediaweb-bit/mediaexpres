@@ -74,7 +74,7 @@ export function ExitIntentPopup() {
         <p className="flex items-start gap-2 rounded-lg bg-emerald-50 px-3 py-2.5 text-sm text-emerald-900">
           <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0" />
           <span>
-            <strong>Garanție:</strong> nu publicăm în 4 ore lucrătoare? Îți dăm toți
+            <strong>Garanție:</strong> nu publicăm în 24 de ore lucrătoare? Îți dăm toți
             banii înapoi.
           </span>
         </p>

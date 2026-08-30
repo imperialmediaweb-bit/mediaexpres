@@ -46,7 +46,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           </h1>
           <p className="mt-3 text-white/80 max-w-2xl mx-auto">
             Distribuim comunicatele de presă pe <strong>50 de ziare online</strong> din România
-            cu raport PDF livrat în 4h. Tu trimiți tematica, noi scriem şi publicăm.
+            cu raport PDF livrat în 224h lucrătoare lucrătoare. Tu trimiți tematica, noi scriem şi publicăm.
           </p>
           {agency && (
             <div className="mt-4 inline-block rounded-lg bg-brand-gold/20 border border-brand-gold/40 px-4 py-2 text-sm font-medium text-brand-gold">
@@ -61,7 +61,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
         <div className="grid sm:grid-cols-3 gap-6 text-center">
           <div className="rounded-xl bg-white border border-slate-200 p-6">
             <Clock className="h-7 w-7 text-brand-red mx-auto mb-3" />
-            <p className="font-semibold text-brand-navy">Publicare în 4h</p>
+            <p className="font-semibold text-brand-navy">Publicare în 224h lucrătoare lucrătoare</p>
             <p className="text-xs text-slate-500 mt-1">Trimiți azi, eşti online mâine</p>
           </div>
           <div className="rounded-xl bg-white border border-slate-200 p-6">
@@ -247,7 +247,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
           </h2>
           <p className="text-white/75 text-sm mb-6 max-w-lg mx-auto">
             Click pe buton, completezi datele firmei + tematica (2 minute),
-            noi scriem comunicatul cu AI şi publicăm pe 50 de ziare în 4h.
+            noi scriem comunicatul cu AI şi publicăm pe 50 de ziare în 224h lucrătoare lucrătoare.
             Factura fiscală pe email după publicare.
           </p>
           <Link

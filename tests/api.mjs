@@ -50,7 +50,33 @@ t("transfer OP: corp gol -> 400", (await post("/api/comanda/transfer", {})).stat
 t("transfer OP: fara dovada platii -> 200 (comanda intai, plata dupa factura)", (await post("/api/comanda/transfer", {
   packageId: "promo-50", email: "api-fara-dovada@test.ro", contactPhone: "0740000000", companyName: "Firma SRL",
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
+  contentDeclaration: true,
 })).status === 200);
+// Declaratia de continut e obligatorie SI pe server, nu doar bifa din formular:
+// altfel oricine trimite direct un POST o ocoleste, iar tocmai ea e temeiul
+// pentru care banii nu se restituie daca articolul se dovedeste nepublicabil.
+t("transfer OP: fara declaratia de continut -> 400", (await post("/api/comanda/transfer", {
+  packageId: "promo-50", email: "api-fara-declaratie@test.ro", contactPhone: "0740000000", companyName: "Firma SRL",
+  companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
+})).status === 400);
+t("transfer OP: declaratie bifata pe fals -> 400", (await post("/api/comanda/transfer", {
+  packageId: "promo-50", email: "api-declaratie-falsa@test.ro", contactPhone: "0740000000", companyName: "Firma SRL",
+  companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "x".repeat(150),
+  contentDeclaration: false,
+})).status === 400);
+// Articolul suspect intra la verificare, nu la facturare: raspunsul spune
+// `review: true`, iar factura NU pleaca. Restul comenzii e valid, deci un 400
+// aici ar fi gresit — comanda exista, doar plata asteapta.
+{
+  const r = await post("/api/comanda/transfer", {
+    packageId: "promo-50", email: "api-continut-medical@test.ro", contactPhone: "0740000000",
+    companyName: "Firma SRL", companyCui: "RO123", companyAddress: "Str. Test 1",
+    title: "Tratamentul care vindeca cancerul",
+    body: "Bolnavii de cancer se pot vindeca cu un tratament pe baza de sucuri si apa alcalina. " + "x".repeat(100),
+    contentDeclaration: true,
+  });
+  t("transfer OP: articol medical -> oprit inainte de factura", r.status === 200 && r.body?.review === true);
+}
 t("transfer OP: articol prea scurt -> 400", (await post("/api/comanda/transfer", {
   packageId: "promo-50", email: "a@b.ro", contactPhone: "0740000000", companyName: "Firma SRL",
   companyCui: "RO123", companyAddress: "Str. Test 1", title: "Titlu test", body: "scurt",
@@ -80,9 +106,16 @@ t("oferta/continua: pachet inexistent -> 400", (await post("/api/oferta/continua
 t("oferta/continua: cerere valida -> 200", (await post("/api/oferta/continua", {
   email: "continua-test@test.ro", packageId: "promo-50",
 })).status === 200);
+// Declaratia e trimisa corect aici INTENTIONAT: testul verifica tokenul, iar
+// fara ea raspunsul ar fi 400 de la validare si n-ar mai ajunge la verificarea
+// tokenului — testul ar trece degeaba, pe alt motiv decat cel urmarit.
 t("articol/submit: token invalid -> 403", (await post("/api/articol/submit", {
   token: "token-inventat-lung", title: "Titlu test", body: "x".repeat(150),
+  contentDeclaration: true,
 })).status === 403);
+t("articol/submit: fara declaratia de continut -> 400", (await post("/api/articol/submit", {
+  token: "token-inventat-lung", title: "Titlu test", body: "x".repeat(150),
+})).status === 400);
 t("JSON stricat -> 400, nu 500", (await (await fetch(B + "/api/comanda/transfer", {
   method: "POST", headers: { "Content-Type": "application/json" }, body: "{stricat",
 })).status) === 400);

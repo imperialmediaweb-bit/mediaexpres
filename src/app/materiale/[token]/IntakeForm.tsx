@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { STANDARD_PACKAGES } from "@/data/packages";
+import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
+import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
 type ArticleMode = "write" | "ai";
 
@@ -57,6 +59,7 @@ export function IntakeForm({
     articleBody: "",
     articleTopic: "",
   });
+  const [contentDeclaration, setContentDeclaration] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
@@ -75,13 +78,17 @@ export function IntakeForm({
       setError("Descrie tematica articolului.");
       return;
     }
+    if (!contentDeclaration) {
+      setError(CONTENT_DECLARATION_ERROR);
+      return;
+    }
     setLoading(true);
     setError("");
     try {
       const res = await fetch("/api/materiale/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, ...data }),
+        body: JSON.stringify({ token, ...data, contentDeclaration }),
       });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error || "Eroare la trimitere");
@@ -101,7 +108,7 @@ export function IntakeForm({
           Materialele au fost trimise!
         </h2>
         <p className="mt-3 text-slate-600">
-          Publicăm pe 50 de ziare în <strong>4h</strong>. Vei primi raportul PDF cu toate
+          Publicăm pe 50 de ziare în <strong>24h lucrătoare</strong>. Vei primi raportul PDF cu toate
           link-urile pe emailul de facturare.
         </p>
       </div>
@@ -268,6 +275,8 @@ export function IntakeForm({
         )}
       </section>
 
+      <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
+
       {error && (
         <p className="rounded-xl bg-red-50 p-4 text-sm text-red-600">{error}</p>
       )}
@@ -281,7 +290,7 @@ export function IntakeForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în 4h. Factura se emite pe email după publicare.
+        Publicăm în 224h lucrătoare lucrătoare. Factura se emite pe email după publicare.
       </p>
     </form>
   );

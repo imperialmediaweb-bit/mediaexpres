@@ -25,7 +25,7 @@ export default function TermeniPage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">3. Termen de livrare</h2>
       <p>
         MediaExpres se angajează să publice articolul pe toate site-urile din pachetul ales în
-        maximum 4 ore de la confirmarea plății și primirea textului.
+        maximum 24 de ore lucrătoare de la confirmarea plății și primirea textului.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">4. Conținut interzis</h2>
@@ -33,6 +33,25 @@ export default function TermeniPage() {
         Nu publicăm conținut care: încalcă legea română sau europeană, conține calomnii,
         incită la ură, promovează substanțe ilegale, este pornografic sau defăimător. MediaExpres
         își rezervă dreptul de a refuza publicarea.
+      </p>
+      <p>
+        <strong>Conținut medical.</strong> Nu publicăm articole care prezintă cauze, metode de
+        tratare sau vindecare pentru boli — inclusiv cancer, boli cronice sau afecțiuni grave —
+        și nici produse, suplimente ori terapii prezentate ca alternativă la tratamentul medical.
+        Regula se aplică fără excepții, indiferent de client sau de sursele invocate.
+      </p>
+      <p>
+        <strong>Declarația clientului.</strong> La trimiterea comenzii, clientul declară pe proprie
+        răspundere că materialul nu intră în categoriile de mai sus. Declarația este obligatorie și
+        se bifează în formular înainte de trimitere.
+      </p>
+      <p>
+        <strong>Ce se întâmplă dacă declarația e falsă.</strong> Dacă materialul primit încalcă
+        regulile de conținut, comanda se anulează, articolul nu se publică (iar dacă a fost deja
+        publicat, se retrage de pe toate site-urile), <strong>și suma plătită nu se
+        restituie</strong> — costurile de verificare, redactare și publicare sunt deja făcute.
+        Clientul rămâne singurul răspunzător pentru conținutul trimis. Dacă noi refuzăm comanda din
+        alt motiv decât încălcarea acestor reguli, banii se returnează integral în 3 zile lucrătoare.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">5. Permanența publicării</h2>

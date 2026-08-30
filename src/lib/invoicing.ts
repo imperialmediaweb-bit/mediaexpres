@@ -138,7 +138,7 @@ export async function issueInvoiceForOrder(
           </p>
           ${
             dePlata
-              ? `<p style="margin-top:16px;">Dă factura la contabilitate și fă transferul — la detalii scrie <strong>Factura ${invoice.series} ${invoice.number}</strong>. Imediat ce vedem încasarea, publicăm articolul în maximum 4 ore lucrătoare și primești raportul cu toate cele 50 de linkuri.</p>
+              ? `<p style="margin-top:16px;">Dă factura la contabilitate și fă transferul — la detalii scrie <strong>Factura ${invoice.series} ${invoice.number}</strong>. Imediat ce vedem încasarea, publicăm articolul în maximum 24 de ore lucrătoare și primești raportul cu toate cele 50 de linkuri.</p>
                  ${bankTransferEmailBox(`${input.amount.toFixed(2)} RON`, `Factura ${invoice.series} ${invoice.number}`)}`
               : `<p style="margin-top:16px;color:#64748b;font-size:13px;">Linkul e permanent — il poti da contabilitatii oricand.</p>`
           }

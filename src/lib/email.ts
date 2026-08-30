@@ -156,7 +156,7 @@ export function bankTransferEmailBox(amount: string, paymentDetails: string): st
         <tr><td style="padding:3px 0;color:#64748b;">Suma</td><td style="padding:3px 0;font-weight:600;">${amount}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">Detalii plată</td><td style="padding:3px 0;">${paymentDetails}</td></tr>
       </table>
-      <p style="margin:10px 0 0;color:#64748b;">După plată nu trebuie să ne trimiți nimic — <strong>vedem încasarea în extras</strong> și publicăm în maximum 4 ore lucrătoare, cu raportul cu toate linkurile. Vrei să grăbim confirmarea? Răspunde la acest email cu ordinul de plată.</p>
+      <p style="margin:10px 0 0;color:#64748b;">După plată nu trebuie să ne trimiți nimic — <strong>vedem încasarea în extras</strong> și publicăm în maximum 24 de ore lucrătoare, cu raportul cu toate linkurile. Vrei să grăbim confirmarea? Răspunde la acest email cu ordinul de plată.</p>
       <p style="margin:8px 0 0;color:#64748b;">Nu ai trimis încă comanda pe site? Scrie-ne aici datele firmei (denumire, CUI, adresă) și articolul, ca să emitem factura și să pornim.</p>
     </div>`;
 }

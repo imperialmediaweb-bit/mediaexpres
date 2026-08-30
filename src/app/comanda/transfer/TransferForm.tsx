@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Loader2, Upload, X, CheckCircle2, FileCheck } from "lucide-react";
 import { signAndUpload, MAX_UPLOAD_BYTES as MAX_BYTES, type Uploaded } from "@/lib/upload-client";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
+import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
+import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
 export function TransferForm({
   packageId,
@@ -31,6 +33,7 @@ export function TransferForm({
   const [proof, setProof] = useState<Uploaded | null>(null);
   const [uniquePerSite, setUniquePerSite] = useState(true);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  const [contentDeclaration, setContentDeclaration] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<"images" | "proof" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -77,6 +80,10 @@ export function TransferForm({
       setError("Articolul trebuie să aibă minimum 100 de caractere.");
       return;
     }
+    if (!contentDeclaration) {
+      setError(CONTENT_DECLARATION_ERROR);
+      return;
+    }
     setBusy(true);
     setError(null);
     try {
@@ -93,6 +100,7 @@ export function TransferForm({
           ...(proof ? { paymentProof: proof } : {}),
           facebookOptIn,
           uniquePerSite,
+          contentDeclaration,
         }),
       });
       const j = await res.json();
@@ -118,7 +126,7 @@ export function TransferForm({
         <p className="mx-auto mt-3 max-w-lg text-sm text-emerald-800">
           Ți-am trimis pe email confirmarea cu pașii următori. Primești în scurt timp
           <strong> factura fiscală</strong>, plătești prin transfer pe baza ei, iar imediat
-          ce vedem încasarea publicăm articolul — în maximum 4 ore lucrătoare — și îți
+          ce vedem încasarea publicăm articolul — în maximum 24 de ore lucrătoare — și îți
           trimitem raportul cu toate cele 50 de linkuri.
         </p>
       </div>
@@ -244,6 +252,8 @@ export function TransferForm({
           </label>
         </div>
       </section>
+
+      <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
 
       {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
 

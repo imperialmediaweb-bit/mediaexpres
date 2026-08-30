@@ -14,6 +14,7 @@ import {
   Trash2,
 } from "lucide-react";
 import { signAndUpload, type Uploaded } from "@/lib/upload-client";
+import { SITE } from "@/data/site";
 import {
   STEPS,
   EMPTY_ORDER,
@@ -154,6 +155,20 @@ export function OfferChatBubble() {
     if (s.id === "casino") d.isCasino = value === "da";
     if (s.id === "method") d.method = value === "card" ? "card" : "op";
     if (s.id === "hasArticle") d.hasArticle = value === "am";
+    if (s.id === "declaration") {
+      if (value !== "da") {
+        // Nu-l ducem mai departe si nu-i luam banii. Un „nu sunt sigur" aici
+        // costa un email; acelasi „nu" descoperit dupa incasare costa o
+        // retragere de pe 50 de site-uri si o restituire care nu se mai face.
+        setData({ ...d, contentDeclaration: false });
+        say(
+          "Atunci hai să ne uităm pe text înainte de orice plată. Trimite-l pe " +
+            `${SITE.email} sau pe WhatsApp la ${SITE.phone} și îți spunem în aceeași zi dacă îl putem publica. Nu-ți luăm banii până nu știm sigur.`,
+        );
+        return;
+      }
+      d.contentDeclaration = true;
+    }
     setData(d);
     // La card, toti pasii de dupa email sunt marcati `skip` — Stripe cere el
     // datele de facturare, iar articolul se trimite dupa confirmarea platii,
@@ -237,7 +252,7 @@ export function OfferChatBubble() {
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare la trimitere");
       setMode("sent");
       say(
-        "Am primit comanda ta. Verificăm încasarea în extras — de obicei câteva ore lucrătoare, în funcție de bancă. Imediat după confirmare publicăm în maximum 4 ore lucrătoare și primești pe email raportul cu toate linkurile și factura fiscală.",
+        "Am primit comanda ta. Verificăm încasarea în extras — de obicei câteva ore lucrătoare, în funcție de bancă. Imediat după confirmare publicăm în maximum 24 de ore lucrătoare și primești pe email raportul cu toate linkurile și factura fiscală.",
       );
     } catch (e) {
       setStepError(e instanceof Error ? e.message : "Eroare la trimitere");
@@ -383,6 +398,7 @@ export function OfferChatBubble() {
             {data.siteUrl && <Row k="Site" v={data.siteUrl} />}
             <Row k="Poze" v={images.length ? `${images.length} încărcate` : "fără"} />
             <Row k="Plata" v={proof ? `dovadă atașată: ${proof.name}` : "după factura primită pe email"} />
+            <Row k="Declarație" v={data.contentDeclaration ? "conținut fără tratamente medicale — confirmat" : "neconfirmată"} />
           </div>
         )}
 

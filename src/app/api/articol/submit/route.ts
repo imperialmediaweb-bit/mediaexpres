@@ -6,6 +6,7 @@ import { findPackageById } from "@/data/packages";
 import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
+import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
 export const runtime = "nodejs";
 
@@ -27,6 +28,11 @@ const schema = z.object({
   featuredIndex: z.number().int().min(0).max(2).default(0),
   facebookOptIn: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
+  // Bifa obligatorie, nu optionala cu default: intrebarea are rost doar daca
+  // raspunsul e explicit. z.literal(true) refuza si `false`, si lipsa campului.
+  contentDeclaration: z.literal(true, {
+    errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
+  }),
   generatedByAi: z.boolean().default(false),
 });
 
@@ -166,7 +172,7 @@ export async function POST(req: NextRequest) {
   // Confirmarea catre client nu trebuie sa blocheze raspunsul — materialele au ajuns deja.
   sendEmail({
     to: order.email,
-    subject: "Materialele au ajuns — publicăm în 4h",
+    subject: "Materialele au ajuns — publicăm în 224h lucrătoare lucrătoare",
     html: wrapEmail(
       "Am primit articolul tău",
       `
@@ -182,7 +188,7 @@ export async function POST(req: NextRequest) {
             ? "pe publicația din pachetul tău"
             : `pe cele ${pkg.newspapers}${pkg.newspapers >= 20 ? " de" : ""} publicații din pachetul tău`
           : "în publicațiile din pachetul tău"
-      } în maximum <strong>4 ore lucrătoare</strong>. Când e gata, primești pe email raportul cu toate linkurile.</p>
+      } în maximum <strong>24 de ore lucrătoare</strong>. Când e gata, primești pe email raportul cu toate linkurile.</p>
       ${featured ? `<p style="margin:16px 0;"><img src="${esc(featured.url)}" alt="" style="max-width:100%;border-radius:8px;" /></p>` : ""}
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,

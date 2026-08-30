@@ -3,6 +3,7 @@ import { z } from "zod";
 import { verifyFbLeadToken } from "@/lib/fb-lead-token";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
+import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
 export const runtime = "nodejs";
 
@@ -21,6 +22,11 @@ const schema = z.object({
   articleMode: z.enum(["write", "ai"]),
   articleTitle: z.string().max(300).optional(),
   articleBody: z.string().max(50000).optional(),
+  // Bifa obligatorie, nu optionala cu default: intrebarea are rost doar daca
+  // raspunsul e explicit. z.literal(true) refuza si `false`, si lipsa campului.
+  contentDeclaration: z.literal(true, {
+    errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
+  }),
   articleTopic: z.string().max(2000).optional(),
 });
 
@@ -99,7 +105,7 @@ export async function POST(req: NextRequest) {
       `
       <p>Salut ${lead.name.trim().split(/\s+/)[0]},</p>
       <p>Am primit materialele tale pentru pachetul <strong>${pkgLabel}</strong>.</p>
-      <p>Publicăm pe cele 50 de ziare în <strong>4 ore</strong>. Vei primi pe acest email raportul PDF cu toate link-urile.</p>
+      <p>Publicăm pe cele 50 de ziare în <strong>24 de ore lucrătoare</strong>. Vei primi pe acest email raportul PDF cu toate link-urile.</p>
       <p>Factura se emite pe emailul <strong>${d.firmInvoiceEmail}</strong> după publicare.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,

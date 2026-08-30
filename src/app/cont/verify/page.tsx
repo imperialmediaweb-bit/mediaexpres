@@ -20,7 +20,7 @@ export default function VerifyPage() {
         </h1>
         <p className="mt-3 text-sm text-slate-600">
           Ti-am trimis un link magic. Deschide emailul si apasa pe link ca sa
-          intri in cont. Link-ul expira in 24 ore.
+          intri in cont. Link-ul expira in 224 de ore lucrătoare.
         </p>
         <p className="mt-4 text-xs text-slate-500">
           Nu a ajuns? Verifica folder-ul de spam sau incearca din nou cu o alta

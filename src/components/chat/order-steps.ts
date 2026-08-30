@@ -1,4 +1,5 @@
 import { SITE } from "@/data/site";
+import { CONTENT_DECLARATION_SHORT } from "@/lib/content-policy";
 
 /**
  * Comanda completa purtata ca o conversatie, pas cu pas.
@@ -26,6 +27,8 @@ export interface OrderData {
   title: string;
   body: string;
   siteUrl: string;
+  /** Declaratia de continut, ceruta inainte de plata. */
+  contentDeclaration: boolean;
 }
 
 export const EMPTY_ORDER: OrderData = {
@@ -40,6 +43,7 @@ export const EMPTY_ORDER: OrderData = {
   title: "",
   body: "",
   siteUrl: "",
+  contentDeclaration: false,
 };
 
 export type StepKind =
@@ -212,6 +216,19 @@ export const STEPS: Step[] = [
     ask: () => "Ai poze pentru articol? Poți încărca până la 3. Dacă nu ai, publicăm fără.",
   },
   {
+    id: "declaration",
+    kind: "choice",
+    skip: (d) => d.method !== "op",
+    // Se pune INAINTE de datele de plata, nu dupa: intrebarea are rost doar
+    // cat timp nu s-au miscat bani. Dupa incasare, un „nu" ar insemna
+    // restituire — adica exact situatia pe care pasul asta o previne.
+    ask: () => CONTENT_DECLARATION_SHORT,
+    choices: [
+      { label: "Da, confirm", value: "da" },
+      { label: "Nu / nu sunt sigur", value: "nu" },
+    ],
+  },
+  {
     id: "proof",
     kind: "proof",
     skip: (d) => d.method !== "op",
@@ -273,5 +290,6 @@ export function buildSubmission(d: OrderData) {
     title: d.hasArticle ? d.title.trim() : `[De redactat] ${d.companyName.trim()}`,
     body,
     siteUrl: d.siteUrl.trim() || undefined,
+    contentDeclaration: d.contentDeclaration,
   };
 }

@@ -129,7 +129,7 @@ export function PublicGenerateForm() {
             <div className="flex-1">
               <p className="eyebrow text-brand-gold">Următorul pas</p>
               <h3 className="mt-2 font-serif text-2xl font-bold">
-                Publică-l pe 50 de ziare în 4h
+                Publică-l pe 50 de ziare în 224h lucrătoare lucrătoare
               </h3>
               <p className="mt-2 text-sm text-white/80">
                 Pachetul Național — articolul tău apare pe 41 ziare locale + 9

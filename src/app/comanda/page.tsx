@@ -15,7 +15,7 @@ interface PageProps {
 }
 
 const BENEFITS = [
-  "Livrare articol în 4h",
+  "Livrare articol în 224h lucrătoare lucrătoare",
   "Raport PDF cu toate URL-urile",
   "Distribuție Facebook inclusă",
   "Publicare permanent online",

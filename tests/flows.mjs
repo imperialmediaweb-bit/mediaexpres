@@ -265,6 +265,17 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.locator('h2:has-text("3. Articolul")').locator("..").locator("input").first()
     .fill("Titlu de test din suita flows");
   await p.locator("textarea").first().fill("F".repeat(150));
+  // Bifa de declaratie e obligatorie de-acum. Fara ea formularul nici nu
+  // trimite — si tocmai asta e rostul ei: intrebarea se pune cat timp inca nu
+  // s-a miscat niciun leu, nu dupa incasare, cand un "nu" costa o restituire.
+  await p.locator("button", { hasText: "Trimite comanda" }).click();
+  await p.waitForTimeout(600);
+  check(
+    /Bifează declarația/i.test(await p.locator("body").innerText()),
+    "fara declaratie, comanda nu pleaca",
+  );
+
+  await p.locator('input[name="contentDeclaration"]').check();
   await p.locator("button", { hasText: "Trimite comanda" }).click();
   await p.waitForTimeout(6000);
   check(opStatus === 200, `comanda pleaca FARA dovada platii (HTTP ${opStatus})`);

@@ -11,7 +11,7 @@ const ROWS: Array<{
   { label: "Pagini Facebook (distribuție)", values: ["1", "8", "50"] },
   { label: "Backlinks SEO", values: ["1", "10", "50"] },
   { label: "Acoperire geografică", values: ["1 județ", "1 zonă (5-8 jud.)", "Toată România"] },
-  { label: "Livrare", values: ["≤ 4h", "≤ 4h", "≤ 4h"] },
+  { label: "Livrare", values: ["≤ 24h lucrătoare", "≤ 24h lucrătoare", "≤ 24h lucrătoare"] },
   { label: "Articole indexate Google", values: [true, true, true] },
   { label: "Linkuri permanente online", values: [true, true, true] },
   { label: "Raport PDF cu URL-uri", values: ["URL singular", true, "PDF complet 50"] },

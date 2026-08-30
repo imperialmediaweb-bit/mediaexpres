@@ -18,6 +18,11 @@ import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
 import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
+import {
+  screenContent,
+  CONTENT_DECLARATION,
+  CONTENT_DECLARATION_WARNING,
+} from "@/lib/content-policy";
 import zlib from "node:zlib";
 import { createHash } from "node:crypto";
 
@@ -86,7 +91,7 @@ t("contine termenul ofertei", mail.includes("14 septembrie"));
 t("contine WhatsApp-ul", mail.includes(SITE.phone));
 t("contine linkul catre oferta", mail.includes("/oferta-500"));
 t("promite factura fiscala", /factur[aă] fiscal[aă]/i.test(mail));
-t("mentioneaza 4 ore", mail.includes("4 ore"));
+t("mentioneaza termenul de 24 de ore", /24\s*(de\s*)?ore/i.test(mail));
 t("mentioneaza fara continut duplicat", /duplicat/i.test(mail));
 t("NU promite ca sunam clientul", !/te va contacta|scurt[aă] convorbire/i.test(mail));
 t("subiectul spune cifra oficiala 50", LIST_EMAIL_SUBJECT.includes("50"));
@@ -103,14 +108,14 @@ t("caseta contine suma", box.includes("500 lei"));
 t("caseta NU mai cere dovada ca obligatie", !/răspunde.*cu.*dovada/i.test(box));
 t("caseta spune ca incasarea se vede in extras", /extras/i.test(box));
 t("caseta pastreaza drumul pentru comanda direct de pe email", /CUI/i.test(box));
-t("caseta promite raportul si publicarea in 4 ore", /raportul/i.test(box) && /4 ore/i.test(box));
+t("caseta promite raportul si publicarea in 24 de ore", /raportul/i.test(box) && /24\s*(de\s*)?ore/i.test(box));
 
 console.log("\n########## E. CUNOSTINTELE CONSULTANTULUI ##########");
 const k = buildAdvisorKnowledge();
 t("stie IBAN-ul pentru OP", k.includes(SITE.billing.iban));
 t("stie firma de pe factura", k.includes(SITE.billing.company));
 t("stie termenul ofertei", k.includes("14 SEPTEMBRIE"));
-t("stie de publicarea in 4 ore", k.includes("4 ORE"));
+t("stie de publicarea in 24 de ore", /24\s*(DE\s*)?ORE/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));
@@ -361,6 +366,90 @@ console.log("\n########## L. GA4 SERVER-SIDE ##########");
   // fara GA_API_SECRET, trimiterea tace — nu exista drum fara secret
   const res = await sendGaPurchase({ sessionId: "cs_test_x", value: 500 });
   t("fara GA_API_SECRET se dezactiveaza singur", res.skipped === true && res.ok === false);
+}
+
+
+// ##########################################################################
+// M. PROMISIUNI CARE TREBUIE TINUTE
+//
+// Doua reguli invatate din realitate, nu din teorie:
+//  1. "publicam in 4 ore" nu se poate tine cand proprietarul e plecat de
+//     acasa — termenul devine 24 de ore lucratoare, peste tot deodata
+//     (era in 117 locuri; o singura scapare face restul mincinos).
+//  2. "acceptam orice tip de continut" a adus o comanda cu un articol despre
+//     tratarea cancerului. Publicarea lui pe 51 de ziare ar fi riscat
+//     paginile de Facebook, autoritatea SEO a intregii retele si mai mult.
+// ##########################################################################
+console.log("\n########## M. PROMISIUNI ##########");
+{
+  const texte: [string, string][] = [
+    ["emailul cu lista", buildListEmail("Test")],
+    ["cunostintele consultantului", buildAdvisorKnowledge()],
+    ["caseta bancara", bankTransferEmailBox("500 lei", "Publicare articol")],
+    ["nota de pret", PRICING_NOTE],
+  ];
+  for (const [nume, txt] of texte) {
+    t(
+      `${nume}: fara promisiunea veche de 4 ore`,
+      !/\b4\s*(ore|h)\b/i.test(txt),
+      (txt.match(/.{0,25}\b4\s*(ore|h)\b.{0,25}/i) || [])[0],
+    );
+  }
+  t(
+    "consultantul stie termenul nou",
+    /24\s*(de\s*)?ore|24h/i.test(buildAdvisorKnowledge()),
+  );
+}
+
+
+// ##########################################################################
+// N. VERIFICAREA ARTICOLULUI INAINTE DE PLATA
+//
+// Regula a venit dintr-o comanda reala: un articol care prezenta un
+// "tratament" pentru cancer (regim de sucuri, apa alcalina, fara mancare
+// solida) a fost incasat inainte sa-l citeasca cineva. Nu putea fi publicat,
+// iar restituirea prin banca dureaza si trece prin contabilitate.
+//
+// De-aia trierea ruleaza INAINTE ca factura sa plece: cat timp nu s-a virat
+// niciun leu, un "nu" costa un email. Testele de mai jos apara exact linia
+// asta — si, la fel de important, apara si cazul invers: un articol normal
+// care contine cuvantul "tratament" nu are voie sa fie oprit degeaba, altfel
+// fiecare stomatolog sau salon din tara ajunge in coada de verificare.
+// ##########################################################################
+console.log("\n########## N. VERIFICARE INAINTE DE PLATA ##########");
+{
+  const cancerul = screenContent(
+    "Tratamentul care vindeca cancerul",
+    "Bolnavii de cancer se pot vindeca printr-un regim de sucuri si apa alcalina, fara chimioterapie.",
+  );
+  t("articolul cu tratament pentru cancer e oprit", cancerul.flagged === true);
+  t("alerta spune si de ce", (cancerul.reason || "").includes("medical"));
+
+  t(
+    "acte false sunt oprite din primul cuvant",
+    screenContent("Oferim diplome false rapid", "x".repeat(200)).flagged === true,
+  );
+  t(
+    "schema financiara e oprita",
+    screenContent("Investiție garantată", "Dublează investiția în 30 de zile.").flagged === true,
+  );
+
+  // Fals pozitivele costa vanzari, deci sunt bug-uri la fel de serioase.
+  const normale: [string, string][] = [
+    ["stomatologie", "Clinica noastra ofera tratament stomatologic modern in Cluj."],
+    ["cosmetica", "Salonul ofera terapii de relaxare si tratament pentru par."],
+    ["auto", "Service-ul face tratament anticoroziv pentru caroserie."],
+    ["ong cancer", "Asociatia strange fonduri pentru bolnavii de cancer din spitalul judetean."],
+  ];
+  for (const [nume, txt] of normale) {
+    t(`articol normal (${nume}) nu e oprit`, screenContent("Comunicat", txt).flagged === false);
+  }
+
+  t(
+    "declaratia si consecinta ei sunt scrise, nu subintelese",
+    CONTENT_DECLARATION.includes("cancer") &&
+      /nu se restituie/i.test(CONTENT_DECLARATION_WARNING),
+  );
 }
 
 console.log("\n" + "=".repeat(64));

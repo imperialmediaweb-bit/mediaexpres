@@ -80,7 +80,7 @@ export default function TemplatePage({ params }: { params: { slug: string } }) {
               <p className="mt-2 text-sm text-white/80">
                 AI-ul ți-o scrie în 30 de secunde, plecând de la șablonul ăsta și
                 de la informațiile firmei tale. Apoi o publici pe 50 de ziare în
-                4h.
+                24h lucrătoare.
               </p>
               <div className="mt-5 flex flex-wrap gap-3">
                 <Button variant="gold" size="lg" asChild>

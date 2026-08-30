@@ -59,7 +59,7 @@ const CONDITIONS = [
   "Distribuire pe paginile noastre de Facebook.",
   "3 poze și 3 linkuri dofollow incluse.",
   "Servicii de redactare articole — la cerere.",
-  "Acceptăm orice tip de conținut.",
+  "Acceptăm orice conținut comercial legal (fără articole medicale despre tratarea bolilor).",
   "Nu adăugăm eticheta (P) la articole.",
 ];
 
@@ -238,7 +238,7 @@ export default function OfertaPage() {
             Un articol, 50 de ziare, 500 de lei
           </h2>
           <p className="lead mt-4 mx-auto max-w-2xl text-white/85">
-            Publicare în maximum 4 ore lucrătoare, raport cu toate linkurile și
+            Publicare în maximum 24 de ore lucrătoare, raport cu toate linkurile și
             factură fiscală. Plătești cu cardul sau prin ordin de plată.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

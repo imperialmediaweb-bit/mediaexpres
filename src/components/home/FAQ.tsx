@@ -8,7 +8,7 @@ import {
 const FAQS = [
   {
     q: "În cât timp îmi este publicat articolul?",
-    a: "În maximum 4h de la confirmarea plății și primirea textului. De obicei, publicarea se face în același zi, iar linkurile sunt livrate pe email cu raport parțial, urmat de raportul PDF complet.",
+    a: "În maximum 24h lucrătoare de la confirmarea plății și primirea textului. De obicei, publicarea se face în același zi, iar linkurile sunt livrate pe email cu raport parțial, urmat de raportul PDF complet.",
   },
   {
     q: "Pot trimite articol gata scris sau îl redactați voi?",

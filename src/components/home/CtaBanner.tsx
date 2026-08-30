@@ -22,7 +22,7 @@ export function CtaBanner() {
             Pregătit să-ți publici articolul?
           </h2>
           <p className="mt-6 text-lg text-white/90">
-            Alege un pachet, trimite-ne articolul, iar în 4h ești pe 50 de ziare. Nu plătești
+            Alege un pachet, trimite-ne articolul, iar în 224h lucrătoare lucrătoare ești pe 50 de ziare. Nu plătești
             nimic până nu confirmăm capacitatea de publicare.
           </p>
           <div className="mt-10 flex flex-wrap justify-center gap-4">

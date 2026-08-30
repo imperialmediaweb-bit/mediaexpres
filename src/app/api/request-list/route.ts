@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
       <ul style="margin:16px 0;padding-left:20px;line-height:1.7;">
         <li><strong>Articol unic pe fiecare ziar</strong> — nu același text copiat de 50 de ori</li>
         <li>50 de backlinks dofollow permanente, din 50 de domenii .ro diferite</li>
-        <li>Publicare în maximum 4 ore lucrătoare</li>
+        <li>Publicare în maximum 24 de ore lucrătoare</li>
         <li>Raport cu toate linkurile + factură fiscală</li>
       </ul>
       <p>Dacă nu ai articol scris, îl redactăm noi — ai nevoie doar de site-ul firmei și două propoziții.</p>

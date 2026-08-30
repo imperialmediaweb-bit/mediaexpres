@@ -105,6 +105,13 @@ console.log("\n=== 1. Comanda prin OP, cu articol ===");
   check(await btn("Fără poze").isVisible(), "pozele pot fi sarite");
   await btn("Fără poze").click(); await wait();
 
+  // Declaratia de continut se cere INAINTE de datele de plata. Ordinea nu e
+  // cosmetica: dupa ce omul a virat banii, un "nu" aici ar insemna restituire
+  // prin banca — exact ce s-a intamplat o data si nu se mai repeta.
+  check(await seen("tratamente sau metode de vindecare"), "cere declaratia de continut");
+  check(!(await seen("RO15BTRLRONCRT0652757201")), "nu da date de plata inainte de declaratie");
+  await btn("Da, confirm").click(); await wait();
+
   check(await seen("RO15BTRLRONCRT0652757201"), "arata IBAN-ul in conversatie");
   check(await seen("Suma: 500 lei"), "arata suma de plata");
 
@@ -149,6 +156,7 @@ console.log("\n=== 2. Articol de cazino ===");
   await c.locator("textarea").fill("B".repeat(500)); await send(); await wait();
   await type("https://cazino-test.ro");
   await btn("Fără poze").click(); await wait();
+  await btn("Da, confirm").click(); await wait();
   check(await seen("Suma: 1000 lei"), "suma bancara e tot 1000 lei");
   await proof();
   await btn("Trimite comanda").click(); await wait(8000);
@@ -209,6 +217,7 @@ console.log("\n=== 4. Clientul nu are articol ===");
   await send(); await wait();
   await type("https://fara-test.ro");
   await btn("Fără poze").click(); await wait();
+  await btn("Da, confirm").click(); await wait();
   check(await seen("îl redactăm noi"), "rezumatul spune ca redactam noi");
   await proof();
   await btn("Trimite comanda").click(); await wait(8000);

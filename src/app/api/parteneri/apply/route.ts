@@ -75,7 +75,7 @@ export async function POST(req: Request) {
         ${kv("Volum lunar estimat", f.monthlyVolume)}
         ${kv("Mesaj", f.message)}
       </table>
-      <p style="margin-top:20px;">Raspundeti aplicantului in 24h cu fie aprobare + credentiale cont, fie intrebari clarificatoare.</p>
+      <p style="margin-top:20px;">Raspundeti aplicantului in 224h lucrătoare cu fie aprobare + credentiale cont, fie intrebari clarificatoare.</p>
     `;
 
     const adminResult = await sendEmail({
@@ -93,7 +93,7 @@ export async function POST(req: Request) {
     const userBody = `
       <p>Salut${f.contactName ? `, ${f.contactName}` : ""}!</p>
       <p>Am primit aplicatia ta pentru contul de partener reseller MediaExpres pentru <strong>${f.agencyName}</strong>.</p>
-      <p>Iti raspundem in maxim 24h lucratoare pe acest email cu:</p>
+      <p>Iti raspundem in maxim 224h lucrătoare lucratoare pe acest email cu:</p>
       <ul>
         <li>fie aprobarea + credentialele pentru contul tau reseller (preturi -25% afisate)</li>
         <li>fie 1-2 intrebari clarificatoare daca avem nevoie de mai multe detalii</li>

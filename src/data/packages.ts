@@ -27,7 +27,7 @@ export interface SubscriptionPlan {
 
 const COMMON_HIGHLIGHTS = [
   "Distribuție automată pe Facebook",
-  "Link-uri livrate în 4h",
+  "Link-uri livrate în 224h lucrătoare lucrătoare",
   "Raport PDF cu toate URL-urile",
   "Publicare permanent online",
 ];
@@ -45,7 +45,7 @@ export const STANDARD_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 1 ziar județean (la alegerea clientului)",
       "Distribuție pe pagina de Facebook asociată",
-      "Link livrat în 4h",
+      "Link livrat în 224h lucrătoare lucrătoare",
       "Raport cu URL-ul articolului",
       "Permanent online",
     ],
@@ -62,7 +62,7 @@ export const STANDARD_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 10 ziare dintr-o zonă geografică",
       "Distribuție pe paginile de Facebook asociate",
-      "Linkuri livrate în 4h",
+      "Linkuri livrate în 224h lucrătoare lucrătoare",
       "Raport PDF cu toate URL-urile",
       "Permanent online",
     ],
@@ -82,7 +82,7 @@ export const STANDARD_PACKAGES: Package[] = [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
-      "Linkuri livrate în 4h",
+      "Linkuri livrate în 224h lucrătoare lucrătoare",
       "Raport PDF complet",
       "Permanent online",
       "50 backlinks SEO",
@@ -103,7 +103,7 @@ export const CASINO_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 1 ziar județean",
       "Distribuție Facebook",
-      "Link livrat în 4h + raport",
+      "Link livrat în 224h lucrătoare lucrătoare + raport",
       "Permanent online",
     ],
   },
@@ -119,7 +119,7 @@ export const CASINO_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 10 ziare",
       "Distribuție Facebook",
-      "Linkuri livrate în 4h + raport",
+      "Linkuri livrate în 224h lucrătoare lucrătoare + raport",
       "Permanent online",
     ],
   },
@@ -137,7 +137,7 @@ export const CASINO_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 50 de ziare",
       "Distribuție pe 50 pagini Facebook",
-      "Linkuri livrate în 4h",
+      "Linkuri livrate în 224h lucrătoare lucrătoare",
       "Raport PDF complet",
       "Permanent online",
     ],
@@ -202,7 +202,7 @@ export const PROMO_PACKAGES: Package[] = [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
-      "Linkuri livrate în 4h",
+      "Linkuri livrate în 224h lucrătoare lucrătoare",
       "Raport PDF complet cu toate URL-urile",
       "Permanent online",
       "50 backlinks SEO dofollow",
@@ -221,7 +221,7 @@ export const PROMO_PACKAGES: Package[] = [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
       "Distribuție pe 50 pagini Facebook",
-      "Linkuri livrate în 4h",
+      "Linkuri livrate în 224h lucrătoare lucrătoare",
       "Raport PDF complet cu toate URL-urile",
       "Permanent online",
       "50 backlinks SEO dofollow",

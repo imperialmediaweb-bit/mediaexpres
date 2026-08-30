@@ -25,7 +25,7 @@ import { OfferChatBubble } from "@/components/OfferChatBubble";
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
   description:
-    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 4h.",
+    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 224h lucrătoare lucrătoare.",
   robots: { index: false, follow: false },
 };
 
@@ -72,9 +72,9 @@ const INCLUDED = [
   },
   {
     icon: Clock,
-    title: "Publicat în 4 ore",
+    title: "Publicat în 24 de ore lucrătoare",
     description:
-      "De la confirmarea comenzii până la linkurile live trec maximum 4 ore lucrătoare.",
+      "De la confirmarea comenzii până la linkurile live trec maximum 24 de ore lucrătoare.",
   },
 ];
 
@@ -96,7 +96,7 @@ const STEPS = [
   {
     n: "3",
     title: "Publicăm și primești raportul",
-    text: "În maximum 4 ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
+    text: "În maximum 24 de ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
   },
 ];
 
@@ -146,7 +146,7 @@ const FAQ = [
   },
   {
     q: "Ce fel de conținut acceptați?",
-    a: "Acceptăm orice tip de conținut comercial legal — lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P) la articole.",
+    a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P). Nu publicăm însă articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — indiferent de sursele invocate; dacă o comandă e refuzată din acest motiv, returnăm integral suma.",
   },
   {
     q: "Pot să-mi scriu eu articolul?",
@@ -178,14 +178,14 @@ export default function Oferta500Page() {
             </h1>
             <p className="mt-6 text-lg text-white/85 md:text-xl">
               41 de ziare locale + 9 naționale. Un singur articol, publicat pe
-              toate, în 4 ore. Cu raport PDF și 50 de backlinks reale.
+              toate, în 24 de ore lucrătoare. Cu raport PDF și 50 de backlinks reale.
             </p>
 
             <div className="mt-10">
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Card sau ordin de plată • factură fiscală • publicare în 4h
+              Card sau ordin de plată • factură fiscală • publicare în 224h lucrătoare lucrătoare
             </p>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default function Oferta500Page() {
                 jos in pagina. */}
             <Stat value="50" label="domenii .ro proprii" />
             <Stat value="1.200+" label="articole publicate în rețea" />
-            <Stat value="4h" label="până la publicare" />
+            <Stat value="24h lucrătoare" label="până la publicare" />
           </div>
         </div>
       </section>
@@ -331,7 +331,7 @@ export default function Oferta500Page() {
               Comandă acum — 500 lei
             </a>
             <p className="mt-3 text-sm text-slate-500">
-              Publicare în 4 ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
+              Publicare în 24 de ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
             </p>
           </div>
         </div>
@@ -402,7 +402,7 @@ export default function Oferta500Page() {
         <div className="container py-16 text-center">
           <ShieldCheck className="mx-auto h-10 w-10 text-brand-gold" />
           <h2 className="h2 mt-5 text-white">
-            50 de ziare. 4 ore. 500 de lei.
+            50 de ziare. 24 de ore lucrătoare. 500 de lei.
           </h2>
           <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,

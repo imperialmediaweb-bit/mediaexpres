@@ -7,6 +7,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferE
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
+import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
 
 export const runtime = "nodejs";
 
@@ -31,6 +32,11 @@ const schema = z.object({
   paymentProof: fileSchema.optional(),
   facebookOptIn: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
+  // Bifa obligatorie, nu optionala cu default: intrebarea are rost doar daca
+  // raspunsul e explicit. z.literal(true) refuza si `false`, si lipsa campului.
+  contentDeclaration: z.literal(true, {
+    errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
+  }),
   isCasino: z.boolean().default(false),
 });
 
@@ -116,6 +122,12 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Verificarea articolului se face INAINTE de plata, nu dupa. Daca textul
+  // atinge conținut interzis, nu pleaca nici factura, nici datele de plata:
+  // fara bani virati nu exista ce restitui daca articolul nu se poate publica.
+  // Comanda ramane salvata si asteapta un ochi de om.
+  const screening = screenContent(d.title, d.body);
+
   await sendEmail({
     to: ADMIN_EMAIL,
     replyTo: email,
@@ -123,6 +135,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Comandă nouă prin transfer bancar",
       `
+      ${screening.flagged ? '<p style="color:#b91c1c;"><strong>🛑 FACTURA NU S-A EMIS — comanda e oprită la verificare de conținut.</strong> Vezi alerta separată cu textul integral. Clientul a fost anunțat că verificăm și că nu are nimic de plătit până atunci.</p>' : ""}
       <p style="color:#b91c1c;"><strong>Factura se emite automat în StartCo și pleacă la client</strong> — dacă emiterea eșuează primești o alertă separată și o faci manual pe datele de mai jos. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
@@ -150,8 +163,25 @@ export async function POST(req: NextRequest) {
 
   sendEmail({
     to: email,
-    subject: "Am primit comanda ta — MediaExpres",
-    html: wrapEmail(
+    subject: screening.flagged
+      ? "Am primit comanda ta — o verificăm înainte de factură"
+      : "Am primit comanda ta — MediaExpres",
+    html: screening.flagged
+      ? wrapEmail(
+          "Comandă primită — o verificăm întâi",
+          `
+      <p>Salut,</p>
+      <p>Am primit comanda pentru <strong>${esc(pkg.name)}</strong>. Înainte de a-ți emite factura, un coleg citește articolul: publicăm în 50 de ziare reale, iar unele subiecte au reguli stricte de conținut.</p>
+      <p><strong>Nu ai de plătit nimic până atunci</strong> — nu ți-am trimis factură și nu ți-am cerut niciun ban. Îți răspundem în maximum o zi lucrătoare:</p>
+      <ul style="padding-left:20px;margin:8px 0 16px;">
+        <li style="margin:6px 0;">dacă articolul e în regulă, primești factura și mergem mai departe;</li>
+        <li style="margin:6px 0;">dacă nu îl putem publica, îți spunem clar de ce — și nu ai pierdut nimic.</li>
+      </ul>
+      <p>Poți vedea regulile în <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>. Dacă vrei să lămurim mai repede, scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
+      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      `,
+        )
+      : wrapEmail(
       "Comandă primită",
       `
       <p>Salut,</p>
@@ -160,7 +190,7 @@ export async function POST(req: NextRequest) {
       <ol style="padding-left:20px;margin:8px 0 16px;">
         <li style="margin:6px 0;"><strong>Îți trimitem factura fiscală</strong> pe acest email, în scurt timp.</li>
         <li style="margin:6px 0;"><strong>Plătești prin transfer bancar</strong> — datele contului sunt mai jos, ca să le ai la îndemână.</li>
-        <li style="margin:6px 0;"><strong>Publicăm în maximum 4 ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
+        <li style="margin:6px 0;"><strong>Publicăm în maximum 24 de ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
       </ol>
       ${d.paymentProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
       ${bankTransferEmailBox(`${pkg.price} lei`, `${esc(pkg.name)} — ${esc(d.companyName)}`)}
@@ -176,6 +206,35 @@ export async function POST(req: NextRequest) {
   // isi inghite propriile erori si alerteaza adminul; comanda e deja salvata,
   // raspunsul catre client nu asteapta si nu depinde de StartCo.
   // Acopera si formularul, si comanda din chat: amandoua trec pe aici.
+  if (screening.flagged) {
+    await sendEmail({
+      to: ADMIN_EMAIL,
+      replyTo: email,
+      subject: `🛑 VERIFICĂ ÎNAINTE DE FACTURĂ — ${d.companyName}`,
+      html: wrapEmail(
+        "Comandă oprită automat înainte de facturare",
+        `
+        <p style="color:#b91c1c;"><strong>Factura NU a fost emisă și clientul NU a primit date de plată pentru ea.</strong> Textul conține termeni din zona medicală, iar regula e simplă: verificăm articolul cât timp nu s-a mișcat niciun leu.</p>
+        ${kv("Motiv", screening.reason || "conținut interzis")}
+        ${kv("Termeni găsiți", screening.hits.join(", "))}
+        <table style="width:100%;border-collapse:collapse;margin:16px 0;">
+          ${kv("Client", esc(d.companyName))}
+          ${kv("Email", esc(email))}
+          ${kv("Telefon", esc(d.contactPhone))}
+          ${kv("Sumă", `${pkg.price} RON`)}
+          ${kv("Referință", esc(reference))}
+        </table>
+        <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>
+        <div style="white-space:pre-wrap;border-left:3px solid #e5e5e5;padding-left:16px;margin:12px 0;color:#334155;">${esc(d.body.slice(0, 4000))}${d.body.length > 4000 ? "…" : ""}</div>
+        <p><strong>E în regulă?</strong> Emite factura manual în StartCo și mergi mai departe.<br/>
+        <strong>Nu e?</strong> Răspunde-i clientului că nu putem publica — nu are ce restitui, n-a plătit nimic.</p>
+        <p style="margin-top:16px;"><a href="${SITE.url}/admin/materiale">Vezi comanda în admin →</a></p>
+        `,
+      ),
+    }).catch((e) => console.error("[comanda/transfer] alerta continut:", e));
+    return NextResponse.json({ ok: true, review: true });
+  }
+
   void issueInvoiceForOrder({
     email,
     customerName: d.companyName,
