@@ -8,6 +8,7 @@ import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
+import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 
 export const runtime = "nodejs";
 
@@ -66,6 +67,10 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  // Curatam la intrare, o singura data, si tot lantul de dupa — email, admin,
+  // copiere, publicare — vede text de om, nu gunoi de PDF.
+  d.title = cleanTitle(d.title);
+  d.body = cleanArticleText(d.body);
 
   const pkg = findPackageById(d.packageId);
   if (!pkg) {

@@ -19,6 +19,7 @@ import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
 import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
 import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
+import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import {
   screenContent,
   CONTENT_DECLARATION,
@@ -544,6 +545,42 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
     /24 de ore lucr[ăa]toare/i.test(fs.readFileSync(f, "utf8")),
   );
   t("termenul nou e scris in produs", cuTermen.length >= 20, `doar ${cuTermen.length} fisiere`);
+}
+
+
+// ##########################################################################
+// Q. TEXTUL CLIENTULUI SE CURATA
+//
+// Primul articol real a ajuns pe ziare exact cum l-a lipit clientul din PDF:
+// spatii duble, spatii inaintea virgulelor, randuri rupte in mijloc de
+// propozitie. "Copiaza textul" din admin copia gunoiul cu tot cu text.
+// Cazurile de mai jos sunt luate din articolul ala, nu inventate.
+// ##########################################################################
+console.log("\n########## Q. CURATAREA TEXTULUI ##########");
+{
+  t("spatiile duble devin unul", cleanArticleText("are nevoie de Fe2+  70% din acest fier") === "are nevoie de Fe2+ 70% din acest fier");
+  t("spatiul dinaintea virgulei dispare", cleanArticleText("procesele de ardere , procesele de crestere") === "procesele de ardere, procesele de crestere");
+  t("randul care incepe cu spatiu se curata", cleanArticleText(" Anumite tesuturi nu primesc oxigen") === "Anumite tesuturi nu primesc oxigen");
+  t(
+    "randul rupt in mijloc de propozitie se uneste",
+    cleanArticleText("este transportat in organism cu\najutorul unei enzime") ===
+      "este transportat in organism cu ajutorul unei enzime",
+  );
+  t(
+    "dar randul nou care incepe cu majuscula ramane rand nou",
+    cleanArticleText("teoria veche.\nFactori care declanseaza") === "teoria veche.\nFactori care declanseaza",
+  );
+  t(
+    "si dupa punct randurile raman separate",
+    cleanArticleText("refuzul hranei de catre pacient.\nCe este cancerul?") ===
+      "refuzul hranei de catre pacient.\nCe este cancerul?",
+  );
+  t("CRLF si 4 randuri goale se normalizeaza", cleanArticleText("a\r\n\r\n\r\n\r\nb") === "a\n\nb");
+  t("spatiul non-breaking din Word devine spatiu", cleanArticleText("unu\u00a0doi") === "unu doi");
+  t("titlul pierde orice rand si spatiu in plus", cleanTitle("  Ce este  cancerul ,\n tratament ") === "Ce este cancerul, tratament");
+  // Curatarea nu are voie sa strice un text deja bun.
+  const bun = "Primul paragraf, corect.\n\nAl doilea paragraf, tot corect.";
+  t("un text curat ramane identic", cleanArticleText(bun) === bun);
 }
 
 console.log("\n" + "=".repeat(64));

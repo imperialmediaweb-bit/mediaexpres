@@ -8,6 +8,7 @@ import { orderSubmissions, publicationReports, clientMessages } from "@/db/schem
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
 import { CopyButton } from "./CopyButton";
+import { cleanArticleText } from "@/lib/clean-text";
 
 export const dynamic = "force-dynamic";
 
@@ -117,7 +118,10 @@ export default async function MaterialDetailPage({
           <section className="rounded-xl border border-slate-200 bg-white p-5">
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-serif text-lg font-bold text-brand-navy">Articolul</h2>
-              <CopyButton text={r.body} label="Copiază textul" />
+              {/* Curatat la copiere, nu doar la intrare: comenzile vechi sunt deja in
+                  baza cu spatii duble si randuri rupte din PDF — exact textul care a
+                  ajuns o data pe ziare asa cum era. */}
+              <CopyButton text={cleanArticleText(r.body)} label="Copiază textul" />
             </div>
             {r.metaDescription && (
               <p className="mt-2 text-xs text-slate-500">

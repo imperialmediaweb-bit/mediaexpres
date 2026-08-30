@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
+import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 
 export const runtime = "nodejs";
 
@@ -52,6 +53,9 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  // Aceeasi curatare ca la comanda prin OP — vezi lib/clean-text.ts.
+  d.title = cleanTitle(d.title);
+  d.body = cleanArticleText(d.body);
 
   const order = verifyOrderToken(d.token);
   if (!order) {
