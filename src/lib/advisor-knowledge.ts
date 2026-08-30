@@ -55,7 +55,7 @@ export function buildAdvisorKnowledge(): string {
 
   return `RETEAUA:
 - ${CLAIMED_TOTAL} publicatii online proprii: ${CLAIMED_LOCAL} locale (cate 1 per judet) + ${CLAIMED_NATIONAL} nationale
-- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google
+- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google, peste 1.200 de articole publicate zilnic in retea cu ajutorul jurnalistilor
 - ${CLAIMED_TOTAL} pagini de Facebook asociate (300-10.000 urmaritori fiecare)
 - Acoperim toate cele 41 de judete + Bucuresti
 

@@ -47,8 +47,12 @@ export default function ReteauaPage() {
           <p className="eyebrow text-brand-gold">Acoperire națională</p>
           <h1 className="h1 mt-3 text-white">Rețeaua MediaExpres</h1>
           <p className="lead mx-auto mt-6 max-w-2xl text-white/85">
-            O rețea de ziare proprii și pagini Facebook, construită în ani pentru a oferi
-            clienților noștri maximă vizibilitate națională.
+            Rețeaua MediaExpres înseamnă <strong className="text-white">50 de ziare online
+            proprii</strong> — 41 locale, câte unul pentru fiecare județ, și 9 naționale —
+            fiecare cu pagina lui de Facebook. Cu ajutorul jurnaliștilor din toată țara,
+            în rețea se publică <strong className="text-white">peste 1.200 de articole în
+            fiecare zi</strong> — site-uri vii, cu trafic real, pe care le poți deschide
+            chiar acum, mai jos.
           </p>
         </div>
       </section>
@@ -94,7 +98,7 @@ export default function ReteauaPage() {
                   </span>
                 </div>
                 <p className="mt-4 text-sm text-slate-600">
-                  Publicații naționale cu audiență lunară de ordinul milioanelor, incluse în pachetul{" "}
+                  Publicații naționale cu trafic constant și articole noi în fiecare zi, incluse în pachetul{" "}
                   <strong className="text-brand-navy">Național 50</strong> și în toate abonamentele.
                 </p>
               </div>

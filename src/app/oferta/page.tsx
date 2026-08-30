@@ -24,7 +24,7 @@ const BENEFITS = [
     icon: Newspaper,
     title: "Publicare în 50+ ziare online",
     description:
-      "Advertorial sau comunicat distribuit într-o rețea extinsă, cu audiențe între 10.000 și 40.000 vizitatori unici pe lună per publicație și peste 320.000 total.",
+      "Advertorial sau comunicat distribuit în rețeaua noastră de 50 de ziare proprii — site-uri active, cu trafic real, în care se publică peste 1.200 de articole pe zi.",
   },
   {
     icon: Globe,
@@ -105,7 +105,7 @@ export default function OfertaPage() {
             <StatCard
               icon={Newspaper}
               value="50+"
-              label="ziare online, 10–40k vizitatori unici/lună, 320k+ total"
+              label="ziare online proprii, cu articole noi și trafic real în fiecare zi"
             />
             <StatCard
               icon={Globe}

@@ -142,7 +142,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, cu redacții reale: fiecare publicație are jurnalistul ei și publică constant — peste 1.200 de articole apărute în rețea, plus distribuția pe paginile de Facebook asociate. Lista completă e publicată mai sus pe această pagină — dă click pe orice ziar, citește ce a apărut azi și verifică singur.",
+    a: "Sunt reale, cu redacții reale: fiecare publicație are jurnalistul ei și publică constant — peste 1.200 de articole publicate zilnic în rețea, plus distribuția pe paginile de Facebook asociate. Lista completă e publicată mai sus pe această pagină — dă click pe orice ziar, citește ce a apărut azi și verifică singur.",
   },
   {
     q: "Ce fel de conținut acceptați?",
@@ -201,7 +201,7 @@ export default function Oferta500Page() {
                 presa si linkurile. Domeniile sunt verificabile — lista e mai
                 jos in pagina. */}
             <Stat value="50" label="domenii .ro proprii" />
-            <Stat value="1.200+" label="articole publicate în rețea" />
+            <Stat value="1.200+" label="articole publicate zilnic în rețea" />
             <Stat value="24 de ore lucrătoare" label="până la publicare" />
           </div>
         </div>
