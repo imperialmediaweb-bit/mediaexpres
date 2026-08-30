@@ -146,7 +146,7 @@ const FAQ = [
   },
   {
     q: "Ce fel de conținut acceptați?",
-    a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P). Nu publicăm însă articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — indiferent de sursele invocate; dacă o comandă e refuzată din acest motiv, returnăm integral suma.",
+    a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P). Nu publicăm însă articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — nici produse sau terapii prezentate ca alternativă la tratamentul medical. La comandă bifezi o declarație că articolul nu intră în aceste categorii: dacă declarația se dovedește falsă, comanda se anulează și suma nu se restituie. Dacă noi refuzăm dintr-un alt motiv, returnăm integral în 3 zile lucrătoare.",
   },
   {
     q: "Pot să-mi scriu eu articolul?",

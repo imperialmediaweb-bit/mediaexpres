@@ -62,7 +62,7 @@ export const FOOTER_LINKS = {
 };
 
 export const STATS = [
-  { value: "50+", label: "ziare partenere" },
+  { value: "50+", label: "ziare proprii" },
   { value: "50", label: "pagini Facebook" },
   { value: "24 de ore lucrătoare", label: "timp de livrare" },
   { value: "10k+", label: "articole publicate" },

@@ -142,7 +142,7 @@ export function PackageComparator() {
       </div>
 
       <p className="mt-4 text-center text-xs text-slate-500">
-        TVA inclus în prețuri. Plată unică prin card sau factură proformă (transfer bancar).
+        TVA inclus în prețuri. Plată unică prin card sau ordin de plată — primești factura fiscală și plătești prin transfer.
       </p>
     </section>
   );

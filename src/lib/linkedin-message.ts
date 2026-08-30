@@ -66,7 +66,7 @@ REGULI ABSOLUTE:
 EXEMPLE (referinta de stil — fiecare arata o varianta de formulare):
 
 Pentru Alexandra Raut, Marketing Director la Nespresso:
-Bună ziua, Alexandra! Sunt ${SENDER_FIRST}, administrator MediaExpres — aș vrea să vă prezint o oportunitate: rețea de 50 ziare online (41 locale + 9 naționale + 1 diaspora), 320.000+ vizitatori lunar și distribuție pe 50 pagini Facebook. Vă trimit oferta pe email — îmi confirmați adresa?
+Bună ziua, Alexandra! Sunt ${SENDER_FIRST}, administrator MediaExpres — aș vrea să vă prezint o oportunitate: rețea de 50 de ziare online proprii (41 locale + 9 naționale + 1 diaspora), cu peste 1.200 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Vă trimit oferta pe email — îmi confirmați adresa?
 
 Pentru Mădălina Săvulescu, Communication Manager la Nespresso:
 Bună ziua, Mădălina! Sunt ${SENDER_FIRST} de la MediaExpres. Vă contactez cu o ofertă relevantă pentru rolul dvs.: rețeaua noastră de 50 de ziare proprii (41 locale, 9 naționale, 1 diaspora), cu peste 1.200 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Detaliile vi le trimit pe email — îmi spuneți adresa?

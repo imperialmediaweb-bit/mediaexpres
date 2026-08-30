@@ -133,7 +133,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
                   "Raport PDF cu toate URL-urile",
                   "50 backlinks permanente → +SEO",
                   "Distribuție pe Facebook a fiecărui ziar",
-                  "Factură fiscală după publicare",
+                  "Factură fiscală, transmisă prin e-Factura",
                 ].map((item, i) => (
                   <li key={i} className="flex items-start gap-1.5 text-xs text-green-700">
                     <CheckCircle2 className="h-3.5 w-3.5 mt-0.5 shrink-0" />
@@ -257,7 +257,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
             Vreau să public acum →
           </Link>
           <p className="mt-4 text-xs text-white/50">
-            Fără plată în avans &bull; Fără telefon &bull; Fără proformă &bull; Factură după publicare
+            Fără telefon &bull; Fără proformă &bull; Factură fiscală directă &bull; Publicare în 24 de ore lucrătoare de la încasare
           </p>
         </div>
       </div>

@@ -3,7 +3,7 @@ import { SITE } from "@/data/site";
 
 // Caseta cu plata prin transfer bancar (OP), afisata pe paginile de vanzare.
 // Datele vin din SITE.billing. Factura pentru OP se emite manual dupa plata —
-// fara proforma. Abonamentele lunare raman doar cu cardul (OP nu e recurent).
+// direct factura fiscala, fara proforma. Abonamentele raman doar cu cardul (OP nu e recurent).
 export function BankTransferBox({ note }: { note: string }) {
   return (
     <div className="mx-auto max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">

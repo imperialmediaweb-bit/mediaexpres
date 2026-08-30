@@ -241,7 +241,7 @@ export function IntakeForm({
         {selectedPkg && (
           <p className="mt-3 text-xs text-slate-500">
             Pachetul ales: <strong>{selectedPkg.name}</strong> —{" "}
-            {selectedPkg.price.toLocaleString("ro")} RON. Factura se emite după publicare.
+            {selectedPkg.price.toLocaleString("ro")} RON. Primești factura pe email și plătești pe baza ei.
           </p>
         )}
       </section>
@@ -373,7 +373,7 @@ export function IntakeForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în 24 de ore lucrătoare. Factura se emite pe email după publicare.
+        Primești factura pe email, plătești prin transfer, iar publicarea se face în maximum 24 de ore lucrătoare de la încasare.
       </p>
     </form>
   );

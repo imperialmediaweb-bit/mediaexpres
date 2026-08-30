@@ -77,7 +77,7 @@ export function PackageCard({ pkg }: PackageCardProps) {
           defaultPackageId={pkg.id}
           trigger={
             <Button variant="outline" size="default" className="w-full">
-              Comandă cu factură proformă
+              Comandă cu ordin de plată (factură)
             </Button>
           }
         />
