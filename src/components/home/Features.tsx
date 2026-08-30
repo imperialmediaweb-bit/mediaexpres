@@ -10,7 +10,7 @@ import {
 const FEATURES = [
   {
     icon: Newspaper,
-    title: "50 de ziare partenere",
+    title: "50 de ziare proprii",
     description: "41 ziare locale + 9 naționale, acoperire în toate cele 4 regiuni.",
   },
   {

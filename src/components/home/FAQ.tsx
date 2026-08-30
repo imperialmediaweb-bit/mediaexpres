@@ -16,11 +16,11 @@ const FAQS = [
   },
   {
     q: "Pot alege pe ce ziare apar?",
-    a: "Pentru pachetul Local, da — alegi ziarul dorit dintr-o listă. Pentru Regional alegi zona (Moldova / Transilvania / Muntenia / Banat). Pentru Național 50, articolul apare pe toate cele 50 de ziare partenere.",
+    a: "Pentru pachetul Local, da — alegi ziarul dorit dintr-o listă. Pentru Regional alegi zona (Moldova / Transilvania / Muntenia / Banat). Pentru Național 50, articolul apare pe toate cele 50 de ziare din rețeaua noastră.",
   },
   {
     q: "Cât timp rămâne articolul online?",
-    a: "Permanent. Articolele rămân online pe site-urile partenere atâta timp cât acele site-uri funcționează — minim câțiva ani, de regulă.",
+    a: "Permanent. Ziarele sunt ale noastre, nu ale unor terți — articolul rămâne online cât timp există rețeaua, fără să depindem de bunăvoința altcuiva.",
   },
   {
     q: "De ce pachetele de cazino sunt mai scumpe?",

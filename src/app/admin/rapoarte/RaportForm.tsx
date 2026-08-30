@@ -3,13 +3,23 @@
 import { useRef, useState } from "react";
 import { Loader2, Send, CheckCircle2, Paperclip } from "lucide-react";
 
-export function RaportForm() {
-  const [email, setEmail] = useState("");
-  const [clientName, setClientName] = useState("");
-  const [articleTitle, setArticleTitle] = useState("");
+export function RaportForm({
+  initialEmail = "",
+  initialClientName = "",
+  initialTitle = "",
+}: {
+  initialEmail?: string;
+  initialClientName?: string;
+  initialTitle?: string;
+}) {
+  const [email, setEmail] = useState(initialEmail);
+  const [clientName, setClientName] = useState(initialClientName);
+  const [articleTitle, setArticleTitle] = useState(initialTitle);
   const [links, setLinks] = useState("");
   const [fileName, setFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
+  const [invoiceName, setInvoiceName] = useState("");
+  const invoiceRef = useRef<HTMLInputElement>(null);
 
   const [sending, setSending] = useState(false);
   const [done, setDone] = useState<string | null>(null);
@@ -34,6 +44,8 @@ export function RaportForm() {
       fd.set("links", links);
       const f = fileRef.current?.files?.[0];
       if (f) fd.set("file", f);
+      const inv = invoiceRef.current?.files?.[0];
+      if (inv) fd.set("invoice", inv);
 
       const res = await fetch("/api/admin/raport", { method: "POST", body: fd });
       const json = await res.json();
@@ -42,12 +54,15 @@ export function RaportForm() {
       setDone(
         `Raportul a plecat către ${email}` +
           (json.linksCount ? ` cu ${json.linksCount} linkuri` : "") +
-          (json.attached ? " + fișierul atașat" : "") +
+          (json.attached ? ` + ${json.attached} fișiere atașate` : "") +
+          (json.invoiceAttached ? ", inclusiv factura" : "") +
           ".",
       );
       setLinks("");
       setFileName("");
+      setInvoiceName("");
       if (fileRef.current) fileRef.current.value = "";
+      if (invoiceRef.current) invoiceRef.current.value = "";
     } catch (err) {
       setError(err instanceof Error ? err.message : "Eroare neașteptată");
     } finally {
@@ -114,9 +129,32 @@ export function RaportForm() {
         />
       </div>
 
+      {/*
+        Factura, in acelasi email cu raportul — cerinta venita din durere:
+        raportul pleca de aici, factura din alta unealta, iar seara se termina
+        cu trei taburi deschise pentru o singura comanda. PDF-ul din StartCo
+        se pune aici si clientul primeste tot ce ii datoram dintr-un foc.
+      */}
       <div>
         <label className="mb-1 block text-sm font-medium text-slate-700">
-          Fișier Excel (opțional, se atașează la email)
+          Factura PDF (opțional, se atașează la același email)
+        </label>
+        <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 px-4 py-3 text-sm text-slate-600 transition hover:border-brand-red">
+          <Paperclip className="h-4 w-4" />
+          {invoiceName || "Alege factura .pdf (din StartCo)"}
+          <input
+            ref={invoiceRef}
+            type="file"
+            accept=".pdf,application/pdf"
+            className="sr-only"
+            onChange={(e) => setInvoiceName(e.target.files?.[0]?.name || "")}
+          />
+        </label>
+      </div>
+
+      <div>
+        <label className="mb-1 block text-sm font-medium text-slate-700">
+          Fișier Excel propriu (opțional — PDF-ul și Excelul raportului se generează automat din linkuri)
         </label>
         <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-dashed border-slate-300 px-4 py-3 text-sm text-slate-600 transition hover:border-brand-red">
           <Paperclip className="h-4 w-4" />

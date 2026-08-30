@@ -76,7 +76,7 @@ export function VisibilityCalculator() {
           </h2>
           <p className="mt-3 text-sm text-slate-600">
             Mută slider-ul ca să vezi reach-ul real pentru fiecare pachet. Estimările sunt conservatoare,
-            bazate pe trafic mediu lunar al ziarelor partenere.
+            bazate pe trafic mediu lunar al ziarelor din rețea.
           </p>
 
           <div className="mt-8">

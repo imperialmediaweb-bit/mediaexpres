@@ -63,7 +63,7 @@ export function ArticleTracker({ publishedAt, packageId }: Props) {
         </h3>
       </div>
       <p className="mt-1 text-xs text-slate-500">
-        Cifre estimate pe baza traficului mediu al ziarelor partenere. Pentru
+        Cifre estimate pe baza traficului mediu al ziarelor din rețea. Pentru
         statistici detaliate, vezi raportul PDF trimis pe email.
       </p>
 

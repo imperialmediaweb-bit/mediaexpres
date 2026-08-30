@@ -47,7 +47,7 @@ export default function ReteauaPage() {
           <p className="eyebrow text-brand-gold">Acoperire națională</p>
           <h1 className="h1 mt-3 text-white">Rețeaua MediaExpres</h1>
           <p className="lead mx-auto mt-6 max-w-2xl text-white/85">
-            O rețea solidă de ziare partenere și pagini Facebook, construită în ani pentru a oferi
+            O rețea de ziare proprii și pagini Facebook, construită în ani pentru a oferi
             clienților noștri maximă vizibilitate națională.
           </p>
         </div>
@@ -56,7 +56,7 @@ export default function ReteauaPage() {
       <section className="section bg-white">
         <div className="container">
           <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
-            <StatCard icon={Newspaper} value={`${REGION_COUNTS.Național + REGION_COUNTS.Moldova + REGION_COUNTS.Transilvania + REGION_COUNTS.Muntenia + REGION_COUNTS.Banat}+`} label="ziare partenere" />
+            <StatCard icon={Newspaper} value={`${REGION_COUNTS.Național + REGION_COUNTS.Moldova + REGION_COUNTS.Transilvania + REGION_COUNTS.Muntenia + REGION_COUNTS.Banat}+`} label="ziare proprii" />
             <StatCard icon={Facebook} value="50" label="pagini Facebook asociate" />
             <StatCard icon={Globe} value="4" label="regiuni acoperite" />
             <StatCard icon={MapPin} value="35+" label="județe din România" />

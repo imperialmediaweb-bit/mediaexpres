@@ -6,6 +6,7 @@ import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 import { pingIndexNow } from "@/lib/indexnow";
+import { buildReportPdf, buildReportXlsx } from "@/lib/report-files";
 import { submitToGoogle } from "@/lib/google-indexing";
 
 export const runtime = "nodejs";
@@ -40,6 +41,7 @@ export async function POST(req: NextRequest) {
   const articleTitle = String(form.get("articleTitle") || "").trim();
   const linksRaw = String(form.get("links") || "");
   const file = form.get("file");
+  const invoice = form.get("invoice");
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ ok: false, error: "Emailul clientului nu e valid" }, { status: 400 });
@@ -63,6 +65,7 @@ export async function POST(req: NextRequest) {
   const links = entries.map((e) => e.url);
 
   const hasFile = file instanceof File && file.size > 0;
+  const hasInvoice = invoice instanceof File && invoice.size > 0;
 
   if (links.length === 0 && !hasFile) {
     return NextResponse.json(
@@ -71,7 +74,27 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  let attachments: { filename: string; content: string }[] | undefined;
+  const attachments: { filename: string; content: string }[] = [];
+
+  // Factura, in acelasi email cu raportul. Pana acum raportul pleca de aici,
+  // iar factura din alta pagina (sau din Gmail, de pe telefon) — doua drumuri
+  // pentru o singura comanda. Clientul primeste acum tot ce ii datoram
+  // intr-un singur mesaj: dovada publicarii si documentul contabil.
+  if (hasInvoice) {
+    const f = invoice as File;
+    if (f.size > MAX_FILE_BYTES) {
+      return NextResponse.json({ ok: false, error: "Factura depășește 10MB" }, { status: 400 });
+    }
+    if (f.type && f.type !== "application/pdf") {
+      return NextResponse.json({ ok: false, error: "Factura trebuie să fie PDF" }, { status: 400 });
+    }
+    const buf = Buffer.from(await f.arrayBuffer());
+    attachments.push({
+      filename: f.name || "factura.pdf",
+      content: buf.toString("base64"),
+    });
+  }
+
   if (hasFile) {
     const f = file as File;
     if (f.size > MAX_FILE_BYTES) {
@@ -84,12 +107,39 @@ export async function POST(req: NextRequest) {
       );
     }
     const buf = Buffer.from(await f.arrayBuffer());
-    attachments = [
-      {
-        filename: f.name || "raport-publicare.xlsx",
-        content: buf.toString("base64"),
-      },
-    ];
+    attachments.push({
+      filename: f.name || "raport-publicare.xlsx",
+      content: buf.toString("base64"),
+    });
+  }
+
+  // Raportul in PDF si Excel se genereaza SINGUR din linkuri — nimeni nu mai
+  // are de construit fisiere de mana pentru fiecare comanda. Acelasi generator
+  // ca la descarcarea din contul clientului, deci arata identic peste tot.
+  if (entries.length > 0) {
+    try {
+      const args = {
+        entries,
+        clientName: clientName || null,
+        articleTitle: articleTitle || null,
+        date: new Date(),
+        siteName: SITE.name,
+        siteUrl: SITE.url,
+      };
+      attachments.push(
+        {
+          filename: "raport-publicare.pdf",
+          content: buildReportPdf(args).toString("base64"),
+        },
+        {
+          filename: "raport-publicare.xlsx",
+          content: buildReportXlsx(args).toString("base64"),
+        },
+      );
+    } catch (err) {
+      // Emailul cu linkurile in corp e obligatia; fisierele sunt ambalajul.
+      console.error("[raport] generarea fisierelor a esuat (emailul pleaca):", err);
+    }
   }
 
   // Raportul se salveaza si in DB, ca sa apara permanent in contul clientului
@@ -162,14 +212,15 @@ export async function POST(req: NextRequest) {
           : "Articolul tău este acum live"
       } în <strong>${links.length || 50} de publicații</strong> din rețeaua MediaExpres.</p>
       ${links.length ? `<p>Linkurile, ca să le verifici pe fiecare:</p>${linksHtml}` : ""}
-      ${hasFile ? '<p>Găsești lista completă și în fișierul atașat.</p>' : ""}
+      ${entries.length || hasFile ? '<p>Găsești raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
+      ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, iar backlinkurile rămân active.</p>
       <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul tău: intră pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primești link de conectare).</p>
       <p style="margin-top:24px;">Mulțumim pentru încredere!<br/><strong>Echipa MediaExpres</strong></p>
       `,
     ),
     replyTo: ADMIN_EMAIL,
-    attachments,
+    attachments: attachments.length ? attachments : undefined,
   });
 
   if (!result.ok) {
@@ -179,5 +230,5 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ ok: true, linksCount: links.length, attached: hasFile });
+  return NextResponse.json({ ok: true, linksCount: links.length, attached: attachments.length, invoiceAttached: hasInvoice });
 }

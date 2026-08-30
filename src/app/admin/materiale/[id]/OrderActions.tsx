@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Send, CheckCircle2, FileSpreadsheet, Mail } from "lucide-react";
+import { Loader2, Send, CheckCircle2, FileSpreadsheet, Mail, Paperclip, X } from "lucide-react";
 
 /**
  * Toate actiunile unei comenzi, pe acelasi ecran cu materialele ei.
@@ -27,6 +27,8 @@ export function OrderActions({
 }) {
   const router = useRouter();
   const [links, setLinks] = useState("");
+  const [invoiceName, setInvoiceName] = useState("");
+  const invoiceRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const [mailSubject, setMailSubject] = useState(`Comanda ta — ${articleTitle}`.slice(0, 120));
@@ -73,14 +75,18 @@ export function OrderActions({
       fd.append("clientName", clientName);
       fd.append("articleTitle", articleTitle);
       fd.append("links", links);
+      const inv = invoiceRef.current?.files?.[0];
+      if (inv) fd.append("invoice", inv);
       const r = await fetch("/api/admin/raport", { method: "POST", body: fd });
       const j = await r.json();
       if (!r.ok || !j.ok) throw new Error(j.error || "Eroare");
       setMsg({
         kind: "ok",
-        text: `Raport trimis către ${email} — ${linkCount} linkuri, cu Excelul atașat. Apare și în contul clientului.`,
+        text: `Raport trimis către ${email} — ${linkCount} linkuri, cu PDF-ul și Excelul generate automat${invoiceRef.current?.files?.[0] ? " și factura atașată" : ""}. Apare și în contul clientului.`,
       });
       setLinks("");
+      setInvoiceName("");
+      if (invoiceRef.current) invoiceRef.current.value = "";
       router.refresh();
     } catch (e) {
       setMsg({ kind: "err", text: e instanceof Error ? e.message : "Eroare" });
@@ -204,6 +210,41 @@ export function OrderActions({
           placeholder={"Titlul articolului\nhttps://clujexpres.ro/...\n\nAlt titlu\nhttps://iasiexpres.ro/..."}
           className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 font-mono text-xs focus:border-brand-navy focus:outline-none"
         />
+        {/*
+          Factura, in acelasi email: pana acum raportul pleca de aici, iar
+          factura din Trimite email sau din Gmail — trei taburi pentru o
+          singura comanda. PDF-ul din StartCo se pune aici si clientul
+          primeste raport + factura dintr-un singur mesaj.
+        */}
+        {invoiceName ? (
+          <div className="mt-3 flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            <Paperclip className="h-4 w-4 shrink-0" />
+            <span className="min-w-0 truncate">{invoiceName}</span>
+            <button
+              type="button"
+              aria-label="Scoate factura"
+              onClick={() => {
+                setInvoiceName("");
+                if (invoiceRef.current) invoiceRef.current.value = "";
+              }}
+              className="ml-auto text-emerald-700 hover:text-red-600"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        ) : (
+          <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-medium text-slate-700 hover:border-brand-navy">
+            <Paperclip className="h-4 w-4" />
+            Atașează factura PDF (opțional)
+            <input
+              ref={invoiceRef}
+              type="file"
+              accept=".pdf,application/pdf"
+              className="hidden"
+              onChange={(e) => setInvoiceName(e.target.files?.[0]?.name || "")}
+            />
+          </label>
+        )}
         <div className="mt-2 flex flex-wrap items-center gap-3">
           <button
             type="button"
@@ -215,8 +256,8 @@ export function OrderActions({
             Trimite raportul către {email}
           </button>
           <span className="text-xs text-slate-500">
-            {linkCount > 0 ? `${linkCount} linkuri detectate` : "niciun link încă"} · Excelul se
-            generează și se atașează automat
+            {linkCount > 0 ? `${linkCount} linkuri detectate` : "niciun link încă"} · raportul
+            PDF + Excel se generează automat din linkuri
           </span>
         </div>
       </div>

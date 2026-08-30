@@ -4,7 +4,11 @@ import { RaportForm } from "./RaportForm";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminRapoartePage() {
+export default function AdminRapoartePage({
+  searchParams,
+}: {
+  searchParams?: { email?: string; client?: string; titlu?: string };
+}) {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/rapoarte");
 
@@ -14,12 +18,19 @@ export default function AdminRapoartePage() {
         Raport publicare
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        După ce publici articolul, trimite clientului raportul de aici: lipești
-        linkurile (unul pe linie) și/sau atașezi Excelul tău. Clientul primește
-        un email cu lista clickabilă + fișierul atașat.
+        Totul dintr-un loc: lipești linkurile (unul pe linie), atașezi factura
+        PDF, iar clientul primește un singur email cu lista clickabilă,
+        raportul generat automat în PDF și Excel, plus factura.
       </p>
       <div className="mt-8">
-        <RaportForm />
+        {/* Prefill din pagina comenzii — butonul "Trimite raport + factura"
+            vine incoace cu datele clientului deja puse, ca sa nu le mai
+            copieze nimeni de mana dintr-un tab in altul. */}
+        <RaportForm
+          initialEmail={searchParams?.email || ""}
+          initialClientName={searchParams?.client || ""}
+          initialTitle={searchParams?.titlu || ""}
+        />
       </div>
     </div>
   );

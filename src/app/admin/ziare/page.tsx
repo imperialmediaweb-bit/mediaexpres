@@ -28,7 +28,7 @@ export default function AdminZiarePage() {
         Lista ziarelor
       </h1>
       <p className="mt-2 text-sm text-slate-600">
-        Rețeaua completă de ziare partenere — <strong>confidențial</strong>. Total:{" "}
+        Rețeaua completă de ziare proprii — <strong>confidențial</strong>. Total:{" "}
         <strong>{NEWSPAPERS.length} ziare</strong>.
       </p>
 

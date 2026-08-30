@@ -13,7 +13,7 @@ export default function TermeniPage() {
       <h2 className="font-serif text-2xl font-bold text-brand-navy">1. Obiectul contractului</h2>
       <p>
         MediaExpres oferă servicii de distribuție a comunicatelor de presă pe o rețea de ziare și
-        pagini Facebook partenere, conform pachetului ales de client.
+        paginile de Facebook asociate acestora, conform pachetului ales de client.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">2. Comandă și plată</h2>
@@ -56,9 +56,9 @@ export default function TermeniPage() {
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">5. Permanența publicării</h2>
       <p>
-        Articolele rămân publicate pe site-urile partenere pe durata nelimitată, cu condiția ca
-        site-urile respective să fie active. Nu garantăm funcționarea pe termen nelimitat a fiecărui
-        site partener individual.
+        Articolele rămân publicate pe site-urile din rețeaua MediaExpres pe durată nelimitată, cu
+        condiția ca site-urile respective să fie active. Nu garantăm funcționarea pe termen
+        nelimitat a fiecărui site individual.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">6. Raport de publicare</h2>
