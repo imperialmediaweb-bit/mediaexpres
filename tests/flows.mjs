@@ -86,6 +86,12 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.waitForTimeout(400);
   check(sent === null, "email invalid: blocat local, fara cerere la server");
   await p.locator('input[type="email"]').first().fill("test@firma.ro");
+  // Fara declaratie nu pleaca nici plata cu cardul — verificam intai ca chiar
+  // blocheaza, ca bifa sa nu ramana un element decorativ.
+  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
+  await p.waitForTimeout(500);
+  check(sent === null, "fara declaratie: cardul nu pleaca la Stripe");
+  await p.locator('input[name="contentDeclaration"]').first().check();
   await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(900);
   check(sent?.email === "test@firma.ro" && sent?.packageId === "promo-50", `trimis la server: ${JSON.stringify(sent)}`);
@@ -144,6 +150,10 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.locator("#oferta button", { hasText: "Comandă acum" }).first().click();
   await p.waitForTimeout(400);
   await p.locator("#oferta input[type=email]").fill("punte@firma.ro");
+  // Declaratia de continut se cere de-acum INAINTE de orice metoda de plata,
+  // card sau OP: pe card banii intra primii si o restituire prin Stripe
+  // dureaza saptamani, deci temeiul trebuie semnat inainte, nu dupa.
+  await p.locator('#oferta input[name="contentDeclaration"]').check();
   await p.waitForTimeout(200);
   // click pe OP fara sa navigam efectiv (route-ul de mai sus nu opreste nav,
   // dar cererea keepalive pleaca inainte)
@@ -354,7 +364,7 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(await p.locator("text=Le-ai văzut").isVisible(), "blocul de comanda apare sub lista");
 
   const yCta = (await p.locator("text=Le-ai văzut").boundingBox()).y;
-  const yMail = (await p.locator("text=Trimite-mi lista pe email").boundingBox()).y;
+  const yMail = (await p.locator("text=Primește lista în PDF").boundingBox()).y;
   check(yCta < yMail, "comanda vine inaintea formularului de email");
 
   // Lista trebuie sa ramana publica — a fost ascunsa dupa formular candva.
@@ -362,7 +372,7 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(externe >= 45, `lista ramane publica (${externe} linkuri catre ziare)`);
 
   // Formularul nu se sterge, doar se retrogradeaza: e util cui nu e decis.
-  check(await p.locator("text=Trimite-mi lista pe email").isVisible(), "formularul ramane disponibil");
+  check(await p.locator("text=Primește lista în PDF").isVisible(), "formularul de PDF ramane disponibil");
   await p.close();
 }
 

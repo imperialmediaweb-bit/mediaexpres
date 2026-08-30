@@ -2,7 +2,13 @@
 
 import { useState } from "react";
 import { Loader2, Upload, X, CheckCircle2, FileCheck } from "lucide-react";
-import { signAndUpload, MAX_UPLOAD_BYTES as MAX_BYTES, type Uploaded } from "@/lib/upload-client";
+import {
+  signAndUpload,
+  MAX_UPLOAD_BYTES as MAX_BYTES,
+  reportUploadError,
+  UPLOAD_FALLBACK_HINT,
+  type Uploaded,
+} from "@/lib/upload-client";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
@@ -65,7 +71,10 @@ export function TransferForm({
         setImages(next);
       }
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Eroare la încărcare");
+      const msg = e instanceof Error ? e.message : "Eroare la încărcare";
+      // Aflam si noi, pe loc. Altfel eroarea ramane doar pe ecranul lui.
+      reportUploadError(`comanda/transfer:${kind}`, msg);
+      setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
     } finally {
       setUploading(null);
     }

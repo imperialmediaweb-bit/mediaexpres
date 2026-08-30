@@ -4,7 +4,8 @@ import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import Link from "next/link";
-import { Loader2, AlertCircle, Mail, ArrowRight } from "lucide-react";
+import { Loader2, AlertCircle, Mail, ArrowRight, Download, MessageCircle } from "lucide-react";
+import { SITE } from "@/data/site";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -63,18 +64,67 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
           <Mail className="h-10 w-10 text-green-600" />
         </div>
         <h3 className="font-serif text-2xl font-semibold text-brand-navy">
-          Gata — te ducem la listă
+          Gata — lista e a ta
         </h3>
         <p className="text-slate-600">
-          Vezi imediat toate cele 50 de publicații, cu link către fiecare. Ți-am trimis-o
-          și pe email, ca s-o ai salvată.
+          Ți-am trimis-o pe email, cu PDF-ul atașat. O poți vedea și descărca și de aici.
         </p>
-        <Button variant="accent" size="lg" asChild className="mt-2">
-          <Link href={successHref || "/reteaua-noastra"}>
-            {successCtaLabel || "Vezi lista acum"}
-            <ArrowRight className="h-4 w-4" />
-          </Link>
-        </Button>
+
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:justify-center">
+          <Button variant="outline" asChild>
+            <Link href={successHref || "/reteaua-noastra"}>
+              {successCtaLabel || "Vezi lista"}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </Button>
+          {/*
+            PDF-ul se ofera AICI, nu numai pe email: omul e in fata ecranului
+            acum, iar emailul poate intra in spam sau poate fi deschis maine.
+            E si documentul pe care il duce mai departe — la sef, la contabil —
+            fara sa trimita un link catre site.
+          */}
+          <Button variant="outline" asChild>
+            <a href="/api/lista-pdf">
+              <Download className="h-4 w-4" />
+              Descarcă PDF-ul
+            </a>
+          </Button>
+        </div>
+
+        {/*
+          Pana acum ecranul asta se termina aici, cu lista in mana si niciun
+          mod de a comanda. Omul convins trebuia sa se intoarca singur pe site
+          si sa caute — cei mai multi nu o faceau. Cele trei cai de plata sunt
+          exact cele de pe pagina de oferta, ca sa nu piardem pe nimeni intre
+          "m-am lamurit" si "cumpar".
+        */}
+        <div className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <p className="text-sm font-semibold text-brand-navy">
+            Vrei să comanzi? 500 lei, factură fiscală, publicare în 24 de ore lucrătoare.
+          </p>
+          <div className="mt-3 flex flex-col gap-2">
+            <Button variant="accent" asChild>
+              <Link href="/oferta-500">Plătesc cu cardul — 500 lei</Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <Link href="/comanda/transfer?pachet=promo-50">
+                Comandă prin ordin de plată (factură întâi)
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
+              <a
+                href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
+                  "Salut! Am primit lista cu cele 50 de ziare și vreau să comand publicarea unui articol.",
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MessageCircle className="h-4 w-4" />
+                Comandă pe WhatsApp
+              </a>
+            </Button>
+          </div>
+        </div>
       </div>
     );
   }

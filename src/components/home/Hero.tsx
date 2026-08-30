@@ -34,7 +34,7 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-gold opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-gold" />
             </span>
-            Distribuție în 224h lucrătoare lucrătoare
+            Distribuție în 24 de ore lucrătoare
           </div>
 
           <h1 className="mt-6 font-serif text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
@@ -55,7 +55,7 @@ export function Hero() {
                 />
               </svg>
             </span>{" "}
-            românești în 224h lucrătoare lucrătoare.
+            românești în 24 de ore lucrătoare.
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/85">
@@ -84,7 +84,7 @@ export function Hero() {
           </div>
 
           <ul className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/80">
-            {["Livrare 24h lucrătoare", "Raport PDF inclus", "Publicare permanentă", "50 backlinks SEO"].map(
+            {["Livrare 24 de ore lucrătoare", "Raport PDF inclus", "Publicare permanentă", "50 backlinks SEO"].map(
               (item) => (
                 <li key={item} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-brand-gold" /> {item}

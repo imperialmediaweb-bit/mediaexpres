@@ -25,7 +25,7 @@ import { OfferChatBubble } from "@/components/OfferChatBubble";
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
   description:
-    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 224h lucrătoare lucrătoare.",
+    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 24 de ore lucrătoare.",
   robots: { index: false, follow: false },
 };
 
@@ -185,7 +185,7 @@ export default function Oferta500Page() {
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Card sau ordin de plată • factură fiscală • publicare în 224h lucrătoare lucrătoare
+              Card sau ordin de plată • factură fiscală • publicare în 24 de ore lucrătoare
             </p>
           </div>
         </div>
@@ -202,7 +202,7 @@ export default function Oferta500Page() {
                 jos in pagina. */}
             <Stat value="50" label="domenii .ro proprii" />
             <Stat value="1.200+" label="articole publicate în rețea" />
-            <Stat value="24h lucrătoare" label="până la publicare" />
+            <Stat value="24 de ore lucrătoare" label="până la publicare" />
           </div>
         </div>
       </section>

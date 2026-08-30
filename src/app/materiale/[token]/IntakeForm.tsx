@@ -2,6 +2,13 @@
 
 import { useState } from "react";
 import { STANDARD_PACKAGES } from "@/data/packages";
+import {
+  signAndUpload,
+  MAX_UPLOAD_BYTES,
+  reportUploadError,
+  UPLOAD_FALLBACK_HINT,
+  type Uploaded,
+} from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
@@ -60,12 +67,47 @@ export function IntakeForm({
     articleTopic: "",
   });
   const [contentDeclaration, setContentDeclaration] = useState(false);
+  // Formularul asta e cel pe care ajung leadurile din Facebook si, pana acum,
+  // NU avea deloc camp de poze. Clientul citea "pana la 3 poze" in oferta,
+  // ajungea aici si nu gasea unde sa le puna — de-aia "nu pot urca pozele".
+  const [images, setImages] = useState<Uploaded[]>([]);
+  const [uploading, setUploading] = useState(false);
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
 
   function set(field: keyof FormData, value: string) {
     setData((prev) => ({ ...prev, [field]: value }));
+  }
+
+  async function handleUpload(list: FileList | null) {
+    if (!list?.length) return;
+    setError("");
+    setUploading(true);
+    try {
+      const next = [...images];
+      for (const file of Array.from(list)) {
+        if (next.length >= 3) break;
+        if (file.type && !file.type.startsWith("image/")) {
+          setError(`„${file.name}" nu pare să fie o imagine.`);
+          continue;
+        }
+        if (file.size > MAX_UPLOAD_BYTES) {
+          setError(
+            `„${file.name}" are ${(file.size / 1024 / 1024).toFixed(1)}MB, peste limita de 8MB. ${UPLOAD_FALLBACK_HINT}`,
+          );
+          continue;
+        }
+        next.push(await signAndUpload(file));
+      }
+      setImages(next);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Încărcarea a eșuat";
+      reportUploadError("materiale/intake", msg);
+      setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
+    } finally {
+      setUploading(false);
+    }
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -88,7 +130,7 @@ export function IntakeForm({
       const res = await fetch("/api/materiale/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, ...data, contentDeclaration }),
+        body: JSON.stringify({ token, ...data, contentDeclaration, images }),
       });
       const json = await res.json();
       if (!json.ok) throw new Error(json.error || "Eroare la trimitere");
@@ -108,7 +150,7 @@ export function IntakeForm({
           Materialele au fost trimise!
         </h2>
         <p className="mt-3 text-slate-600">
-          Publicăm pe 50 de ziare în <strong>24h lucrătoare</strong>. Vei primi raportul PDF cu toate
+          Publicăm pe 50 de ziare în <strong>24 de ore lucrătoare</strong>. Vei primi raportul PDF cu toate
           link-urile pe emailul de facturare.
         </p>
       </div>
@@ -275,6 +317,47 @@ export function IntakeForm({
         )}
       </section>
 
+      <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow">
+        <h2 className="mb-1 font-serif text-lg font-bold text-brand-navy">
+          Poze pentru articol ({images.length}/3)
+        </h2>
+        <p className="mb-4 text-sm text-slate-600">
+          Opțional. Dacă nu ai poze, publicăm fără — articolul apare oricum pe toate ziarele.
+        </p>
+        <label className="inline-flex cursor-pointer items-center gap-2 rounded-xl border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-red">
+          {uploading ? "Se încarcă..." : "Adaugă poze"}
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            className="hidden"
+            disabled={uploading || images.length >= 3}
+            onChange={(e) => {
+              void handleUpload(e.target.files);
+              e.target.value = "";
+            }}
+          />
+        </label>
+        {images.length > 0 && (
+          <div className="mt-3 flex flex-wrap gap-3">
+            {images.map((img, i) => (
+              <div key={img.url} className="relative">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={img.url} alt="" className="h-24 w-32 rounded-lg border border-slate-200 object-cover" />
+                <button
+                  type="button"
+                  onClick={() => setImages(images.filter((_, j) => j !== i))}
+                  aria-label="Șterge poza"
+                  className="absolute -right-2 -top-2 rounded-full bg-white px-1.5 text-sm shadow ring-1 ring-slate-200 hover:text-red-600"
+                >
+                  ×
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
       <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
 
       {error && (
@@ -290,7 +373,7 @@ export function IntakeForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în 224h lucrătoare lucrătoare. Factura se emite pe email după publicare.
+        Publicăm în 24 de ore lucrătoare. Factura se emite pe email după publicare.
       </p>
     </form>
   );

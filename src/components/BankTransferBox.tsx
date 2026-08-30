@@ -28,7 +28,7 @@ export function BankTransferBox({ note }: { note: string }) {
         <a href={`mailto:${SITE.email}`} className="font-semibold text-brand-red hover:underline">
           {SITE.email}
         </a>{" "}
-        sau pe WhatsApp la <strong>{SITE.phone}</strong>. Publicăm în maximum 24 de ore lucrătoare
+        sau pe WhatsApp la <strong>{SITE.phone}</strong>. Publicăm în maximum 24 de ore
         lucrătoare și livrăm împreună raportul cu toate linkurile și factura fiscală.
         Abonamentele lunare se plătesc doar cu cardul.
       </p>

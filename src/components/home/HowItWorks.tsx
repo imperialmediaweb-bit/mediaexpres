@@ -17,7 +17,7 @@ const STEPS = [
     icon: Send,
     title: "Publicăm pe 50 ziare",
     description:
-      "În maximum 24h lucrătoare publicăm pe rețeaua noastră + distribuim automat pe 50 pagini Facebook.",
+      "În maximum 24 de ore lucrătoare publicăm pe rețeaua noastră + distribuim automat pe 50 pagini Facebook.",
   },
   {
     icon: FileCheck2,
@@ -35,7 +35,7 @@ export function HowItWorks() {
           <p className="eyebrow">Simplu ca 1-2-3-4</p>
           <h2 className="h2 mt-2">Cum funcționează</h2>
           <p className="lead mt-4">
-            Proces simplu, rezultate mari. În mai puțin de 24h lucrătoare ești pe prima pagină a celor 50 de
+            Proces simplu, rezultate mari. În mai puțin de 24 de ore lucrătoare ești pe prima pagină a celor 50 de
             ziare din rețea.
           </p>
         </div>

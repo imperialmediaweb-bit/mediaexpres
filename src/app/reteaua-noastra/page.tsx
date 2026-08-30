@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { MapPin, Newspaper, Facebook, Globe, Mail } from "lucide-react";
+import { MapPin, Newspaper, Facebook, Globe, FileDown } from "lucide-react";
 import { RequestListModal } from "@/components/forms/RequestListModal";
 import { REGION_COUNTS } from "@/data/newspapers";
 import { CountyGrid } from "@/components/CountyGrid";
@@ -168,22 +168,26 @@ export default function ReteauaPage() {
           */}
           <div className="mt-16 rounded-xl border border-slate-200 bg-white p-6 text-center">
             <p className="flex items-center justify-center gap-2 font-semibold text-brand-navy">
-              <Mail className="h-4 w-4 text-brand-gold" />
-              Nu comanzi acum?
+              <FileDown className="h-4 w-4 text-brand-gold" />
+              Vrei lista în PDF?
             </p>
             <p className="mx-auto mt-2 max-w-xl text-sm text-slate-600">
-              Îți trimitem lista pe email, cu link către fiecare ziar și specificațiile
-              articolului — o ai la îndemână când te hotărăști.
+              Lasă-ne adresa de email și primești imediat lista în PDF, cu link către
+              fiecare ziar și specificațiile articolului — documentul pe care îl poți
+              trimite mai departe colegilor sau șefului.
             </p>
             <div className="mt-4">
               <RequestListModal
                 trigger={
                   <Button variant="outline">
-                    <Mail className="h-4 w-4" /> Trimite-mi lista pe email
+                    <FileDown className="h-4 w-4" /> Primește lista în PDF
                   </Button>
                 }
               />
             </div>
+            <p className="mt-3 text-xs text-slate-500">
+              PDF-ul ajunge pe email și îl poți descărca și direct, pe ecranul următor.
+            </p>
           </div>
         </div>
       </section>

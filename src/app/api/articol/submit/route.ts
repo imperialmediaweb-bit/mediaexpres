@@ -172,7 +172,7 @@ export async function POST(req: NextRequest) {
   // Confirmarea catre client nu trebuie sa blocheze raspunsul — materialele au ajuns deja.
   sendEmail({
     to: order.email,
-    subject: "Materialele au ajuns — publicăm în 224h lucrătoare lucrătoare",
+    subject: "Materialele au ajuns — publicăm în 24 de ore lucrătoare",
     html: wrapEmail(
       "Am primit articolul tău",
       `

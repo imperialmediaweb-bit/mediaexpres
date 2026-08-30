@@ -8,15 +8,22 @@ export interface CloudinaryConfig {
 }
 
 export function getCloudinaryConfig(): CloudinaryConfig | null {
-  const cloudName = process.env.CLOUDINARY_CLOUD_NAME;
-  const apiKey = process.env.CLOUDINARY_API_KEY;
-  const apiSecret = process.env.CLOUDINARY_API_SECRET;
+  // .trim() pe fiecare, nu din exces de prudenta: un singur spatiu sau enter
+  // lipit la finalul secretului cand e copiat in panoul de variabile face
+  // SHA1-ul sa iasa altfel, iar Cloudinary respinge TOATE incarcarile cu
+  // "Invalid Signature". Simptomul e exact cel raportat — niciun client nu
+  // reuseste sa urce poze — si nu se vede nicaieri in log.
+  const cloudName = process.env.CLOUDINARY_CLOUD_NAME?.trim();
+  const apiKey = process.env.CLOUDINARY_API_KEY?.trim();
+  const apiSecret = process.env.CLOUDINARY_API_SECRET?.trim();
   if (!cloudName || !apiKey || !apiSecret) return null;
   return {
     cloudName,
     apiKey,
     apiSecret,
-    uploadFolder: process.env.CLOUDINARY_FOLDER || "mediaexpres",
+    // Fara "/" la capete: folderul intra direct in semnatura, iar un slash in
+    // plus schimba si semnatura, si calea din Cloudinary.
+    uploadFolder: (process.env.CLOUDINARY_FOLDER?.trim() || "mediaexpres").replace(/^\/+|\/+$/g, ""),
   };
 }
 

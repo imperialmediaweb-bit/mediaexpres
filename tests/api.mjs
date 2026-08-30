@@ -128,6 +128,18 @@ t("pagina OP cu pachet inventat -> 404", (await get("/comanda/transfer?pachet=in
 t("rewrite judet functioneaza", (await get("/publicare-comunicat-cluj")).status === 200);
 t("rewrite industrie functioneaza", (await get("/comunicate-presa-imobiliare")).status === 200);
 t("judet inexistent -> 404", (await get("/judet/atlantida")).status === 404);
+// PDF-ul cu lista: ruta e deschisa intentionat (aceleasi adrese sunt libere pe
+// /reteaua-noastra), dar trebuie sa se descarce ca fisier, nu sa se deschida
+// ca pagina — altfel omul nu-l are pe telefon cand vrea sa-l trimita mai
+// departe, adica exact pentru asta exista.
+{
+  const r = await fetch(B + "/api/lista-pdf");
+  const buf = Buffer.from(await r.arrayBuffer());
+  t("lista PDF: raspunde 200", r.status === 200);
+  t("lista PDF: e application/pdf", (r.headers.get("content-type") || "").includes("application/pdf"));
+  t("lista PDF: se descarca, nu se deschide", /attachment/i.test(r.headers.get("content-disposition") || ""));
+  t("lista PDF: are continut valid", buf.length > 3000 && buf.subarray(0, 5).toString() === "%PDF-");
+}
 t("sitemap e XML", (await get("/sitemap.xml")).ct.includes("xml"));
 t("robots.txt e text", (await get("/robots.txt")).ct.includes("text"));
 t("pagina inexistenta -> 404", (await get("/pagina-care-nu-exista")).status === 404);

@@ -2,6 +2,11 @@
 
 import { useState } from "react";
 import { Loader2, Sparkles, Upload, X, Star, CheckCircle2 } from "lucide-react";
+import {
+  reportUploadError,
+  UPLOAD_FALLBACK_HINT,
+  MAX_UPLOAD_BYTES,
+} from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
@@ -110,7 +115,24 @@ export function ArticleForm({
       const uploaded: UploadedImage[] = [];
 
       for (const file of picked) {
-        if (!file.type.startsWith("image/")) continue;
+        // NU sarim peste fisierele fara `type`: telefoanele trimit des un tip
+        // gol sau neasteptat (HEIC de pe iPhone, unele galerii Android), iar
+        // `continue` insemna ca poza dispare fara niciun mesaj — omul apasa,
+        // nu se intampla nimic si crede ca site-ul e stricat. Lasam Cloudinary
+        // sa refuze ce nu e imagine; el macar spune de ce.
+        if (file.type && !file.type.startsWith("image/")) {
+          setError(`„${file.name}" nu pare să fie o imagine.`);
+          continue;
+        }
+        // Pozele facute cu telefonul trec des de 10MB, iar Cloudinary le
+        // refuza cu un mesaj in engleza. Le oprim aici, cu o explicatie pe
+        // care omul o poate urma: sa o trimita altfel, nu sa se blocheze.
+        if (file.size > MAX_UPLOAD_BYTES) {
+          setError(
+            `„${file.name}" are ${(file.size / 1024 / 1024).toFixed(1)}MB, peste limita de 8MB. ${UPLOAD_FALLBACK_HINT}`,
+          );
+          continue;
+        }
         const form = new FormData();
         form.append("file", file);
         form.append("api_key", sign.apiKey);
@@ -131,7 +153,9 @@ export function ArticleForm({
 
       if (uploaded.length) setImages((prev) => [...prev, ...uploaded]);
     } catch (e) {
-      setError(e instanceof Error ? e.message : "Încărcarea a eșuat");
+      const msg = e instanceof Error ? e.message : "Încărcarea a eșuat";
+      reportUploadError("articol/poze", msg);
+      setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
     } finally {
       setUploading(false);
     }

@@ -236,6 +236,12 @@ export function buildReportPdf(args: {
   date: Date;
   siteName: string;
   siteUrl: string;
+  /** Subtitlul de sub sigla. Implicit e raportul de publicare. */
+  subtitle?: string;
+  /** Eticheta de dinaintea numarului de randuri (implicit "Publicatii"). */
+  countLabel?: string;
+  /** Randuri libere puse dupa antet, inainte de lista. */
+  intro?: string[];
 }): Buffer {
   const PAGE_H = 842; // A4 in puncte
   const PAGE_W = 595;
@@ -246,14 +252,18 @@ export function buildReportPdf(args: {
   type Line = [string, "F1" | "F2", number];
   const lines: Line[] = [];
   lines.push([args.siteName.toUpperCase(), "F2", 18]);
-  lines.push(["Raport de publicare", "F1", 11]);
+  lines.push([args.subtitle ?? "Raport de publicare", "F1", 11]);
   lines.push(["", "F1", 11]);
   if (args.clientName) lines.push([`Client: ${args.clientName}`, "F1", 11]);
   if (args.articleTitle) {
     for (const l of wrap(`Campanie: ${args.articleTitle}`, 80)) lines.push([l, "F1", 11]);
   }
   lines.push([`Data: ${args.date.toLocaleDateString("ro-RO")}`, "F1", 11]);
-  lines.push([`Publicatii: ${args.entries.length}`, "F1", 11]);
+  lines.push([`${args.countLabel ?? "Publicatii"}: ${args.entries.length}`, "F1", 11]);
+  for (const l of args.intro ?? []) {
+    if (!l) lines.push(["", "F1", 11]);
+    else for (const w of wrap(l, 88)) lines.push([w, "F1", 10]);
+  }
   lines.push(["", "F1", 11]);
 
   args.entries.forEach((e, i) => {

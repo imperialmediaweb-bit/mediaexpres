@@ -2,9 +2,9 @@ export const SITE = {
   name: "MediaExpres",
   domain: "mediaexpress.ro",
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro",
-  tagline: "Articolul tău în 50 de ziare românești în 224h lucrătoare lucrătoare",
+  tagline: "Articolul tău în 50 de ziare românești în 24 de ore lucrătoare",
   description:
-    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 224h lucrătoare lucrătoare, raport PDF, linkuri permanente.",
+    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 24 de ore lucrătoare, raport PDF, linkuri permanente.",
   email: "contact@mediaexpress.ro",
   phone: "+40 758 169 388",
   // Acelasi numar, in formatul cerut de wa.me: prefix de tara fara "+" si fara spatii.
@@ -64,6 +64,6 @@ export const FOOTER_LINKS = {
 export const STATS = [
   { value: "50+", label: "ziare partenere" },
   { value: "50", label: "pagini Facebook" },
-  { value: "24h lucrătoare", label: "timp de livrare" },
+  { value: "24 de ore lucrătoare", label: "timp de livrare" },
   { value: "10k+", label: "articole publicate" },
 ];

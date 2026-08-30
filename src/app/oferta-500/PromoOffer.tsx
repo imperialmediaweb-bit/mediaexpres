@@ -4,6 +4,11 @@ import { useState, useSyncExternalStore } from "react";
 import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
+import {
+  CONTENT_DECLARATION,
+  CONTENT_DECLARATION_ERROR,
+  CONTENT_DECLARATION_WARNING,
+} from "@/lib/content-policy";
 import { SITE } from "@/data/site";
 
 // Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
@@ -48,6 +53,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   // mai departe — omul are un camp mai putin de scris la Stripe.
   const [askEmail, setAskEmail] = useState(false);
   const [email, setEmail] = useState("");
+  const [declar, setDeclar] = useState(false);
 
   const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
@@ -73,6 +79,15 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
     const clean = email.trim();
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
       setError("Scrie o adresă de email validă — acolo primești factura.");
+      return;
+    }
+    // La card, banii intra INAINTE sa vedem articolul — asa functioneaza
+    // Stripe. Nu putem verifica textul mai devreme, dar putem cere declaratia
+    // mai devreme: daca se dovedeste ca nu se poate publica, temeiul de a nu
+    // restitui exista deja, semnat inainte de plata. Pe transfer bancar
+    // articolul se verifica efectiv inainte sa plece vreun leu.
+    if (!declar) {
+      setError(CONTENT_DECLARATION_ERROR);
       return;
     }
     setLoading(true);
@@ -221,6 +236,23 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             serviciu B2B de 500 de lei, vrea ordin de plata si factura. Optiunea
             exista, dar nu o vedea nimeni.
           */}
+          <label className="mt-4 flex items-start gap-2.5 rounded-lg border border-amber-300/40 bg-amber-400/10 p-3 text-left">
+            <input
+              type="checkbox"
+              name="contentDeclaration"
+              checked={declar}
+              onChange={(ev) => setDeclar(ev.target.checked)}
+              className="mt-0.5 h-4 w-4 shrink-0 accent-brand-gold"
+            />
+            <span className="text-xs leading-relaxed text-white/85">
+              {CONTENT_DECLARATION}{" "}
+              <a href="/legal/termeni" target="_blank" rel="noreferrer" className="font-semibold text-brand-gold underline">
+                Regulile de conținut
+              </a>
+              <span className="mt-1 block text-white/60">{CONTENT_DECLARATION_WARNING}</span>
+            </span>
+          </label>
+
           <p className="mt-4 text-center text-sm font-semibold text-white">
             Cum plătești?
           </p>
@@ -248,11 +280,18 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 // Emailul scris mai sus pleaca in link: altfel omul care alege
                 // OP il scrie a doua oara pe formular — frictiune gratuita.
                 href={`/comanda/transfer?pachet=${offer.packageId}${/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) ? `&email=${encodeURIComponent(email.trim())}` : ""}`}
-                onClick={() => {
+                onClick={(ev) => {
                   // Puntea telefon -> birou: cine alege OP primeste pe loc un
                   // email cu datele de plata si linkul precompletat, ca sa
                   // poata termina de pe alt dispozitiv. keepalive: cererea
                   // supravietuieste navigarii care incepe chiar acum.
+                  if (!declar) {
+                    // Acelasi prag ca la card: fara declaratie nu incepe nicio
+                    // comanda, indiferent de metoda de plata.
+                    ev.preventDefault();
+                    setError(CONTENT_DECLARATION_ERROR);
+                    return;
+                  }
                   const clean = email.trim();
                   if (/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
                     void fetch("/api/oferta/continua", {
@@ -355,7 +394,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             publicare.
           </li>
           <li>
-            <strong className="text-white">3.</strong> Publicăm în maximum 24 de ore lucrătoare
+            <strong className="text-white">3.</strong> Publicăm în maximum 24 de ore
             lucrătoare, pe toate ziarele.{" "}
             <span className="text-white/60">
               (La plata prin OP, cronometrul pornește după ce confirmăm încasarea în

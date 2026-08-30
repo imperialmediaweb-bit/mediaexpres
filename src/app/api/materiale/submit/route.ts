@@ -28,6 +28,10 @@ const schema = z.object({
     errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
   }),
   articleTopic: z.string().max(2000).optional(),
+  images: z
+    .array(z.object({ url: z.string().url().max(500), name: z.string().max(200) }))
+    .max(3)
+    .default([]),
 });
 
 export async function POST(req: NextRequest) {
@@ -86,6 +90,12 @@ export async function POST(req: NextRequest) {
         ${kv("Email facturare", d.firmInvoiceEmail)}
         ${kv("Pachet", pkgLabel)}
         ${kv("Lead FB", `${lead.name} — ${lead.email} — ${lead.phone}`)}
+        ${kv(
+          "Poze",
+          d.images.length
+            ? d.images.map((i) => `<a href="${i.url}">${i.name}</a>`).join("<br/>")
+            : "fără",
+        )}
       </table>
       <div style="background:#0B2545;color:white;padding:16px;border-radius:8px;margin:16px 0;">
         <p style="margin:0 0 8px;font-size:12px;opacity:0.7;">📋 Copy-paste direct în SmartBill:</p>

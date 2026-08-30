@@ -25,7 +25,7 @@ export async function generateMetadata({
   if (!county) return { title: "Pagina nu există" };
 
   const title = `Publicare comunicat de presă în ${county.name} — MediaExpres`;
-  const description = `Publică-ți comunicatul de presă pe ziarele din județul ${county.name} în 224h lucrătoare lucrătoare. Pachet Local de la 150 RON, Regional 500 RON sau Național 1500 RON pe 50 ziare. Plată online cu cardul.`;
+  const description = `Publică-ți comunicatul de presă pe ziarele din județul ${county.name} în 24 de ore lucrătoare. Pachet Local de la 150 RON, Regional 500 RON sau Național 1500 RON pe 50 ziare. Plată online cu cardul.`;
 
   return {
     title,
@@ -59,7 +59,7 @@ const STEPS = [
   },
   {
     icon: CheckCircle2,
-    title: "Publicare în 224h lucrătoare lucrătoare",
+    title: "Publicare în 24 de ore lucrătoare",
     text: "Echipa noastră publică pe ziarele alese. Primești email cu toate URL-urile + raport PDF.",
   },
 ];
@@ -162,7 +162,7 @@ export default function CountyPage({
                 `Publicare pe ziarul județean ${county.name}`,
                 "Distribuție Facebook județeană",
                 "Link permanent + raport URL",
-                "Livrare în 224h lucrătoare lucrătoare",
+                "Livrare în 24 de ore lucrătoare",
               ]}
             />
             <PriceCard
@@ -174,7 +174,7 @@ export default function CountyPage({
                 `${regionLabel[county.region]} — 10 ziare`,
                 "Distribuție pe paginile FB asociate",
                 "Linkuri permanente + raport PDF",
-                "Livrare în 224h lucrătoare lucrătoare",
+                "Livrare în 24 de ore lucrătoare",
               ]}
               highlighted
             />
@@ -187,7 +187,7 @@ export default function CountyPage({
                 "Publicare pe rețeaua națională (50 ziare)",
                 "Distribuție FB extinsă",
                 "Raport PDF complet cu toate URL-urile",
-                "Livrare în 224h lucrătoare lucrătoare",
+                "Livrare în 24 de ore lucrătoare",
               ]}
             />
           </div>
@@ -229,7 +229,7 @@ export default function CountyPage({
           </h2>
           <p className="mt-4 max-w-xl mx-auto text-white/80">
             Plătești online cu cardul, primești email de confirmare în 30 de
-            secunde. Articolul tău e publicat în maximum 24h lucrătoare.
+            secunde. Articolul tău e publicat în maximum 24 de ore lucrătoare.
           </p>
           <div className="mt-8 flex flex-wrap justify-center gap-3">
             <Button variant="gold" size="lg" asChild>

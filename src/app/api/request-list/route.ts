@@ -6,6 +6,7 @@ import { users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 import { buildListEmail, LIST_EMAIL_SUBJECT } from "@/lib/list-email";
+import { buildNewspaperListPdf, LIST_PDF_FILENAME } from "@/lib/newspaper-list-pdf";
 import { promoDeadlineLabel } from "@/data/packages";
 
 export const runtime = "nodejs";
@@ -51,11 +52,26 @@ export async function POST(req: NextRequest) {
 
   // 1) Email initial: LISTA COMPLETA, direct in email, din sablonul unic
   // (lib/list-email.ts). Nu promitem apeluri — nu suna nimeni pe nimeni.
+  // PDF-ul merge atasat, nu doar ca link: omul care primeste lista o duce mai
+  // departe — la sef, la contabil, la asociat — si un atasament se retrimite
+  // pe WhatsApp, un link catre site nu. Generarea e ieftina (acelasi cod ca
+  // raportul de publicare), dar daca totusi crapa, emailul pleaca fara PDF:
+  // lista intreaga e oricum in corpul mesajului.
+  let listPdf: string | null = null;
+  try {
+    listPdf = buildNewspaperListPdf().toString("base64");
+  } catch (err) {
+    console.error("[request-list] PDF-ul listei nu s-a generat:", err);
+  }
+
   await sendEmail({
     to: data.email,
     subject: LIST_EMAIL_SUBJECT,
     html: buildListEmail(firstName),
     replyTo: ADMIN_EMAIL,
+    ...(listPdf
+      ? { attachments: [{ filename: LIST_PDF_FILENAME, content: listPdf }] }
+      : {}),
   });
 
   // 2) Notificare admin — lead nou

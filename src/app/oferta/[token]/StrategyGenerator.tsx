@@ -107,7 +107,7 @@ export function StrategyGenerator({
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "eroare necunoscuta";
       setError(
-        `Imi pare rau, am o problema tehnica acum (${msg}). Scrieti-ne la contact@mediaexpress.ro si va trimitem strategia in 24h lucrătoare.`
+        `Imi pare rau, am o problema tehnica acum (${msg}). Scrieti-ne la contact@mediaexpress.ro si va trimitem strategia in 24 de ore lucrătoare.`
       );
     } finally {
       clearInterval(stepTimer);
@@ -117,8 +117,8 @@ export function StrategyGenerator({
 
   return (
     <section className="relative overflow-hidden bg-gradient-to-br from-slate-50 via-amber-50/30 to-rose-50/30 py-16 md:py-20">
-      <div className="pointer-events-none absolute -top-24 -right-24h lucrătoare-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-24 -left-24h lucrătoare-96 w-96 rounded-full bg-rose-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -top-24 -right-24 h-96 w-96 rounded-full bg-amber-200/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-24 -left-24 h-96 w-96 rounded-full bg-rose-200/40 blur-3xl" />
 
       <div className="container relative max-w-5xl">
         <div className="text-center">

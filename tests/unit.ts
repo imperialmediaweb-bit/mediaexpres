@@ -18,12 +18,15 @@ import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
 import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
+import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
 import {
   screenContent,
   CONTENT_DECLARATION,
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
 import zlib from "node:zlib";
+import fs from "node:fs";
+import path from "node:path";
 import { createHash } from "node:crypto";
 
 let n = 0;
@@ -450,6 +453,97 @@ console.log("\n########## N. VERIFICARE INAINTE DE PLATA ##########");
     CONTENT_DECLARATION.includes("cancer") &&
       /nu se restituie/i.test(CONTENT_DECLARATION_WARNING),
   );
+}
+
+
+// ##########################################################################
+// O. LISTA RETELEI CA PDF
+//
+// Omul care cumpara publicare in presa nu decide singur: are un sef, un
+// contabil, un asociat. Pagina de pe site nu se poate trimite pe WhatsApp ca
+// dovada; un PDF cu toate linkurile, da. Verificam ca fisierul chiar e un PDF
+// valid si ca CONTINE fiecare adresa din retea — un PDF care se deschide dar
+// a pierdut jumatate de lista e mai rau decat niciunul.
+// ##########################################################################
+console.log("\n########## O. LISTA IN PDF ##########");
+{
+  const pdf = buildNewspaperListPdf();
+  const raw = pdf.toString("latin1");
+  t("e un PDF valid", raw.startsWith("%PDF-") && raw.trimEnd().endsWith("%%EOF"));
+  t("are tabel xref si trailer", raw.includes("xref") && raw.includes("/Root 1 0 R"));
+
+  // Diacriticele sunt transliterate la scriere (fontul e WinAnsi), deci
+  // comparam pe forma fara diacritice, exact cum ajunge in fisier.
+  const fara = (x: string) =>
+    x.replace(/[ăâîșşțţ]/g, (c) => ({ ă: "a", â: "a", î: "i", ș: "s", ş: "s", ț: "t", ţ: "t" })[c] || c);
+  const lipsa = NEWSPAPERS.filter((n) => !raw.includes(n.url));
+  t("toate cele " + NEWSPAPERS.length + " adrese sunt in PDF", lipsa.length === 0, lipsa[0]?.url);
+  const numeLipsa = NEWSPAPERS.filter((n) => !raw.includes(fara(n.name)));
+  t("toate numele de ziare sunt in PDF", numeLipsa.length === 0, numeLipsa[0]?.name);
+
+  t("spune pretul si termenul real", raw.includes("500 lei") && raw.includes("24 de ore lucratoare"));
+  t("nu promite termenul vechi de 4 ore", !/\b4 ore\b/i.test(raw));
+  t("explica diferenta dintre 50 promise si cate sunt", raw.includes("bonus"));
+  t("explica adresele xn-- (domenii cu diacritice)", raw.includes("xn--"));
+}
+
+
+// ##########################################################################
+// P. TOT CODUL, NU DOAR PATRU SIRURI
+//
+// Blocul M verifica patru texte anume si a trecut cu brio in timp ce
+// inlocuirea in masa a promisiunii "4 ore" spargea 80 de locuri din site:
+// a iesit "224h lucratoare lucratoare" pe prima pagina, in titluri, in
+// descrierile pentru Google — si chiar si doua clase Tailwind ("-right-24
+// h-96" a devenit "-right-24h lucratoare-96", adica un fundal disparut).
+//
+// Lectia: un test care se uita la o lista de siruri alese de mine apara exact
+// ce mi-am amintit sa trec pe lista. Asta se uita la TOT ce se livreaza.
+// ##########################################################################
+console.log("\n########## P. SCANARE PE TOT CODUL ##########");
+{
+  const files: string[] = [];
+  const walk = (dir: string) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name === "node_modules" || e.name === ".next") continue;
+        walk(full);
+      } else if (/\.(ts|tsx)$/.test(e.name)) files.push(full);
+    }
+  };
+  walk("src");
+
+  const rele: [RegExp, string][] = [
+    [/\b\d*24h\s*lucr/i, "cifra lipita de 'h' — a ramas din inlocuirea veche"],
+    [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
+    // Doar 224 urmat de o unitate de timp: 224 e si inceputul intervalului IP
+    // multicast, iar un test care se plange de el ar fi zgomot, nu paza.
+    [/\b224\s*(h\b|de ore|ore\b)/i, "224 — 24 lipit peste alt numar"],
+    [/\bin (maximum )?4 ore\b/i, "promisiunea veche de 4 ore"],
+    [/\b4 ORE LUCRATOARE\b/, "promisiunea veche, cu majuscule"],
+  ];
+
+  const gasite: string[] = [];
+  for (const f of files) {
+    const txt = fs.readFileSync(f, "utf8");
+    for (const [re, ce] of rele) {
+      const m = txt.match(re);
+      if (m) gasite.push(`${f}: ${ce} → "${m[0]}"`);
+    }
+  }
+  t(
+    `niciun text stricat in cele ${files.length} fisiere din src/`,
+    gasite.length === 0,
+    gasite.slice(0, 3).join(" | "),
+  );
+
+  // Si invers: termenul nou chiar exista in produs, ca testul de mai sus sa nu
+  // poata trece pur si simplu pentru ca s-a sters orice promisiune.
+  const cuTermen = files.filter((f) =>
+    /24 de ore lucr[ăa]toare/i.test(fs.readFileSync(f, "utf8")),
+  );
+  t("termenul nou e scris in produs", cuTermen.length >= 20, `doar ${cuTermen.length} fisiere`);
 }
 
 console.log("\n" + "=".repeat(64));
