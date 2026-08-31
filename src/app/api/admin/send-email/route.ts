@@ -5,6 +5,7 @@ import {
   sendEmail,
   wrapEmail,
   wrapEmailCold,
+  SENDER_NAME,
   escapeHtml,
   ADMIN_EMAIL,
 } from "@/lib/email";
@@ -107,6 +108,8 @@ export async function POST(req: NextRequest) {
   const results: { to: string; ok: boolean; error?: string }[] = [];
   for (const to of d.recipients) {
     const r = await sendEmail({
+      // Scrisoarea simpla e mesaj de la un om; antetul de brand e de la firma.
+      fromName: d.template === "brand" ? undefined : SENDER_NAME,
       to,
       subject: d.subject,
       html,

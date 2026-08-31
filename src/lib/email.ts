@@ -11,24 +11,32 @@ const RAW_FROM = process.env.FROM_EMAIL || "noreply@mediaexpress.ro";
 const CONTACT = process.env.CONTACT_EMAIL || "contact@mediaexpress.ro";
 export const SENDER_NAME = process.env.SENDER_NAME || "Andrei Popescu";
 
-// Auto-prepend SENDER_NAME ca display name dacă FROM_EMAIL e doar adresa.
-// User-ul are deja `noreply@mediaexpress.ro` verificat în Resend; nu vrem
-// să-i cerem să creeze un nou mailbox. Rezultat la send-time:
-//   "Andrei Popescu <noreply@mediaexpress.ro>"
-// Inbox afișează "Andrei Popescu" ca sender, deliverability beneficiază de
-// numele personal, dar tehnic emailul vine din mailbox-ul deja verificat.
-function buildFromHeader(): string {
+/**
+ * Numele expeditorului difera dupa TIPUL emailului, si asta e intentionat.
+ *
+ * Clientul care a comandat asteapta "MediaExpres" in inbox — a platit unei
+ * firme, nu unui necunoscut. Factura semnata "Andrei Popescu" il pune sa se
+ * intrebe cine e, exact in momentul in care ar trebui sa aiba incredere.
+ *
+ * La prospectare rece e pe dos: un nume de om deschide mai des decat un brand,
+ * pentru ca arata a mesaj scris de cineva, nu a newsletter. De-aia rutele de
+ * outreach trec explicit `fromName: SENDER_NAME`, iar tot restul — comenzi,
+ * facturi, rapoarte, confirmari — pleaca de la brand.
+ */
+export const BRAND_SENDER_NAME = process.env.BRAND_SENDER_NAME || "MediaExpres";
+
+function buildFromHeader(name: string): string {
   // Dacă FROM_EMAIL conține deja un display name (format "Name <email>"),
   // respectă configurația.
   if (RAW_FROM.includes("<") && RAW_FROM.includes(">")) return RAW_FROM;
-  return `${SENDER_NAME} <${RAW_FROM}>`;
+  return `${name} <${RAW_FROM}>`;
 }
-
-const FROM = buildFromHeader();
 
 interface SendArgs {
   to: string;
   subject: string;
+  /** Numele afisat in inbox. Implicit brandul; outreach-ul trimite numele personal. */
+  fromName?: string;
   html: string;
   text?: string;
   replyTo?: string;
@@ -50,7 +58,7 @@ export async function sendEmail(args: SendArgs) {
     return { ok: true, dryRun: true };
   }
   const payload: Parameters<typeof resend.emails.send>[0] = {
-    from: FROM,
+    from: buildFromHeader(args.fromName || BRAND_SENDER_NAME),
     to: args.to,
     subject: args.subject,
     html: args.html,

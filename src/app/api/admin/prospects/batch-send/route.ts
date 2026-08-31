@@ -128,6 +128,7 @@ export async function POST(req: NextRequest) {
         const prospectTag = [{ name: "prospect_id", value: p.id }];
 
         const initial = await sendEmail({
+          fromName: SENDER_NAME,
           to: p.email,
           subject,
           html,
@@ -148,6 +149,7 @@ export async function POST(req: NextRequest) {
         const followUp1Text = textFromBody(followUp1Body, SENDER_NAME);
 
         const followUp1 = await sendEmail({
+          fromName: SENDER_NAME,
           to: p.email,
           subject: followUp1Subject,
           html: followUp1Html,
@@ -166,6 +168,7 @@ export async function POST(req: NextRequest) {
         const followUp2Text = textFromBody(followUp2Body, SENDER_NAME);
 
         const followUp2 = await sendEmail({
+          fromName: SENDER_NAME,
           to: p.email,
           subject: followUp2Subject,
           html: followUp2Html,
