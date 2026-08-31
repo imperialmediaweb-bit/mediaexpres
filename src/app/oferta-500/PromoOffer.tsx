@@ -345,7 +345,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 // pozele. Site-ul nu se cere separat — cine are articolul
                 // scris are linkurile in text; il trimite doar cine ne lasa
                 // pe noi sa scriem.
-                "Pentru a publica avem nevoie de:",
+                "Pentru comandă avem nevoie de:",
                 "1. Datele firmei pentru factură: denumire, CUI, adresă",
                 "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
                 "3. Pozele (până la 3, opțional)",
