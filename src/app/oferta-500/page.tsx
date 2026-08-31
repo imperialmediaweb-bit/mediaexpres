@@ -174,6 +174,17 @@ export default function Oferta500Page() {
               41 de ziare locale + 9 naționale. Un singur articol, publicat pe
               toate, în 24 de ore lucrătoare. Cu raport PDF și 50 de backlinks reale.
             </p>
+          {/* Cifra de audienta pe PRIMUL ecran, inclusiv pe telefon — jos, in
+              dreptul butoanelor, cadea sub margine la 390px si n-o vedea fix
+              publicul din reclama. Dovada completa ramane la lista (ancora). */}
+          <p className="mx-auto mt-3 max-w-2xl">
+            <a
+              href="#dovada-facebook"
+              className="text-sm font-semibold text-brand-gold underline decoration-brand-gold/40 underline-offset-4 hover:decoration-brand-gold"
+            >
+              ★ Cel mai citit ziar din rețea: 2,3 mil. vizualizări în 28 de zile — vezi dovada ↓
+            </a>
+          </p>
 
             <div className="mt-10">
               <PromoOffer />
@@ -321,7 +332,7 @@ export default function Oferta500Page() {
             de trafic pe care le-am scos de pe site. Cand cifrele se schimba,
             se schimba AICI si in eticheta de perioada, impreuna.
           */}
-          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+          <div id="dovada-facebook" className="mx-auto mt-12 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
             <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
               Cel mai citit ziar din rețea, pe Facebook
             </p>
