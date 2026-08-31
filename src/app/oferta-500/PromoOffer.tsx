@@ -334,18 +334,29 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               conversatiile astea par ca reclama n-a produs nimic. */}
           <a
             href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-              `Bună ziua! Vreau articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}) — am câteva întrebări înainte de comandă.`,
+              // Mesajul pre-scris E comanda: ii spune omului exact ce sa
+              // trimita, ca prima lui interactiune sa fie deja o comanda
+              // completa, nu un "buna ziua" dupa care il intrebam noi de toate.
+              [
+                `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
+                "",
+                "Vă trimit aici:",
+                "1. Articolul — sau doar tema, dacă îl scrieți voi (e inclus în preț)",
+                "2. Datele firmei pentru factură: denumire, CUI, adresă",
+                "3. Site-ul către care puneți linkurile",
+                "4. Până la 3 poze (opțional)",
+              ].join("\n"),
             )}`}
             target="_blank"
             rel="noopener noreferrer"
             onClick={() => {
-              trackPixelEvent("Contact", { content_name: "WhatsApp din oferta" });
-              trackGaEvent("contact", { method: "whatsapp_oferta" });
+              trackPixelEvent("Contact", { content_name: "Comanda pe WhatsApp din oferta" });
+              trackGaEvent("begin_checkout", { value: offer.price, currency: "RON", payment_type: "whatsapp" });
             }}
             className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
           >
             <MessageCircle className="h-4 w-4" />
-            Ai întrebări? Scrie-ne pe WhatsApp
+            Comandă pe WhatsApp — îți spunem ce să trimiți
           </a>
           <p className="mt-3 text-center text-xs text-white/60">
             {offer.price.toLocaleString("ro")} lei{offer.suffix} · factură fiscală în ambele
