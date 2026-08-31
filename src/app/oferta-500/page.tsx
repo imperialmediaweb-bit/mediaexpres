@@ -62,7 +62,7 @@ const INCLUDED = [
     icon: Facebook,
     title: "Distribuire pe 50 pagini Facebook",
     description:
-      "Fiecare publicație are pagina ei de Facebook, cu între 300 și 10.000 de urmăritori. Inclus, fără cost extra.",
+      "Fiecare publicație are pagina ei de Facebook, cu între 300 și 10.000 de urmăritori. Inclus, fără cost extra — articolul ajunge pe paginile publicațiilor odată cu publicarea pe site.",
   },
   {
     icon: FileText,
@@ -119,7 +119,7 @@ const CONDITIONS = [
   {
     title: "Distribuire pe Facebook — inclusă, o poți refuza",
     detail:
-      "Articolul se distribuie automat pe paginile de Facebook ale publicațiilor, fără cost suplimentar. Dacă preferi doar publicarea pe site, debifezi la comandă.",
+      "Articolul se distribuie automat pe paginile de Facebook ale publicațiilor, fără cost suplimentar. Dacă preferi doar publicarea pe site, debifezi la comandă. Postările le vezi direct pe pagini — raportul PDF adună linkurile de pe site-uri, pe care le poți verifica unul câte unul.",
   },
 ];
 
