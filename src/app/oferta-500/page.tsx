@@ -44,7 +44,7 @@ const INCLUDED = [
     icon: Zap,
     title: "Trimise imediat la indexare",
     description:
-      "După publicare, fiecare articol e trimis automat la Google, Bing și Yandex pentru indexare — nu așteaptă să fie descoperit de crawler. Asta grăbește indexarea semnificativ; momentul exact îl decide fiecare motor de căutare.",
+      "Nu așteptăm să ne descopere crawlerul: imediat după publicare, fiecare articol e anunțat automat la Google, Bing și Yandex. De regulă, asta scurtează indexarea de la săptămâni la zile.",
   },
   {
     icon: Globe,
