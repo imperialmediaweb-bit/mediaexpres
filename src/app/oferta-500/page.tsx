@@ -319,6 +319,50 @@ export default function Oferta500Page() {
             <NewspaperDirectory />
           </div>
 
+          {/*
+            Cifrele de aici sunt din Meta Insights, pagina Botosani Expres,
+            3–30 august 2026 — captura primita de la proprietar. Perioada e
+            spusa explicit tocmai ca cifra sa nu poata fi contestata in
+            comentariile de la reclama, cum au fost contestate cifrele vagi
+            de trafic pe care le-am scos de pe site. Cand cifrele se schimba,
+            se schimba AICI si in eticheta de perioada, impreuna.
+          */}
+          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
+              Cel mai citit ziar din rețea, pe Facebook
+            </p>
+            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
+              Botoșani Expres: 2,3 milioane de vizualizări în 28 de zile
+            </h3>
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">2.337.606</div>
+                <div className="mt-1 text-sm text-slate-600">vizualizări</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">95.464</div>
+                <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-emerald-600">+78%</div>
+                <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-slate-600">
+              Sursa: statisticile Meta ale paginii, perioada 3–30 august. Articolul tău se
+              distribuie pe <strong className="text-brand-navy">50 de astfel de pagini</strong> —
+              asta e doar cea mai mare dintre ele.{" "}
+              <a
+                href="https://botosaniexpres.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-red underline"
+              >
+                Vezi ziarul live →
+              </a>
+            </p>
+          </div>
+
           {/* Omul tocmai a verificat ca ziarele sunt reale — momentul cu cea mai
               mare incredere din toata pagina. Fara buton aici, trebuia sa se
               intoarca singur sus. */}
