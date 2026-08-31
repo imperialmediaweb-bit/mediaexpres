@@ -385,7 +385,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <strong className="text-white">Cu cardul:</strong> ești dus direct la un
             formular unde trimiți articolul și până la 3 poze.{" "}
             <strong className="text-white">Prin OP:</strong> completezi totul pe pagina
-            de transfer, odată cu dovada plății.
+            de transfer — primești factura pe email și plătești pe baza ei, după.
           </li>
           <li>
             <strong className="text-white">2.</strong> Nu ai articol scris?{" "}
