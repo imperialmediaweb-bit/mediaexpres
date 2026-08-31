@@ -340,13 +340,15 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               [
                 `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
                 "",
-                "Vă trimit aici:",
-                // Site-ul nu se cere separat: cine are articolul scris are
-                // linkurile deja in text. Il cerem doar impreuna cu tema,
-                // cand il scriem noi si trebuie sa stim incotro dam linkurile.
-                "1. Articolul, cu linkurile puse în text — sau doar tema și site-ul, dacă îl scrieți voi (e inclus în preț)",
-                "2. Datele firmei pentru factură: denumire, CUI, adresă",
-                "3. Până la 3 poze (opțional)",
+                // Ordinea si formularea sunt ale proprietarului: intai datele
+                // de factura (pe ele se misca totul), apoi articolul, apoi
+                // pozele. Site-ul nu se cere separat — cine are articolul
+                // scris are linkurile in text; il trimite doar cine ne lasa
+                // pe noi sa scriem.
+                "Pentru publicare vă trimit:",
+                "1. Datele firmei pentru factură: denumire, CUI, adresă",
+                "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
+                "3. Pozele (până la 3, opțional)",
               ].join("\n"),
             )}`}
             target="_blank"
@@ -360,6 +362,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <MessageCircle className="h-4 w-4" />
             Comandă pe WhatsApp — îți spunem ce să trimiți
           </a>
+          <p className="mt-1.5 text-center text-xs text-white/60">
+            Ai întrebări? Îți răspundem cu drag, tot acolo.
+          </p>
           <p className="mt-3 text-center text-xs text-white/60">
             {offer.price.toLocaleString("ro")} lei{offer.suffix} · factură fiscală în ambele
             cazuri · publicare în 24 de ore lucrătoare
