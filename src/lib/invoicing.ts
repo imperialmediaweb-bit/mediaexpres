@@ -21,7 +21,13 @@ export interface IssueInvoiceInput {
   /** Suma facturata, in RON (nu bani). */
   amount: number;
   packageLabel: string;
-  stripeSessionId: string;
+  /**
+   * Referinta comenzii, oricare ar fi calea de plata: `cs_...` la card,
+   * `op_...` la transfer bancar. S-a numit `stripeSessionId` si aparea in
+   * alerte ca "Stripe session" chiar la comenzile OP, unde nu exista nicio
+   * sesiune Stripe — deruta pe cine citea alerta.
+   */
+  orderReference: string;
   /**
    * La card, banii sunt deja in cont cand emitem, deci factura se marcheaza
    * incasata pe loc. La ordin de plata e invers: clientul are nevoie de
@@ -51,7 +57,7 @@ async function alertManualInvoice(input: IssueInvoiceInput, reason: string) {
         ${kv("Suma", `${input.amount.toFixed(2)} RON`)}
         ${kv("Serviciu", INVOICE_PRODUCT_NAME)}
         ${kv("Pachet", input.packageLabel)}
-        ${kv("Stripe session", input.stripeSessionId)}
+        ${kv("Referință comandă", input.orderReference)}
       </table>
       `,
     ),
@@ -97,7 +103,7 @@ export async function issueInvoiceForOrder(
       },
       amount: input.amount,
       mentions:
-        input.mentions || `Achitat online cu cardul. Ref: ${input.stripeSessionId}`,
+        input.mentions || `Achitat online cu cardul. Ref: ${input.orderReference}`,
     });
 
     // Marcarea ca incasata e separata de emitere: daca esueaza, factura ramane
@@ -110,7 +116,7 @@ export async function issueInvoiceForOrder(
         await recordInvoicePayment({
           invoiceId: invoice.id,
           amount: input.amount,
-          reference: input.stripeSessionId,
+          reference: input.orderReference,
         });
       } catch (err) {
         paymentRecorded = false;

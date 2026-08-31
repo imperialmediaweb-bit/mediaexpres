@@ -144,7 +144,7 @@ export async function POST(req: NextRequest) {
       ${kv("Publicare", d.uniquePerSite ? "Variantă unică pe fiecare ziar" : "⚠️ IDENTIC pe toate — clientul a cerut textul neschimbat")}
       ${kv("Distribuire Facebook", d.facebookOptIn ? "✅ Da" : "❌ Nu (clientul a refuzat)")}
       ${kv("Scris cu AI", d.generatedByAi ? "Da" : "Nu — text propriu")}
-      ${kv("Stripe session", order.sessionId)}
+      ${kv("Referință comandă", order.sessionId)}
     </table>
 
     <h3 style="margin:24px 0 8px;font-family:Georgia,serif;color:#0B1F3A;">${esc(d.title)}</h3>

@@ -288,7 +288,7 @@ async function handleCheckoutCompleted(
       phone: session.customer_details?.phone || null,
       amount: amount / 100,
       packageLabel: packageId,
-      stripeSessionId: session.id,
+      orderReference: session.id,
     });
 
     // Upsell: cine a cumparat oferta o singura data afla ca abonamentul lunar
@@ -399,7 +399,7 @@ async function handleCheckoutCompleted(
       phone: session.customer_details?.phone || null,
       amount: (session.amount_total || 0) / 100,
       packageLabel: (session.metadata?.planId as string) || "abonament",
-      stripeSessionId: session.id,
+      orderReference: session.id,
     });
   }
 }

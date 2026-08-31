@@ -59,9 +59,27 @@ async function startcoFetch<T>(
   }
 
   if (!res.ok) {
-    const e = body as { error?: string; code?: string } | null;
+    const e = body as
+      | { error?: string; code?: string; message?: string; errors?: unknown; details?: unknown }
+      | null;
+
+    // Pastram TOT ce ne-a spus StartCo, nu doar `error`. Refuzurile lor vin cu
+    // "Bad Request" ca mesaj principal si cu motivul real intr-un camp
+    // secundar (`errors`, `details`, `message`) — pe care il aruncam, si de-aia
+    // alerta catre admin spunea doar "a refuzat factura" fara sa spuna de ce.
+    const extra: string[] = [];
+    if (e?.message && e.message !== e.error) extra.push(e.message);
+    for (const k of ["errors", "details"] as const) {
+      const v = e?.[k];
+      if (v !== undefined && v !== null) {
+        extra.push(`${k}: ${typeof v === "string" ? v : JSON.stringify(v)}`);
+      }
+    }
+    // Daca raspunsul n-a fost JSON deloc, ducem mai departe textul brut.
+    if (!e && text) extra.push(text.slice(0, 400));
+
     throw new StartcoError(
-      e?.error || `StartCo a raspuns ${res.status}`,
+      [e?.error || `StartCo a raspuns ${res.status}`, ...extra].join(" | ").slice(0, 700),
       e?.code || "HTTP_ERROR",
       res.status,
     );

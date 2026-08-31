@@ -237,7 +237,7 @@ export async function POST(req: NextRequest) {
     phone: d.contactPhone,
     amount: pkg.price,
     packageLabel: pkg.name,
-    stripeSessionId: reference,
+    orderReference: reference,
     markPaid: false,
     mentions: `Plata prin transfer bancar (OP). Ref: ${reference}`,
   }).catch((e) => console.error("[comanda/transfer] factura automata:", e));
