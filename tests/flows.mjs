@@ -237,7 +237,15 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   console.log("\n=== 5. Fluxul OP ===");
   await p.goto(B + "/comanda/transfer?pachet=promo-50", { waitUntil: "domcontentloaded" });
   await p.waitForTimeout(900);
-  const t = await p.locator("body").innerText();
+  let t = await p.locator("body").innerText();
+  // Regula s-a intors fata de prima versiune a paginii: IBAN-ul NU mai sta
+  // mare sus ("Pasul 1: fa plata") — datele de plata vin cu factura, iar aici
+  // raman pliate, pentru cine vrea sa vireze inainte. Verificam AMBELE fete:
+  // inchis nu se vede, deschis exista.
+  check(!t.includes("RO15BTRLRONCRT0652757201"), "IBAN-ul nu mai sta desfasurat inaintea comenzii");
+  await p.locator("summary", { hasText: "Datele contului" }).click();
+  await p.waitForTimeout(300);
+  t = await p.locator("body").innerText();
   check(t.includes("RO15BTRLRONCRT0652757201"), "IBAN afisat");
   check(t.includes("LEGIO WEB DEVELOPMENT TOOLS"), "beneficiar afisat");
   check(t.includes("500 lei"), "suma pachetului");

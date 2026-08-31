@@ -74,6 +74,7 @@ for (const [path, label] of PAGES) {
       [/factur[ăa][^.!?]{0,60}după publicare/i, "ordinea e factura -> plata -> publicare"],
       [/plata (se face )?după publicare/i, "ordinea e factura -> plata -> publicare"],
       [/odat[ăa] cu dovada pl[ăa][țt]ii/i, "dovada platii nu mai e ceruta la comanda"],
+      [/f[ăa] plata [îi]n contul nostru|după ce ai făcut plata/i, "plata nu se cere inaintea facturii"],
     ];
     for (const [re, motiv] of INTERZISE) {
       const m = text.match(re);

@@ -126,6 +126,26 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
     }
   }
 
+  // Mesajul pre-scris E comanda: ii spune omului exact ce sa trimita, ca
+  // prima lui interactiune pe WhatsApp sa fie o comanda completa, nu un
+  // "buna ziua" dupa care il intrebam noi de toate. Acelasi link apare pe
+  // AMBELE ecrane — si inainte, si dupa "Comanda acum": cine prefera
+  // WhatsApp nu trebuie sa descopere asta abia la pasul de plata.
+  const waOrderHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
+    [
+      `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
+      "",
+      "Pentru comandă avem nevoie de:",
+      "1. Datele firmei pentru factură: denumire, CUI, adresă",
+      "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
+      "3. Pozele (până la 3, opțional)",
+    ].join("\n"),
+  )}`;
+  const trackWaOrder = () => {
+    trackPixelEvent("Contact", { content_name: "Comanda pe WhatsApp din oferta" });
+    trackGaEvent("begin_checkout", { value: offer.price, currency: "RON", payment_type: "whatsapp" });
+  };
+
   return (
     <div>
       {/* O data / Lunar */}
@@ -333,30 +353,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               Evenimentul Contact il face vizibil in Ads Manager — altfel
               conversatiile astea par ca reclama n-a produs nimic. */}
           <a
-            href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-              // Mesajul pre-scris E comanda: ii spune omului exact ce sa
-              // trimita, ca prima lui interactiune sa fie deja o comanda
-              // completa, nu un "buna ziua" dupa care il intrebam noi de toate.
-              [
-                `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
-                "",
-                // Ordinea si formularea sunt ale proprietarului: intai datele
-                // de factura (pe ele se misca totul), apoi articolul, apoi
-                // pozele. Site-ul nu se cere separat — cine are articolul
-                // scris are linkurile in text; il trimite doar cine ne lasa
-                // pe noi sa scriem.
-                "Pentru comandă avem nevoie de:",
-                "1. Datele firmei pentru factură: denumire, CUI, adresă",
-                "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
-                "3. Pozele (până la 3, opțional)",
-              ].join("\n"),
-            )}`}
+            href={waOrderHref}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => {
-              trackPixelEvent("Contact", { content_name: "Comanda pe WhatsApp din oferta" });
-              trackGaEvent("begin_checkout", { value: offer.price, currency: "RON", payment_type: "whatsapp" });
-            }}
+            onClick={trackWaOrder}
             className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
           >
             <MessageCircle className="h-4 w-4" />
@@ -399,6 +399,16 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <Newspaper className="h-5 w-5" />
             Vezi lista celor 50 de ziare
             <ChevronDown className="h-4 w-4" />
+          </a>
+          <a
+            href={waOrderHref}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={trackWaOrder}
+            className="inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white sm:w-auto"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Comandă pe WhatsApp
           </a>
         </div>
       )}
