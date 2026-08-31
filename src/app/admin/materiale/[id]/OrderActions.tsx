@@ -95,6 +95,64 @@ export function OrderActions({
     }
   }
 
+
+  /**
+   * Emailurile care se repeta la FIECARE comanda, gata scrise.
+   *
+   * Pana acum, casuta de mai jos pornea goala si trebuia compus de fiecare
+   * data acelasi text — factura, apoi raportul — de obicei seara, pe telefon,
+   * dupa o zi de munca. Sabloanele completeaza si subiectul, si mesajul; se
+   * pot edita oricand inainte de trimitere.
+   */
+  const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
+    {
+      eticheta: "Factura",
+      subiect: `Factura — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        `Vă mulțumim pentru comandă. Atașat aveți factura fiscală pentru publicarea articolului „${articleTitle}" în cele 50 de ziare din rețea.`,
+        "",
+        "Dacă ați efectuat deja transferul, nu mai aveți nimic de făcut — factura rămâne pentru evidența dumneavoastră contabilă.",
+        "",
+        "Publicăm în maximum 24 de ore lucrătoare, iar la final primiți pe email raportul complet cu toate linkurile.",
+        "",
+        "O zi bună,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+    {
+      eticheta: "Am publicat",
+      subiect: `Articolul e publicat — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        `Articolul „${articleTitle}" este publicat pe toate cele 50 de ziare din rețea.`,
+        "",
+        "Vă trimitem separat raportul complet cu toate linkurile — puteți deschide și verifica fiecare publicare. Articolele rămân online permanent.",
+        "",
+        "Mulțumim pentru încredere!",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+    {
+      eticheta: "Aștept plata",
+      subiect: `Comanda ${articleTitle} — așteptăm confirmarea plății`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        "Am primit comanda și materialele, mulțumim.",
+        "",
+        "Nu am identificat încă plata în extras. Dacă ați efectuat transferul, ne puteți trimite dovada tranzacției și demarăm publicarea pe loc, fără să mai așteptăm procesarea bancară.",
+        "",
+        "Publicăm în maximum 24 de ore lucrătoare de la confirmarea încasării.",
+        "",
+        "O zi bună,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+  ];
+
   async function sendMail() {
     if (mailBody.trim().length < 10) {
       setMsg({ kind: "err", text: "Scrie mesajul (minim 10 caractere)." });
@@ -268,9 +326,25 @@ export function OrderActions({
           3. Scrie-i clientului
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Pleacă de pe adresa site-ului, ca mesaj personal. Pentru factură ca atașament,
-          folosește Emailuri → Răspunde clientului.
+          Pleacă de pe adresa site-ului, ca mesaj personal. Alege un șablon și trimite —
+          sau modifică textul înainte. Pentru factură ca atașament, folosește
+          Emailuri → Răspunde clientului.
         </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          {SABLOANE.map((t) => (
+            <button
+              key={t.eticheta}
+              type="button"
+              onClick={() => {
+                setMailSubject(t.subiect);
+                setMailBody(t.text);
+              }}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-brand-navy hover:text-brand-navy"
+            >
+              {t.eticheta}
+            </button>
+          ))}
+        </div>
         <input
           value={mailSubject}
           onChange={(e) => setMailSubject(e.target.value)}

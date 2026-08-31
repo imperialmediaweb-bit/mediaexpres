@@ -34,6 +34,7 @@ export function TransferForm({
     title: "",
     body: "",
     siteUrl: "",
+    linkNotes: "",
   });
   const [images, setImages] = useState<Uploaded[]>([]);
   const [proof, setProof] = useState<Uploaded | null>(null);
@@ -218,10 +219,36 @@ export function TransferForm({
             <label className={label}>Textul articolului (sau descrierea a ce vrei comunicat) *</label>
             <textarea required rows={10} value={f.body} onChange={(e) => set("body", e.target.value)} className={input} />
             <p className="mt-1 text-xs text-slate-500">{f.body.length} caractere (minimum 100)</p>
+            {/*
+              Avertismentul asta a fost scris dupa o comanda reala: clientul a
+              redactat articolul in Word, cu linkuri puse pe cuvinte, iar la
+              lipire in formular a ramas doar textul ancora — adresele s-au
+              pierdut pe drum, si n-aveam de unde sti unde trebuiau sa duca.
+            */}
+            <p className="mt-1 text-xs text-amber-700">
+              Dacă ai copiat textul din Word, linkurile puse pe cuvinte se pierd — scrie
+              adresele direct în text (ex. &bdquo;vezi la https://firma.ro&rdquo;) sau trece-le mai jos.
+            </p>
           </div>
           <div>
             <label className={label}>Site-ul firmei</label>
             <input value={f.siteUrl} onChange={(e) => set("siteUrl", e.target.value)} className={input} placeholder="https://firma.ro" />
+          </div>
+          <div>
+            <label className={label}>
+              Linkurile dorite <span className="font-normal text-slate-500">(opțional — până la 3)</span>
+            </label>
+            <textarea
+              rows={3}
+              value={f.linkNotes}
+              onChange={(e) => set("linkNotes", e.target.value)}
+              className={input}
+              placeholder={"stație ITP Sector 5 → https://firma.ro\nprogramare online → https://firma.ro/contact"}
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Scrie ce cuvinte din articol să fie link și către ce adresă. Dacă lași gol,
+              punem numele firmei ca link către site.
+            </p>
           </div>
         </div>
 

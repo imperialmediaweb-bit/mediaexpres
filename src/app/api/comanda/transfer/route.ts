@@ -24,6 +24,8 @@ const schema = z.object({
   title: z.string().min(5).max(300),
   body: z.string().min(100).max(30000),
   siteUrl: z.string().max(300).optional(),
+  // Ce cuvinte se leaga si incotro — vezi comentariul din formular.
+  linkNotes: z.string().max(1000).optional(),
   images: z.array(fileSchema).max(3).default([]),
   featuredIndex: z.number().int().min(0).max(2).default(0),
   // Optionala prin decizie de flux, nu din comoditate: cerinta obligatorie il
@@ -165,6 +167,7 @@ export async function POST(req: NextRequest) {
       ${d.paymentProof ? `<p><strong>Dovada plății:</strong> <a href="${esc(d.paymentProof.url)}">${esc(d.paymentProof.name)}</a></p>` : ""}
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>
       <div style="white-space:pre-wrap;border-left:3px solid #e5e5e5;padding-left:16px;margin:12px 0;color:#334155;">${esc(d.body.slice(0, 1500))}${d.body.length > 1500 ? "…" : ""}</div>
+      ${d.linkNotes?.trim() ? `<p style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;"><strong>Linkuri cerute de client:</strong><br/><span style="white-space:pre-wrap;">${esc(d.linkNotes.trim())}</span></p>` : ""}
       <p><strong>Poze:</strong> ${d.images.length}/3</p>
       <p style="margin-top:16px;"><a href="${SITE.url}/admin/materiale">Vezi materialele în admin →</a></p>
       `,

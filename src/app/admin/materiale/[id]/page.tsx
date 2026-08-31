@@ -133,6 +133,60 @@ export default async function MaterialDetailPage({
                 <strong>Cuvinte-cheie:</strong> {r.keywords}
               </p>
             )}
+
+            {/*
+              Linkurile, scoase din text si puse la vedere.
+              Fara asta, cel care publica trebuia sa citeasca tot articolul ca
+              sa ghiceasca ce cuvinte se leaga si unde — sau publica fara
+              linkuri, adica exact lucrul pentru care plateste clientul.
+            */}
+            <div className="mt-3 rounded-lg border border-amber-200 bg-amber-50 p-3">
+              <p className="text-xs font-bold uppercase tracking-wide text-amber-900">
+                Linkuri de pus în articol
+              </p>
+              {(() => {
+                const found = Array.from(
+                  new Set((r.body.match(/https?:\/\/[^\s<>")\]]+/gi) || []).map((u) =>
+                    u.replace(/[.,;:)]+$/, ""),
+                  )),
+                );
+                const site = r.siteUrl?.trim();
+                const all = site && !found.includes(site) ? [site, ...found] : found;
+                if (all.length === 0) {
+                  return (
+                    <p className="mt-1 text-xs text-slate-600">
+                      Niciun link în text. Cel mai des, clientul a scris articolul în Word
+                      cu linkuri puse pe cuvinte — la lipire rămâne doar textul ancoră, iar
+                      adresa se pierde. Caută în articol expresii care sună a link (&bdquo;poți
+                      accesa…&rdquo;, numele firmei, numele serviciului) și leagă-le către site-ul
+                      lui. Dacă nu ai nici site, întreabă-l înainte să publici.
+                    </p>
+                  );
+                }
+                return (
+                  <ul className="mt-2 space-y-1">
+                    {all.map((u) => (
+                      <li key={u} className="flex items-center gap-2 text-xs">
+                        <a
+                          href={u}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="min-w-0 flex-1 truncate font-mono text-brand-red hover:underline"
+                        >
+                          {u}
+                        </a>
+                        <CopyButton text={u} label="copiază" />
+                      </li>
+                    ))}
+                  </ul>
+                );
+              })()}
+              <p className="mt-2 text-[11px] leading-relaxed text-amber-900">
+                Dacă linkul apare scris în text, leagă exact cuvintele din jurul lui.
+                Dacă nu apare deloc, ancora implicită e numele firmei
+                {r.companyName ? ` („${r.companyName}")` : ""} către site.
+              </p>
+            </div>
             <div className="mt-3 max-h-[420px] overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-100 bg-slate-50 p-4 text-sm leading-relaxed text-slate-700">
               {r.body}
             </div>
