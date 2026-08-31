@@ -12,6 +12,7 @@ import {
 import { buildListEmail, LIST_EMAIL_SUBJECT, newspaperListHtml } from "@/lib/list-email";
 import { buildAdvisorKnowledge } from "@/lib/advisor-knowledge";
 import { buildReportXlsx, buildReportPdf } from "@/lib/report-files";
+import { FONT_ENCODING } from "@/lib/report-font";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
@@ -203,8 +204,21 @@ t("Count din Pages = numarul de pagini", (() => {
   const kids = (pdfStr.match(/\/Type \/Page[^s]/g) || []).length;
   return !!m && Number(m[1]) === kids;
 })());
-t("pdf are ambele fonturi", pdfStr.includes("/Helvetica") && pdfStr.includes("/Helvetica-Bold"));
-t("pdf transliterează diacriticele", pdfStr.includes("Articol aist") || !/ăîșț/.test(pdfStr));
+t(
+  "pdf are ambele fonturi, incorporate",
+  pdfStr.includes("/DejaVuSans") &&
+    pdfStr.includes("/DejaVuSans-Bold") &&
+    pdfStr.includes("/FontFile2"),
+);
+// Regula s-a INTORS: pana acum diacriticele erau transliterate, pentru ca
+// fonturile standard PDF n-au ă, ș si ț — si ieseau "Arges Expres" si
+// "Braila Expres" in raportul pe care clientul il pune la dosar. Acum fontul
+// e incorporat, iar literele exista cu adevarat: se scriu cu codurile
+// noastre, escapate octal in fluxul de continut.
+t(
+  "pdf scrie diacriticele cu codurile fontului incorporat",
+  pdfStr.includes("/Differences") && /\\1\d\d/.test(pdfStr),
+);
 t("xref: fiecare offset arata spre obiectul corect", (() => {
   const m = pdfStr.match(/startxref\s+(\d+)/);
   if (!m) return false;
@@ -481,7 +495,17 @@ console.log("\n########## O. LISTA IN PDF ##########");
   // la fel de bune la copiere. Verificam deci forma afisata.
   const lipsa = NEWSPAPERS.filter((n) => !raw.includes(n.url.replace(/^https?:\/\//, "")));
   t("toate cele " + NEWSPAPERS.length + " adrese sunt in PDF", lipsa.length === 0, lipsa[0]?.url);
-  const numeLipsa = NEWSPAPERS.filter((n) => !raw.includes(fara(n.name)));
+  // Numele se scriu cu codurile fontului nostru, deci il aplicam si aici —
+  // altfel am cauta in PDF un text care nu exista in forma aia nicaieri.
+  const codat = (x: string) =>
+    Array.from(x)
+      .map((ch) => {
+        const c = FONT_ENCODING[ch];
+        if (c === undefined) return ch;
+        return "\\" + c.toString(8).padStart(3, "0");
+      })
+      .join("");
+  const numeLipsa = NEWSPAPERS.filter((n) => !raw.includes(codat(n.name)));
   t("toate numele de ziare sunt in PDF", numeLipsa.length === 0, numeLipsa[0]?.name);
 
   t("spune pretul si termenul real", raw.includes("500 lei") && raw.includes("24 de ore lucratoare"));

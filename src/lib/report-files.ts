@@ -1,4 +1,14 @@
-import { deflateRawSync } from "node:zlib";
+import { deflateRawSync, deflateSync } from "node:zlib";
+import {
+  FONT_ENCODING,
+  FONT_GLYPHS,
+  FONT_FIRST_CHAR,
+  FONT_WIDTHS,
+  FONT_WIDTHS_BOLD,
+  FONT_METRICS,
+  FONT_REGULAR_B64,
+  FONT_BOLD_B64,
+} from "@/lib/report-font";
 import { NEWSPAPERS } from "@/data/newspapers";
 
 /**
@@ -237,37 +247,41 @@ export function buildReportPdf(args: {
   date: Date;
   siteName: string;
   siteUrl: string;
-  /** Subtitlul de sub sigla. Implicit e raportul de publicare. */
+  /** Subtitlul de sub titlu. Implicit e raportul de publicare. */
   subtitle?: string;
-  /** Eticheta de dinaintea numarului de randuri (implicit "Publicatii"). */
+  /** Eticheta coloanei cu numarul de randuri. */
   countLabel?: string;
-  /** Randuri libere puse dupa antet, inainte de lista. */
+  /** Paragrafe puse in rezumat, in locul celui generat automat. */
   intro?: string[];
 }): Buffer {
   // ---------------------------------------------------------------------
-  // Raportul e ULTIMUL lucru pe care il vede clientul si singura dovada ca
-  // si-a primit banii inapoi in servicii. A fost multa vreme o insiruire de
-  // URL-uri intr-un font de masina de scris — arata a fisier text, nu a
-  // livrabil platit. Acum are antet, casetele cu datele comenzii, numele
-  // fiecarei publicatii langa adresa ei si numerotare pe pagini.
+  // Raportul e ultimul lucru pe care il vede clientul si singura dovada ca
+  // si-a primit banii inapoi in servicii. Arata ca un document, nu ca un
+  // fisier text: titlu, rezumat, tabel cu numele publicatiei langa link.
+  //
+  // Diacriticele sunt reale, nu transliterate. Fonturile standard PDF merg
+  // pe WinAnsi, care n-are ă, ș si t-virgula — iesea "Arges Expres" si
+  // "Braila Expres" in documentul pe care clientul il pune la dosar. De-aia
+  // incorporam DejaVu Sans, decupat la caracterele noastre (lib/report-font).
   // ---------------------------------------------------------------------
-  const PAGE_W = 595; // A4 in puncte
+  const PAGE_W = 595;
   const PAGE_H = 842;
-  const M = 46; // marginea laterala
+  const M = 42;
   const W = PAGE_W - M * 2;
 
-  const NAVY: RGB = [0.067, 0.067, 0.067];
   const RED: RGB = [0.757, 0.071, 0.122];
-  const GOLD: RGB = [0.788, 0.631, 0.291];
-  const TEXT: RGB = [0.13, 0.16, 0.22];
-  const MUTED: RGB = [0.45, 0.5, 0.58];
-  const LINE: RGB = [0.9, 0.91, 0.93];
-  const ZEBRA: RGB = [0.976, 0.98, 0.985];
+  const INK: RGB = [0.07, 0.07, 0.07];
+  const MUTED: RGB = [0.42, 0.45, 0.5];
+  const LINK: RGB = [0.13, 0.35, 0.72];
+  const GRID: RGB = [0.85, 0.86, 0.88];
+  const ZEBRA: RGB = [0.973, 0.976, 0.98];
   const WHITE: RGB = [1, 1, 1];
 
-  // Numele publicatiei, dedus din adresa. `new URL` converteste singur
-  // domeniile cu diacritice in forma punycode din datele noastre, deci
-  // "constanțaexpres.ro" si "xn--constanaexpres-mbf.ro" se potrivesc.
+  // Coloanele tabelului: numar, publicatie, link.
+  const C_NR = 30;
+  const C_PUB = 150;
+  const C_LINK = W - C_NR - C_PUB;
+
   const dupaGazda = new Map<string, string>();
   for (const n of NEWSPAPERS) {
     try {
@@ -276,131 +290,132 @@ export function buildReportPdf(args: {
       /* adresa stricata in date — o sarim, raportul nu trebuie sa cada */
     }
   }
-  function numePublicatie(url: string): string | null {
+  const numePublicatie = (url: string): string => {
     try {
-      return dupaGazda.get(new URL(url).hostname.replace(/^www\./, "")) ?? null;
+      return dupaGazda.get(new URL(url).hostname.replace(/^www\./, "")) ?? "";
     } catch {
-      return null;
+      return "";
     }
-  }
+  };
 
   const pages: Cmd[][] = [];
   let page: Cmd[] = [];
-  let y = 0;
-
-  const antetPagina = (prima: boolean) => {
-    page = [];
-    page.push({ t: "rect", x: 0, y: PAGE_H - (prima ? 104 : 58), w: PAGE_W, h: prima ? 104 : 58, c: NAVY });
-    if (prima) {
-      page.push({ t: "text", x: M, y: PAGE_H - 52, s: args.siteName.toUpperCase(), f: "F2", size: 22, c: WHITE });
-      page.push({ t: "text", x: M, y: PAGE_H - 70, s: "PRESA · DISTRIBUTIE · IMPACT", f: "F1", size: 7.5, c: GOLD });
-      page.push({
-        t: "text",
-        x: M,
-        y: PAGE_H - 92,
-        s: args.subtitle ?? "Raport de publicare",
-        f: "F2",
-        size: 11,
-        c: WHITE,
-      });
-      y = PAGE_H - 104 - 30;
-    } else {
-      page.push({ t: "text", x: M, y: PAGE_H - 36, s: args.siteName.toUpperCase(), f: "F2", size: 12, c: WHITE });
-      page.push({
-        t: "text",
-        x: M,
-        y: PAGE_H - 50,
-        s: args.subtitle ?? "Raport de publicare",
-        f: "F1",
-        size: 8,
-        c: GOLD,
-      });
-      y = PAGE_H - 58 - 26;
-    }
-  };
+  let y = PAGE_H - M;
 
   const paginaNoua = () => {
     pages.push(page);
-    antetPagina(false);
+    page = [];
+    y = PAGE_H - M - 10;
   };
 
-  const loc = (h: number) => {
-    if (y - h < 56) paginaNoua();
-  };
-
-  antetPagina(true);
-
-  // ——— Caseta cu datele comenzii ———
-  const detalii: [string, string][] = [];
-  if (args.clientName) detalii.push(["Client", args.clientName]);
-  if (args.articleTitle) detalii.push(["Articol", args.articleTitle]);
-  detalii.push(["Data", args.date.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })]);
-  detalii.push([args.countLabel ?? "Publicatii", String(args.entries.length)]);
-
-  const hCaseta = 16 + detalii.reduce((acc, [, v]) => acc + wrap(v, 62).length * 13, 0) + 10;
-  page.push({ t: "rect", x: M, y: y - hCaseta, w: W, h: hCaseta, c: ZEBRA });
-  page.push({ t: "rect", x: M, y: y - hCaseta, w: 3, h: hCaseta, c: RED });
-  let yd = y - 16;
-  for (const [k, v] of detalii) {
-    const randuri = wrap(v, 62);
-    page.push({ t: "text", x: M + 16, y: yd, s: k.toUpperCase(), f: "F1", size: 7.5, c: MUTED });
-    randuri.forEach((r, i) => {
-      page.push({ t: "text", x: M + 96, y: yd - i * 13, s: r, f: i === 0 ? "F2" : "F1", size: 9.5, c: TEXT });
-    });
-    yd -= randuri.length * 13;
+  // ——— Titlu ———
+  const titlu = `Raport de campanie — ${args.clientName || args.siteName}`;
+  for (const l of wrapW(titlu, W, 19, true)) {
+    page.push({ t: "text", x: M, y, s: l, f: "F2", size: 19, c: INK });
+    y -= 24;
   }
-  y -= hCaseta + 22;
+  page.push({
+    t: "text",
+    x: M,
+    y,
+    s: `${args.subtitle ?? "Raport de publicare"} · ${args.date.toLocaleDateString("ro-RO")}`,
+    f: "F1",
+    size: 9,
+    c: MUTED,
+  });
+  y -= 30;
 
-  // ——— Randurile de intro (folosite de lista retelei) ———
-  for (const l of args.intro ?? []) {
-    if (!l) {
-      y -= 7;
+  // ——— Rezumat ———
+  page.push({ t: "text", x: M, y, s: "Rezumat", f: "F2", size: 13, c: RED });
+  y -= 18;
+
+  const rezumat = args.intro?.length
+    ? args.intro
+    : [
+        `Articolul${args.articleTitle ? ` „${args.articleTitle}”` : ""} a fost publicat pe ` +
+          `${args.entries.length} publicații online — acoperire națională, câte o publicație în ` +
+          `fiecare județ, plus titluri naționale. Fiecare articol are titlu și formulare ` +
+          `editoriale proprii, include linkurile către site-ul clientului și datele de contact, ` +
+          `și a fost transmis la indexare către motoarele de căutare.`,
+      ];
+  for (const par of rezumat) {
+    if (!par) {
+      y -= 8;
       continue;
     }
-    for (const w of wrap(l, 88)) {
-      loc(13);
-      page.push({ t: "text", x: M, y, s: w, f: "F1", size: 9, c: TEXT });
+    for (const l of wrapW(par, W, 9.5, false)) {
+      if (y < 90) paginaNoua();
+      page.push({ t: "text", x: M, y, s: l, f: "F1", size: 9.5, c: INK });
       y -= 13;
     }
   }
-  if ((args.intro?.length ?? 0) > 0) y -= 10;
-
-  // ——— Titlul listei ———
-  loc(30);
-  page.push({ t: "text", x: M, y, s: (args.countLabel ?? "PUBLICATII").toUpperCase(), f: "F2", size: 9, c: RED });
-  y -= 6;
-  page.push({ t: "rect", x: M, y, w: W, h: 0.8, c: LINE });
   y -= 18;
 
-  // ——— Lista ———
-  args.entries.forEach((e, i) => {
-    const nume = e.title || numePublicatie(e.url) || "";
-    const adresa = e.url.replace(/^https?:\/\//, "");
-    const rAdresa = wrap(adresa, 92);
-    const h = (nume ? 13 : 0) + rAdresa.length * 11 + 9;
-
-    loc(h);
-    if (i % 2 === 1) {
-      page.push({ t: "rect", x: M - 6, y: y - h + 8, w: W + 12, h, c: ZEBRA });
-    }
-    page.push({ t: "text", x: M, y, s: String(i + 1).padStart(2, "0"), f: "F2", size: 9, c: GOLD });
-    if (nume) {
-      page.push({ t: "text", x: M + 26, y, s: nume, f: "F2", size: 9.5, c: TEXT });
-      y -= 12;
-    }
-    rAdresa.forEach((r, j) => {
-      page.push({ t: "text", x: M + 26, y: y - j * 11, s: r, f: "F1", size: 8, c: nume ? MUTED : TEXT });
+  // ——— Tabelul ———
+  const H_HEAD = 20;
+  const capTabel = () => {
+    page.push({ t: "rect", x: M, y: y - H_HEAD + 6, w: W, h: H_HEAD, c: RED });
+    page.push({ t: "text", x: M + 10, y, s: "#", f: "F2", size: 9, c: WHITE });
+    page.push({ t: "text", x: M + C_NR + 8, y, s: "Publicația", f: "F2", size: 9, c: WHITE });
+    page.push({
+      t: "text",
+      x: M + C_NR + C_PUB + 8,
+      y,
+      s: args.countLabel ?? "Linkul articolului",
+      f: "F2",
+      size: 9,
+      c: WHITE,
     });
-    y -= rAdresa.length * 11 + 9;
+    y -= H_HEAD + 4;
+  };
+  capTabel();
+
+  args.entries.forEach((e, i) => {
+    const nume = e.title || numePublicatie(e.url) || "—";
+    const rNume = wrapW(nume, C_PUB - 16, 9, true);
+    const rLink = wrapChars(e.url, C_LINK - 16, 8);
+    const h = Math.max(rNume.length * 12, rLink.length * 10) + 12;
+
+    if (y - h < 60) {
+      paginaNoua();
+      capTabel();
+    }
+
+    if (i % 2 === 1) page.push({ t: "rect", x: M, y: y - h + 10, w: W, h, c: ZEBRA });
+    page.push({ t: "rect", x: M, y: y - h + 10, w: W, h: 0.6, c: GRID });
+
+    page.push({ t: "text", x: M + 10, y, s: String(i + 1), f: "F1", size: 8.5, c: MUTED });
+    rNume.forEach((l, j) =>
+      page.push({ t: "text", x: M + C_NR + 8, y: y - j * 12, s: l, f: "F2", size: 9, c: INK }),
+    );
+    rLink.forEach((l, j) =>
+      page.push({ t: "text", x: M + C_NR + C_PUB + 8, y: y - j * 10, s: l, f: "F1", size: 8, c: LINK }),
+    );
+    y -= h;
   });
 
   pages.push(page);
 
-  // ——— Subsolul, pe fiecare pagina ———
   pages.forEach((p, i) => {
-    p.push({ t: "rect", x: M, y: 44, w: W, h: 0.8, c: LINE });
-    p.push({ t: "text", x: M, y: 32, s: `${args.siteName} · ${args.siteUrl.replace(/^https?:\/\//, "")}`, f: "F1", size: 7.5, c: MUTED });
-    p.push({ t: "text", x: PAGE_W - M - 46, y: 32, s: `Pagina ${i + 1} / ${pages.length}`, f: "F1", size: 7.5, c: MUTED });
+    p.push({ t: "rect", x: M, y: 46, w: W, h: 0.6, c: GRID });
+    p.push({
+      t: "text",
+      x: M,
+      y: 34,
+      s: `${args.siteName} · ${args.siteUrl.replace(/^https?:\/\//, "")}`,
+      f: "F1",
+      size: 7.5,
+      c: MUTED,
+    });
+    p.push({
+      t: "text",
+      x: PAGE_W - M - 52,
+      y: 34,
+      s: `Pagina ${i + 1} / ${pages.length}`,
+      f: "F1",
+      size: 7.5,
+      c: MUTED,
+    });
   });
 
   return serializePdf(pages, PAGE_W, PAGE_H);
@@ -408,44 +423,141 @@ export function buildReportPdf(args: {
 
 type RGB = [number, number, number];
 
-/** O singura instructiune de desen. Ordinea din lista e ordinea pe hartie. */
 type Cmd =
   | { t: "rect"; x: number; y: number; w: number; h: number; c: RGB }
   | { t: "text"; x: number; y: number; s: string; f: "F1" | "F2"; size: number; c: RGB };
+
+/** Latimea unui sir, in puncte — din tabelul de latimi al fontului decupat. */
+function textWidth(s: string, size: number, bold: boolean): number {
+  const w = bold ? FONT_WIDTHS_BOLD : FONT_WIDTHS;
+  let total = 0;
+  for (const ch of s) {
+    const code = FONT_ENCODING[ch] ?? ch.charCodeAt(0);
+    const idx = code - FONT_FIRST_CHAR;
+    total += (idx >= 0 && idx < w.length ? w[idx] : 600) * size;
+  }
+  return total / 1000;
+}
+
+/** Taie pe cuvinte, la o latime data in puncte. */
+function wrapW(s: string, maxW: number, size: number, bold: boolean): string[] {
+  const out: string[] = [];
+  let line = "";
+  for (const word of s.split(/\s+/)) {
+    const test = line ? `${line} ${word}` : word;
+    if (textWidth(test, size, bold) <= maxW || !line) line = test;
+    else {
+      out.push(line);
+      line = word;
+    }
+  }
+  if (line) out.push(line);
+  return out.length ? out : [""];
+}
+
+/** Taie oriunde — pentru adrese lungi, care n-au spatii. */
+function wrapChars(s: string, maxW: number, size: number): string[] {
+  const out: string[] = [];
+  let line = "";
+  for (const ch of s) {
+    if (textWidth(line + ch, size, false) > maxW && line) {
+      out.push(line);
+      line = ch;
+    } else line += ch;
+  }
+  if (line) out.push(line);
+  return out.length ? out : [""];
+}
 
 function col([r, g, b]: RGB): string {
   return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`;
 }
 
-/** Scrie obiectele PDF si tabelul xref. Separat, ca desenul sa ramana citibil. */
+/** Codifica textul in codurile fontului nostru si escapeaza ce cere PDF-ul. */
+function pdfString(s: string): string {
+  let out = "";
+  for (const ch of s) {
+    const code = FONT_ENCODING[ch] ?? (ch.charCodeAt(0) < 127 ? ch.charCodeAt(0) : 63);
+    if (code === 40 || code === 41 || code === 92) out += "\\" + String.fromCharCode(code);
+    else if (code < 32 || code > 126) out += "\\" + code.toString(8).padStart(3, "0");
+    else out += String.fromCharCode(code);
+  }
+  return out;
+}
+
+/**
+ * Scrie obiectele PDF, cu fonturile TrueType incorporate.
+ *
+ * Ordinea obiectelor: 1 catalog, 2 pages, 3+4 fonturile, 5+6 descriptorii,
+ * 7+8 fisierele de font, apoi perechile pagina/continut.
+ */
 function serializePdf(pages: Cmd[][], PAGE_W: number, PAGE_H: number): Buffer {
-  const objects: string[] = [];
+  const objects: (string | null)[] = [];
+  const binStreams = new Map<number, { data: Buffer; dict: string }>();
+
+  const lastChar = FONT_FIRST_CHAR + FONT_WIDTHS.length - 1;
+  const differences = `[ ${FONT_FIRST_CHAR} ${FONT_GLYPHS.map((g) => `/${g}`).join(" ")} ]`;
+
+  const fontDict = (id: number, descriptorId: number, widths: number[], name: string) =>
+    `<< /Type /Font /Subtype /TrueType /BaseFont /${name} /FirstChar ${FONT_FIRST_CHAR} ` +
+    `/LastChar ${lastChar} /Widths [${widths.join(" ")}] ` +
+    `/Encoding << /Type /Encoding /Differences ${differences} >> ` +
+    `/FontDescriptor ${descriptorId} 0 R >>`;
+
+  const descriptor = (name: string, m: (typeof FONT_METRICS)["regular"], fileId: number) =>
+    `<< /Type /FontDescriptor /FontName /${name} /Flags 32 /FontBBox [${m.bbox.join(" ")}] ` +
+    `/ItalicAngle ${m.italicAngle} /Ascent ${m.ascent} /Descent ${m.descent} ` +
+    `/CapHeight ${m.capHeight} /StemV ${m.stemV} /FontFile2 ${fileId} 0 R >>`;
+
+  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
+  objects[3] = fontDict(3, 5, FONT_WIDTHS, "DejaVuSans");
+  objects[4] = fontDict(4, 6, FONT_WIDTHS_BOLD, "DejaVuSans-Bold");
+  objects[5] = descriptor("DejaVuSans", FONT_METRICS.regular, 7);
+  objects[6] = descriptor("DejaVuSans-Bold", FONT_METRICS.bold, 8);
+
+  for (const [id, b64] of [
+    [7, FONT_REGULAR_B64],
+    [8, FONT_BOLD_B64],
+  ] as [number, string][]) {
+    const raw = Buffer.from(b64, "base64");
+    const zipped = deflateSync(raw);
+    binStreams.set(id, {
+      data: zipped,
+      dict: `<< /Length ${zipped.length} /Length1 ${raw.length} /Filter /FlateDecode >>`,
+    });
+    objects[id] = null;
+  }
+
+  let nextId = 9;
   const pageObjIds: number[] = [];
   const contentObjIds: number[] = [];
-
-  let nextId = 5;
   for (let i = 0; i < pages.length; i++) {
     pageObjIds.push(nextId++);
     contentObjIds.push(nextId++);
   }
+  objects[2] = `<< /Type /Pages /Count ${pages.length} /Kids [${pageObjIds
+    .map((id) => `${id} 0 R`)
+    .join(" ")}] >>`;
 
-  objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-  objects[2] = `<< /Type /Pages /Count ${pages.length} /Kids [${pageObjIds.map((id) => `${id} 0 R`).join(" ")}] >>`;
-  objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
-  objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
-
-  const streams: Buffer[] = [];
   pages.forEach((cmds, pi) => {
     let c = "";
     for (const cmd of cmds) {
       if (cmd.t === "rect") {
-        c += `q ${col(cmd.c)} rg ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} ${cmd.w.toFixed(2)} ${cmd.h.toFixed(2)} re f Q\n`;
+        c +=
+          `q ${col(cmd.c)} rg ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} ` +
+          `${cmd.w.toFixed(2)} ${cmd.h.toFixed(2)} re f Q\n`;
       } else if (cmd.s) {
-        c += `BT ${col(cmd.c)} rg /${cmd.f} ${cmd.size} Tf 1 0 0 1 ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} Tm (${pdfText(cmd.s)}) Tj ET\n`;
+        c +=
+          `BT ${col(cmd.c)} rg /${cmd.f} ${cmd.size} Tf ` +
+          `1 0 0 1 ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} Tm (${pdfString(cmd.s)}) Tj ET\n`;
       }
     }
     const buf = Buffer.from(c, "latin1");
-    streams[pi] = buf;
+    binStreams.set(contentObjIds[pi], {
+      data: buf,
+      dict: `<< /Length ${buf.length} >>`,
+    });
+    objects[contentObjIds[pi]] = null;
     objects[pageObjIds[pi]] =
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] ` +
       `/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjIds[pi]} 0 R >>`;
@@ -464,11 +576,10 @@ function serializePdf(pages: Cmd[][], PAGE_W: number, PAGE_H: number): Buffer {
   const total = nextId - 1;
   for (let id = 1; id <= total; id++) {
     offsets[id] = pos;
-    const ci = contentObjIds.indexOf(id);
-    if (ci >= 0) {
-      const stream = streams[ci];
-      push(Buffer.from(`${id} 0 obj\n<< /Length ${stream.length} >>\nstream\n`, "latin1"));
-      push(stream);
+    const bin = binStreams.get(id);
+    if (bin) {
+      push(Buffer.from(`${id} 0 obj\n${bin.dict}\nstream\n`, "latin1"));
+      push(bin.data);
       push(Buffer.from("\nendstream\nendobj\n", "latin1"));
     } else {
       push(Buffer.from(`${id} 0 obj\n${objects[id]}\nendobj\n`, "latin1"));
