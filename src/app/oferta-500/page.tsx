@@ -44,7 +44,7 @@ const INCLUDED = [
     icon: Zap,
     title: "Trimise imediat la indexare",
     description:
-      "După publicare, fiecare articol e trimis automat către Google pentru indexare. Nu aștepți să te descopere singur — intri în rezultate în ore, nu în săptămâni.",
+      "După publicare, fiecare articol e trimis automat la Google, Bing și Yandex pentru indexare — nu așteaptă să fie descoperit de crawler. Asta grăbește indexarea semnificativ; momentul exact îl decide fiecare motor de căutare.",
   },
   {
     icon: Globe,
