@@ -10,6 +10,65 @@ import { Loader2, Send, CheckCircle2, FileSpreadsheet, Mail, Paperclip, X } from
  * Raport publicare (ca sa trimita linkurile) si Trimite email (ca sa scrie
  * clientului) — copiind manual adresa si titlul intre ele.
  */
+/**
+ * Emailurile care se repeta la FIECARE comanda, gata scrise.
+ *
+ * Nu doar disponibile la un click: casuta porneste DEJA completata cu
+ * sablonul potrivit starii comenzii — factura cat timp nu e incasata,
+ * anuntul de publicare dupa. Proprietarul apasa Trimite si gata; rescria
+ * acelasi text la fiecare client, seara, de pe telefon.
+ */
+function sabloane(articleTitle: string) {
+  return [
+    {
+      eticheta: "Factura",
+      subiect: `Factura — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        `Vă mulțumim pentru comandă. Atașat aveți factura fiscală pentru publicarea articolului „${articleTitle}" în cele 50 de ziare din rețea.`,
+        "",
+        "Dacă ați efectuat deja transferul, nu mai aveți nimic de făcut — factura rămâne pentru evidența dumneavoastră contabilă.",
+        "",
+        "Publicăm în maximum 24 de ore lucrătoare, iar la final primiți pe email raportul complet cu toate linkurile.",
+        "",
+        "O zi bună,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+    {
+      eticheta: "Am publicat",
+      subiect: `Articolul e publicat — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        `Articolul „${articleTitle}" este publicat pe toate cele 50 de ziare din rețea.`,
+        "",
+        "Vă trimitem separat raportul complet cu toate linkurile — puteți deschide și verifica fiecare publicare. Articolele rămân online permanent.",
+        "",
+        "Mulțumim pentru încredere!",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+    {
+      eticheta: "Aștept plata",
+      subiect: `Comanda ${articleTitle} — așteptăm confirmarea plății`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        "Am primit comanda și materialele, mulțumim.",
+        "",
+        "Nu am identificat încă plata în extras. Dacă ați efectuat transferul, ne puteți trimite dovada tranzacției și demarăm publicarea pe loc, fără să mai așteptăm procesarea bancară.",
+        "",
+        "Publicăm în maximum 24 de ore lucrătoare de la confirmarea încasării.",
+        "",
+        "O zi bună,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+  ];
+}
+
 export function OrderActions({
   id,
   email,
@@ -31,8 +90,11 @@ export function OrderActions({
   const invoiceRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const [mailSubject, setMailSubject] = useState(`Comanda ta — ${articleTitle}`.slice(0, 120));
-  const [mailBody, setMailBody] = useState("");
+  const SABLOANE = sabloane(articleTitle);
+  // Sablonul potrivit momentului: publicata -> anuntul; neincasata -> factura.
+  const implicit = SABLOANE[isPublished ? 1 : 0];
+  const [mailSubject, setMailSubject] = useState(implicit.subiect);
+  const [mailBody, setMailBody] = useState(implicit.text);
 
   // Numaram doar liniile care chiar sunt linkuri, ca sa nu promitem clientului
   // un numar gresit de publicatii cand lista contine si titluri.
@@ -95,63 +157,6 @@ export function OrderActions({
     }
   }
 
-
-  /**
-   * Emailurile care se repeta la FIECARE comanda, gata scrise.
-   *
-   * Pana acum, casuta de mai jos pornea goala si trebuia compus de fiecare
-   * data acelasi text — factura, apoi raportul — de obicei seara, pe telefon,
-   * dupa o zi de munca. Sabloanele completeaza si subiectul, si mesajul; se
-   * pot edita oricand inainte de trimitere.
-   */
-  const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
-    {
-      eticheta: "Factura",
-      subiect: `Factura — ${articleTitle}`.slice(0, 120),
-      text: [
-        "Bună ziua,",
-        "",
-        `Vă mulțumim pentru comandă. Atașat aveți factura fiscală pentru publicarea articolului „${articleTitle}" în cele 50 de ziare din rețea.`,
-        "",
-        "Dacă ați efectuat deja transferul, nu mai aveți nimic de făcut — factura rămâne pentru evidența dumneavoastră contabilă.",
-        "",
-        "Publicăm în maximum 24 de ore lucrătoare, iar la final primiți pe email raportul complet cu toate linkurile.",
-        "",
-        "O zi bună,",
-        "Echipa MediaExpres",
-      ].join("\n"),
-    },
-    {
-      eticheta: "Am publicat",
-      subiect: `Articolul e publicat — ${articleTitle}`.slice(0, 120),
-      text: [
-        "Bună ziua,",
-        "",
-        `Articolul „${articleTitle}" este publicat pe toate cele 50 de ziare din rețea.`,
-        "",
-        "Vă trimitem separat raportul complet cu toate linkurile — puteți deschide și verifica fiecare publicare. Articolele rămân online permanent.",
-        "",
-        "Mulțumim pentru încredere!",
-        "Echipa MediaExpres",
-      ].join("\n"),
-    },
-    {
-      eticheta: "Aștept plata",
-      subiect: `Comanda ${articleTitle} — așteptăm confirmarea plății`.slice(0, 120),
-      text: [
-        "Bună ziua,",
-        "",
-        "Am primit comanda și materialele, mulțumim.",
-        "",
-        "Nu am identificat încă plata în extras. Dacă ați efectuat transferul, ne puteți trimite dovada tranzacției și demarăm publicarea pe loc, fără să mai așteptăm procesarea bancară.",
-        "",
-        "Publicăm în maximum 24 de ore lucrătoare de la confirmarea încasării.",
-        "",
-        "O zi bună,",
-        "Echipa MediaExpres",
-      ].join("\n"),
-    },
-  ];
 
   async function sendMail() {
     if (mailBody.trim().length < 10) {

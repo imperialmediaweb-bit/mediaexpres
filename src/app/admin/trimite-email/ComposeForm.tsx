@@ -3,6 +3,64 @@
 import { useState } from "react";
 import { Loader2, Send, Clock, CheckCircle2 } from "lucide-react";
 
+/**
+ * Sabloanele pentru emailurile care se repeta.
+ *
+ * Aici, spre deosebire de pagina comenzii, nu stim despre ce comanda e vorba,
+ * deci textele lasa un loc gol de completat — dar restul frazei e scris. Pana
+ * acum casuta pornea goala si acelasi mesaj se rescria la fiecare client.
+ */
+const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
+  {
+    eticheta: "Factura",
+    subiect: "Factura — MediaExpres",
+    text: [
+      "Bună ziua,",
+      "",
+      "Vă mulțumim pentru comandă. Atașat aveți factura fiscală pentru publicarea articolului în cele 50 de ziare din rețea.",
+      "",
+      "Dacă ați efectuat deja transferul, nu mai aveți nimic de făcut — factura rămâne pentru evidența dumneavoastră contabilă.",
+      "",
+      "Publicăm în maximum 24 de ore lucrătoare, iar la final primiți pe email raportul complet cu toate linkurile.",
+      "",
+      "O zi bună,",
+      "Echipa MediaExpres",
+    ].join("\n"),
+  },
+  {
+    eticheta: "Am publicat",
+    subiect: "Articolul e publicat — raportul cu linkurile",
+    text: [
+      "Bună ziua,",
+      "",
+      "Articolul este publicat pe toate cele 50 de ziare din rețea.",
+      "",
+      "Atașat aveți raportul complet cu toate linkurile — puteți deschide și verifica fiecare publicare. Articolele rămân online permanent.",
+      "",
+      "Dacă sunteți mulțumit de rezultat, ne-ar ajuta enorm două-trei rânduri despre experiența dumneavoastră, ca răspuns la acest email.",
+      "",
+      "Mulțumim pentru încredere!",
+      "Echipa MediaExpres",
+    ].join("\n"),
+  },
+  {
+    eticheta: "Aștept plata",
+    subiect: "Comanda dumneavoastră — așteptăm confirmarea plății",
+    text: [
+      "Bună ziua,",
+      "",
+      "Am primit comanda și materialele, mulțumim.",
+      "",
+      "Nu am identificat încă plata în extras. Dacă ați efectuat transferul, ne puteți trimite dovada tranzacției și demarăm publicarea pe loc, fără să mai așteptăm procesarea bancară.",
+      "",
+      "Publicăm în maximum 24 de ore lucrătoare de la confirmarea încasării.",
+      "",
+      "O zi bună,",
+      "Echipa MediaExpres",
+    ].join("\n"),
+  },
+];
+
 export function ComposeForm() {
   const [recipientsRaw, setRecipientsRaw] = useState("");
   const [subject, setSubject] = useState("");
@@ -123,6 +181,27 @@ export function ComposeForm() {
           placeholder={"client1@firma.ro\nclient2@firma.ro"}
           className="w-full rounded-xl border border-slate-200 px-3 py-2 font-mono text-xs focus:border-brand-red focus:outline-none"
         />
+      </div>
+
+      <div>
+        <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500">
+          Șabloane gata scrise
+        </p>
+        <div className="flex flex-wrap gap-2">
+          {SABLOANE.map((t) => (
+            <button
+              key={t.eticheta}
+              type="button"
+              onClick={() => {
+                setSubject(t.subiect);
+                setBody(t.text);
+              }}
+              className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:border-brand-red hover:text-brand-red"
+            >
+              {t.eticheta}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div>
