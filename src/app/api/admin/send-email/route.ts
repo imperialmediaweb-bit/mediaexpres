@@ -83,7 +83,22 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  const contentHtml = textToHtml(d.body);
+  // Numele fisierelor atasate intra si in corpul emailului.
+  //
+  // Doua motive, amandoua venite din realitate: clientul vede negru pe alb ca
+  // are factura in mesaj (nu toate aplicatiile de mail arata clipsul la fel),
+  // iar noi putem VERIFICA ulterior ce am trimis. Resend nu returneaza
+  // atasamentele cand recitim emailul, deci previzualizarea din admin arata
+  // doar HTML — iar lipsa lor de acolo parea, pe buna dreptate, ca nu s-a
+  // atasat nimic.
+  const atasamente = d.attachments?.map((a) => a.filename).filter(Boolean) ?? [];
+  const contentHtml =
+    textToHtml(d.body) +
+    (atasamente.length
+      ? `<p style="margin-top:20px;padding-top:14px;border-top:1px solid #e5e5e5;color:#64748b;font-size:13px;">📎 Atașat: ${atasamente
+          .map((n) => `<strong style="color:#111111;">${escapeHtml(n)}</strong>`)
+          .join(", ")}</p>`
+      : "");
   const html =
     d.template === "brand"
       ? wrapEmail(escapeHtml(d.subject), contentHtml)
