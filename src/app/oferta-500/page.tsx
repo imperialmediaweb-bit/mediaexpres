@@ -357,42 +357,56 @@ export default function Oferta500Page() {
           */}
           <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
             <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
-              Autoritatea domeniilor
+              De ce contează unde apare articolul
             </p>
             <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Toate cele 50 de domenii au Domain Authority 36+
+              50 de recomandări, de pe 50 de site-uri puternice
             </h3>
-            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
-              Nu doar câteva — <strong className="text-brand-navy">toate</strong>. Domain
-              Authority e scorul Moz de la 0 la 100 care arată cât de puternic e un domeniu
-              pentru motoarele de căutare: un blog nou are 1–5, iar site-urile din rețea au
-              36–37, cu peste 120 de domenii care fac linkuri către fiecare.
-            </p>
-            {/*
-              De ce conteaza ritmul: Google trece mai des pe site-urile care
-              publica zilnic. Autoritatea si trimiterea la indexare ajuta, dar
-              asta e motivul de fond pentru care articolul e gasit repede — un
-              domeniu parasit, oricat de vechi, e vizitat rar de crawler.
-            */}
-            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
-              Nu sunt domenii parcate, ținute doar pentru linkuri. Sunt redacții care
-              lucrează: în rețea se publică{" "}
-              <strong className="text-brand-navy">peste 1.200 de articole în fiecare zi</strong>.
-              De asta trec motoarele de căutare des pe ele — iar un articol nou e găsit
-              repede, nu peste săptămâni.
-            </p>
-            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
-              Verifică singur, gratuit, în 30 de secunde: intră pe{" "}
-              <a
-                href="https://moz.com/domain-analysis"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-brand-red underline"
-              >
-                Moz Domain Analysis
-              </a>{" "}
-              și scrie oricare domeniu din lista de mai sus.
-            </p>
+
+            <div className="mx-auto mt-5 max-w-2xl space-y-4 text-sm leading-relaxed text-slate-600">
+              <p>
+                Google judecă un site după cine îl recomandă. Un link primit de pe un site
+                puternic e ca o recomandare din partea cuiva de încredere. Unul de pe un blog
+                pe care nu-l cunoaște nimeni nu cântărește aproape nimic.
+              </p>
+              <p>
+                Puterea unui site se măsoară cu un scor de la 0 la 100, numit{" "}
+                <strong className="text-brand-navy">Domain Authority</strong>. Un blog nou are
+                1–5. Ziarele din rețeaua noastră au{" "}
+                <strong className="text-brand-navy">36–37 — toate, nu doar câteva</strong>, cu
+                peste 120 de site-uri care fac linkuri către fiecare.
+              </p>
+              <p>
+                Tu primești <strong className="text-brand-navy">50 de astfel de recomandări
+                dintr-o dată</strong>, de pe 50 de domenii diferite, și rămân permanent.
+              </p>
+              {/*
+                Argumentul care le leaga pe celelalte doua si pe care il intelege
+                oricine: Google trece des pe unde se intampla ceva. Un domeniu
+                parcat, oricat de vechi si de puternic, e vizitat rar.
+              */}
+              <p>
+                Și încă ceva, care cântărește la fel de mult:{" "}
+                <strong className="text-brand-navy">site-urile sunt vii</strong>. În rețea apar
+                peste 1.200 de articole în fiecare zi, deci motoarele de căutare trec pe ele
+                constant. Un domeniu ținut doar pentru linkuri, oricât de vechi, e vizitat rar —
+                articolul tău ar aștepta săptămâni. Aici e găsit repede, iar în ziua publicării
+                îl anunțăm noi la Google, prin API-ul oficial de indexare.
+              </p>
+              <p className="rounded-lg bg-slate-50 p-4 text-center">
+                <strong className="text-brand-navy">Nu ne crede pe cuvânt.</strong> Intră pe{" "}
+                <a
+                  href="https://moz.com/domain-analysis"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="font-semibold text-brand-red underline"
+                >
+                  moz.com/domain-analysis
+                </a>
+                , scrie oricare ziar din lista de mai sus și vezi scorul. E gratuit și durează
+                30 de secunde.
+              </p>
+            </div>
           </div>
 
           <div id="dovada-facebook" className="mx-auto mt-12 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
