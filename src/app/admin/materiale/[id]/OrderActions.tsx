@@ -88,6 +88,11 @@ export function OrderActions({
   const [links, setLinks] = useState("");
   const [invoiceName, setInvoiceName] = useState("");
   const invoiceRef = useRef<HTMLInputElement>(null);
+  // Atasamentele emailului liber — de aici pleaca factura, cu mesajul deja
+  // scris. Pana acum factura se putea trimite doar din alta pagina, unde
+  // trebuia recompus textul de la zero.
+  const [mailFiles, setMailFiles] = useState<{ filename: string; content: string; size: number }[]>([]);
+  const mailFilesRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const SABLOANE = sabloane(articleTitle);
@@ -158,6 +163,28 @@ export function OrderActions({
   }
 
 
+  const MAX_FILE = 5 * 1024 * 1024;
+
+  async function addMailFiles(list: FileList | null) {
+    if (!list?.length) return;
+    const next = [...mailFiles];
+    for (const f of Array.from(list)) {
+      if (next.length >= 3) break;
+      if (f.size > MAX_FILE) {
+        setMsg({ kind: "err", text: `„${f.name}" depășește 5MB.` });
+        continue;
+      }
+      const b64 = await new Promise<string>((res, rej) => {
+        const r = new FileReader();
+        r.onload = () => res(String(r.result).split(",")[1] || "");
+        r.onerror = () => rej(new Error("Nu am putut citi fișierul"));
+        r.readAsDataURL(f);
+      });
+      next.push({ filename: f.name, content: b64, size: f.size });
+    }
+    setMailFiles(next);
+  }
+
   async function sendMail() {
     if (mailBody.trim().length < 10) {
       setMsg({ kind: "err", text: "Scrie mesajul (minim 10 caractere)." });
@@ -174,12 +201,19 @@ export function OrderActions({
           subject: mailSubject.trim(),
           body: mailBody.trim(),
           template: "personal",
+          ...(mailFiles.length
+            ? { attachments: mailFiles.map(({ filename, content }) => ({ filename, content })) }
+            : {}),
         }),
       });
       const j = await r.json();
       if (!r.ok || !j.ok) throw new Error(j.error || "Eroare");
-      setMsg({ kind: "ok", text: `Email trimis către ${email}.` });
-      setMailBody("");
+      setMsg({
+        kind: "ok",
+        text: `Email trimis către ${email}${mailFiles.length ? ` cu ${mailFiles.length} fișier(e) atașat(e)` : ""}.`,
+      });
+      setMailFiles([]);
+      if (mailFilesRef.current) mailFilesRef.current.value = "";
     } catch (e) {
       setMsg({ kind: "err", text: e instanceof Error ? e.message : "Eroare" });
     } finally {
@@ -331,9 +365,8 @@ export function OrderActions({
           3. Scrie-i clientului
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Pleacă de pe adresa site-ului, ca mesaj personal. Alege un șablon și trimite —
-          sau modifică textul înainte. Pentru factură ca atașament, folosește
-          Emailuri → Răspunde clientului.
+          Mesajul e deja scris, potrivit stării comenzii. Atașezi factura sau raportul
+          mai jos și trimiți — totul dintr-un singur loc.
         </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {SABLOANE.map((t) => (
@@ -362,6 +395,43 @@ export function OrderActions({
           placeholder="Bună ziua,&#10;&#10;..."
           className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-navy focus:outline-none"
         />
+        {mailFiles.length > 0 && (
+          <ul className="mt-2 space-y-1">
+            {mailFiles.map((f, i) => (
+              <li key={f.filename + i} className="flex items-center gap-2 rounded-lg bg-emerald-50 px-3 py-1.5 text-xs text-emerald-800">
+                <Paperclip className="h-3.5 w-3.5 shrink-0" />
+                <span className="min-w-0 flex-1 truncate">{f.filename}</span>
+                <span className="shrink-0 text-emerald-700">{(f.size / 1024 / 1024).toFixed(1)}MB</span>
+                <button
+                  type="button"
+                  aria-label="Scoate fișierul"
+                  onClick={() => setMailFiles(mailFiles.filter((_, j) => j !== i))}
+                  className="shrink-0 text-emerald-700 hover:text-red-600"
+                >
+                  <X className="h-3.5 w-3.5" />
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+        {mailFiles.length < 3 && (
+          <label className="mt-2 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:border-brand-navy">
+            <Paperclip className="h-3.5 w-3.5" />
+            Atașează factura sau raportul (PDF, max. 5MB)
+            <input
+              ref={mailFilesRef}
+              type="file"
+              accept=".pdf,.xlsx,.xls,.csv,image/*"
+              multiple
+              className="hidden"
+              onChange={(e) => {
+                void addMailFiles(e.target.files);
+                e.target.value = "";
+              }}
+            />
+          </label>
+        )}
+        <br />
         <button
           type="button"
           onClick={sendMail}
