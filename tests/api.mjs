@@ -114,6 +114,12 @@ t("oferta/continua: cerere valida -> 200", (await post("/api/oferta/continua", {
 // Declaratia e trimisa corect aici INTENTIONAT: testul verifica tokenul, iar
 // fara ea raspunsul ar fi 400 de la validare si n-ar mai ajunge la verificarea
 // tokenului — testul ar trece degeaba, pe alt motiv decat cel urmarit.
+// Comanda introdusa manual din admin: e o usa care creeaza comenzi in baza
+// de date, deci fara sesiune nu are voie sa raspunda nimic.
+t("comanda-noua: fara sesiune -> 401", (await post("/api/admin/comanda-noua", {
+  packageId: "promo-50", email: "a@b.ro", companyName: "X SRL",
+  title: "Titlu test", body: "x".repeat(60),
+})).status === 401);
 t("articol/submit: token invalid -> 403", (await post("/api/articol/submit", {
   token: "token-inventat-lung", title: "Titlu test", body: "x".repeat(150),
   contentDeclaration: true,

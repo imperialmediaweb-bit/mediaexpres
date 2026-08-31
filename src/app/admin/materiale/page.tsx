@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { MarkPublishedButton } from "./MarkPublishedButton";
+import { NewOrderForm } from "./NewOrderForm";
 
 export const dynamic = "force-dynamic";
 
@@ -34,7 +35,12 @@ export default async function MaterialePage() {
 
   return (
     <div>
-      <h1 className="font-serif text-3xl font-bold text-brand-navy">Materiale de publicat</h1>
+      <div className="flex flex-wrap items-start justify-between gap-3">
+        <h1 className="font-serif text-3xl font-bold text-brand-navy">Materiale de publicat</h1>
+        {/* Comenzile de pe WhatsApp si de la telefon intra tot aici, nu pe o
+            usa separata — ca sa existe un singur loc unde stau toate. */}
+        <NewOrderForm />
+      </div>
       <p className="mt-2 text-sm text-slate-600">
         Articolele trimise de clienți după plată — text, poze și contact, într-un singur loc.
         {pending > 0 && (
