@@ -41,6 +41,12 @@ const INCLUDED = [
       "Nu publicăm copii. Fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, altă adresă — cu același mesaj și aceleași linkuri. Google vede 50 de articole diferite, nu unul copiat de 50 de ori.",
   },
   {
+    icon: Zap,
+    title: "Trimise la indexare, în ziua publicării",
+    description:
+      "Fiecare articol e anunțat automat la Google, Bing și Yandex imediat ce apare — la Google prin API-ul oficial de indexare, nu doar prin sitemap. Nu așteaptă să fie descoperit de crawler. Momentul indexării îl decide fiecare motor de căutare.",
+  },
+  {
     icon: Globe,
     title: "41 locale + 9 naționale",
     description:
@@ -48,7 +54,7 @@ const INCLUDED = [
   },
   {
     icon: LinkIcon,
-    title: "50 backlinks dofollow, DA 37+",
+    title: "50 backlinks dofollow, DA 36+ pe toate domeniile",
     description:
       "Linkuri reale, permanente, din 50 de domenii .ro diferite — nu de pe subpagini ale aceluiași site. Autoritate de domeniu 37+, efect direct și durabil pe SEO-ul tău.",
   },
@@ -111,9 +117,9 @@ const CONDITIONS = [
       "Trimiți până la 3 imagini, dintre care una o alegi ca imagine reprezentativă a articolului.",
   },
   {
-    title: "Distribuire pe Facebook — opțional",
+    title: "Distribuire pe Facebook — inclusă, o poți refuza",
     detail:
-      "Poți alege dacă articolul se distribuie și pe paginile de Facebook ale publicațiilor. Fără cost suplimentar.",
+      "Articolul se distribuie automat pe paginile de Facebook ale publicațiilor, fără cost suplimentar. Dacă preferi doar publicarea pe site, debifezi la comandă.",
   },
 ];
 
@@ -133,6 +139,14 @@ const FAQ = [
   {
     q: "E același articol copiat pe toate ziarele? Nu penalizează Google?",
     a: "Nu e copiat. Fiecare ziar primește o variantă unică a articolului: alt titlu, altă formulare, altă adresă URL — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Zero conținut duplicat între publicații. Iar „canibalizarea” de care se vorbește e o problemă doar între paginile propriului tău site — articolele apar pe domeniile noastre și trimit linkuri către tine, exact ce contează pentru SEO.",
+  },
+  {
+    q: "Ce autoritate au domeniile? Linkurile chiar contează pentru SEO?",
+    a: "Toate cele 50 de domenii au Domain Authority 36+ (scorul Moz, de la 0 la 100) și peste 120 de domenii care fac linkuri către fiecare. Un blog nou are DA 1–5, deci diferența e mare. Linkurile sunt dofollow, de pe 50 de domenii .ro diferite — nu subpagini ale aceluiași site — și rămân permanent. Verifică singur, gratuit: intră pe moz.com/domain-analysis și scrie oricare ziar din lista de mai sus.",
+  },
+  {
+    q: "Articolele ajung în Google?",
+    a: "Fiecare articol e trimis automat la indexare imediat după publicare — la Google prin API-ul oficial de indexare, plus Bing și Yandex. Nu așteptăm să-l descopere crawlerul. Momentul exact în care intră în index îl decide fiecare motor de căutare, de regulă între câteva ore și câteva zile. La cerere, îți spunem starea articolelor tale.",
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
@@ -332,6 +346,55 @@ export default function Oferta500Page() {
             de trafic pe care le-am scos de pe site. Cand cifrele se schimba,
             se schimba AICI si in eticheta de perioada, impreuna.
           */}
+          {/*
+            Autoritatea domeniilor, spusa ca text si invitand la verificare.
+            NU punem capturi din Moz: oricine poate verifica gratuit in 30 de
+            secunde, deci o captura n-ar adauga incredere, dar ar parea aleasa
+            de noi. Un numar plus "verifica singur" e mai puternic.
+            Nu pomenim cuvintele-cheie pe care rankeaza ziarele: nu vindem
+            pozitii in Google, vindem backlinkuri de pe domenii puternice —
+            iar aia e afirmatia pe care o putem sustine.
+          */}
+          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
+              Autoritatea domeniilor
+            </p>
+            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
+              Toate cele 50 de domenii au Domain Authority 36+
+            </h3>
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
+              Nu doar câteva — <strong className="text-brand-navy">toate</strong>. Domain
+              Authority e scorul Moz de la 0 la 100 care arată cât de puternic e un domeniu
+              pentru motoarele de căutare: un blog nou are 1–5, iar site-urile din rețea au
+              36–37, cu peste 120 de domenii care fac linkuri către fiecare.
+            </p>
+            {/*
+              De ce conteaza ritmul: Google trece mai des pe site-urile care
+              publica zilnic. Autoritatea si trimiterea la indexare ajuta, dar
+              asta e motivul de fond pentru care articolul e gasit repede — un
+              domeniu parasit, oricat de vechi, e vizitat rar de crawler.
+            */}
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
+              Nu sunt domenii parcate, ținute doar pentru linkuri. Sunt redacții care
+              lucrează: în rețea se publică{" "}
+              <strong className="text-brand-navy">peste 1.200 de articole în fiecare zi</strong>.
+              De asta trec motoarele de căutare des pe ele — iar un articol nou e găsit
+              repede, nu peste săptămâni.
+            </p>
+            <p className="mx-auto mt-4 max-w-xl text-center text-sm text-slate-600">
+              Verifică singur, gratuit, în 30 de secunde: intră pe{" "}
+              <a
+                href="https://moz.com/domain-analysis"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-red underline"
+              >
+                Moz Domain Analysis
+              </a>{" "}
+              și scrie oricare domeniu din lista de mai sus.
+            </p>
+          </div>
+
           <div id="dovada-facebook" className="mx-auto mt-12 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
             <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
               Cel mai citit ziar din rețea, pe Facebook
