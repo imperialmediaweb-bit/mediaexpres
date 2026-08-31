@@ -341,10 +341,12 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
                 "",
                 "Vă trimit aici:",
-                "1. Articolul — sau doar tema, dacă îl scrieți voi (e inclus în preț)",
+                // Site-ul nu se cere separat: cine are articolul scris are
+                // linkurile deja in text. Il cerem doar impreuna cu tema,
+                // cand il scriem noi si trebuie sa stim incotro dam linkurile.
+                "1. Articolul, cu linkurile puse în text — sau doar tema și site-ul, dacă îl scrieți voi (e inclus în preț)",
                 "2. Datele firmei pentru factură: denumire, CUI, adresă",
-                "3. Site-ul către care puneți linkurile",
-                "4. Până la 3 poze (opțional)",
+                "3. Până la 3 poze (opțional)",
               ].join("\n"),
             )}`}
             target="_blank"
