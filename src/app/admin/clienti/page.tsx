@@ -2,8 +2,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { users, orders, subscriptions } from "@/db/schema";
-import { desc, eq, sql } from "drizzle-orm";
+import { users, orders, subscriptions, orderSubmissions } from "@/db/schema";
+import { desc, eq, or, sql } from "drizzle-orm";
+import { findPackageById } from "@/data/packages";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
 import { ImportLeadsButton } from "./ImportLeadsButton";
 import { SendListButton } from "./SendListButton";
@@ -19,6 +20,37 @@ function formatDate(d: Date | null) {
 export default async function AdminClientiPage() {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/clienti");
+
+  // Comenzile prin transfer bancar NU trec prin tabela `orders` (aia e a
+  // platilor Stripe), ci prin `orderSubmissions`, legate pe EMAIL — comanda
+  // exista inainte ca omul sa-si activeze contul. Fara ele, un client care a
+  // platit 500 lei prin OP aparea in lista cu 0,00 RON si 0 plati, adica exact
+  // pe dos fata de realitate.
+  const opPlati = await db
+    .select({
+      email: orderSubmissions.email,
+      packageId: orderSubmissions.packageId,
+    })
+    .from(orderSubmissions)
+    .where(
+      or(
+        eq(orderSubmissions.status, "paid"),
+        eq(orderSubmissions.status, "published"),
+      ),
+    );
+
+  const opDupaEmail = new Map<string, { count: number; total: number }>();
+  for (const p of opPlati) {
+    const key = p.email.toLowerCase();
+    const pkg = findPackageById(p.packageId);
+    const cur = opDupaEmail.get(key) || { count: 0, total: 0 };
+    // `orders.amount` e in bani (cenți), deci si suma din pachete se aduce
+    // la aceeasi unitate inainte de adunare.
+    opDupaEmail.set(key, {
+      count: cur.count + 1,
+      total: cur.total + (pkg?.price ?? 0) * 100,
+    });
+  }
 
   const rows = await db
     .select({
@@ -48,6 +80,16 @@ export default async function AdminClientiPage() {
     .where(eq(subscriptions.status, "active"));
 
   const subByUser = new Map(activeSubs.map((s) => [s.userId, s]));
+
+  // Cardul + OP, intr-o singura cifra pe client.
+  const clienti = rows.map((u) => {
+    const op = opDupaEmail.get(u.email.toLowerCase());
+    return {
+      ...u,
+      paidCount: (Number(u.paidCount) || 0) + (op?.count ?? 0),
+      totalSpent: (Number(u.totalSpent) || 0) + (op?.total ?? 0),
+    };
+  });
 
   return (
     <div>
@@ -82,14 +124,14 @@ export default async function AdminClientiPage() {
             </tr>
           </thead>
           <tbody>
-            {rows.length === 0 ? (
+            {clienti.length === 0 ? (
               <tr>
                 <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
                   Niciun client.
                 </td>
               </tr>
             ) : (
-              rows.map((u) => {
+              clienti.map((u) => {
                 const sub = subByUser.get(u.id);
                 return (
                   <tr key={u.id} className="border-t border-slate-100">
