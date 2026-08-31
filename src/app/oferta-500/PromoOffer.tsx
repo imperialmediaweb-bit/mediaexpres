@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
@@ -54,6 +54,17 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   const [askEmail, setAskEmail] = useState(false);
   const [email, setEmail] = useState("");
   const [declar, setDeclar] = useState(false);
+  const emailFormRef = useRef<HTMLFormElement>(null);
+
+  // Pe telefon, formularul de email se deschidea SUB marginea ecranului —
+  // acoperit de bara fixa de comanda si de bula de chat. Omul apasa "Comanda
+  // acum" si nu vedea nicio schimbare, deci pleca. Il aducem in mijlocul
+  // ecranului imediat ce apare.
+  useEffect(() => {
+    if (askEmail) {
+      emailFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }, [askEmail]);
 
   const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
@@ -208,6 +219,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
 
       {askEmail ? (
         <form
+          ref={emailFormRef}
           onSubmit={(e) => {
             e.preventDefault();
             void go();

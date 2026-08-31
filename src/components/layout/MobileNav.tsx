@@ -27,10 +27,18 @@ export function MobileNav() {
         onClick={() => setOpen(false)}
         aria-hidden={!open}
       />
+      {/*
+        invisible cand e inchis, nu doar translatat: sertarul impins cu
+        translate-x-full ramane, pentru browser, parte din latimea paginii —
+        si TOT site-ul pe telefon capata un scroll orizontal de 384px spre
+        gol. `invisible` il scoate din calcul; tranzitia ramane vizibila
+        pentru ca visibility se schimba instant la deschidere si cu
+        intarziere la inchidere (delay-150), dupa ce alunecarea s-a terminat.
+      */}
       <aside
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl transition-transform duration-300",
-          open ? "translate-x-0" : "translate-x-full"
+          "fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl transition-[transform,visibility] duration-300",
+          open ? "translate-x-0" : "invisible translate-x-full delay-150"
         )}
         aria-hidden={!open}
       >
