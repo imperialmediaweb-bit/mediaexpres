@@ -10,6 +10,7 @@ import {
   type Uploaded,
 } from "@/lib/upload-client";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
+import { SITE } from "@/data/site";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 
@@ -158,6 +159,16 @@ export function TransferForm({
           <div>
             <label className={label}>Email *</label>
             <input type="email" required value={f.email} onChange={(e) => set("email", e.target.value)} className={input} placeholder="nume@firma.ro" />
+            {/*
+              Avertisment scurt, langa camp: TOT ce datoram clientului pleaca
+              spre adresa asta — factura si raportul cu cele 50 de linkuri. O
+              litera gresita si omul nu primeste nimic, iar noi aflam abia cand
+              ne scrie ca „n-a venit nimic".
+            */}
+            <p className="mt-1 text-xs text-slate-500">
+              Verifică adresa — aici primești factura și raportul cu linkurile. Dacă
+              greșești, scrie-ne pe WhatsApp la {SITE.phone}.
+            </p>
           </div>
           <div>
             <label className={label}>Telefon *</label>

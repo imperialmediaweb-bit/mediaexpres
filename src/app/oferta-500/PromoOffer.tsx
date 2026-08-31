@@ -259,6 +259,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               placeholder="nume@firma.ro"
               className="mt-2 w-full rounded-lg border border-white/20 bg-white px-4 py-3 text-base text-brand-navy placeholder:text-slate-400 focus:border-brand-gold focus:outline-none"
             />
+            {/* O litera gresita aici = nici factura, nici raportul. */}
+            <span className="mt-1.5 block text-xs text-white/60">
+              Verifică adresa — dacă greșești, scrie-ne pe WhatsApp la {SITE.phone}.
+            </span>
           </label>
           {/*
             Cele doua metode, ca alegere egala.

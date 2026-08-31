@@ -216,6 +216,24 @@ export async function POST(req: NextRequest) {
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, iar backlinkurile rămân active.</p>
       <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul tău: intră pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primești link de conectare).</p>
+      ${/*
+        Cererea de recenzie sta AICI, in emailul cu raportul, si nu intr-un
+        mesaj separat de peste cateva zile: acum e momentul in care omul tocmai
+        a deschis linkurile si a vazut ca totul e la locul lui. Peste trei zile
+        entuziasmul e deja consumat, iar emailul pare cersit.
+        Cerem un raspuns la email, nu o recenzie pe vreo platforma — asa nu-i
+        dam nicio bataie de cap si primim un text pe care il putem folosi ca
+        testimonial, cu acordul lui.
+      */ ""}
+      <div style="margin-top:24px;background:#f8f5f0;border-radius:10px;padding:16px;">
+        <p style="margin:0 0 8px;font-weight:600;color:#111111;">Ne spui cum ți s-a părut?</p>
+        <p style="margin:0;color:#334155;font-size:14px;line-height:1.6;">
+          Dacă ești mulțumit de rezultat, răspunde la acest email cu două-trei
+          rânduri despre experiența ta. Ne ajută enorm — iar dacă ne dai voie,
+          le publicăm pe site ca recomandare, cu numele firmei tale și link
+          către ea.
+        </p>
+      </div>
       <p style="margin-top:24px;">Mulțumim pentru încredere!<br/><strong>Echipa MediaExpres</strong></p>
       `,
     ),
