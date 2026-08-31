@@ -393,19 +393,33 @@ export default function Oferta500Page() {
                 articolul tău ar aștepta săptămâni. Aici e găsit repede, iar în ziua publicării
                 îl anunțăm noi la Google, prin API-ul oficial de indexare.
               </p>
-              <p className="rounded-lg bg-slate-50 p-4 text-center">
-                <strong className="text-brand-navy">Nu ne crede pe cuvânt.</strong> Intră pe{" "}
-                <a
-                  href="https://moz.com/domain-analysis"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="font-semibold text-brand-red underline"
-                >
-                  moz.com/domain-analysis
-                </a>
-                , scrie oricare ziar din lista de mai sus și vezi scorul. E gratuit și durează
-                30 de secunde.
-              </p>
+            </div>
+
+            {/*
+              Cifrele in fata, ca la cardul de Facebook: omul le vede, nu i se
+              cere sa se documenteze singur. Sursa si data raman scrise, ca sa
+              nu fie o afirmatie fara acoperire — si ca sa stim cand trebuie
+              improspatate.
+            */}
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">36–37</div>
+                <div className="mt-1 text-sm text-slate-600">Domain Authority, pe toate cele 50</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">120+</div>
+                <div className="mt-1 text-sm text-slate-600">domenii care dau linkuri către fiecare ziar</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-emerald-600">50</div>
+                <div className="mt-1 text-sm text-slate-600">linkuri dofollow, permanente</div>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-slate-600">
+              Sursa: Moz Domain Analysis, verificat în august 2026. Un blog nou are Domain
+              Authority 1–5.
+            </p>
+            <div className="hidden">
             </div>
           </div>
 
