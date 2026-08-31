@@ -477,7 +477,9 @@ console.log("\n########## O. LISTA IN PDF ##########");
   // comparam pe forma fara diacritice, exact cum ajunge in fisier.
   const fara = (x: string) =>
     x.replace(/[ăâîșşțţ]/g, (c) => ({ ă: "a", â: "a", î: "i", ș: "s", ş: "s", ț: "t", ţ: "t" })[c] || c);
-  const lipsa = NEWSPAPERS.filter((n) => !raw.includes(n.url));
+  // Raportul afiseaza adresele fara "https://" — se citesc mai bine si raman
+  // la fel de bune la copiere. Verificam deci forma afisata.
+  const lipsa = NEWSPAPERS.filter((n) => !raw.includes(n.url.replace(/^https?:\/\//, "")));
   t("toate cele " + NEWSPAPERS.length + " adrese sunt in PDF", lipsa.length === 0, lipsa[0]?.url);
   const numeLipsa = NEWSPAPERS.filter((n) => !raw.includes(fara(n.name)));
   t("toate numele de ziare sunt in PDF", numeLipsa.length === 0, numeLipsa[0]?.name);

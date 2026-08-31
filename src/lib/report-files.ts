@@ -1,4 +1,5 @@
 import { deflateRawSync } from "node:zlib";
+import { NEWSPAPERS } from "@/data/newspapers";
 
 /**
  * Generatoare de .xlsx si .pdf fara nicio dependenta noua.
@@ -243,56 +244,185 @@ export function buildReportPdf(args: {
   /** Randuri libere puse dupa antet, inainte de lista. */
   intro?: string[];
 }): Buffer {
-  const PAGE_H = 842; // A4 in puncte
-  const PAGE_W = 595;
-  const MARGIN = 50;
-  const LINE = 14;
+  // ---------------------------------------------------------------------
+  // Raportul e ULTIMUL lucru pe care il vede clientul si singura dovada ca
+  // si-a primit banii inapoi in servicii. A fost multa vreme o insiruire de
+  // URL-uri intr-un font de masina de scris — arata a fisier text, nu a
+  // livrabil platit. Acum are antet, casetele cu datele comenzii, numele
+  // fiecarei publicatii langa adresa ei si numerotare pe pagini.
+  // ---------------------------------------------------------------------
+  const PAGE_W = 595; // A4 in puncte
+  const PAGE_H = 842;
+  const M = 46; // marginea laterala
+  const W = PAGE_W - M * 2;
 
-  // Construim liniile: [text, font, marime]
-  type Line = [string, "F1" | "F2", number];
-  const lines: Line[] = [];
-  lines.push([args.siteName.toUpperCase(), "F2", 18]);
-  lines.push([args.subtitle ?? "Raport de publicare", "F1", 11]);
-  lines.push(["", "F1", 11]);
-  if (args.clientName) lines.push([`Client: ${args.clientName}`, "F1", 11]);
-  if (args.articleTitle) {
-    for (const l of wrap(`Campanie: ${args.articleTitle}`, 80)) lines.push([l, "F1", 11]);
-  }
-  lines.push([`Data: ${args.date.toLocaleDateString("ro-RO")}`, "F1", 11]);
-  lines.push([`${args.countLabel ?? "Publicatii"}: ${args.entries.length}`, "F1", 11]);
-  for (const l of args.intro ?? []) {
-    if (!l) lines.push(["", "F1", 11]);
-    else for (const w of wrap(l, 88)) lines.push([w, "F1", 10]);
-  }
-  lines.push(["", "F1", 11]);
+  const NAVY: RGB = [0.067, 0.067, 0.067];
+  const RED: RGB = [0.757, 0.071, 0.122];
+  const GOLD: RGB = [0.788, 0.631, 0.291];
+  const TEXT: RGB = [0.13, 0.16, 0.22];
+  const MUTED: RGB = [0.45, 0.5, 0.58];
+  const LINE: RGB = [0.9, 0.91, 0.93];
+  const ZEBRA: RGB = [0.976, 0.98, 0.985];
+  const WHITE: RGB = [1, 1, 1];
 
-  args.entries.forEach((e, i) => {
-    const title = e.title || "";
-    if (title) {
-      for (const l of wrap(`${i + 1}. ${title}`, 78)) lines.push([l, "F2", 10]);
-      for (const l of wrap(e.url, 92)) lines.push([l, "F1", 9]);
-    } else {
-      for (const l of wrap(`${i + 1}. ${e.url}`, 92)) lines.push([l, "F1", 10]);
+  // Numele publicatiei, dedus din adresa. `new URL` converteste singur
+  // domeniile cu diacritice in forma punycode din datele noastre, deci
+  // "constanțaexpres.ro" si "xn--constanaexpres-mbf.ro" se potrivesc.
+  const dupaGazda = new Map<string, string>();
+  for (const n of NEWSPAPERS) {
+    try {
+      dupaGazda.set(new URL(n.url).hostname.replace(/^www\./, ""), n.name);
+    } catch {
+      /* adresa stricata in date — o sarim, raportul nu trebuie sa cada */
     }
-    lines.push(["", "F1", 6]);
+  }
+  function numePublicatie(url: string): string | null {
+    try {
+      return dupaGazda.get(new URL(url).hostname.replace(/^www\./, "")) ?? null;
+    } catch {
+      return null;
+    }
+  }
+
+  const pages: Cmd[][] = [];
+  let page: Cmd[] = [];
+  let y = 0;
+
+  const antetPagina = (prima: boolean) => {
+    page = [];
+    page.push({ t: "rect", x: 0, y: PAGE_H - (prima ? 104 : 58), w: PAGE_W, h: prima ? 104 : 58, c: NAVY });
+    if (prima) {
+      page.push({ t: "text", x: M, y: PAGE_H - 52, s: args.siteName.toUpperCase(), f: "F2", size: 22, c: WHITE });
+      page.push({ t: "text", x: M, y: PAGE_H - 70, s: "PRESA · DISTRIBUTIE · IMPACT", f: "F1", size: 7.5, c: GOLD });
+      page.push({
+        t: "text",
+        x: M,
+        y: PAGE_H - 92,
+        s: args.subtitle ?? "Raport de publicare",
+        f: "F2",
+        size: 11,
+        c: WHITE,
+      });
+      y = PAGE_H - 104 - 30;
+    } else {
+      page.push({ t: "text", x: M, y: PAGE_H - 36, s: args.siteName.toUpperCase(), f: "F2", size: 12, c: WHITE });
+      page.push({
+        t: "text",
+        x: M,
+        y: PAGE_H - 50,
+        s: args.subtitle ?? "Raport de publicare",
+        f: "F1",
+        size: 8,
+        c: GOLD,
+      });
+      y = PAGE_H - 58 - 26;
+    }
+  };
+
+  const paginaNoua = () => {
+    pages.push(page);
+    antetPagina(false);
+  };
+
+  const loc = (h: number) => {
+    if (y - h < 56) paginaNoua();
+  };
+
+  antetPagina(true);
+
+  // ——— Caseta cu datele comenzii ———
+  const detalii: [string, string][] = [];
+  if (args.clientName) detalii.push(["Client", args.clientName]);
+  if (args.articleTitle) detalii.push(["Articol", args.articleTitle]);
+  detalii.push(["Data", args.date.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })]);
+  detalii.push([args.countLabel ?? "Publicatii", String(args.entries.length)]);
+
+  const hCaseta = 16 + detalii.reduce((acc, [, v]) => acc + wrap(v, 62).length * 13, 0) + 10;
+  page.push({ t: "rect", x: M, y: y - hCaseta, w: W, h: hCaseta, c: ZEBRA });
+  page.push({ t: "rect", x: M, y: y - hCaseta, w: 3, h: hCaseta, c: RED });
+  let yd = y - 16;
+  for (const [k, v] of detalii) {
+    const randuri = wrap(v, 62);
+    page.push({ t: "text", x: M + 16, y: yd, s: k.toUpperCase(), f: "F1", size: 7.5, c: MUTED });
+    randuri.forEach((r, i) => {
+      page.push({ t: "text", x: M + 96, y: yd - i * 13, s: r, f: i === 0 ? "F2" : "F1", size: 9.5, c: TEXT });
+    });
+    yd -= randuri.length * 13;
+  }
+  y -= hCaseta + 22;
+
+  // ——— Randurile de intro (folosite de lista retelei) ———
+  for (const l of args.intro ?? []) {
+    if (!l) {
+      y -= 7;
+      continue;
+    }
+    for (const w of wrap(l, 88)) {
+      loc(13);
+      page.push({ t: "text", x: M, y, s: w, f: "F1", size: 9, c: TEXT });
+      y -= 13;
+    }
+  }
+  if ((args.intro?.length ?? 0) > 0) y -= 10;
+
+  // ——— Titlul listei ———
+  loc(30);
+  page.push({ t: "text", x: M, y, s: (args.countLabel ?? "PUBLICATII").toUpperCase(), f: "F2", size: 9, c: RED });
+  y -= 6;
+  page.push({ t: "rect", x: M, y, w: W, h: 0.8, c: LINE });
+  y -= 18;
+
+  // ——— Lista ———
+  args.entries.forEach((e, i) => {
+    const nume = e.title || numePublicatie(e.url) || "";
+    const adresa = e.url.replace(/^https?:\/\//, "");
+    const rAdresa = wrap(adresa, 92);
+    const h = (nume ? 13 : 0) + rAdresa.length * 11 + 9;
+
+    loc(h);
+    if (i % 2 === 1) {
+      page.push({ t: "rect", x: M - 6, y: y - h + 8, w: W + 12, h, c: ZEBRA });
+    }
+    page.push({ t: "text", x: M, y, s: String(i + 1).padStart(2, "0"), f: "F2", size: 9, c: GOLD });
+    if (nume) {
+      page.push({ t: "text", x: M + 26, y, s: nume, f: "F2", size: 9.5, c: TEXT });
+      y -= 12;
+    }
+    rAdresa.forEach((r, j) => {
+      page.push({ t: "text", x: M + 26, y: y - j * 11, s: r, f: "F1", size: 8, c: nume ? MUTED : TEXT });
+    });
+    y -= rAdresa.length * 11 + 9;
   });
 
-  lines.push(["", "F1", 11]);
-  lines.push([`Generat de ${args.siteName} - ${args.siteUrl}`, "F1", 9]);
+  pages.push(page);
 
-  // Impartim pe pagini
-  const usable = PAGE_H - MARGIN * 2;
-  const perPage = Math.floor(usable / LINE);
-  const pages: Line[][] = [];
-  for (let i = 0; i < lines.length; i += perPage) pages.push(lines.slice(i, i + perPage));
-  if (pages.length === 0) pages.push([]);
+  // ——— Subsolul, pe fiecare pagina ———
+  pages.forEach((p, i) => {
+    p.push({ t: "rect", x: M, y: 44, w: W, h: 0.8, c: LINE });
+    p.push({ t: "text", x: M, y: 32, s: `${args.siteName} · ${args.siteUrl.replace(/^https?:\/\//, "")}`, f: "F1", size: 7.5, c: MUTED });
+    p.push({ t: "text", x: PAGE_W - M - 46, y: 32, s: `Pagina ${i + 1} / ${pages.length}`, f: "F1", size: 7.5, c: MUTED });
+  });
 
-  // Obiectele PDF
+  return serializePdf(pages, PAGE_W, PAGE_H);
+}
+
+type RGB = [number, number, number];
+
+/** O singura instructiune de desen. Ordinea din lista e ordinea pe hartie. */
+type Cmd =
+  | { t: "rect"; x: number; y: number; w: number; h: number; c: RGB }
+  | { t: "text"; x: number; y: number; s: string; f: "F1" | "F2"; size: number; c: RGB };
+
+function col([r, g, b]: RGB): string {
+  return `${r.toFixed(3)} ${g.toFixed(3)} ${b.toFixed(3)}`;
+}
+
+/** Scrie obiectele PDF si tabelul xref. Separat, ca desenul sa ramana citibil. */
+function serializePdf(pages: Cmd[][], PAGE_W: number, PAGE_H: number): Buffer {
   const objects: string[] = [];
   const pageObjIds: number[] = [];
   const contentObjIds: number[] = [];
 
-  // 1 = Catalog, 2 = Pages, 3 = F1, 4 = F2, apoi perechi pagina/continut
   let nextId = 5;
   for (let i = 0; i < pages.length; i++) {
     pageObjIds.push(nextId++);
@@ -300,33 +430,27 @@ export function buildReportPdf(args: {
   }
 
   objects[1] = "<< /Type /Catalog /Pages 2 0 R >>";
-  objects[2] = `<< /Type /Pages /Count ${pages.length} /Kids [${pageObjIds
-    .map((id) => `${id} 0 R`)
-    .join(" ")}] >>`;
+  objects[2] = `<< /Type /Pages /Count ${pages.length} /Kids [${pageObjIds.map((id) => `${id} 0 R`).join(" ")}] >>`;
   objects[3] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica /Encoding /WinAnsiEncoding >>";
-  objects[4] =
-    "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
+  objects[4] = "<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold /Encoding /WinAnsiEncoding >>";
 
   const streams: Buffer[] = [];
-  pages.forEach((page, pi) => {
-    let y = PAGE_H - MARGIN;
-    let content = "BT\n";
-    for (const [text, font, size] of page) {
-      if (text) {
-        content += `/${font} ${size} Tf\n1 0 0 1 ${MARGIN} ${y} Tm\n(${pdfText(text)}) Tj\n`;
+  pages.forEach((cmds, pi) => {
+    let c = "";
+    for (const cmd of cmds) {
+      if (cmd.t === "rect") {
+        c += `q ${col(cmd.c)} rg ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} ${cmd.w.toFixed(2)} ${cmd.h.toFixed(2)} re f Q\n`;
+      } else if (cmd.s) {
+        c += `BT ${col(cmd.c)} rg /${cmd.f} ${cmd.size} Tf 1 0 0 1 ${cmd.x.toFixed(2)} ${cmd.y.toFixed(2)} Tm (${pdfText(cmd.s)}) Tj ET\n`;
       }
-      y -= LINE;
     }
-    content += "ET\n";
-    const buf = Buffer.from(content, "latin1");
+    const buf = Buffer.from(c, "latin1");
     streams[pi] = buf;
-
     objects[pageObjIds[pi]] =
       `<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${PAGE_W} ${PAGE_H}] ` +
       `/Resources << /Font << /F1 3 0 R /F2 4 0 R >> >> /Contents ${contentObjIds[pi]} 0 R >>`;
   });
 
-  // Serializare cu tabel xref
   const parts: Buffer[] = [];
   let pos = 0;
   const push = (b: Buffer) => {
