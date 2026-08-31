@@ -41,12 +41,6 @@ const INCLUDED = [
       "Nu publicăm copii. Fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, altă adresă — cu același mesaj și aceleași linkuri. Google vede 50 de articole diferite, nu unul copiat de 50 de ori.",
   },
   {
-    icon: Zap,
-    title: "Trimise imediat la indexare",
-    description:
-      "Nu așteptăm să ne descopere crawlerul: imediat după publicare, fiecare articol e anunțat automat la Google, Bing și Yandex. De regulă, asta scurtează indexarea de la săptămâni la zile.",
-  },
-  {
     icon: Globe,
     title: "41 locale + 9 naționale",
     description:
