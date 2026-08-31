@@ -343,9 +343,10 @@ export default function Oferta500Page() {
               </div>
             </div>
             <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: statisticile Meta ale paginii, perioada 3–30 august. Articolul tău se
-              distribuie pe <strong className="text-brand-navy">50 de astfel de pagini</strong> —
-              asta e doar cea mai mare dintre ele.{" "}
+              Sursa: statisticile Meta ale paginii, perioada 3–30 august. Toate cele 50 de
+              ziare au pagini de Facebook active, fiecare cu publicul ei — aici am arătat-o
+              doar pe cea mai citită. Articolul tău se distribuie pe{" "}
+              <strong className="text-brand-navy">toate cele 50</strong>.{" "}
               <a
                 href="https://botosaniexpres.ro"
                 target="_blank"
