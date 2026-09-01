@@ -2,7 +2,17 @@
 
 import { useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Send, CheckCircle2, FileSpreadsheet, Mail, Paperclip, X } from "lucide-react";
+import {
+  Loader2,
+  Send,
+  CheckCircle2,
+  FileSpreadsheet,
+  Mail,
+  MessageCircle,
+  Paperclip,
+  X,
+} from "lucide-react";
+import { waLink } from "@/lib/whatsapp";
 
 /**
  * Toate actiunile unei comenzi, pe acelasi ecran cu materialele ei.
@@ -74,11 +84,13 @@ export function OrderActions({
   email,
   clientName,
   articleTitle,
+  contactPhone,
   isPublished,
   awaitingPayment,
 }: {
   id: string;
   email: string;
+  contactPhone?: string | null;
   clientName: string;
   articleTitle: string;
   isPublished: boolean;
@@ -451,6 +463,24 @@ export function OrderActions({
           {busy === "mail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
           Trimite emailul
         </button>
+        {/*
+          Acelasi mesaj, dar pe WhatsApp. Exista pentru ca emailul poate fi
+          respins fara sa afli: o factura catre un client a fost blocata de
+          serverul lui („550 blocked by hostkarma"), iar omul a asteptat un
+          document care nu ajunsese niciodata. Atasamentele le pui de mana in
+          WhatsApp — linkul duce doar textul.
+        */}
+        {waLink(contactPhone) && (
+          <a
+            href={waLink(contactPhone, mailBody)!}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="ml-2 mt-2 inline-flex items-center gap-2 rounded-lg border border-emerald-300 bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-800 hover:bg-emerald-100"
+          >
+            <MessageCircle className="h-4 w-4" />
+            Trimite pe WhatsApp
+          </a>
+        )}
       </div>
     </div>
   );

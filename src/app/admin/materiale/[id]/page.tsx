@@ -9,6 +9,7 @@ import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
 import { CopyButton } from "./CopyButton";
 import { cleanArticleText } from "@/lib/clean-text";
+import { waLink } from "@/lib/whatsapp";
 
 export const dynamic = "force-dynamic";
 
@@ -233,6 +234,7 @@ export default async function MaterialDetailPage({
             email={r.email}
             clientName={r.companyName || ""}
             articleTitle={r.title}
+            contactPhone={r.contactPhone}
             isPublished={isPublished}
             awaitingPayment={awaitingPay}
           />
@@ -253,7 +255,26 @@ export default async function MaterialDetailPage({
                   </span>
                 }
               />
-              <Row label="Telefon" value={r.contactPhone || "—"} />
+              <Row
+                label="Telefon"
+                value={
+                  waLink(r.contactPhone) ? (
+                    <span className="flex flex-wrap items-center gap-2">
+                      <span>{r.contactPhone}</span>
+                      <a
+                        href={waLink(r.contactPhone)!}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1 rounded-md bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-100"
+                      >
+                        WhatsApp
+                      </a>
+                    </span>
+                  ) : (
+                    r.contactPhone || "—"
+                  )
+                }
+              />
               {r.companyCui && <Row label="CUI" value={<strong>{r.companyCui}</strong>} />}
               {r.companyAddress && <Row label="Adresă" value={r.companyAddress} />}
               <Row
