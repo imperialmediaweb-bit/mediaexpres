@@ -63,7 +63,7 @@ const INCLUDED = [
     icon: LinkIcon,
     title: "50 backlinks dofollow, DA 36+ pe toate domeniile",
     description:
-      "Linkuri reale, permanente, din 50 de domenii .ro diferite — nu de pe subpagini ale aceluiași site. Autoritate de domeniu 37+, efect direct și durabil pe SEO-ul tău.",
+      "Linkuri reale, permanente, din 50 de domenii .ro diferite — nu de pe subpagini ale aceluiași site. Domain Authority 36–37 pe toate, măsurat de Moz. Linkurile rămân active și după ani, fără să plătești nimic în plus.",
   },
   {
     icon: Facebook,
@@ -150,17 +150,13 @@ const FAQ = [
   {
     // Intrebarile astea trei au consumat, intr-o singura zi, aproape o ora de
     // WhatsApp cu un om care oricum n-avea sa cumpere. Puse aici, il lasa sa se
-    // descalifice singur inainte sa scrie — si il conving pe cel potrivit.
-    q: "Câți vizitatori au site-urile? Cumpăr trafic?",
-    a: "Nu, și e important să știi asta dinainte: nu vindem trafic. Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale cu milioane de vizite. Îți spunem și cifrele, măsurate în Google Analytics în august 2026: traficul diferă foarte mult de la o publicație la alta — de la câteva zeci de utilizatori pe lună la peste 20.000 pentru cea mai mare, Botoșani Expres. Rețeaua e tânără și în creștere. Ce cumperi sunt 50 de linkuri dofollow permanente de pe domenii cu autoritate 36–37, prezență în presă care rămâne online pentru totdeauna, și distribuirea pe paginile de Facebook ale publicațiilor — acolo e audiența: cea mai mare pagină din rețea, Botoșani Expres, a avut 2,4 milioane de vizualizări într-o lună. Vizitatori vin și ei, dar nu ăsta e argumentul principal. Mai valoroasă e imaginea: după publicare ai 50 de linkuri din presă pe care le poți folosi oriunde — le pui pe site-ul tău la secțiunea Presa despre noi, le trimiți în oferte și în emailuri către clienți, le distribui pe rețelele tale. A apărea în presă cântărește altfel decât a scrie pe propriul site, iar linkurile rămân valabile ani de zile. Dacă însă ce cauți sunt strict vizitatori direcți pe site-ul tău, îți spunem de la început că nu asta e soluția potrivită.",
-  },
-  {
+    // descalifice singur inainte sa scrie — si il conving pe cel potriv  {
     q: "Sunt ziare tipărite sau site-uri online?",
     a: "Online — 50 de site-uri de știri, câte unul pentru fiecare județ, plus cele naționale. Avantajul față de tipărit: un articol din ziarul de hârtie se citește o zi și dispare, pe când al tău rămâne online permanent, poate fi găsit oricând în căutări și îți lasă un link către site.",
   },
   {
     q: "Ce autoritate au domeniile? Linkurile chiar contează pentru SEO?",
-    a: "Toate cele 50 de domenii au Domain Authority 36+ (scorul Moz, de la 0 la 100) și peste 120 de domenii care fac linkuri către fiecare. Un blog nou are DA 1–5, deci diferența e mare. Linkurile sunt dofollow, de pe 50 de domenii .ro diferite — nu subpagini ale aceluiași site — și rămân permanent. Verifică singur, gratuit: intră pe moz.com/domain-analysis și scrie oricare ziar din lista de mai sus.",
+    a: "Toate cele 50 de domenii au Domain Authority 36+ (scorul Moz, de la 0 la 100) și peste 120 de domenii care fac linkuri către fiecare. Un blog nou are DA 1–5, deci diferența e mare. Linkurile sunt dofollow, de pe 50 de domenii .ro diferite — nu subpagini ale aceluiași site — și rămân permanent. Scorul e public și verificabil de oricine, pentru orice domeniu din listă.",
   },
   {
     q: "Articolele ajung în Google?",
@@ -450,8 +446,8 @@ export default function Oferta500Page() {
               </div>
             </div>
             <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: Moz Domain Analysis, verificat în august 2026. Un blog nou are Domain
-              Authority 1–5.
+              Sursa: Moz Domain Analysis, verificat în august 2026 — scor public, verificabil
+              pentru oricare domeniu din listă. Un blog nou are Domain Authority 1–5.
             </p>
             <div className="hidden">
             </div>
@@ -545,8 +541,104 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* FAQ — tinta butonului „Vezi ce primesti" din antet. */}
-      <section id="detalii" className="section scroll-mt-20 bg-slate-50">
+      {/*
+        Datele, ca sectiune de sine statatoare — tinta butoanelor din antet si
+        de langa comanda.
+        Erau un raspuns lung in intrebari frecvente, adica un zid de text pe
+        care nu-l citea nimeni. Aici sunt cifre, pe rand, inclusiv cele slabe:
+        o zi intreaga de WhatsApp s-a dus pe intrebari la care raspunsul exista
+        deja, doar ca ingropat.
+      */}
+      <section id="detalii" className="section scroll-mt-20">
+        <div className="container">
+          <div className="mx-auto max-w-3xl">
+            <div className="text-center">
+              <p className="eyebrow">Fără surprize</p>
+              <h2 className="h2 mt-2">Datele, pe față</h2>
+              <p className="mt-4 text-slate-600">
+                Inclusiv cele care nu ne avantajează. Preferăm să știi dinainte ce cumperi.
+              </p>
+            </div>
+
+            <div className="mt-10 space-y-4">
+              <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6">
+                <h3 className="font-serif text-lg font-bold text-brand-navy">
+                  Nu vindem trafic. Iată cifrele reale.
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale.
+                  Măsurat în Google Analytics, august 2026, traficul diferă foarte mult de la
+                  o publicație la alta:
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-3">
+                  <div className="rounded-xl bg-slate-50 p-4 text-center">
+                    <div className="font-serif text-2xl font-bold text-brand-navy">20.000</div>
+                    <div className="mt-1 text-xs text-slate-600">cea mai mare (Botoșani Expres), într-o lună</div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-4 text-center">
+                    <div className="font-serif text-2xl font-bold text-brand-navy">câteva sute</div>
+                    <div className="mt-1 text-xs text-slate-600">majoritatea publicațiilor</div>
+                  </div>
+                  <div className="rounded-xl bg-slate-50 p-4 text-center">
+                    <div className="font-serif text-2xl font-bold text-brand-navy">câteva zeci</div>
+                    <div className="mt-1 text-xs text-slate-600">cele mai noi din rețea</div>
+                  </div>
+                </div>
+                <p className="mt-4 text-sm text-slate-600">
+                  Rețeaua e tânără și în creștere. Dacă ce cauți sunt strict vizitatori direcți
+                  pe site-ul tău, <strong className="text-brand-navy">îți spunem de la început
+                  că nu asta e soluția potrivită</strong>.
+                </p>
+              </div>
+
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-serif text-lg font-bold text-brand-navy">
+                    Unde e audiența: pe Facebook
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                    Fiecare publicație are pagina ei, iar articolul se distribuie automat.
+                    Cea mai mare pagină din rețea, Botoșani Expres, a avut{" "}
+                    <strong className="text-brand-navy">2,4 milioane de vizualizări</strong> și
+                    100.056 interacțiuni într-o singură lună (statistici Meta, august 2026).
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-slate-200 bg-white p-6">
+                  <h3 className="font-serif text-lg font-bold text-brand-navy">
+                    Ce cumperi de fapt
+                  </h3>
+                  <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
+                    <li>50 de linkuri dofollow permanente, DA 36–37</li>
+                    <li>50 de apariții în presă, de arătat clienților tăi</li>
+                    <li>Prezență care rămâne online și peste ani</li>
+                    <li>Distribuire pe paginile de Facebook</li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="rounded-2xl bg-brand-navy p-6 text-center md:p-8">
+                <p className="font-serif text-xl font-bold text-white">
+                  Ai văzut tot, inclusiv ce nu ne avantajează.
+                </p>
+                <p className="mx-auto mt-2 max-w-lg text-sm text-white/75">
+                  Dacă asta cauți, comanda durează două minute. Publicăm în maximum 24 de ore
+                  lucrătoare și primești raportul cu toate linkurile.
+                </p>
+                <a
+                  href="#oferta"
+                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
+                >
+                  <CreditCard className="h-5 w-5" />
+                  Comandă acum — 500 lei
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Intrebari frecvente */}
+      <section className="section bg-slate-50">
         <div className="container">
           <div className="mx-auto max-w-3xl">
             <h2 className="h2 text-center">Întrebări frecvente</h2>
