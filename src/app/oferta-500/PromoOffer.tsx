@@ -414,6 +414,18 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <MessageCircle className="h-4 w-4" />
             Comandă pe WhatsApp
           </a>
+          {/*
+            Acelasi drum spre date si AICI, in momentul deciziei. Sus e pentru
+            cine citeste pagina de la inceput; asta e pentru cine a derulat
+            direct la pret si sta cu degetul pe buton, dar vrea sa mai verifice
+            ceva inainte sa plateasca.
+          */}
+          <a
+            href="#detalii"
+            className="text-xs font-medium text-white/60 underline underline-offset-4 transition hover:text-white/90"
+          >
+            Vezi datele: ce primești, ce trafic au ziarele, ce nu promitem
+          </a>
         </div>
       )}
       {/* Ce se intampla DUPA plata, spus inainte de plata. Un lead a scris pe

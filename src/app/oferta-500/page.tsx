@@ -214,7 +214,7 @@ export default function Oferta500Page() {
               href="#dovada-facebook"
               className="text-sm font-semibold text-brand-gold underline decoration-brand-gold/40 underline-offset-4 hover:decoration-brand-gold"
             >
-              ★ Cel mai citit ziar din rețea: 2,3 mil. vizualizări în 28 de zile — vezi dovada ↓
+              ★ Pe Facebook: 2,3 mil. vizualizări în 28 de zile, doar pe cea mai mare pagină din rețea — vezi dovada ↓
             </a>
           </p>
           {/*
@@ -462,12 +462,12 @@ export default function Oferta500Page() {
               Cel mai citit ziar din rețea, pe Facebook
             </p>
             <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Botoșani Expres: 2,3 milioane de vizualizări în 28 de zile
+              Botoșani Expres: 2,3 milioane de vizualizări pe Facebook, în 28 de zile
             </h3>
             <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4">
                 <div className="font-serif text-3xl font-bold text-brand-navy">2.337.606</div>
-                <div className="mt-1 text-sm text-slate-600">vizualizări</div>
+                <div className="mt-1 text-sm text-slate-600">vizualizări pe Facebook</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
                 <div className="font-serif text-3xl font-bold text-brand-navy">95.464</div>
