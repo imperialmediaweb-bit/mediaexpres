@@ -220,13 +220,19 @@ export default function Oferta500Page() {
             raspunsul si scriau. Prima varianta a butonului statea langa pret
             si cadea la y=1052 pe un ecran de 844: invizibila fix pentru
             publicul din reclama, care intra de pe telefon.
+
+            Textul nu mai spune „ce trafic" si „ce nu iti promitem". Cifrele
+            raman intregi la #detalii — cine verifica le gaseste si ramane,
+            fiindcă le-am spus noi primii. Dar pe primul ecran ridicau o
+            indoiala celui care n-avea niciuna: omul intrat din reclama nu se
+            gandise la trafic pana nu i-am scris noi cuvantul sub titlu.
           */}
           <p className="mx-auto mt-4 max-w-2xl">
             <a
               href="#detalii"
               className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-5 py-2 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
             >
-              Ce primești, ce trafic au ziarele și ce nu îți promitem →
+              Vezi cele 50 de ziare și ce primești exact →
             </a>
           </p>
 
