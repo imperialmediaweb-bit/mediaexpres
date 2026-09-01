@@ -217,6 +217,22 @@ export default function Oferta500Page() {
               ★ Cel mai citit ziar din rețea: 2,3 mil. vizualizări în 28 de zile — vezi dovada ↓
             </a>
           </p>
+          {/*
+            Usa spre raspunsuri, inainte de pret si de butonul de comanda.
+            O zi intreaga de WhatsApp s-a dus pe trei intrebari — cate ziare,
+            ce trafic au, sunt tiparite? — puse de oameni care nu gaseau
+            raspunsul si scriau. Prima varianta a butonului statea langa pret
+            si cadea la y=1052 pe un ecran de 844: invizibila fix pentru
+            publicul din reclama, care intra de pe telefon.
+          */}
+          <p className="mx-auto mt-4 max-w-2xl">
+            <a
+              href="#detalii"
+              className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-5 py-2 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
+            >
+              Ce primești, ce trafic au ziarele și ce nu îți promitem →
+            </a>
+          </p>
 
             <div className="mt-10">
               <PromoOffer />
@@ -529,8 +545,8 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="section bg-slate-50">
+      {/* FAQ — tinta butonului „Vezi ce primesti" din antet. */}
+      <section id="detalii" className="section scroll-mt-20 bg-slate-50">
         <div className="container">
           <div className="mx-auto max-w-3xl">
             <h2 className="h2 text-center">Întrebări frecvente</h2>

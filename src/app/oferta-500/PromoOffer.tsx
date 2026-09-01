@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck, Info } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import {
