@@ -321,7 +321,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 Card — plătesc acum
               </span>
               <span className="text-xs font-normal text-white/80">
-                factură automată pe email
+                factura vine pe email
               </span>
             </button>
 
@@ -473,10 +473,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           </li>
           <li>
             <strong className="text-white">4.</strong> Primești pe email raportul cu
-            toate linkurile și factura fiscală.{" "}
+            toate linkurile publicate.{" "}
             <span className="text-white/60">
-              Cu cardul, factura se emite automat; prin OP, imediat după confirmarea
-              plății.
+              Factura fiscală vine pe email imediat după comandă, indiferent cum plătești.
             </span>
           </li>
         </ol>

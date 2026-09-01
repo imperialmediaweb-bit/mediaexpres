@@ -98,7 +98,7 @@ const STEPS = [
   {
     n: "2",
     title: "Primești factura și plătești",
-    text: "La card, factura vine automat după plată. La OP, îți trimitem factura pe email și plătești pe baza ei — ca între firme.",
+    text: "Primești factura fiscală pe email după comandă, în ambele cazuri. La OP plătești pe baza ei, ca între firme.",
   },
   {
     n: "3",
@@ -137,7 +137,7 @@ const FAQ = [
   },
   {
     q: "Cum plătesc și primesc factură?",
-    a: "Cum îți e mai ușor: cu cardul (prin Stripe, factura vine automat pe email) sau prin ordin de plată — comanzi, îți trimitem factura fiscală, iar contabilitatea ta plătește pe baza ei. Nu trebuie să fi plătit ca să comanzi.",
+    a: "Cum îți e mai ușor: cu cardul, prin Stripe, sau prin ordin de plată. În ambele cazuri primești factura fiscală pe email după comandă — la OP, contabilitatea ta plătește pe baza ei. Nu trebuie să fi plătit ca să comanzi.",
   },
   {
     q: "De ce costă dublu pentru cazino și pariuri?",
