@@ -226,10 +226,15 @@ export default function Oferta500Page() {
             fiindcă le-am spus noi primii. Dar pe primul ecran ridicau o
             indoiala celui care n-avea niciuna: omul intrat din reclama nu se
             gandise la trafic pana nu i-am scris noi cuvantul sub titlu.
+
+            Ancora duce la #lista-ziare, nu la #detalii: textul promite cele
+            50 de ziare, deci trebuie sa livreze lista. Prima varianta cadea
+            in „Nu vindem trafic" — exact indoiala pe care o mutasem de aici.
+            Cifrele raman la #detalii, unde ajunge cine deruleaza mai jos.
           */}
           <p className="mx-auto mt-4 max-w-2xl">
             <a
-              href="#detalii"
+              href="#lista-ziare"
               className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-5 py-2 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
             >
               Vezi cele 50 de ziare și ce primești exact →
