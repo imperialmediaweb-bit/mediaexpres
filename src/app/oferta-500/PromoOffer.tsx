@@ -289,6 +289,20 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </span>
           </label>
 
+          {/*
+            Eroarea sta AICI, lipita de butoane.
+            Statea la coada componentei, sub caseta „Ce se intampla dupa plata"
+            — adica la un ecran mai jos. Cine apasa „Card" fara sa bifeze
+            declaratia vedea ca nu se intampla NIMIC si pleca; un client ne-a
+            si scris „dau pe card sau pe op dar nu face nimic". Mesajul trebuie
+            sa fie in campul vizual al butonului apasat.
+          */}
+          {error && (
+            <p className="mt-4 rounded-lg border border-red-400/40 bg-red-500/15 px-3 py-2 text-center text-sm font-semibold text-red-200">
+              {error}
+            </p>
+          )}
+
           <p className="mt-4 text-center text-sm font-semibold text-white">
             Cum plătești?
           </p>
@@ -482,9 +496,6 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         )}
       </div>
 
-      {error && (
-        <p className="mt-3 text-center text-sm text-red-300">{error}</p>
-      )}
     </div>
   );
 }
