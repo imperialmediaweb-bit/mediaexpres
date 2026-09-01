@@ -91,6 +91,28 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(500);
   check(sent === null, "fara declaratie: cardul nu pleaca la Stripe");
+
+  // MESAJUL DE EROARE TREBUIE SA FIE LANGA BUTON, NU DOAR IN PAGINA.
+  //
+  // Testul asta exista pentru ca a lipsit exact cand trebuia. Mesajul
+  // „Bifeaza declaratia..." se randa la coada componentei, sub caseta „Ce se
+  // intampla dupa plata" — la peste un ecran sub butonul apasat. Verificarea
+  // veche cauta textul in pagina, il gasea, si trecea verde. Clientii apasau
+  // si nu vedeau nimic; unul a scris „dau pe card sau pe op dar nu face
+  // nimic", si s-au pierdut comenzi.
+  //
+  // De-aia se masoara acum POZITIA, nu prezenta: eroarea trebuie sa fie
+  // vizibila pe ecran si in aceeasi privire cu butonul care a produs-o.
+  {
+    const eroare = p.locator("text=Bifează declarația").first();
+    check(await eroare.isVisible(), "eroarea de declaratie e vizibila");
+    const be = await eroare.boundingBox();
+    const bb = await p.getByRole("button", { name: /Card — plătesc acum/ }).first().boundingBox();
+    const dist = be && bb ? Math.abs(be.y - bb.y) : 9999;
+    check(dist < 200, `eroarea sta langa buton (${Math.round(dist)}px)`);
+    const vh = p.viewportSize().height;
+    check(!!be && be.y > 0 && be.y < vh, "eroarea e in ecran, nu sub margine");
+  }
   await p.locator('input[name="contentDeclaration"]').first().check();
   await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
   await p.waitForTimeout(900);
