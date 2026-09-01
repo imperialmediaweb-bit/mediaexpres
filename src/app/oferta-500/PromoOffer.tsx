@@ -239,6 +239,12 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
 
       {askEmail ? (
         <form
+          // noValidate: fara el, browserul opreste trimiterea si arata bula lui
+          // nativa — in engleza pe multe telefoane, si dincolo de controlul
+          // nostru. Codul din `go()` nu mai ajunge sa ruleze, deci mesajul
+          // nostru in romana („Scrie o adresa de email valida") nu apare
+          // niciodata. Aceeasi tacere care a costat comenzi azi.
+          noValidate
           ref={emailFormRef}
           onSubmit={(e) => {
             e.preventDefault();
@@ -306,6 +312,11 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           <p className="mt-4 text-center text-sm font-semibold text-white">
             Cum plătești?
           </p>
+          <p className="mt-1 text-center text-xs text-white/55">
+            Cu cardul plătești acum, pe pagina securizată Stripe, iar la revenire trimiți
+            articolul. Prin ordin de plată trimiți întâi comanda și plătești după ce
+            primești factura.
+          </p>
           <div className={`mt-2 grid gap-2 ${monthly ? "" : "sm:grid-cols-2"}`}>
             <button
               type="submit"
@@ -321,7 +332,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
                 Card — plătesc acum
               </span>
               <span className="text-xs font-normal text-white/80">
-                factura vine pe email
+                plată securizată, apoi trimiți articolul
               </span>
             </button>
 
