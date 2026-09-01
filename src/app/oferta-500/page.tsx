@@ -141,6 +141,17 @@ const FAQ = [
     a: "Nu e copiat. Fiecare ziar primește o variantă unică a articolului: alt titlu, altă formulare, altă adresă URL — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Zero conținut duplicat între publicații. Iar „canibalizarea” de care se vorbește e o problemă doar între paginile propriului tău site — articolele apar pe domeniile noastre și trimit linkuri către tine, exact ce contează pentru SEO.",
   },
   {
+    // Intrebarile astea trei au consumat, intr-o singura zi, aproape o ora de
+    // WhatsApp cu un om care oricum n-avea sa cumpere. Puse aici, il lasa sa se
+    // descalifice singur inainte sa scrie — si il conving pe cel potrivit.
+    q: "Câți vizitatori au site-urile? Cumpăr trafic?",
+    a: "Nu, și e important să știi asta dinainte: nu vindem trafic. Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale cu milioane de vizite. Îți spunem și cifrele, măsurate în Google Analytics în august 2026: traficul diferă foarte mult de la o publicație la alta — de la câteva zeci de utilizatori pe lună la peste 20.000 pentru cea mai mare, Botoșani Expres. Rețeaua e tânără și în creștere. Ce cumperi sunt 50 de linkuri dofollow permanente de pe domenii cu autoritate 36–37, prezență în presă care rămâne online pentru totdeauna, și distribuirea pe paginile de Facebook ale publicațiilor — acolo e audiența: cea mai mare pagină din rețea, Botoșani Expres, a avut 2,4 milioane de vizualizări într-o lună. Dacă ce cauți sunt vizitatori direcți pe site-ul tău, îți spunem de la început că nu asta e soluția potrivită.",
+  },
+  {
+    q: "Sunt ziare tipărite sau site-uri online?",
+    a: "Online — 50 de site-uri de știri, câte unul pentru fiecare județ, plus cele naționale. Avantajul față de tipărit: un articol din ziarul de hârtie se citește o zi și dispare, pe când al tău rămâne online permanent, poate fi găsit oricând în căutări și îți lasă un link către site.",
+  },
+  {
     q: "Ce autoritate au domeniile? Linkurile chiar contează pentru SEO?",
     a: "Toate cele 50 de domenii au Domain Authority 36+ (scorul Moz, de la 0 la 100) și peste 120 de domenii care fac linkuri către fiecare. Un blog nou are DA 1–5, deci diferența e mare. Linkurile sunt dofollow, de pe 50 de domenii .ro diferite — nu subpagini ale aceluiași site — și rămân permanent. Verifică singur, gratuit: intră pe moz.com/domain-analysis și scrie oricare ziar din lista de mai sus.",
   },
