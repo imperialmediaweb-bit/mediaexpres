@@ -22,14 +22,20 @@ export function BankTransferBox({ note }: { note: string }) {
         <dt className="text-slate-500">Banca</dt>
         <dd className="font-semibold text-brand-navy">{SITE.billing.bank}</dd>
       </dl>
+      {/*
+        Textul de aici a ramas o data pe fluxul vechi („dupa plata, trimite
+        dovada...") in timp ce pasii de pe aceeasi pagina spuneau invers —
+        doua instructiuni opuse, la un ecran distanta. Regula e una singura,
+        peste tot: comanzi, primesti factura pe email, platesti pe baza ei.
+      */}
       <p className="mt-4 text-sm text-slate-600">
-        După plată, trimite <strong>dovada plății</strong> + datele de facturare
-        (denumire firmă, CUI, adresă) + articolul sau site-ul firmei la{" "}
-        <a href={`mailto:${SITE.email}`} className="font-semibold text-brand-red hover:underline">
-          {SITE.email}
+        <strong>Nu trebuie să plătești înainte.</strong> Trimiți comanda pe{" "}
+        <a href="/comanda/transfer?pachet=promo-50" className="font-semibold text-brand-red hover:underline">
+          pagina de transfer
         </a>{" "}
-        sau pe WhatsApp la <strong>{SITE.phone}</strong>. Publicăm în maximum 24 de ore
-        lucrătoare și livrăm împreună raportul cu toate linkurile și factura fiscală.
+        — cu articolul și datele de facturare — primești factura fiscală pe email și
+        plătești pe baza ei, în contul de mai sus. Imediat ce vedem încasarea, publicăm
+        în maximum 24 de ore lucrătoare și primești raportul cu toate linkurile.
         Abonamentele lunare se plătesc doar cu cardul.
       </p>
     </div>

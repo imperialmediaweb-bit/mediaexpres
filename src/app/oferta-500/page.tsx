@@ -81,7 +81,7 @@ const INCLUDED = [
     icon: Clock,
     title: "Publicat în 24 de ore lucrătoare",
     description:
-      "De la confirmarea comenzii până la linkurile live trec maximum 24 de ore lucrătoare.",
+      "De la confirmarea plății până la linkurile live trec maximum 24 de ore lucrătoare.",
   },
 ];
 
@@ -210,7 +210,7 @@ export default function Oferta500Page() {
               href="#dovada-facebook"
               className="text-sm font-semibold text-brand-gold underline decoration-brand-gold/40 underline-offset-4 hover:decoration-brand-gold"
             >
-              ★ Pe Facebook: 2,3 mil. vizualizări în 28 de zile, doar pe cea mai mare pagină din rețea — vezi dovada ↓
+              ★ Pe Facebook: 2,4 mil. vizualizări în 28 de zile, doar pe cea mai mare pagină din rețea — vezi dovada ↓
             </a>
           </p>
           {/*
@@ -458,24 +458,24 @@ export default function Oferta500Page() {
               Cel mai citit ziar din rețea, pe Facebook
             </p>
             <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Botoșani Expres: 2,3 milioane de vizualizări pe Facebook, în 28 de zile
+              Botoșani Expres: 2,4 milioane de vizualizări pe Facebook, în 28 de zile
             </h3>
             <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">2.337.606</div>
+                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
                 <div className="mt-1 text-sm text-slate-600">vizualizări pe Facebook</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">95.464</div>
+                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
                 <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-emerald-600">+78%</div>
+                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
                 <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
               </div>
             </div>
             <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: statisticile Meta ale paginii, perioada 3–30 august. Toate cele 50 de
+              Sursa: statisticile Meta ale paginii, perioada 4–31 august. Toate cele 50 de
               ziare au pagini de Facebook active, fiecare cu publicul ei — aici am arătat-o
               doar pe cea mai citită. Articolul tău se distribuie pe{" "}
               <strong className="text-brand-navy">toate cele 50</strong>.{" "}
