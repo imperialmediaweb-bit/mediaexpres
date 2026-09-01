@@ -249,11 +249,21 @@ export function OrderActions({
             {/* Comanda OP neincasata: publicarea e blocata pana confirmi banii.
                 Fara asta, 50 de articole permanente puteau pleca pe o comanda
                 neplatita, dintr-un singur click grabit. */}
-            <p className="mt-1 text-sm text-slate-600">
-              Factura s-a emis <strong>automat</strong> și a plecat la client — el plătește
-              pe baza ei. Când vezi banii în extras, confirmă aici. (Dacă emiterea a
-              eșuat, ai primit alertă pe email și o faci manual în StartCo.)
-            </p>
+            <ol className="mt-1 space-y-1.5 text-sm text-slate-600">
+              <li>
+                <strong className="text-brand-navy">1.</strong> Emite factura în StartCo,
+                pe datele din dreapta, și descarcă PDF-ul.
+              </li>
+              <li>
+                <strong className="text-brand-navy">2.</strong> Trimite-i-o de mai jos, de
+                la <em>Scrie-i clientului</em> — șablonul Factura e deja scris, atașezi
+                PDF-ul și trimiți.
+              </li>
+              <li>
+                <strong className="text-brand-navy">3.</strong> Când vezi banii în extras,
+                confirmă plata aici. Abia atunci se deblochează publicarea.
+              </li>
+            </ol>
             <button
               type="button"
               onClick={confirmPayment}
