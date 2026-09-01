@@ -10,6 +10,7 @@ import {
   ShieldCheck,
   Star,
   Zap,
+  Award,
   CreditCard,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
@@ -39,6 +40,12 @@ const INCLUDED = [
     title: "50 de articole UNICE",
     description:
       "Nu publicăm copii. Fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, altă adresă — cu același mesaj și aceleași linkuri. Google vede 50 de articole diferite, nu unul copiat de 50 de ori.",
+  },
+  {
+    icon: Award,
+    title: "50 de apariții în presă, de folosit oriunde",
+    description:
+      "După publicare ai 50 de linkuri din presă pe care le poți arăta: pe site-ul tău la secțiunea Presa despre noi, în oferte, în emailuri către clienți, pe rețelele tale. A apărea în presă cântărește altfel decât a scrie pe propriul site — iar linkurile rămân valabile ani de zile.",
   },
   {
     icon: Zap,
@@ -145,7 +152,7 @@ const FAQ = [
     // WhatsApp cu un om care oricum n-avea sa cumpere. Puse aici, il lasa sa se
     // descalifice singur inainte sa scrie — si il conving pe cel potrivit.
     q: "Câți vizitatori au site-urile? Cumpăr trafic?",
-    a: "Nu, și e important să știi asta dinainte: nu vindem trafic. Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale cu milioane de vizite. Îți spunem și cifrele, măsurate în Google Analytics în august 2026: traficul diferă foarte mult de la o publicație la alta — de la câteva zeci de utilizatori pe lună la peste 20.000 pentru cea mai mare, Botoșani Expres. Rețeaua e tânără și în creștere. Ce cumperi sunt 50 de linkuri dofollow permanente de pe domenii cu autoritate 36–37, prezență în presă care rămâne online pentru totdeauna, și distribuirea pe paginile de Facebook ale publicațiilor — acolo e audiența: cea mai mare pagină din rețea, Botoșani Expres, a avut 2,4 milioane de vizualizări într-o lună. Dacă ce cauți sunt vizitatori direcți pe site-ul tău, îți spunem de la început că nu asta e soluția potrivită.",
+    a: "Nu, și e important să știi asta dinainte: nu vindem trafic. Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale cu milioane de vizite. Îți spunem și cifrele, măsurate în Google Analytics în august 2026: traficul diferă foarte mult de la o publicație la alta — de la câteva zeci de utilizatori pe lună la peste 20.000 pentru cea mai mare, Botoșani Expres. Rețeaua e tânără și în creștere. Ce cumperi sunt 50 de linkuri dofollow permanente de pe domenii cu autoritate 36–37, prezență în presă care rămâne online pentru totdeauna, și distribuirea pe paginile de Facebook ale publicațiilor — acolo e audiența: cea mai mare pagină din rețea, Botoșani Expres, a avut 2,4 milioane de vizualizări într-o lună. Vizitatori vin și ei, dar nu ăsta e argumentul principal. Mai valoroasă e imaginea: după publicare ai 50 de linkuri din presă pe care le poți folosi oriunde — le pui pe site-ul tău la secțiunea Presa despre noi, le trimiți în oferte și în emailuri către clienți, le distribui pe rețelele tale. A apărea în presă cântărește altfel decât a scrie pe propriul site, iar linkurile rămân valabile ani de zile. Dacă însă ce cauți sunt strict vizitatori direcți pe site-ul tău, îți spunem de la început că nu asta e soluția potrivită.",
   },
   {
     q: "Sunt ziare tipărite sau site-uri online?",
