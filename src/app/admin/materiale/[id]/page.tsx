@@ -113,6 +113,44 @@ export default async function MaterialDetailPage({
 
       <h1 className="mt-3 font-serif text-2xl font-bold text-brand-navy">{r.title}</h1>
 
+      {/*
+        „Ce am de facut ACUM", scris o singura data, sus.
+        Pagina avea trei sectiuni numerotate si un badge de stare, dar
+        raspunsul la intrebarea reala — care e urmatorul pas — trebuia dedus
+        din ele. Banda asta il spune direct, dupa starea comenzii.
+      */}
+      {(() => {
+        const pasi = awaitingPay
+          ? {
+              culoare: "border-amber-300 bg-amber-50 text-amber-900",
+              titlu: "Următorul pas: emite factura și trimite-o",
+              text: "Comanda nu e încasată. Emite factura în StartCo pe datele din dreapta, trimite-i-o de mai jos (pe email sau pe WhatsApp), iar când vezi banii în extras apasă „Confirmă plata”. Publicarea e blocată până atunci.",
+            }
+          : isPaid
+            ? {
+                culoare: "border-emerald-300 bg-emerald-50 text-emerald-900",
+                titlu: "Următorul pas: publică articolul",
+                text: "Banii au intrat. Copiază textul, publică pe cele 50 de ziare, apoi apasă „Marchează publicat”.",
+              }
+            : isPublished
+              ? {
+                  culoare: "border-sky-300 bg-sky-50 text-sky-900",
+                  titlu: "Următorul pas: trimite raportul cu linkurile",
+                  text: "Articolul e publicat. Lipește linkurile mai jos și trimite raportul — PDF-ul și Excelul se generează automat.",
+                }
+              : {
+                  culoare: "border-slate-300 bg-slate-50 text-slate-700",
+                  titlu: "Următorul pas: publică articolul",
+                  text: "Plata e confirmată. Publică pe cele 50 de ziare, apoi marchează comanda ca publicată.",
+                };
+        return (
+          <div className={`mt-4 rounded-xl border-2 p-4 ${pasi.culoare}`}>
+            <p className="font-serif text-base font-bold">{pasi.titlu}</p>
+            <p className="mt-1 text-sm leading-relaxed">{pasi.text}</p>
+          </div>
+        );
+      })()}
+
       <div className="mt-6 grid gap-6 lg:grid-cols-[1fr_400px]">
         {/* Stanga: materialele */}
         <div className="space-y-5">
