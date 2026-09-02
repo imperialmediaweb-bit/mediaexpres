@@ -12,7 +12,8 @@ import {
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
-import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS } from "@/lib/content-policy";
+import { FormError } from "@/components/forms/FormError";
 
 export function TransferForm({
   packageId,
@@ -87,13 +88,28 @@ export function TransferForm({
     // Dovada platii NU mai e ceruta: clientul comanda intai, primeste factura
     // pe email si plateste dupa. Cerinta veche il obliga sa fi platit inainte
     // sa aiba vreun document — de-asta nu trimitea nimeni formularul.
-    if (f.body.trim().length < 100) {
-      setError("Articolul trebuie să aibă minimum 100 de caractere.");
-      return;
-    }
-    if (!contentDeclaration) {
-      setError(CONTENT_DECLARATION_ERROR);
-      return;
+    // Validarea, camp cu camp, IN ROMANA, inainte sa plece ceva la server.
+    // Butonul e type="button", deci atributele `required` de pe campuri nu
+    // fac nimic — singura verificare era cea de pe server, iar Zod raspundea
+    // cu mesajele lui implicite, in engleza: „String must contain at least 9
+    // character(s)". Omul vedea asta in caseta rosie si nu stia ce sa repare.
+    const verificari: [boolean, string][] = [
+      [!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim()),
+        "Scrie o adresă de email validă — acolo primești factura și raportul."],
+      [f.contactPhone.replace(/\D/g, "").length < 9,
+        "Scrie numărul de telefon — te sunăm doar dacă e ceva neclar la articol."],
+      [f.companyName.trim().length < 2, "Scrie denumirea firmei, pentru factură."],
+      [f.companyCui.trim().length < 2, "Scrie CUI-ul firmei (sau CNP-ul, dacă ești persoană fizică)."],
+      [f.companyAddress.trim().length < 5, "Scrie adresa de facturare."],
+      [f.body.trim().length < 100,
+        "Articolul (sau descrierea a ce vrei comunicat) trebuie să aibă minimum 100 de caractere."],
+      [!contentDeclaration, CONTENT_DECLARATION_ERROR],
+    ];
+    for (const [gresit, mesaj] of verificari) {
+      if (gresit) {
+        setError(mesaj);
+        return;
+      }
     }
     setBusy(true);
     setError(null);
@@ -106,6 +122,9 @@ export function TransferForm({
           isCasino,
           ...f,
           email: f.email.trim(),
+          // Titlul nu mai e obligatoriu: cine ne cere sa scriem noi articolul
+          // n-are de unde sa stie titlul — il inventa ca sa treaca de „*".
+          title: f.title.trim() || TITLU_DE_PROPUS,
           images,
           featuredIndex: 0,
           ...(proof ? { paymentProof: proof } : {}),
@@ -223,8 +242,10 @@ export function TransferForm({
         </p>
         <div className="mt-4 space-y-4">
           <div>
-            <label className={label}>Titlu *</label>
-            <input required value={f.title} onChange={(e) => set("title", e.target.value)} className={input} />
+            <label className={label}>
+              Titlu <span className="font-normal text-slate-500">(opțional — dacă nu-l ai, îl propunem noi)</span>
+            </label>
+            <input value={f.title} onChange={(e) => set("title", e.target.value)} className={input} placeholder="Lasă gol dacă vrei să-l propunem noi" />
           </div>
           <div>
             <label className={label}>Textul articolului (sau descrierea a ce vrei comunicat) *</label>
@@ -302,7 +323,7 @@ export function TransferForm({
 
       <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
 
-      {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>}
+      <FormError message={error} className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" />
 
       <button
         type="button"

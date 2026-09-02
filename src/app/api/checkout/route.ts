@@ -178,7 +178,11 @@ export async function POST(req: NextRequest) {
           },
         ],
         success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
-        cancel_url: `${SITE.url}/comanda/anulat`,
+        // Pachetul merge in linkul de anulare: cine iese din Stripe fara sa
+        // plateasca (firma fara card, sef care vrea OP) trebuie sa primeasca
+        // pe loc drumul prin ordin de plata pentru ACELASI pachet, nu o
+        // pagina generica cu „vezi pachete" la pret intreg.
+        cancel_url: `${SITE.url}/comanda/anulat?pachet=${encodeURIComponent(packageId)}`,
         locale: "ro",
         allow_promotion_codes: true,
       });
@@ -247,7 +251,7 @@ export async function POST(req: NextRequest) {
       tax_id_collection: { enabled: true },
       phone_number_collection: { enabled: true },
       success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `${SITE.url}/comanda/anulat`,
+      cancel_url: `${SITE.url}/comanda/anulat?abonament=1`,
       locale: "ro",
       allow_promotion_codes: true,
     });

@@ -10,6 +10,7 @@ import {
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
 import { SITE } from "@/data/site";
+import { FormError } from "@/components/forms/FormError";
 
 // Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
 // Abonamentul lunar promo e mai ieftin decat plata unica: 400 lei/luna (cazino 800).
@@ -303,11 +304,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             si scris „dau pe card sau pe op dar nu face nimic". Mesajul trebuie
             sa fie in campul vizual al butonului apasat.
           */}
-          {error && (
-            <p className="mt-4 rounded-lg border border-red-400/40 bg-red-500/15 px-3 py-2 text-center text-sm font-semibold text-red-200">
-              {error}
-            </p>
-          )}
+          <FormError
+            message={error}
+            className="mt-4 rounded-lg border border-red-400/40 bg-red-500/15 px-3 py-2 text-center text-sm font-semibold text-red-200"
+          />
 
           <p className="mt-4 text-center text-sm font-semibold text-white">
             Cum plătești?
@@ -440,16 +440,22 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             Comandă pe WhatsApp
           </a>
           {/*
-            Acelasi drum spre date si AICI, in momentul deciziei. Sus e pentru
-            cine citeste pagina de la inceput; asta e pentru cine a derulat
-            direct la pret si sta cu degetul pe buton, dar vrea sa mai verifice
-            ceva inainte sa plateasca.
+            Acelasi drum spre raspunsuri si AICI, in momentul deciziei. Sus e
+            pentru cine citeste pagina de la inceput; asta e pentru cine a
+            derulat direct la pret si sta cu degetul pe buton, dar vrea sa mai
+            verifice ceva inainte sa plateasca.
+
+            Scria „ce trafic au ziarele, ce nu promitem" — sub butonul de
+            comanda, in secunda deciziei. Cine nu se gandise la trafic afla
+            de la noi ca e ceva de verificat. Cifrele raman pe pagina, la
+            #detalii; de aici trimitem la intrebari, unde le gaseste cine le
+            cauta, fara sa le fluturam in fata celui care nu le cauta.
           */}
           <a
-            href="#detalii"
+            href="#intrebari"
             className="text-xs font-medium text-white/60 underline underline-offset-4 transition hover:text-white/90"
           >
-            Vezi datele: ce primești, ce trafic au ziarele, ce nu promitem
+            Ai o întrebare înainte să comanzi? Răspunsurile, mai jos ↓
           </a>
         </div>
       )}
@@ -486,7 +492,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             <strong className="text-white">4.</strong> Primești pe email raportul cu
             toate linkurile publicate.{" "}
             <span className="text-white/60">
-              Factura fiscală vine pe email imediat după comandă, indiferent cum plătești.
+              Factura fiscală o primești pe email în aceeași zi lucrătoare, indiferent cum plătești.
             </span>
           </li>
         </ol>

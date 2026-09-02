@@ -22,6 +22,14 @@ export const CONTENT_DECLARATION_SHORT =
   "Confirmi că articolul NU prezintă tratamente sau metode de vindecare pentru boli " +
   "(cancer, boli cronice) și nu promovează medicamente ori terapii alternative?";
 
+/**
+ * Titlul pus in locul unuia lipsa, pe comenzile unde clientul ne cere sa
+ * scriem noi articolul. Trebuie sa fie evident ca e un loc gol, nu un titlu
+ * real — se vede in admin si in emailul catre proprietar, si se inlocuieste
+ * cand se scrie articolul.
+ */
+export const TITLU_DE_PROPUS = "(fără titlu — îl propunem noi)";
+
 /** Mesajul cand nu e bifata — acelasi pe client si pe server. */
 export const CONTENT_DECLARATION_ERROR =
   "Bifează declarația de conținut ca să poți trimite comanda.";

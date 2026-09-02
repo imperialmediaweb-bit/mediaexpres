@@ -649,7 +649,7 @@ export default function Oferta500Page() {
       </section>
 
       {/* Intrebari frecvente */}
-      <section className="section bg-slate-50">
+      <section id="intrebari" className="scroll-mt-20 section bg-slate-50">
         <div className="container">
           <div className="mx-auto max-w-3xl">
             <h2 className="h2 text-center">Întrebări frecvente</h2>
@@ -684,7 +684,7 @@ export default function Oferta500Page() {
           </h2>
           <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,
-            iar mâine ai raportul cu toate cele 50 de linkuri.
+            iar în 24 de ore lucrătoare ai raportul cu toate cele 50 de linkuri.
           </p>
           <div className="mt-8">
             <PromoOffer showPrice={false} />

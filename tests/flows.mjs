@@ -307,7 +307,10 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(t.includes("RO15BTRLRONCRT0652757201"), "IBAN afisat");
   check(t.includes("LEGIO WEB DEVELOPMENT TOOLS"), "beneficiar afisat");
   check(t.includes("500 lei"), "suma pachetului");
-  check((await p.locator('input[required]').count()) >= 6, "campuri de facturare obligatorii");
+  // 5 campuri de facturare (email, telefon, firma, CUI, adresa). Titlul NU
+  // mai e obligatoriu: cine ne cere sa scriem noi articolul nu are titlu.
+  check((await p.locator('input[required]').count()) >= 5, "campuri de facturare obligatorii");
+  check((await p.locator('input[placeholder*="propunem noi"]').count()) === 1, "titlul e optional (il propunem noi)");
   check(t.includes("Încarcă dovada plății"), "incarcare dovada");
   // Dovada platii e OPTIONALA prin design: cerinta veche il obliga pe client
   // sa fi platit inainte sa fi primit vreo factura — cerc vicios care a tinut

@@ -9,6 +9,7 @@ import {
 } from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
+import { FormError } from "@/components/forms/FormError";
 
 type Mode = "ai" | "write";
 
@@ -557,9 +558,7 @@ export function ArticleForm({
 
       <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
 
-      {error && (
-        <p className="rounded-xl bg-red-50 p-4 text-sm text-red-700">{error}</p>
-      )}
+      <FormError message={error} className="rounded-xl bg-red-50 p-4 text-sm text-red-700" />
 
       <button
         type="submit"

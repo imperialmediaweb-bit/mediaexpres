@@ -12,6 +12,7 @@ astea trebuie sa poata fi rulate de oricine, oricand, cu un singur `node`.
 | `pages.mjs` | 27 | fiecare pagina publica, de admin si de cont raspunde 200, fara erori JavaScript |
 | `flows.mjs` | 69 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |
 | `chat.mjs` | 33 | comanda facuta integral din chat: OP cu articol, cazino, scurtatura spre Stripe, comanda fara articol scris |
+| `stress.mjs` | 100 iteratii × 13 scenarii | rezistenta fluxului de comanda: telefon/desktop alternativ, card/OP/cazino/abonament, email gresit, fara declaratie, camp lipsa, dublu click, Enter, server picat — la fiecare apasare ori un pas inainte, ori un mesaj in romana, in ecran, langa buton, neacoperit |
 
 ## Cum le rulezi
 
@@ -28,6 +29,7 @@ node tests/api.mjs
 node tests/pages.mjs
 node tests/flows.mjs
 node tests/chat.mjs
+node tests/stress.mjs        # 100 de iteratii; `node tests/stress.mjs 13` = una pe scenariu
 ```
 
 `pages.mjs` si `flows.mjs` cer Chromium (`/opt/pw-browsers/chromium`) si

@@ -66,6 +66,12 @@ for (const [path, label] of PAGES) {
     const text = await p.evaluate(() => document.body?.innerText || "");
     const INTERZISE = [
       [/proform/i, "proforma nu mai exista — direct factura fiscala"],
+      // Facturarea automata NU merge (StartCo refuza mereu): factura o
+      // emite proprietarul de mana, in program. „Imediat" si „automat"
+      // sunt promisiuni pe care site-ul nu le poate tine.
+      [/factur[aă][^.]{0,40}imediat după comandă/i, "factura nu vine imediat — o emite proprietarul de mana"],
+      [/factura se emite automat/i, "facturarea automata nu functioneaza"],
+      [/mâine ai raportul/i, "maine nu inseamna 24 de ore lucratoare (vineri → luni)"],
       [/\b[îi]n (maximum )?4 ore\b/i, "promisiunea veche de 4 ore"],
       [/\b224\s*(de )?(h|ore)\b/i, "cifra stricata 224"],
       [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],

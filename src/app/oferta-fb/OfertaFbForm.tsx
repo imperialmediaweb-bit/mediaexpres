@@ -4,6 +4,7 @@ import { useState } from "react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { CheckCircle2, Loader2 } from "lucide-react";
+import { FormError } from "@/components/forms/FormError";
 
 function makeEventId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) return crypto.randomUUID();
@@ -23,6 +24,21 @@ export function OfertaFbForm() {
     e.preventDefault();
     if (submitting) return;
     setError(null);
+    // Formularul are noValidate: fara el, browserul oprea trimiterea si arata
+    // bula lui nativa (in engleza pe multe telefoane), iar mesajele noastre
+    // nu mai rulau. Verificam noi, in romana, langa buton.
+    if (name.trim().length < 2) {
+      setError("Scrie-ți numele.");
+      return;
+    }
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim())) {
+      setError("Scrie o adresă de email validă — acolo primești oferta.");
+      return;
+    }
+    if (phone.replace(/\D/g, "").length < 9) {
+      setError("Scrie un număr de telefon valid.");
+      return;
+    }
     setSubmitting(true);
 
     const eventId = makeEventId();
@@ -70,7 +86,7 @@ export function OfertaFbForm() {
   }
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form onSubmit={onSubmit} noValidate className="space-y-4">
       <input
         type="text"
         name="website"
@@ -125,9 +141,7 @@ export function OfertaFbForm() {
           className="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-2 focus:ring-brand-red/20"
         />
       </div>
-      {error && (
-        <div className="rounded-lg bg-red-50 p-3 text-sm text-red-700">{error}</div>
-      )}
+      <FormError message={error} className="rounded-lg bg-red-50 p-3 text-sm text-red-700" />
       <button
         type="submit"
         disabled={submitting}

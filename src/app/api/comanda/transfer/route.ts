@@ -7,7 +7,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferE
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
-import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 
 export const runtime = "nodejs";
@@ -16,13 +16,18 @@ const fileSchema = z.object({ url: z.string().url().max(500), name: z.string().m
 
 const schema = z.object({
   packageId: z.string().min(1).max(64),
-  email: z.string().email().max(200),
-  contactPhone: z.string().min(9).max(40),
-  companyName: z.string().min(2).max(200),
-  companyCui: z.string().min(2).max(40),
-  companyAddress: z.string().min(5).max(300),
-  title: z.string().min(5).max(300),
-  body: z.string().min(100).max(30000),
+  // Mesajele in romana: primul mesaj de eroare ajunge in caseta rosie a
+  // clientului. Implicit, Zod raspundea in engleza („String must contain at
+  // least 9 character(s)") — formularul valideaza si el, dar plasa de
+  // siguranta trebuie sa vorbeasca aceeasi limba.
+  email: z.string().email("Adresa de email nu e validă.").max(200),
+  contactPhone: z.string().min(9, "Scrie numărul de telefon.").max(40),
+  companyName: z.string().min(2, "Scrie denumirea firmei.").max(200),
+  companyCui: z.string().min(2, "Scrie CUI-ul firmei.").max(40),
+  companyAddress: z.string().min(5, "Scrie adresa de facturare.").max(300),
+  // Titlul lipseste cand clientul ne cere sa scriem noi articolul.
+  title: z.string().max(300).optional().default(""),
+  body: z.string().min(100, "Articolul trebuie să aibă minimum 100 de caractere.").max(30000),
   siteUrl: z.string().max(300).optional(),
   // Ce cuvinte se leaga si incotro — vezi comentariul din formular.
   linkNotes: z.string().max(1000).optional(),
@@ -71,7 +76,7 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
   // Curatam la intrare, o singura data, si tot lantul de dupa — email, admin,
   // copiere, publicare — vede text de om, nu gunoi de PDF.
-  d.title = cleanTitle(d.title);
+  d.title = cleanTitle(d.title.trim() || TITLU_DE_PROPUS);
   d.body = cleanArticleText(d.body);
 
   const pkg = findPackageById(d.packageId);
@@ -148,7 +153,7 @@ export async function POST(req: NextRequest) {
       "Comandă nouă prin transfer bancar",
       `
       ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, factura a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
-      <p style="color:#b91c1c;"><strong>Factura se emite automat în StartCo și pleacă la client</strong> — dacă emiterea eșuează primești o alertă separată și o faci manual pe datele de mai jos. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
+      <p style="color:#b91c1c;"><strong>Emite factura în StartCo pe datele de mai jos și trimite-o clientului din admin</strong> (Materiale → comanda → „Trimite factura"). Emiterea automată se încearcă, dar de regulă eșuează — nu te baza pe ea. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
         ${kv("Denumire", d.companyName)}
