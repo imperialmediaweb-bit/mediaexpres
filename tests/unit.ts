@@ -138,6 +138,24 @@ t("stie ca clientul revenit trimite dovada/articolul in chat", /Am platit — tr
 t("are raspuns pentru expertul SEO", /EXPERT SEO/.test(k) && /Nu promite pozitii/.test(k));
 t("are raspuns pentru sceptic", /SCEPTICUL/.test(k));
 t("are raspuns pentru cazino, institutie, agentie", /CAZINO \/ PARIURI/.test(k) && /INSTITUTIE/.test(k) && /AGENTIE/.test(k));
+// Raspunsurile pregatite: fiecare tip de client isi gaseste intrebarile.
+for (const [profil, intrebari] of [
+  ["Firma mica, prima data", ["Cat costa?", "Ce primesc?", "Nu am articol scris", "Cat dureaza?", "Cum platesc?", "Primesc factura?", "Pot plati dupa ce vad articolele?"]],
+  ["Expert SEO / agentie", ["E ok pentru SEO?", "Ce DA/DR au?", "E PBN?", "Facturati pe agentie?", "Ce contine raportul?"]],
+  ["Scepticul", ["Sunt site-uri reale sau fantoma?", "Ce trafic au?", "Nu face banii", "Imi aduce clienti?", "Ce garantie am?", "De ce 500 si nu 1.500?"]],
+  ["Cazino / pariuri", []],
+  ["Continut sensibil", []],
+  ["Institutie, primarie, ONG", []],
+  ["Client vechi / a comandat deja", ["Ce e cu comanda mea?", "Am platit, unde trimit dovada?", "Pot modifica articolul dupa publicare?", "Se sterge dupa o perioada?"]],
+  ["Geografie", ["Aveti ziar in", "Vreau doar in judetul meu"]],
+  ["Facebook, trafic, promovare", ["Apare si pe Facebook?", "Puteti promova/boosta postarile?"]],
+  ["Altele", ["Articol in engleza / maghiara?", "Puteti publica azi?", "Pune eticheta (P)?", "Am mai multe articole", "Vorbesc cu un om?"]],
+] as [string, string[]][]) {
+  t(`raspunsuri pregatite: profilul „${profil}”`, k.includes(`[${profil}`));
+  for (const q of intrebari) t(`  are raspuns la „${q}”`, k.includes(`„${q}`));
+}
+t("raspunsurile pregatite tin cifrele: 500, 10 lei/ziar, 12 ore, DA 36-37, 1.000 cazino", /10 lei pe ziar/.test(k) && /1\.000 lei promo/.test(k) && /DA 36-37 \(Moz\)/.test(k));
+t("nu promite trafic sau pozitii nicaieri", !/garantam pozitii/i.test(k.replace(/Nu garantam pozitii/g, "")) && !/mii de vizitatori/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));

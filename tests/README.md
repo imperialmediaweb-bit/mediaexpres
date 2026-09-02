@@ -13,6 +13,7 @@ astea trebuie sa poata fi rulate de oricine, oricand, cu un singur `node`.
 | `flows.mjs` | 69 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |
 | `chat.mjs` | 50 | comanda facuta integral din chat: OP cu articol, cazino, scurtatura spre Stripe, comanda fara articol scris; clientul care revine (dovada, stare, articol cu alegerea rescris/identic) si butonul sugerat de consultant |
 | `stress.mjs` | 100 iteratii × 13 scenarii | rezistenta fluxului de comanda: telefon/desktop alternativ, card/OP/cazino/abonament, email gresit, fara declaratie, camp lipsa, dublu click, Enter, server picat — la fiecare apasare ori un pas inainte, ori un mesaj in romana, in ecran, langa buton, neacoperit |
+| `advisor-scenarios.mjs` | 41 scenarii LIVE | intrebarile reale ale clientilor (firma mica, expert SEO, sceptic, cazino, institutie, client vechi, geografie, Facebook, off-topic) trimise consultantului adevarat; verifica refuzul-sablon, cifrele, promisiunile interzise, eticheta de actiune; scrie raportul cu toate raspunsurile in scratchpad. Are nevoie de cheie de model (local) sau de productie: `node tests/advisor-scenarios.mjs https://mediaexpress.ro` |
 
 ## Cum le rulezi
 
@@ -29,7 +30,8 @@ node tests/api.mjs
 node tests/pages.mjs
 node tests/flows.mjs
 node tests/chat.mjs
-node tests/stress.mjs        # 100 de iteratii; `node tests/stress.mjs 13` = una pe scenariu
+node tests/stress.mjs
+node tests/advisor-scenarios.mjs https://mediaexpress.ro   # LIVE, foloseste cheia de model        # 100 de iteratii; `node tests/stress.mjs 13` = una pe scenariu
 ```
 
 `pages.mjs` si `flows.mjs` cer Chromium (`/opt/pw-browsers/chromium`) si
