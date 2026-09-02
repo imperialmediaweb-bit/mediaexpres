@@ -23,7 +23,7 @@ export default async function MaterialePage({ params, searchParams }: Props) {
             Hai să publicăm, {firstName}!
           </h1>
           <p className="mt-2 text-slate-600">
-            Completează formularul — publicăm în 24 de ore lucrătoare de la primire.
+            Completează formularul — publicăm în 12 ore lucrătoare de la primire.
           </p>
         </div>
         <IntakeForm

@@ -451,7 +451,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
       }, dar plata a rămas neterminată.</p>
       ${
         isPromo
-          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 24 de ore lucrătoare. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
+          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 12 ore lucrătoare. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
           : ""
       }
       <p>Comanda ta e salvată — o poți relua exact de unde ai rămas, într-un minut:</p>
@@ -629,7 +629,7 @@ async function sendConfirmationEmails(args: {
       <p style="margin:16px 0;">
         <a href="${articleUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimite articolul →</a>
       </p>
-      <p style="color:#64748b;font-size:13px;">Publicăm în maximum 24 de ore lucrătoare de la primirea materialelor și îți trimitem raportul cu toate linkurile.</p>`
+      <p style="color:#64748b;font-size:13px;">Publicăm în maximum 12 ore lucrătoare de la primirea materialelor și îți trimitem raportul cu toate linkurile.</p>`
           : `<p>Intra in cont pentru a gestiona comanda, a incarca pozele si a genera articolul:</p>
       <p style="margin-top:16px;">
         <a href="${SITE.url}/cont" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Intra in cont</a>

@@ -26,7 +26,7 @@ import { OfferChatBubble } from "@/components/OfferChatBubble";
 export const metadata: Metadata = {
   title: "Articol în 50 de ziare — 500 lei",
   description:
-    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 24 de ore lucrătoare.",
+    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 12 ore lucrătoare.",
   robots: { index: false, follow: false },
 };
 
@@ -79,9 +79,9 @@ const INCLUDED = [
   },
   {
     icon: Clock,
-    title: "Publicat în 24 de ore lucrătoare",
+    title: "Publicat în 12 ore lucrătoare",
     description:
-      "De la confirmarea plății până la linkurile live trec maximum 24 de ore lucrătoare.",
+      "De la confirmarea plății până la linkurile live trec maximum 12 ore lucrătoare. Comanda făcută seara sau în weekend se publică a doua zi lucrătoare.",
   },
 ];
 
@@ -103,7 +103,7 @@ const STEPS = [
   {
     n: "3",
     title: "Publicăm și primești raportul",
-    text: "În maximum 24 de ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
+    text: "În maximum 12 ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
   },
 ];
 
@@ -200,7 +200,7 @@ export default function Oferta500Page() {
             </h1>
             <p className="mt-6 text-lg text-white/85 md:text-xl">
               41 de ziare locale + 9 naționale. Un singur articol, publicat pe
-              toate, în 24 de ore lucrătoare. Cu raport PDF și 50 de backlinks reale.
+              toate, în 12 ore lucrătoare. Cu raport PDF și 50 de backlinks reale.
             </p>
           {/* Cifra de audienta pe PRIMUL ecran, inclusiv pe telefon — jos, in
               dreptul butoanelor, cadea sub margine la 390px si n-o vedea fix
@@ -245,7 +245,7 @@ export default function Oferta500Page() {
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Card sau ordin de plată • factură fiscală • publicare în 24 de ore lucrătoare
+              Card sau ordin de plată • factură fiscală • publicare în 12 ore lucrătoare
             </p>
           </div>
         </div>
@@ -262,7 +262,7 @@ export default function Oferta500Page() {
                 jos in pagina. */}
             <Stat value="50" label="domenii .ro proprii" />
             <Stat value="1.200+" label="articole publicate zilnic în rețea" />
-            <Stat value="24 de ore lucrătoare" label="până la publicare" />
+            <Stat value="12 ore lucrătoare" label="până la publicare" />
           </div>
         </div>
       </section>
@@ -513,7 +513,7 @@ export default function Oferta500Page() {
               Comandă acum — 500 lei
             </a>
             <p className="mt-3 text-sm text-slate-500">
-              Publicare în 24 de ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
+              Publicare în 12 ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
             </p>
           </div>
         </div>
@@ -632,7 +632,7 @@ export default function Oferta500Page() {
                   Ai văzut tot, inclusiv ce nu ne avantajează.
                 </p>
                 <p className="mx-auto mt-2 max-w-lg text-sm text-white/75">
-                  Dacă asta cauți, comanda durează două minute. Publicăm în maximum 24 de ore
+                  Dacă asta cauți, comanda durează două minute. Publicăm în maximum 12 ore
                   lucrătoare și primești raportul cu toate linkurile.
                 </p>
                 <a
@@ -680,11 +680,11 @@ export default function Oferta500Page() {
         <div className="container py-16 text-center">
           <ShieldCheck className="mx-auto h-10 w-10 text-brand-gold" />
           <h2 className="h2 mt-5 text-white">
-            50 de ziare. 24 de ore lucrătoare. 500 de lei.
+            50 de ziare. 12 ore lucrătoare. 500 de lei.
           </h2>
           <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,
-            iar în 24 de ore lucrătoare ai raportul cu toate cele 50 de linkuri.
+            iar în 12 ore lucrătoare ai raportul cu toate cele 50 de linkuri.
           </p>
           <div className="mt-8">
             <PromoOffer showPrice={false} />

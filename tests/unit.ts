@@ -96,7 +96,7 @@ t("contine termenul ofertei", mail.includes("14 septembrie"));
 t("contine WhatsApp-ul", mail.includes(SITE.phone));
 t("contine linkul catre oferta", mail.includes("/oferta-500"));
 t("promite factura fiscala", /factur[aă] fiscal[aă]/i.test(mail));
-t("mentioneaza termenul de 24 de ore", /24\s*(de\s*)?ore/i.test(mail));
+t("mentioneaza termenul de 12 ore", /12\s*(de\s*)?ore/i.test(mail));
 t("mentioneaza fara continut duplicat", /duplicat/i.test(mail));
 t("NU promite ca sunam clientul", !/te va contacta|scurt[aă] convorbire/i.test(mail));
 t("subiectul spune cifra oficiala 50", LIST_EMAIL_SUBJECT.includes("50"));
@@ -113,14 +113,14 @@ t("caseta contine suma", box.includes("500 lei"));
 t("caseta NU mai cere dovada ca obligatie", !/răspunde.*cu.*dovada/i.test(box));
 t("caseta spune ca incasarea se vede in extras", /extras/i.test(box));
 t("caseta pastreaza drumul pentru comanda direct de pe email", /CUI/i.test(box));
-t("caseta promite raportul si publicarea in 24 de ore", /raportul/i.test(box) && /24\s*(de\s*)?ore/i.test(box));
+t("caseta promite raportul si publicarea in 12 ore", /raportul/i.test(box) && /12\s*(de\s*)?ore/i.test(box));
 
 console.log("\n########## E. CUNOSTINTELE CONSULTANTULUI ##########");
 const k = buildAdvisorKnowledge();
 t("stie IBAN-ul pentru OP", k.includes(SITE.billing.iban));
 t("stie firma de pe factura", k.includes(SITE.billing.company));
 t("stie termenul ofertei", k.includes("14 SEPTEMBRIE"));
-t("stie de publicarea in 24 de ore", /24\s*(DE\s*)?ORE/i.test(k));
+t("stie de publicarea in 12 ore", /12\s*(DE\s*)?ORE/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));
@@ -392,7 +392,7 @@ console.log("\n########## L. GA4 SERVER-SIDE ##########");
 //
 // Doua reguli invatate din realitate, nu din teorie:
 //  1. "publicam in 4 ore" nu se poate tine cand proprietarul e plecat de
-//     acasa — termenul devine 24 de ore lucratoare, peste tot deodata
+//     acasa — termenul devine 12 ore lucratoare, peste tot deodata
 //     (era in 117 locuri; o singura scapare face restul mincinos).
 //  2. "acceptam orice tip de continut" a adus o comanda cu un articol despre
 //     tratarea cancerului. Publicarea lui pe 51 de ziare ar fi riscat
@@ -415,7 +415,7 @@ console.log("\n########## M. PROMISIUNI ##########");
   }
   t(
     "consultantul stie termenul nou",
-    /24\s*(de\s*)?ore|24h/i.test(buildAdvisorKnowledge()),
+    /12\s*(de\s*)?ore|12h/i.test(buildAdvisorKnowledge()),
   );
 }
 
@@ -508,7 +508,7 @@ console.log("\n########## O. LISTA IN PDF ##########");
   const numeLipsa = NEWSPAPERS.filter((n) => !raw.includes(codat(n.name)));
   t("toate numele de ziare sunt in PDF", numeLipsa.length === 0, numeLipsa[0]?.name);
 
-  t("spune pretul si termenul real", raw.includes("500 lei") && raw.includes("24 de ore lucratoare"));
+  t("spune pretul si termenul real", raw.includes("500 lei") && raw.includes("12 ore lucratoare"));
   t("nu promite termenul vechi de 4 ore", !/\b4 ore\b/i.test(raw));
   t("explica diferenta dintre 50 promise si cate sunt", raw.includes("bonus"));
   t("explica adresele xn-- (domenii cu diacritice)", raw.includes("xn--"));
@@ -543,6 +543,9 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
 
   const rele: [RegExp, string][] = [
     [/\b\d*24h\s*lucr/i, "cifra lipita de 'h' — a ramas din inlocuirea veche"],
+    // Termenul s-a schimbat a doua oara (24 → 12): vechiul text nu are voie
+    // sa ramana nicaieri, nici in emailuri, nici in PDF, nici in chat.
+    [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
     [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
     // Doar 224 urmat de o unitate de timp: 224 e si inceputul intervalului IP
     // multicast, iar un test care se plange de el ar fi zgomot, nu paza.
@@ -568,7 +571,7 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
   // Si invers: termenul nou chiar exista in produs, ca testul de mai sus sa nu
   // poata trece pur si simplu pentru ca s-a sters orice promisiune.
   const cuTermen = files.filter((f) =>
-    /24 de ore lucr[ăa]toare/i.test(fs.readFileSync(f, "utf8")),
+    /12 ore lucr[ăa]toare/i.test(fs.readFileSync(f, "utf8")),
   );
   t("termenul nou e scris in produs", cuTermen.length >= 20, `doar ${cuTermen.length} fisiere`);
 }

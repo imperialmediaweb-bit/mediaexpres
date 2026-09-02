@@ -156,7 +156,7 @@ export function TransferForm({
         <p className="mx-auto mt-3 max-w-lg text-sm text-emerald-800">
           Ți-am trimis pe email confirmarea cu pașii următori. Primești în scurt timp
           <strong> factura fiscală</strong>, plătești prin transfer pe baza ei, iar imediat
-          ce vedem încasarea publicăm articolul — în maximum 24 de ore lucrătoare — și îți
+          ce vedem încasarea publicăm articolul — în maximum 12 ore lucrătoare — și îți
           trimitem raportul cu toate cele 50 de linkuri.
         </p>
       </div>

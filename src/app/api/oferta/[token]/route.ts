@@ -138,7 +138,7 @@ export async function POST(
           <li>Raportul PDF cu toate linkurile către articolele publicate</li>
           <li>Factura fiscală emisă cu CUI-ul firmei tale</li>
         </ul>
-        <p>Primiți întâi factura fiscală — fără proformă — plătiți prin transfer pe baza ei, iar publicarea se face în maximum 24 de ore lucrătoare de la încasare.</p>
+        <p>Primiți întâi factura fiscală — fără proformă — plătiți prin transfer pe baza ei, iar publicarea se face în maximum 12 ore lucrătoare de la încasare.</p>
         <p style="margin-top:24px;color:#64748b;font-size:13px;">Comandă #${order.id.slice(
           0,
           8

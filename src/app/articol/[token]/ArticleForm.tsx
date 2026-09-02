@@ -230,7 +230,7 @@ export function ArticleForm({
           Publicăm pe {newspapers === 1
             ? "publicația din pachetul tău"
             : `cele ${newspapers}${newspapers >= 20 ? " de" : ""} publicații`} în
-          maximum <strong>24 de ore lucrătoare</strong>. Primești raportul cu
+          maximum <strong>12 ore lucrătoare</strong>. Primești raportul cu
           toate linkurile pe <strong>{email}</strong>.
         </p>
       </div>
@@ -576,7 +576,7 @@ export function ArticleForm({
       </button>
 
       <p className="text-center text-xs text-slate-500">
-        Publicăm în maximum 24 de ore lucrătoare de la primire.
+        Publicăm în maximum 12 ore lucrătoare de la primire.
       </p>
     </form>
   );

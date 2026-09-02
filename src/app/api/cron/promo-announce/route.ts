@@ -74,7 +74,7 @@ export async function POST(req: NextRequest) {
           `
           <p>Salut ${firstName},</p>
           <p>Veste bună: oferta de intrare — <strong>un articol publicat în 50 de ziare pentru 500 lei</strong> — a fost prelungită până pe <strong>${label}</strong>.</p>
-          <p>Pe scurt, ce primești: articol unic pe fiecare ziar (zero conținut duplicat), 50 de backlinks dofollow, publicare în maximum 24 de ore lucrătoare, raport complet cu linkurile și factură fiscală.</p>
+          <p>Pe scurt, ce primești: articol unic pe fiecare ziar (zero conținut duplicat), 50 de backlinks dofollow, publicare în maximum 12 ore lucrătoare, raport complet cu linkurile și factură fiscală.</p>
           <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;font-weight:600;">Comandă acum — 500 lei</a></p>
           <p>Întrebări? Răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
           <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>

@@ -20,7 +20,7 @@ const FEATURES = [
   },
   {
     icon: Clock,
-    title: "Livrare în 24 de ore lucrătoare",
+    title: "Livrare în 12 ore lucrătoare",
     description: "Publicare rapidă pe toate site-urile. Linkurile ajung la tine imediat.",
   },
   {

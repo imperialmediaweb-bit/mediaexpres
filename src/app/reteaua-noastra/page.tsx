@@ -145,7 +145,7 @@ export default function ReteauaPage() {
                 Le-ai văzut. Articolul tău poate fi în toate, azi.
               </h3>
               <p className="mx-auto mt-4 max-w-xl text-slate-600">
-                Publicare în maximum 24 de ore lucrătoare, în toate cele 50 de ziare de mai sus.
+                Publicare în maximum 12 ore lucrătoare, în toate cele 50 de ziare de mai sus.
                 Primești raportul cu fiecare link și factură fiscală. Plătești cu cardul sau
                 prin ordin de plată.
               </p>

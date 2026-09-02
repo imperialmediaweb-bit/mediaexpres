@@ -5,7 +5,7 @@ import { Newspaper, Clock, ShieldCheck, TrendingUp, Star } from "lucide-react";
 export const metadata: Metadata = {
   title: "Apari în 50 de ziare românești — Ofertă specială",
   description:
-    "Distribuție în 50 de ziare online din România. Raport PDF cu toate linkurile, în 24 de ore lucrătoare. De la 150 RON.",
+    "Distribuție în 50 de ziare online din România. Raport PDF cu toate linkurile, în 12 ore lucrătoare. De la 150 RON.",
   robots: { index: false, follow: false },
 };
 
@@ -24,7 +24,7 @@ export default function OfertaFbPage() {
             </h1>
             <p className="mt-4 text-lg text-slate-600">
               Comunicatul tău publicat pe rețeaua MediaExpres — 50 de ziare online cu trafic
-              real. Raport PDF cu toate linkurile, în 24 de ore lucrătoare.
+              real. Raport PDF cu toate linkurile, în 12 ore lucrătoare.
             </p>
             <ul className="mt-6 space-y-3 text-sm">
               <li className="flex items-start gap-3">
@@ -37,7 +37,7 @@ export default function OfertaFbPage() {
               <li className="flex items-start gap-3">
                 <Clock className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
-                  <strong className="text-brand-navy">Publicat în 24 de ore lucrătoare</strong>{" "}
+                  <strong className="text-brand-navy">Publicat în 12 ore lucrătoare</strong>{" "}
                   de la confirmarea comenzii
                 </span>
               </li>
@@ -90,7 +90,7 @@ export default function OfertaFbPage() {
               subline="toate indexate Google, link-uri active"
             />
             <TrustCard
-              number="24 de ore lucrătoare"
+              number="12 ore lucrătoare"
               label="timp publicare"
               subline="de la confirmarea comenzii"
             />
@@ -113,7 +113,7 @@ export default function OfertaFbPage() {
           />
           <FaqItem
             q="Cum primesc dovada că s-a publicat?"
-            a="În 24 de ore lucrătoare de la confirmare primești un raport PDF cu URL-urile fiecărui articol publicat."
+            a="În 12 ore lucrătoare de la confirmare primești un raport PDF cu URL-urile fiecărui articol publicat."
           />
           <FaqItem
             q="Pot să-mi scriu eu articolul?"

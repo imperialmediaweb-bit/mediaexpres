@@ -35,7 +35,7 @@ export function BankTransferBox({ note }: { note: string }) {
         </a>{" "}
         — cu articolul și datele de facturare — primești factura fiscală pe email și
         plătești pe baza ei, în contul de mai sus. Imediat ce vedem încasarea, publicăm
-        în maximum 24 de ore lucrătoare și primești raportul cu toate linkurile.
+        în maximum 12 ore lucrătoare și primești raportul cu toate linkurile.
         Abonamentele lunare se plătesc doar cu cardul.
       </p>
     </div>

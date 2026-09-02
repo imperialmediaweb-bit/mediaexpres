@@ -15,7 +15,7 @@ interface PageProps {
 }
 
 const BENEFITS = [
-  "Livrare articol în 24 de ore lucrătoare",
+  "Livrare articol în 12 ore lucrătoare",
   "Raport PDF cu toate URL-urile",
   "Distribuție Facebook inclusă",
   "Publicare permanent online",
@@ -30,7 +30,7 @@ export default function ComandaPage({ searchParams }: PageProps) {
         <div className="order-2 lg:order-1">
           <h1 className="h1">Comandă articol</h1>
           <p className="lead mt-4">
-            Completează formularul. Iti trimitem factura fiscala pe email, cu IBAN-ul nostru — platesti prin transfer pe baza ei, iar imediat ce vedem incasarea publicam articolul in maximum 24 de ore lucratoare.
+            Completează formularul. Iti trimitem factura fiscala pe email, cu IBAN-ul nostru — platesti prin transfer pe baza ei, iar imediat ce vedem incasarea publicam articolul in maximum 12 ore lucratoare.
           </p>
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
             <Suspense>

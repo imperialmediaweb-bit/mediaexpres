@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: "Cum publici comunicatul după ce îl ai?",
-    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 50 pagini Facebook în 24 de ore lucrătoare. Costă 1500 RON, plătit o singură dată, rămâne online permanent.",
+    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 50 pagini Facebook în 12 ore lucrătoare. Costă 1500 RON, plătit o singură dată, rămâne online permanent.",
   },
   {
     q: "AI-ul scrie text duplicat? E penalizat de Google?",
@@ -180,7 +180,7 @@ export default function GeneratorComunicatPage() {
         <div className="container py-16 text-center">
           <p className="eyebrow text-brand-gold">După ce ai comunicatul</p>
           <h2 className="font-serif text-3xl md:text-4xl font-bold mt-3">
-            Publică-l pe 50 de ziare în 24 de ore lucrătoare
+            Publică-l pe 50 de ziare în 12 ore lucrătoare
           </h2>
           <p className="mt-4 max-w-2xl mx-auto text-white/80">
             Comunicatul tău AI ajunge instantaneu pe 41 ziare locale + 9

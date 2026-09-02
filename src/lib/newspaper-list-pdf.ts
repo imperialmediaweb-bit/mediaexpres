@@ -73,7 +73,7 @@ export function buildNewspaperListPdf(): Buffer {
           ]
         : []),
       "Un articol publicat pe toata reteaua costa 500 lei, cu factura fiscala, si apare in",
-      "maximum 24 de ore lucratoare de la confirmarea platii. Articolul ramane permanent online.",
+      "maximum 12 ore lucratoare de la confirmarea platii. Articolul ramane permanent online.",
       "",
       `Comenzi si intrebari: ${SITE.email} | ${SITE.phone}`,
       "",

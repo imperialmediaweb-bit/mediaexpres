@@ -61,7 +61,7 @@ export default function ParteneriPage() {
             <Step
               n={1}
               title="Aplicati pentru cont reseller"
-              desc="Formularul de mai jos: nume agentie + CUI + email + estimare lunara. Va raspundem in 24 de ore lucrătoare cu termenii."
+              desc="Formularul de mai jos: nume agentie + CUI + email + estimare lunara. Va raspundem in 12 ore lucrătoare cu termenii."
             />
             <Step
               n={2}
@@ -206,7 +206,7 @@ export default function ParteneriPage() {
               <CheckCircle2 className="h-6 w-6 text-brand-gold" />
               <p className="mt-2 font-serif font-bold text-white">Distributie pe 50 ziare</p>
               <p className="mt-1 text-sm text-white/70">
-                fiecare articol, cu raport PDF in 24 de ore lucrătoare
+                fiecare articol, cu raport PDF in 12 ore lucrătoare
               </p>
             </div>
           </div>
@@ -234,7 +234,7 @@ export default function ParteneriPage() {
             />
             <Faq
               q="Cat dureaza aprobarea?"
-              a="Maxim 24 de ore lucratoare. Va contactam pe email cu fie aprobare directa + credentiale cont, fie cu 1-2 intrebari clarificatoare daca aplicatia e incompleta."
+              a="Maxim 12 ore lucratoare. Va contactam pe email cu fie aprobare directa + credentiale cont, fie cu 1-2 intrebari clarificatoare daca aplicatia e incompleta."
             />
             <Faq
               q="E vreun cost de inscriere?"
@@ -261,7 +261,7 @@ export default function ParteneriPage() {
           <p className="eyebrow">Aplicare</p>
           <h2 className="h2 mt-2">Aplicati pentru cont reseller</h2>
           <p className="lead mt-3 text-slate-600">
-            Completati formularul de mai jos. Va raspundem in 24 de ore lucratoare cu fie
+            Completati formularul de mai jos. Va raspundem in 12 ore lucratoare cu fie
             aprobarea + credentialele de cont, fie cu intrebari clarificatoare.
           </p>
 

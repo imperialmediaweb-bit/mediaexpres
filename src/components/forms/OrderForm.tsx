@@ -64,7 +64,7 @@ export function OrderForm({ defaultPackageId, onSuccess }: OrderFormProps) {
           Comandă primită!
         </h3>
         <p className="text-slate-600">
-          Iti multumim! Iti trimitem factura fiscala pe email, cu IBAN-ul nostru. Platesti prin transfer pe baza ei, iar imediat ce vedem incasarea publicam articolul — in maximum 24 de ore lucratoare.
+          Iti multumim! Iti trimitem factura fiscala pe email, cu IBAN-ul nostru. Platesti prin transfer pe baza ei, iar imediat ce vedem incasarea publicam articolul — in maximum 12 ore lucratoare.
         </p>
         <Button variant="outline" onClick={() => setStatus("idle")}>
           Trimite altă comandă

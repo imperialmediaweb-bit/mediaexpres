@@ -72,7 +72,7 @@ export default function DesprePage() {
                 marketing acces la vizibilitatea pe care, până acum, doar cei mari și-o permiteau.
               </p>
               <p>
-                Totul cu prețuri fixe, transparente, livrare în 24 de ore lucrătoare și raport PDF complet —
+                Totul cu prețuri fixe, transparente, livrare în 12 ore lucrătoare și raport PDF complet —
                 documentat cu linkul fiecărei publicări.
               </p>
             </div>

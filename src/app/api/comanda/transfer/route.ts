@@ -191,7 +191,7 @@ export async function POST(req: NextRequest) {
       <ol style="padding-left:20px;margin:8px 0 16px;">
         <li style="margin:6px 0;"><strong>Îți trimitem factura fiscală</strong> pe acest email, în scurt timp.</li>
         <li style="margin:6px 0;"><strong>Plătești prin transfer bancar</strong> — datele contului sunt mai jos, ca să le ai la îndemână.</li>
-        <li style="margin:6px 0;"><strong>Publicăm în maximum 24 de ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
+        <li style="margin:6px 0;"><strong>Publicăm în maximum 12 ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
       </ol>
       ${d.paymentProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
       ${bankTransferEmailBox(`${pkg.price} lei`, `${esc(pkg.name)} — ${esc(d.companyName)}`)}

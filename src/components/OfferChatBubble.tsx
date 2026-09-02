@@ -252,7 +252,7 @@ export function OfferChatBubble() {
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare la trimitere");
       setMode("sent");
       say(
-        "Am primit comanda ta. Verificăm încasarea în extras — de obicei câteva ore lucrătoare, în funcție de bancă. Imediat după confirmare publicăm în maximum 24 de ore lucrătoare și primești pe email raportul cu toate linkurile și factura fiscală.",
+        "Am primit comanda ta. Îți trimitem factura fiscală pe email în aceeași zi lucrătoare și plătești pe baza ei. Imediat ce vedem încasarea în extras, publicăm în maximum 12 ore lucrătoare și primești pe email raportul cu toate linkurile.",
       );
     } catch (e) {
       setStepError(e instanceof Error ? e.message : "Eroare la trimitere");

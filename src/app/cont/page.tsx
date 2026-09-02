@@ -76,7 +76,7 @@ export default async function ContPage() {
         <div className="mt-12 rounded-2xl border border-dashed border-slate-300 p-8">
           <h2 className="h2">Prima comanda?</h2>
           <p className="lead mt-3 text-slate-600">
-            Completeaza formularul de comanda. Primesti factura fiscala pe email cu IBAN-ul nostru, faci transferul pe baza ei, iar noi publicam articolul in maximum 24 de ore lucratoare de la incasare.
+            Completeaza formularul de comanda. Primesti factura fiscala pe email cu IBAN-ul nostru, faci transferul pe baza ei, iar noi publicam articolul in maximum 12 ore lucratoare de la incasare.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="accent" size="lg" asChild>

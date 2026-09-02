@@ -107,7 +107,7 @@ export function StrategyGenerator({
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : "eroare necunoscuta";
       setError(
-        `Imi pare rau, am o problema tehnica acum (${msg}). Scrieti-ne la contact@mediaexpress.ro si va trimitem strategia in 24 de ore lucrătoare.`
+        `Imi pare rau, am o problema tehnica acum (${msg}). Scrieti-ne la contact@mediaexpress.ro si va trimitem strategia in 12 ore lucrătoare.`
       );
     } finally {
       clearInterval(stepTimer);

@@ -224,8 +224,8 @@ export default function OfertaPage() {
             </div>
             <p className="mt-4 text-slate-600">
               Card online sau ordin de plată (transfer bancar) — în ambele cazuri
-              primești factură fiscală. La card, factura se emite automat imediat după
-              plată; la OP, o trimitem odată cu raportul de publicare.
+              primești factura fiscală pe email în aceeași zi lucrătoare. La OP plătești
+              pe baza ei, ca între firme — nu trebuie să fi plătit ca să comanzi.
             </p>
           </div>
         </div>
@@ -238,7 +238,7 @@ export default function OfertaPage() {
             Un articol, 50 de ziare, 500 de lei
           </h2>
           <p className="lead mt-4 mx-auto max-w-2xl text-white/85">
-            Publicare în maximum 24 de ore lucrătoare, raport cu toate linkurile și
+            Publicare în maximum 12 ore lucrătoare, raport cu toate linkurile și
             factură fiscală. Plătești cu cardul sau prin ordin de plată.
           </p>
           <div className="mt-8 flex flex-col items-center justify-center gap-3 sm:flex-row">

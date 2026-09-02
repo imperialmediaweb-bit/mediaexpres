@@ -44,7 +44,7 @@ export default function TransferPage({
     {
       icon: Landmark,
       title: "3. Plătești și publicăm",
-      text: "În maximum 24 de ore lucrătoare de la încasare, cu raportul celor 50 de linkuri.",
+      text: "În maximum 12 ore lucrătoare de la încasare, cu raportul celor 50 de linkuri.",
     },
   ];
 

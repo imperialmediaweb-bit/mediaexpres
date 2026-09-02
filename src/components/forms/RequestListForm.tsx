@@ -100,7 +100,7 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
         */}
         <div className="mt-2 w-full rounded-xl border border-slate-200 bg-slate-50 p-4">
           <p className="text-sm font-semibold text-brand-navy">
-            Vrei să comanzi? 500 lei, factură fiscală, publicare în 24 de ore lucrătoare.
+            Vrei să comanzi? 500 lei, factură fiscală, publicare în 12 ore lucrătoare.
           </p>
           <div className="mt-3 flex flex-col gap-2">
             <Button variant="accent" asChild>

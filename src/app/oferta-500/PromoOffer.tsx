@@ -396,7 +396,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           </p>
           <p className="mt-3 text-center text-xs text-white/60">
             {offer.price.toLocaleString("ro")} lei{offer.suffix} · factură fiscală în ambele
-            cazuri · publicare în 24 de ore lucrătoare
+            cazuri · publicare în 12 ore lucrătoare
           </p>
         </form>
       ) : (
@@ -417,7 +417,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               necunoscut. */}
           <p className="inline-flex items-center gap-1.5 text-sm text-white/75">
             <ShieldCheck className="h-4 w-4 text-brand-gold" />
-            Nu publicăm în 24 de ore lucrătoare? Îți dăm toți banii înapoi.
+            Nu publicăm în 12 ore lucrătoare? Îți dăm toți banii înapoi.
           </p>
           {/* Lista e mai jos pe pagina, dar nimeni nu stia — omul vedea pretul si
               butonul si pleca fara sa afle ca poate verifica ziarele inainte. */}
@@ -481,8 +481,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             publicare.
           </li>
           <li>
-            <strong className="text-white">3.</strong> Publicăm în maximum 24 de ore
-            lucrătoare, pe toate ziarele.{" "}
+            <strong className="text-white">3.</strong> Publicăm în maximum 12 ore
+            lucrătoare, pe toate ziarele. Comanda făcută seara sau în weekend se
+            publică a doua zi lucrătoare.{" "}
             <span className="text-white/60">
               (La plata prin OP, cronometrul pornește după ce confirmăm încasarea în
               extras — câteva ore lucrătoare, în funcție de bancă.)
