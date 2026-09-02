@@ -58,7 +58,10 @@ export default async function MaterialDetailPage({
   } catch {
     images = [];
   }
-  let proof: { url: string; name: string } | null = null;
+  let proof: { url: string; name: string; analiza?: {
+    suma: string | null; data: string | null; beneficiar: string | null; iban: string | null;
+    platitor: string | null; potrivire: string; observatii: string;
+  } } | null = null;
   try {
     proof = r.paymentProof ? JSON.parse(r.paymentProof) : null;
   } catch {
@@ -377,6 +380,27 @@ export default async function MaterialDetailPage({
                 >
                   {proof.name}
                 </a>
+                {/* Ce a citit chatul pe dovada, ca sa confirmi dintr-o privire.
+                    E o citire a pozei, nu o verificare bancara. */}
+                {proof.analiza && (
+                  <span className="mt-2 block border-t border-amber-200 pt-2 text-xs text-slate-700">
+                    <strong>
+                      {proof.analiza.potrivire === "da"
+                        ? "✅ Se potrivește"
+                        : proof.analiza.potrivire === "partial"
+                          ? "⚠️ Parțial — verifică"
+                          : proof.analiza.potrivire === "nu"
+                            ? "❌ Nu pare dovadă de plată"
+                            : "❔ Necitită automat"}
+                    </strong>
+                    {" · "}
+                    {[proof.analiza.suma, proof.analiza.data, proof.analiza.beneficiar, proof.analiza.platitor && `de la ${proof.analiza.platitor}`]
+                      .filter(Boolean)
+                      .join(" · ") || "fără date"}
+                    {proof.analiza.observatii && <span className="block text-slate-500">{proof.analiza.observatii}</span>}
+                    <span className="block text-slate-500">Confirmă în extras înainte să publici.</span>
+                  </span>
+                )}
               </p>
             )}
           </section>

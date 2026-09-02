@@ -43,7 +43,8 @@ async function openChat() {
     send: () => c.locator("button[aria-label=Trimite]").click(),
     wait: (ms = 400) => p.waitForTimeout(ms),
     type: async (v) => {
-      await c.locator("input[type=text]").fill(v);
+      // Campul poate fi text, email sau tel — tastatura potrivita pe telefon.
+      await c.locator("input[type=text], input[type=email], input[type=tel]").first().fill(v);
       await c.locator("button[aria-label=Trimite]").click();
       await p.waitForTimeout(400);
     },
@@ -228,6 +229,94 @@ console.log("\n=== 4. Clientul nu are articol ===");
     sent?.body?.slice(0, 30),
   );
   check(sent?.title?.startsWith("[De redactat]"), "si titlul semnaleaza", sent?.title);
+  await p.close();
+}
+
+// ---------- 5. Clientul care revine: dovada, stare, articol ----------
+// Pe WhatsApp, proprietarul facea asta cu mana. Aici, rutele sunt simulate:
+// testam ca chatul gaseste comanda, ia fisierul/textul si il pune pe ea.
+{
+  console.log("\n=== 5. Clientul care revine: dovada platii ===");
+  const { p, c, btn, seen, type, proof, wait } = await openChat();
+  const calls = [];
+  await p.route("**/api/chat/comanda", async (r) => {
+    const body = JSON.parse(r.request().postData() || "{}");
+    calls.push(body);
+    if (body.action === "find") {
+      const orders = body.email === "gol@test.ro" ? [] : [{
+        id: "11111111-1111-1111-1111-111111111111", packageName: "Articol în 50 de ziare", price: 500,
+        createdAt: "2026-09-01T10:00:00Z", paymentMethod: "op", status: "pending_payment",
+        publishedAt: null, hasProof: false, hasArticle: true, reportLinks: 0,
+      }];
+      return r.fulfill({ json: { ok: true, orders } });
+    }
+    if (body.action === "proof") {
+      return r.fulfill({ json: { ok: true, analiza: { suma: "500 RON", data: "2026-09-02", beneficiar: "LEGIO WEB", iban: null, platitor: "X SRL", potrivire: "da", observatii: "" } } });
+    }
+    return r.fulfill({ json: { ok: true } });
+  });
+  check(await seen("Ai comandat deja?"), "salutul ofera drumurile clientului revenit");
+  await btn("Am plătit — trimit dovada").click(); await wait();
+  check(await seen("Pe ce adresă de email ai făcut comanda"), "cere emailul comenzii");
+  await type("gol@test.ro");
+  check(await seen("Nu găsesc nicio comandă pe gol@test.ro"), "email necunoscut: spune clar si lasa sa reincerce");
+  await type("client@test.ro");
+  check(await seen("Încarcă dovada plății"), "o comanda gasita: cere dovada direct");
+  await proof(); await wait(800);
+  const pr = calls.find((x) => x.action === "proof");
+  check(pr?.orderId === "11111111-1111-1111-1111-111111111111" && pr?.email === "client@test.ro" && pr?.proof?.url, "dovada pleaca pe comanda gasita", JSON.stringify(pr));
+  check(await seen("Am pus dovada pe comanda ta"), "confirma");
+  check(await seen("500 RON, 2026-09-02, către LEGIO WEB"), "spune ce a citit pe dovada");
+  check(await seen("Se potrivește cu comanda"), "si ca se potriveste");
+  await p.close();
+}
+{
+  console.log("\n=== 5b. Clientul care revine: starea comenzii ===");
+  const { p, c, btn, seen, type, wait } = await openChat();
+  await p.route("**/api/chat/comanda", (r) => r.fulfill({ json: { ok: true, orders: [
+    { id: "a1", packageName: "Articol în 50 de ziare", price: 500, createdAt: "2026-08-28T10:00:00Z", paymentMethod: "op", status: "pending_payment", publishedAt: "2026-08-29T10:00:00Z", hasProof: true, hasArticle: true, reportLinks: 50 },
+    { id: "a2", packageName: "Articol în 50 de ziare", price: 500, createdAt: "2026-09-01T10:00:00Z", paymentMethod: "op", status: "pending_payment", publishedAt: null, hasProof: false, hasArticle: false, reportLinks: 0 },
+  ] } }));
+  await btn("Unde e comanda mea?").click(); await wait();
+  await type("client@test.ro");
+  check(await seen("Am găsit 2 comenzi"), "doua comenzi: cere sa aleaga");
+  await c.locator("button", { hasText: "publicată" }).first().click(); await wait();
+  check(await seen("Raportul cu cele 50 linkuri"), "comanda publicata: spune de raport");
+  await p.close();
+}
+{
+  console.log("\n=== 5c. Clientul care revine: articolul, cu alegerea rescris/identic ===");
+  const { p, c, btn, seen, type, wait, send } = await openChat();
+  const calls = [];
+  await p.route("**/api/chat/comanda", async (r) => {
+    const body = JSON.parse(r.request().postData() || "{}");
+    calls.push(body);
+    if (body.action === "find") return r.fulfill({ json: { ok: true, orders: [{ id: "b1", packageName: "Articol în 50 de ziare", price: 500, createdAt: "2026-09-01T10:00:00Z", paymentMethod: "card", status: "paid", publishedAt: null, hasProof: false, hasArticle: false, reportLinks: 0 }] } });
+    return r.fulfill({ json: { ok: true } });
+  });
+  await btn("Trimit articolul / pozele").click(); await wait();
+  await type("client@test.ro");
+  check(await seen("Titlul articolului"), "cere titlul");
+  await c.locator("button", { hasText: "Sar" }).click(); await wait();
+  check(await seen("Lipește textul articolului"), "titlul e optional (il propunem noi)");
+  await c.locator("textarea").fill("Firma noastra deschide un nou punct de lucru in Cluj, cu servicii complete pentru clientii din zona si program extins.");
+  await send(); await wait();
+  await btn("Fără poze").click(); await wait();
+  check(await seen("rescrisă unic pe fiecare ziar"), "explica alegerea rescris/identic");
+  await btn("Rescris unic pe fiecare ziar").click(); await wait(800);
+  const ar = calls.find((x) => x.action === "article");
+  check(ar?.orderId === "b1" && ar?.uniquePerSite === true && ar?.body?.includes("Cluj") && ar?.title === "", "articolul pleaca pe comanda, rescris unic, fara titlu", JSON.stringify(ar)?.slice(0, 120));
+  check(await seen("Am pus articolul pe comanda ta"), "confirma");
+  await p.close();
+}
+{
+  console.log("\n=== 5d. Consultantul pune butonul potrivit sub raspuns ===");
+  const { p, c, seen, type, wait } = await openChat();
+  await p.route("**/api/advisor", (r) => r.fulfill({ json: { ok: true, answer: "Sigur, o poți trimite chiar aici.", action: "dovada" } }));
+  await type("am platit, unde trimit dovada?");
+  check(await seen("Sigur, o poți trimite chiar aici."), "raspunsul apare");
+  const sugerat = c.locator("button", { hasText: "Am plătit — trimit dovada" });
+  check((await sugerat.count()) >= 1, "butonul sugerat de consultant apare sub raspuns");
   await p.close();
 }
 

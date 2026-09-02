@@ -14,6 +14,14 @@ import {
   Trash2,
 } from "lucide-react";
 import { signAndUpload, type Uploaded } from "@/lib/upload-client";
+import {
+  describeOrder,
+  orderLabel,
+  INTENT_LABEL,
+  EMAIL_RE,
+  type ChatOrder,
+  type ReturnIntent,
+} from "@/components/chat/return-flows";
 import { SITE } from "@/data/site";
 import {
   STEPS,
@@ -23,6 +31,7 @@ import {
   priceOf,
   packageIdOf,
   type OrderData,
+  type Step,
 } from "@/components/chat/order-steps";
 
 interface Message {
@@ -45,7 +54,9 @@ const SUGGESTIONS = [
 const GREETING =
   "Salut! Sunt consultantul MediaExpres. Întreabă-mă orice despre ofertă — plată, factură, unde apare articolul, ce trebuie să trimiți. Sau comandă direct de aici, fără să pleci din conversație.";
 
-type Mode = "chat" | "order" | "sent";
+// "return" = clientul care a comandat deja si revine: dovada, articol, stare.
+type Mode = "chat" | "order" | "sent" | "return";
+type ReturnStep = "email" | "pick" | "proof" | "title" | "body" | "images" | "variant";
 
 export function OfferChatBubble() {
   const [open, setOpen] = useState(false);
@@ -60,6 +71,20 @@ export function OfferChatBubble() {
   const [proof, setProof] = useState<Uploaded | null>(null);
   const [uploading, setUploading] = useState(false);
   const [stepError, setStepError] = useState<string | null>(null);
+
+  // Drumurile clientului care revine. Pe WhatsApp, proprietarul facea asta cu
+  // mana: cauta comanda dupa om, punea dovada sau articolul pe ea, raspundea
+  // la „ce e cu comanda mea?". Aici chatul face acelasi lucru, pe email.
+  const [intent, setIntent] = useState<ReturnIntent | null>(null);
+  const [rstep, setRstep] = useState<ReturnStep>("email");
+  const [remail, setRemail] = useState("");
+  const [orders, setOrders] = useState<ChatOrder[]>([]);
+  const [picked, setPicked] = useState<ChatOrder | null>(null);
+  const [rtitle, setRtitle] = useState("");
+  const [rbody, setRbody] = useState("");
+  // Eticheta de actiune intoarsa de consultant dupa un raspuns liber: pune
+  // butonul potrivit sub raspuns (comanda / dovada / articol / stare).
+  const [lastAction, setLastAction] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -82,6 +107,7 @@ export function OfferChatBubble() {
     setMessages(history);
     setInput("");
     setLoading(true);
+    setLastAction(null);
     try {
       const res = await fetch("/api/advisor", {
         method: "POST",
@@ -91,6 +117,7 @@ export function OfferChatBubble() {
       const dataRes = await res.json();
       if (!res.ok || !dataRes.ok) throw new Error(dataRes.error || "Eroare server");
       setMessages([...history, { role: "assistant", content: dataRes.answer }]);
+      if (typeof dataRes.action === "string" && dataRes.action !== "niciuna") setLastAction(dataRes.action);
     } catch {
       setMessages([
         ...history,
@@ -149,6 +176,7 @@ export function OfferChatBubble() {
   }
 
   function answerChoice(value: string, label: string) {
+    if (mode === "return") return answerReturnChoice(value, label);
     const s = STEPS[step];
     echo(label);
     const d = { ...data };
@@ -177,6 +205,7 @@ export function OfferChatBubble() {
   }
 
   function submitText(raw: string) {
+    if (mode === "return") return submitReturnText(raw);
     const s = STEPS[step];
     const value = raw.trim();
     const err = s.validate?.(value, data) ?? null;
@@ -201,6 +230,7 @@ export function OfferChatBubble() {
   }
 
   function skipStep() {
+    if (mode === "return") return skipReturn();
     echo("Sar peste");
     setInput("");
     goToNext(step, data);
@@ -208,6 +238,7 @@ export function OfferChatBubble() {
 
   async function upload(list: FileList | null, kind: "images" | "proof") {
     if (!list?.length) return;
+    if (mode === "return") return uploadReturn(list, kind);
     setStepError(null);
     setUploading(true);
     try {
@@ -261,6 +292,283 @@ export function OfferChatBubble() {
     }
   }
 
+  // ——— Clientul care revine: dovada / articol / stare ———
+  function startReturn(i: ReturnIntent) {
+    setMode("return");
+    setIntent(i);
+    setStepError(null);
+    setLastAction(null);
+    setPicked(null);
+    setOrders([]);
+    echo(INTENT_LABEL[i]);
+    // Emailul stiut din comanda facuta in aceeasi conversatie se refoloseste.
+    const known = (data.email || remail).trim();
+    if (EMAIL_RE.test(known)) {
+      setRemail(known);
+      void lookupOrders(known, i);
+    } else {
+      setRstep("email");
+      say("Pe ce adresă de email ai făcut comanda?");
+    }
+  }
+
+  async function lookupOrders(email: string, i: ReturnIntent) {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/chat/comanda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "find", email }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.ok) throw new Error(j.error || "Eroare");
+      const found = (j.orders as ChatOrder[]) || [];
+      setOrders(found);
+      if (!found.length) {
+        setRstep("email");
+        say(
+          `Nu găsesc nicio comandă pe ${email}. Dacă ai comandat cu altă adresă, scrie-o aici. Dacă n-ai comandat încă, apasă „Comandă acum" și te iau pas cu pas.`,
+        );
+        return;
+      }
+      if (found.length === 1) {
+        pickOrder(found[0], i, false);
+      } else {
+        setRstep("pick");
+        say(`Am găsit ${found.length} comenzi pe adresa asta. Despre care e vorba?`);
+      }
+    } catch (e) {
+      setStepError(e instanceof Error ? e.message : "Nu am putut căuta comanda acum.");
+      setRstep("email");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function pickOrder(o: ChatOrder, i: ReturnIntent | null, echoIt: boolean) {
+    if (echoIt) echo(orderLabel(o));
+    setPicked(o);
+    const info = describeOrder(o);
+    const kind = i ?? intent;
+    if (kind === "stare") {
+      say(`${orderLabel(o)}.\n${info.urmatorul}`);
+      setMode("chat");
+      return;
+    }
+    if (kind === "dovada") {
+      if (o.paymentMethod === "card") {
+        say("Comanda asta e plătită cu cardul, prin Stripe — nu e nevoie de dovadă. " + info.urmatorul);
+        setMode("chat");
+        return;
+      }
+      if (o.publishedAt) {
+        say("Comanda asta e deja publicată. " + info.urmatorul);
+        setMode("chat");
+        return;
+      }
+      setRstep("proof");
+      say(
+        `Comanda: ${orderLabel(o)}.\nÎncarcă dovada plății (captură din aplicația băncii sau PDF-ul ordinului). O pun pe comandă, o citesc și îi spun lui Ionuț să confirme încasarea.`,
+      );
+      return;
+    }
+    // articol
+    if (o.publishedAt) {
+      say("Comanda asta e deja publicată — pentru modificări scrie-ne pe WhatsApp la " + SITE.phone + ".");
+      setMode("chat");
+      return;
+    }
+    setRstep("title");
+    setRtitle("");
+    setRbody("");
+    setImages([]);
+    say(
+      `Comanda: ${orderLabel(o)}.\nTitlul articolului — sau apasă „Sar" dacă vrei să-l propunem noi:`,
+    );
+  }
+
+  function submitReturnText(raw: string) {
+    const v = raw.trim();
+    if (rstep === "email") {
+      if (!EMAIL_RE.test(v)) {
+        setStepError("Adresa nu pare validă. Mai încearcă o dată.");
+        return;
+      }
+      echo(v);
+      setInput("");
+      setRemail(v);
+      void lookupOrders(v, intent ?? "stare");
+      return;
+    }
+    if (rstep === "title") {
+      if (v.length < 5) {
+        setStepError("Titlul e prea scurt — sau apasă „Sar”.");
+        return;
+      }
+      echo(v);
+      setInput("");
+      setRtitle(v);
+      setRstep("body");
+      say("Lipește textul articolului (minimum 100 de caractere). Dacă vrei să-l scriem noi, descrie în câteva propoziții ce vrei comunicat.");
+      return;
+    }
+    if (rstep === "body") {
+      if (v.length < 40) {
+        setStepError(`Mai scrie câteva cuvinte — minimum 40 de caractere pentru o temă, 100 pentru un articol. Acum are ${v.length}.`);
+        return;
+      }
+      echo(v.length > 160 ? v.slice(0, 160) + "…" : v);
+      setInput("");
+      setRbody(v);
+      setRstep("images");
+      say("Ai poze pentru articol? Poți încărca până la 3. Dacă nu ai, publicăm fără.");
+      return;
+    }
+  }
+
+  function skipReturn() {
+    if (rstep === "title") {
+      echo("Sar — propuneți voi titlul");
+      setInput("");
+      setRtitle("");
+      setRstep("body");
+      say("Lipește textul articolului (minimum 100 de caractere). Dacă vrei să-l scriem noi, descrie în câteva propoziții ce vrei comunicat.");
+    }
+  }
+
+  function returnImagesDone() {
+    echo(images.length ? `${images.length} poze` : "Fără poze");
+    setRstep("variant");
+    say(
+      "Ultima alegere: publicăm o variantă rescrisă unic pe fiecare ziar (recomandat — Google vede 50 de articole diferite, nu unul copiat de 50 de ori, și le indexează mult mai bine), sau textul tău identic peste tot (doar dacă e aprobat juridic și nu are voie schimbat)?",
+    );
+  }
+
+  function answerReturnChoice(value: string, label: string) {
+    if (rstep === "pick") {
+      const o = orders.find((x) => x.id === value);
+      if (o) pickOrder(o, intent, true);
+      return;
+    }
+    if (rstep === "variant") {
+      echo(label);
+      void submitReturnArticle(value === "unic");
+    }
+  }
+
+  async function uploadReturn(list: FileList, kind: "images" | "proof") {
+    setStepError(null);
+    setUploading(true);
+    try {
+      if (kind === "images") {
+        const next = [...images];
+        for (const file of Array.from(list)) {
+          if (next.length >= 3) break;
+          next.push(await signAndUpload(file));
+        }
+        setImages(next);
+        return;
+      }
+      const up = await signAndUpload(list[0]);
+      echo(`📎 ${up.name}`);
+      if (!picked) return;
+      setLoading(true);
+      const res = await fetch("/api/chat/comanda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "proof", email: remail || data.email, orderId: picked.id, proof: up }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.ok) throw new Error(j.error || "Nu am putut salva dovada.");
+      const a = j.analiza as { potrivire: string; suma: string | null; data: string | null; beneficiar: string | null } | undefined;
+      const citit =
+        a && a.potrivire !== "necitit"
+          ? ` Pe dovadă văd: ${[a.suma, a.data, a.beneficiar ? "către " + a.beneficiar : null].filter(Boolean).join(", ")}.` +
+            (a.potrivire === "da"
+              ? " Se potrivește cu comanda."
+              : a.potrivire === "partial"
+                ? " Ceva nu se potrivește exact — Ionuț verifică în extras."
+                : " Nu pare o dovadă de plată — Ionuț se uită oricum.")
+          : "";
+      say(
+        `Am pus dovada pe comanda ta.${citit} Imediat ce încasarea apare în extras, publicăm în maximum 12 ore lucrătoare și primești raportul cu toate linkurile pe email.`,
+      );
+      setMode("chat");
+    } catch (e) {
+      setStepError(e instanceof Error ? e.message : "Încărcarea a eșuat");
+    } finally {
+      setUploading(false);
+      setLoading(false);
+    }
+  }
+
+  async function submitReturnArticle(uniquePerSite: boolean) {
+    if (!picked || loading) return;
+    setLoading(true);
+    setStepError(null);
+    try {
+      const res = await fetch("/api/chat/comanda", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "article",
+          email: remail || data.email,
+          orderId: picked.id,
+          title: rtitle,
+          body: rbody,
+          images,
+          uniquePerSite,
+        }),
+      });
+      const j = await res.json();
+      if (!res.ok || !j.ok) throw new Error(j.error || "Nu am putut salva articolul.");
+      say(
+        picked.status === "pending_payment" && !picked.hasProof
+          ? "Am pus articolul pe comanda ta. Mai rămâne plata: factura e pe emailul tău, iar după ce vedem încasarea publicăm în maximum 12 ore lucrătoare și primești raportul cu linkurile."
+          : "Am pus articolul pe comanda ta. Publicăm în maximum 12 ore lucrătoare și primești pe email raportul cu toate linkurile.",
+      );
+      setMode("chat");
+    } catch (e) {
+      setStepError(e instanceof Error ? e.message : "Trimiterea a eșuat");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  /** Pasul de revenire, in forma pe care o intelege zona de jos a chatului. */
+  function returnStep(): Step | null {
+    if (mode !== "return") return null;
+    switch (rstep) {
+      case "email":
+        return { id: "r-email", kind: "email", ask: () => "", placeholder: "email@firma.ro" };
+      case "pick":
+        return {
+          id: "r-pick",
+          kind: "choice",
+          ask: () => "",
+          choices: orders.map((o) => ({ label: orderLabel(o), value: o.id })),
+        };
+      case "proof":
+        return { id: "r-proof", kind: "proof", ask: () => "" };
+      case "title":
+        return { id: "r-title", kind: "text", ask: () => "", placeholder: "Titlul articolului", skippable: true };
+      case "body":
+        return { id: "r-body", kind: "long", ask: () => "", placeholder: "Textul articolului sau tema..." };
+      case "images":
+        return { id: "r-images", kind: "images", ask: () => "" };
+      case "variant":
+        return {
+          id: "r-variant",
+          kind: "choice",
+          ask: () => "",
+          choices: [
+            { label: "Rescris unic pe fiecare ziar (recomandat)", value: "unic" },
+            { label: "Textul meu, identic peste tot", value: "identic" },
+          ],
+        };
+    }
+  }
+
   if (!open) {
     return (
       <button
@@ -275,7 +583,7 @@ export function OfferChatBubble() {
     );
   }
 
-  const current = mode === "order" && step < STEPS.length ? STEPS[step] : null;
+  const current = mode === "order" && step < STEPS.length ? STEPS[step] : returnStep();
 
   return (
     <div
@@ -290,7 +598,7 @@ export function OfferChatBubble() {
         <MessageCircle className="h-5 w-5 text-brand-gold" />
         <p className="text-sm font-semibold">Consultant MediaExpres</p>
         <span className="ml-auto text-xs text-white/60">
-          {mode === "order" ? "comandă în curs" : "online"}
+          {mode === "order" ? "comandă în curs" : mode === "return" ? "comandă existentă" : "online"}
         </span>
         <button
           type="button"
@@ -326,6 +634,25 @@ export function OfferChatBubble() {
               <Newspaper className="h-4 w-4" />
               Vezi lista celor 50 de ziare
             </a>
+            {/* Clientul care a comandat deja isi gaseste drumul din prima,
+                fara sa scrie pe WhatsApp: dovada, articolul, starea comenzii. */}
+            <div className="rounded-lg border border-slate-200 bg-white p-2">
+              <p className="px-1 pb-1.5 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Ai comandat deja?
+              </p>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(Object.keys(INTENT_LABEL) as ReturnIntent[]).map((i) => (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => startReturn(i)}
+                    className="rounded-md border border-slate-200 px-2 py-1.5 text-[11px] font-medium leading-tight text-slate-700 transition hover:border-brand-navy hover:text-brand-navy"
+                  >
+                    {INTENT_LABEL[i]}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="grid gap-2">
               {SUGGESTIONS.map((s) => (
                 <button
@@ -354,6 +681,18 @@ export function OfferChatBubble() {
               </div>
             </div>
           ))
+        )}
+
+        {/* Consultantul a inteles ce vrea omul (comanda, dovada, articol,
+            stare) si pune butonul potrivit chiar sub raspuns. */}
+        {mode === "chat" && !loading && lastAction && (
+          <button
+            type="button"
+            onClick={() => (lastAction === "comanda" ? startOrder() : startReturn(lastAction as ReturnIntent))}
+            className="flex w-full items-center justify-center gap-2 rounded-lg border-2 border-brand-red bg-red-50/60 px-3 py-2 text-sm font-bold text-brand-red transition hover:bg-red-50"
+          >
+            {lastAction === "comanda" ? "Comandă acum — 500 lei" : INTENT_LABEL[lastAction as ReturnIntent] ?? "Continuă"}
+          </button>
         )}
 
         {loading && (
@@ -448,7 +787,7 @@ export function OfferChatBubble() {
             </label>
             <button
               type="button"
-              onClick={() => goToNext(step, data)}
+              onClick={() => (mode === "return" ? returnImagesDone() : goToNext(step, data))}
               disabled={uploading}
               className="rounded-lg bg-brand-navy px-4 py-2 text-sm font-semibold text-white disabled:opacity-50"
             >
@@ -457,6 +796,7 @@ export function OfferChatBubble() {
           </div>
         ) : current?.kind === "proof" ? (
           <div className="grid gap-2">
+            {mode !== "return" && (
             <button
               type="button"
               onClick={() => {
@@ -468,6 +808,7 @@ export function OfferChatBubble() {
             >
               Trimit comanda, plătesc după factură
             </button>
+            )}
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-navy">
               {uploading ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -545,16 +886,32 @@ export function OfferChatBubble() {
           </form>
         )}
 
-        {/* Cat timp doar discuta, butonul de comanda ramane la vedere. */}
+        {/* Cat timp doar discuta, butonul de comanda ramane la vedere —
+            si, mai discret, drumurile clientului care a comandat deja. */}
         {mode === "chat" && messages.length > 0 && (
-          <button
-            type="button"
-            onClick={startOrder}
-            className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-3 py-2 text-sm font-bold text-white transition hover:bg-brand-red/90"
-          >
-            <ShoppingCart className="h-4 w-4" />
-            Comandă acum
-          </button>
+          <>
+            <button
+              type="button"
+              onClick={startOrder}
+              className="mt-2 flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-3 py-2 text-sm font-bold text-white transition hover:bg-brand-red/90"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Comandă acum
+            </button>
+            <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] text-slate-500">
+              <span>Ai comandat deja?</span>
+              {(Object.keys(INTENT_LABEL) as ReturnIntent[]).map((i) => (
+                <button
+                  key={i}
+                  type="button"
+                  onClick={() => startReturn(i)}
+                  className="rounded px-1.5 py-0.5 font-medium text-brand-navy underline-offset-2 hover:underline"
+                >
+                  {i === "dovada" ? "Dovada plății" : i === "articol" ? "Articolul" : "Starea comenzii"}
+                </button>
+              ))}
+            </div>
+          </>
         )}
       </div>
     </div>

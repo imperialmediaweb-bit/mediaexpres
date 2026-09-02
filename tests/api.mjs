@@ -38,6 +38,21 @@ t("paginile de cont cer autentificare", (await get("/cont/mesaje")).status === 3
 
 console.log("\n########## J. VALIDAREA DATELOR ##########");
 t("checkout: fara pachet -> 400", (await post("/api/checkout", {})).status === 400);
+
+// Clientul care revine in chat: cauta comanda dupa email, pune dovada sau
+// articolul pe ea. Fara actiune -> 400; email necunoscut -> lista goala (nu
+// eroare, chatul ii spune sa incerce alt email); comanda inexistenta -> 404.
+t("chat/comanda: fara actiune -> 400", (await post("/api/chat/comanda", { email: "a@b.ro" })).status === 400);
+t("chat/comanda: email invalid -> 400", (await post("/api/chat/comanda", { action: "find", email: "nu-e-email" })).status === 400);
+{
+  const r = await post("/api/chat/comanda", { action: "find", email: `nimeni-${Date.now()}@test.ro` });
+  const j = r.body || {};
+  t("chat/comanda: email necunoscut -> ok, fara comenzi", r.status === 200 && j.ok === true && Array.isArray(j.orders) && j.orders.length === 0);
+}
+t("chat/comanda: dovada pe comanda inexistenta -> 404",
+  (await post("/api/chat/comanda", { action: "proof", email: "a@b.ro", orderId: "00000000-0000-0000-0000-000000000000", proof: { url: "https://res.cloudinary.com/demo/x.png", name: "x.png" } })).status === 404);
+t("chat/comanda: articol prea scurt -> 400",
+  (await post("/api/chat/comanda", { action: "article", email: "a@b.ro", orderId: "00000000-0000-0000-0000-000000000000", body: "scurt" })).status === 400);
 t("checkout: email invalid -> 400", (await post("/api/checkout", { packageId: "promo-50", email: "gresit" })).status === 400);
 t("checkout: pachet inexistent -> nu 200", (await post("/api/checkout", { packageId: "nu-exista" })).status !== 200);
 t("request-list: fara consimtamant GDPR -> 400", (await post("/api/request-list", { name: "Ion Popescu", email: "a@b.ro" })).status === 400);
@@ -80,6 +95,32 @@ t("transfer OP: declaratie bifata pe fals -> 400", (await post("/api/comanda/tra
   });
   t("transfer OP: articol suspect NU blocheaza comanda", r.status === 200 && r.body?.ok === true);
   t("transfer OP: clientul nu afla ca e la verificare", r.body?.review === undefined);
+}
+
+// Clientul care revine, pe o comanda REALA: chatul o gaseste dupa email,
+// pune dovada pe ea (analiza e „necitit" fara cheie de model — nu conteaza
+// aici), apoi articolul. Emailul altcuiva nu poate atinge comanda.
+{
+  const email = `api-revine-${Date.now()}@test.ro`;
+  const r0 = await post("/api/comanda/transfer", {
+    packageId: "promo-50", email, contactPhone: "0740000000",
+    companyName: "Revine SRL", companyCui: "RO999", companyAddress: "Str. Test 2",
+    title: "", body: "Tema pentru articol: firma deschide un nou punct de lucru si vrea sa anunte clientii din judet. " + "x".repeat(60),
+    contentDeclaration: true,
+  });
+  t("revine: comanda OP fara titlu -> 200 (titlul il propunem noi)", r0.status === 200 && r0.body?.ok === true);
+  const f1 = await post("/api/chat/comanda", { action: "find", email });
+  const o = f1.body?.orders?.[0];
+  t("revine: chatul gaseste comanda dupa email", f1.status === 200 && f1.body?.orders?.length === 1, JSON.stringify(f1.body).slice(0, 120));
+  t("revine: starea e „asteapta plata”, fara dovada, fara articol", o?.status === "pending_payment" && o?.hasProof === false && o?.hasArticle === false, JSON.stringify(o));
+  t("revine: emailul altcuiva nu poate pune dovada", (await post("/api/chat/comanda", { action: "proof", email: "altcineva@test.ro", orderId: o?.id || "x".repeat(10), proof: { url: "https://res.cloudinary.com/demo/image/upload/d.png", name: "d.png" } })).status === 404);
+  const pr = await post("/api/chat/comanda", { action: "proof", email, orderId: o?.id, proof: { url: "https://res.cloudinary.com/demo/image/upload/d.png", name: "dovada.png" } });
+  t("revine: dovada se pune pe comanda", pr.status === 200 && pr.body?.ok === true && ["da", "partial", "nu", "necitit"].includes(pr.body?.analiza?.potrivire), JSON.stringify(pr.body).slice(0, 120));
+  const ar = await post("/api/chat/comanda", { action: "article", email, orderId: o?.id, title: "Titlu venit din chat", body: "Articolul trimis mai tarziu din chat, cu tot textul de care are nevoie redactia. " + "y".repeat(80), images: [{ url: "https://res.cloudinary.com/demo/image/upload/p.png", name: "p.png" }], uniquePerSite: false });
+  t("revine: articolul se pune pe comanda", ar.status === 200 && ar.body?.ok === true);
+  const f2 = await post("/api/chat/comanda", { action: "find", email });
+  const o2 = f2.body?.orders?.[0];
+  t("revine: dupa, comanda are dovada si articol", o2?.hasProof === true && o2?.hasArticle === true, JSON.stringify(o2));
 }
 
 t("transfer OP: articol prea scurt -> 400", (await post("/api/comanda/transfer", {

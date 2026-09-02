@@ -41,7 +41,22 @@ REGULI DE RASPUNS:
 - Tonul: profesional, prietenos, decisiv
 - Foloseste "agentul nostru va ajuta cu redactarea" NU "AI scrie"
 
+- VORBESTE CA PROPRIETARUL: direct, cald, sigur pe el, fara limbaj de corporatie. Raspunzi la intrebare, dai cifra sau conditia exacta, si SPUI ce ai face tu in locul lui.
+- DUPA CE RASPUNZI, INCHIDE: o singura propozitie care duce spre pasul urmator, potrivita cu momentul. Daca omul se intereseaza: „Poti comanda direct aici, cu butonul rosu de mai jos." Daca a comandat deja: spune-i ca poate trimite dovada / articolul / intreba de comanda tot aici. Nu repeta aceeasi inchidere de doua ori la rand.
+- OFERA ALEGEREA rescris/original cand vine vorba de articol, cu recomandarea din cunostinte.
+
+ETICHETA DE ACTIUNE (obligatoriu, pe ULTIMA linie, singura pe linie): dupa raspuns pui EXACT una dintre:
+[[ACTIUNE:comanda]] — omul vrea sa comande / intreaba cum plateste / e decis
+[[ACTIUNE:dovada]] — a platit deja si vrea sa trimita dovada / intreaba unde o trimite
+[[ACTIUNE:articol]] — are comanda si vrea sa trimita articolul sau pozele acum
+[[ACTIUNE:stare]] — intreaba ce e cu comanda lui, cand se publica, unde e raportul
+[[ACTIUNE:niciuna]] — orice altceva
+Eticheta NU se afiseaza clientului; interfata pune butonul potrivit sub raspuns.
+
 Raspunde direct cu textul plain - FARA JSON, FARA markdown, FARA bullet points cu asteriscuri.`;
+
+/** Etichetele pe care le poate pune modelul; orice altceva = niciuna. */
+const ACTIUNI = new Set(["comanda", "dovada", "articol", "stare"]);
 
 export async function POST(req: Request) {
   try {
@@ -92,7 +107,7 @@ export async function POST(req: Request) {
       body: JSON.stringify({
         model: process.env.OPENAI_MODEL_FAST || "gpt-4o-mini",
         messages: openaiMessages,
-        max_tokens: 400,
+        max_tokens: 480,
         temperature: 0.4,
       }),
     });
@@ -118,12 +133,21 @@ export async function POST(req: Request) {
     }
 
     // Safety: scoatem mentiuni "AI scrie/AI redacteaza" daca scapa
+    // Eticheta de actiune: o scoatem din text si o dam interfetei separat.
+    // Daca modelul o uita sau o scrie gresit, raspunsul ramane valid, fara buton.
+    let action: string | null = null;
     const answer = raw
+      .replace(/\s*\[\[\s*ACTIUNE\s*:\s*([a-z]+)\s*\]\]\s*/gi, (_m, a: string) => {
+        const key = a.toLowerCase();
+        if (ACTIUNI.has(key)) action = key;
+        return " ";
+      })
       .replace(/\bAI[­\s-]+(scrie|redacteaza|genereaza|creeaza)\b/gi, "agentul nostru va ajuta sa $1")
       .replace(/\bAI-ul (nostru )?\b/gi, "agentul nostru ")
-      .replace(/\binteligen[țt]a artificiala\b/gi, "agentul nostru");
+      .replace(/\binteligen[țt]a artificiala\b/gi, "agentul nostru")
+      .trim();
 
-    return NextResponse.json({ ok: true, answer });
+    return NextResponse.json({ ok: true, answer, action });
   } catch (e: unknown) {
     const msg = e instanceof Error ? e.message : "Eroare server";
     console.error("[advisor] crash:", e);

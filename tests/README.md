@@ -11,7 +11,7 @@ astea trebuie sa poata fi rulate de oricine, oricand, cu un singur `node`.
 | `api.mjs` | 40 | securitate (fiecare endpoint refuza fara sesiune/cheie) si validarea datelor de intrare |
 | `pages.mjs` | 27 | fiecare pagina publica, de admin si de cont raspunde 200, fara erori JavaScript |
 | `flows.mjs` | 69 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |
-| `chat.mjs` | 33 | comanda facuta integral din chat: OP cu articol, cazino, scurtatura spre Stripe, comanda fara articol scris |
+| `chat.mjs` | 50 | comanda facuta integral din chat: OP cu articol, cazino, scurtatura spre Stripe, comanda fara articol scris; clientul care revine (dovada, stare, articol cu alegerea rescris/identic) si butonul sugerat de consultant |
 | `stress.mjs` | 100 iteratii × 13 scenarii | rezistenta fluxului de comanda: telefon/desktop alternativ, card/OP/cazino/abonament, email gresit, fara declaratie, camp lipsa, dublu click, Enter, server picat — la fiecare apasare ori un pas inainte, ori un mesaj in romana, in ecran, langa buton, neacoperit |
 
 ## Cum le rulezi

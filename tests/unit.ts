@@ -121,6 +121,23 @@ t("stie IBAN-ul pentru OP", k.includes(SITE.billing.iban));
 t("stie firma de pe factura", k.includes(SITE.billing.company));
 t("stie termenul ofertei", k.includes("14 SEPTEMBRIE"));
 t("stie de publicarea in 12 ore", /12\s*(DE\s*)?ORE/i.test(k));
+// Chatul trebuie sa raspunda ca proprietarul pe WhatsApp: pe nume la ziare,
+// cu cifre la autoritate, cinstit la trafic, ferm la reguli, si sa stie
+// drumul comenzii cap-coada.
+t("stie ziarele pe nume, cu judet", /Cluj Expres — judetul Cluj \(clujexpres\.ro\)/.test(k));
+t("stie ziarele nationale", /România Expres \(romaniaexpres\.ro\)/.test(k));
+t("stie autoritatea (DA 36-37, 120+ domenii)", /36-37/.test(k) && /120 de domenii/.test(k));
+t("spune cinstit ca nu vinde trafic", /NU vindem trafic/.test(k) && /cateva sute/.test(k));
+t("stie ce cumpara clientul de fapt", /50 de linkuri dofollow permanente/.test(k));
+t("stie regula banilor la declaratie falsa", /suma NU se restituie/.test(k));
+t("stie garantia de 12 ore", /GARANTIE: daca nu publicam in 12 ore lucratoare/.test(k));
+t("explica rescris vs original si recomanda rescris", /RESCRIS SAU ORIGINAL/.test(k) && /RECOMANDAT: varianta rescrisa/.test(k));
+t("stie drumul OP: factura -> plata -> 12 ore -> raport", /primeste FACTURA pe email in aceeasi zi lucratoare[\s\S]*plateste pe baza ei[\s\S]*12 ore lucratoare[\s\S]*RAPORTUL/.test(k));
+t("stie ca factura NU e automata", !/se emite AUTOMAT/.test(k) && /nu automat/.test(k));
+t("stie ca clientul revenit trimite dovada/articolul in chat", /Am platit — trimit dovada/.test(k));
+t("are raspuns pentru expertul SEO", /EXPERT SEO/.test(k) && /Nu promite pozitii/.test(k));
+t("are raspuns pentru sceptic", /SCEPTICUL/.test(k));
+t("are raspuns pentru cazino, institutie, agentie", /CAZINO \/ PARIURI/.test(k) && /INSTITUTIE/.test(k) && /AGENTIE/.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));
