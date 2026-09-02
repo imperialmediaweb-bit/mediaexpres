@@ -50,7 +50,7 @@ export default function ReteauaPage() {
             Rețeaua MediaExpres înseamnă <strong className="text-white">50 de ziare online
             proprii</strong> — 41 locale, câte unul pentru fiecare județ, și 9 naționale —
             fiecare cu pagina lui de Facebook. Cu ajutorul jurnaliștilor din toată țara,
-            în rețea se publică <strong className="text-white">peste 1.200 de articole în
+            în rețea se publică <strong className="text-white">circa 600 de articole în
             fiecare zi</strong> — site-uri vii, cu trafic real, pe care le poți deschide
             chiar acum, mai jos.
           </p>

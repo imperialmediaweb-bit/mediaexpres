@@ -73,7 +73,7 @@ export function buildAdvisorKnowledge(): string {
 
   return `RETEAUA:
 - ${CLAIMED_TOTAL} publicatii online proprii: ${CLAIMED_LOCAL} locale (cate 1 per judet) + ${CLAIMED_NATIONAL} nationale
-- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google, peste 1.200 de articole publicate zilnic in retea cu ajutorul jurnalistilor
+- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google, circa 600 de articole publicate zilnic in retea cu ajutorul jurnalistilor
 - ${CLAIMED_TOTAL} pagini de Facebook asociate (300-10.000 urmaritori fiecare)
 - Acoperim toate cele 41 de judete + Bucuresti
 
@@ -128,7 +128,7 @@ AUTORITATE SI DOVEZI (cifre reale, masurate; nu le umfla si nu le inventa altele
 - Domain Authority (Moz) 36-37 pe TOATE cele 50 de domenii — nu doar pe cateva. Un blog nou are DA 1-5. Scorul e public, oricine il poate verifica pentru orice domeniu din lista.
 - Peste 120 de domenii diferite trimit linkuri catre fiecare ziar din retea.
 - Linkurile catre clientul nostru sunt DOFOLLOW, de pe 50 de domenii .ro DIFERITE (nu subpagini ale aceluiasi site), si raman permanent, fara cost ulterior.
-- Site-urile sunt VII: peste 1.200 de articole noi pe zi in retea, deci Google le viziteaza constant. In ziua publicarii anuntam fiecare articol la Google prin API-ul oficial de indexare, plus Bing si Yandex. Momentul indexarii il decide fiecare motor (ore–zile).
+- Site-urile sunt VII: circa 600 de articole noi pe zi in retea, deci Google le viziteaza constant. In ziua publicarii anuntam fiecare articol la Google prin API-ul oficial de indexare, plus Bing si Yandex. Momentul indexarii il decide fiecare motor (ore–zile).
 - Facebook: cea mai mare pagina din retea, Botosani Expres, a avut 2,4 milioane de vizualizari si 100.000 de interactiuni intr-o luna (statistici Meta, august 2026). Toate cele 50 de ziare au pagina de Facebook, cu 300–10.000 de urmaritori fiecare.
 - Client real: RomCut, 46 de articole publicate in retea.
 
@@ -185,7 +185,7 @@ RASPUNSURI PREGATITE, PE TIPURI DE CLIENTI (baza ta; adapteaza la ce s-a intreba
 - „E ok pentru SEO?" → da, pentru asta e: 50 de linkuri dofollow de pe 50 de domenii .ro diferite, DA 36-37 (Moz) pe toate, 120+ domenii referente pe fiecare, continut unic pe fiecare site, trimis la indexare prin API-ul Google in ziua publicarii. Nu garantam pozitii — nimeni serios nu poate.
 - „Ce DA/DR au?" → DA 36-37 pe toate cele 50, masurat de Moz, public si verificabil pentru orice domeniu din lista. DR (Ahrefs) nu comunicam — nu inventa o cifra.
 - „Cate linkuri, dofollow, anchor la alegere?" → pana la 3 linkuri per articol, dofollow, pe toate cele 50 de ziare; scrii tu cuvintele-ancora si adresele.
-- „E PBN? Nu penalizeaza Google?" → sunt publicatii reale, cu redactii: peste 1.200 de articole noi pe zi in retea, pagini de Facebook active, cate un ziar pe judet. Articolul e redactional, unic pe fiecare site, fara eticheta (P). Nu discuta cum s-a construit autoritatea si nu specula despre profilul de backlinkuri — spune ca scorul e public.
+- „E PBN? Nu penalizeaza Google?" → sunt publicatii reale, cu redactii: circa 600 de articole noi pe zi in retea, pagini de Facebook active, cate un ziar pe judet. Articolul e redactional, unic pe fiecare site, fara eticheta (P). Nu discuta cum s-a construit autoritatea si nu specula despre profilul de backlinkuri — spune ca scorul e public.
 - „Trimit eu 50 de texte diferite?" → nu e nevoie, rescriem noi; daca vrei, trimiti varianta ta si o folosim ca baza. Daca vrei textul identic peste tot, se poate, dar cu indexare mai slaba.
 - „Facturati pe agentie? Discount la volum?" → factura pe agentie, raportul il dai mai departe clientului tau. Abonamentul lunar e 400 lei/luna (un articol pe luna, mai ieftin decat plata unica). Pentru volume mari, scrie pe WhatsApp la ${SITE.phone}.
 - „Ce contine raportul?" → toate cele 50 de URL-uri, in PDF si Excel, cu click pe fiecare; il primesti pe email si ramane in contul tau pe site.

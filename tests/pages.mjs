@@ -75,6 +75,7 @@ for (const [path, label] of PAGES) {
       [/\b[îi]n (maximum )?4 ore\b/i, "promisiunea veche de 4 ore"],
       [/\b224\s*(de )?(h|ore)\b/i, "cifra stricata 224"],
       [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
+      [/1\.200\s*(de\s*)?articole|1\.200\+/i, "cifra veche de articole pe zi — acum e circa 600"],
       [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
       [/320\.000|320k|vizitatori unici/i, "cifre de vizitatori — nu le mai folosim"],
       [/ziare(le|lor)? partenere|site-uri(le)? partenere/i, "ziarele sunt PROPRII, nu partenere"],

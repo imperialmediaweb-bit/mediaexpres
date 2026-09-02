@@ -24,7 +24,7 @@ const BENEFITS = [
     icon: Newspaper,
     title: "Publicare în 50+ ziare online",
     description:
-      "Advertorial sau comunicat distribuit în rețeaua noastră de 50 de ziare proprii — site-uri active, cu trafic real, în care se publică peste 1.200 de articole pe zi.",
+      "Advertorial sau comunicat distribuit în rețeaua noastră de 50 de ziare proprii — site-uri active, cu trafic real, în care se publică circa 600 de articole pe zi.",
   },
   {
     icon: Globe,

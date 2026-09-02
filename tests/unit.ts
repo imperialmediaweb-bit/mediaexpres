@@ -581,6 +581,8 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
     // Termenul s-a schimbat a doua oara (24 → 12): vechiul text nu are voie
     // sa ramana nicaieri, nici in emailuri, nici in PDF, nici in chat.
     [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
+    // Proprietarul a corectat cifra: nu 1.200, ci circa 600 de articole pe zi.
+    [/1\.200\s*(de\s*)?articole|1\.200\+/i, "cifra veche de articole pe zi — acum e circa 600"],
     [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
     // Doar 224 urmat de o unitate de timp: 224 e si inceputul intervalului IP
     // multicast, iar un test care se plange de el ar fi zgomot, nu paza.

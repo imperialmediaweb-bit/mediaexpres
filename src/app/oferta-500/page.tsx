@@ -164,7 +164,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, cu redacții reale: fiecare publicație are jurnalistul ei și publică constant — peste 1.200 de articole publicate zilnic în rețea, plus distribuția pe paginile de Facebook asociate. Lista completă e publicată mai sus pe această pagină — dă click pe orice ziar, citește ce a apărut azi și verifică singur.",
+    a: "Sunt reale, cu redacții reale: fiecare publicație are jurnalistul ei și publică constant — circa 600 de articole publicate zilnic în rețea, plus distribuția pe paginile de Facebook asociate. Lista completă e publicată mai sus pe această pagină — dă click pe orice ziar, citește ce a apărut azi și verifică singur.",
   },
   {
     q: "Ce fel de conținut acceptați?",
@@ -261,7 +261,7 @@ export default function Oferta500Page() {
                 presa si linkurile. Domeniile sunt verificabile — lista e mai
                 jos in pagina. */}
             <Stat value="50" label="domenii .ro proprii" />
-            <Stat value="1.200+" label="articole publicate zilnic în rețea" />
+            <Stat value="~600" label="articole publicate zilnic în rețea" />
             <Stat value="12 ore lucrătoare" label="până la publicare" />
           </div>
         </div>
@@ -429,7 +429,7 @@ export default function Oferta500Page() {
               <p>
                 Și încă ceva, care cântărește la fel de mult:{" "}
                 <strong className="text-brand-navy">site-urile sunt vii</strong>. În rețea apar
-                peste 1.200 de articole în fiecare zi, deci motoarele de căutare trec pe ele
+                circa 600 de articole în fiecare zi, deci motoarele de căutare trec pe ele
                 constant. Un domeniu ținut doar pentru linkuri, oricât de vechi, e vizitat rar —
                 articolul tău ar aștepta săptămâni. Aici e găsit repede, iar în ziua publicării
                 îl anunțăm noi la Google, prin API-ul oficial de indexare.
