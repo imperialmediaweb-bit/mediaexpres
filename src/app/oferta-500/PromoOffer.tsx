@@ -482,7 +482,8 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           </li>
           <li>
             <strong className="text-white">3.</strong> Publicăm în maximum 12 ore
-            lucrătoare, pe toate ziarele. Comanda făcută seara sau în weekend se
+            lucrătoare, pe toate ziarele, și promovăm postarea 3 zile pe Facebook,
+            pe ziarul ales de tine. Comanda făcută seara sau în weekend se
             publică a doua zi lucrătoare.{" "}
             <span className="text-white/60">
               (La plata prin OP, cronometrul pornește după ce confirmăm încasarea în

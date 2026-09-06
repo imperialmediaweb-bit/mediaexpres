@@ -736,6 +736,7 @@ export function OfferChatBubble() {
             <Row k="Articol" v={data.hasArticle ? data.title : "îl redactăm noi din tema ta"} />
             {data.siteUrl && <Row k="Site" v={data.siteUrl} />}
             <Row k="Poze" v={images.length ? `${images.length} încărcate` : "fără"} />
+            <Row k="Promovare FB" v={data.fbBoostPaper.trim() || "3 zile, pe ziarul din județul tău"} />
             <Row k="Plata" v={proof ? `dovadă atașată: ${proof.name}` : "după factura primită pe email"} />
             <Row k="Declarație" v={data.contentDeclaration ? "conținut fără tratamente medicale — confirmat" : "neconfirmată"} />
           </div>

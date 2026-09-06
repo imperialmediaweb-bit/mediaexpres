@@ -94,6 +94,13 @@ export async function POST(req: NextRequest) {
       `,
     },
     {
+      step: "order_submission: ziarul ales pentru promovarea pe Facebook (3 zile)",
+      query: sql`
+        ALTER TABLE "order_submission"
+          ADD COLUMN IF NOT EXISTS "fb_boost_paper" text
+      `,
+    },
+    {
       step: "tabel client_message (mesajele din contul clientului)",
       query: sql`
         CREATE TABLE IF NOT EXISTS "client_message" (

@@ -232,7 +232,15 @@ const SCENARII = [
     await form.locator('input[type="email"]').fill(rnd(emails, i));
     await form.locator('input[name="contentDeclaration"]').check();
     const btn = form.getByRole("button", { name: /Card — plătesc acum/ });
-    await btn.click({ clickCount: 2, delay: 30 }).catch(() => {});
+    // Doua apasari reale, nu un dblclick: Playwright cere ca butonul sa fie
+    // „stabil" inainte de fiecare click, iar dupa primul el intra in starea
+    // de incarcare (se schimba iconita) — la clickCount:2 asteptarea aia
+    // expira uneori si testul pica fara ca pagina sa aiba vreo problema.
+    // Ce ne intereseaza — a doua apasare sa nu trimita a doua comanda —
+    // se verifica la fel de bine cu doua clickuri fortate, la 30ms.
+    await btn.click({ force: true }).catch(() => {});
+    await p.waitForTimeout(30);
+    await btn.click({ force: true }).catch(() => {});
     await p.waitForURL(/\/comanda\/anulat/, { timeout: 10000 });
     if (ctx.checkout.length !== 1) throw new Error(`dublu click → ${ctx.checkout.length} cereri de checkout`);
   },

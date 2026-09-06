@@ -204,6 +204,12 @@ export const orderSubmissions = pgTable("order_submission", {
   // true = varianta rescrisa unic pe fiecare ziar (implicit); false = clientul
   // a cerut EXACT textul lui, identic peste tot (comunicat oficial/juridic).
   uniquePerSite: boolean("unique_per_site").notNull().default(true),
+  // 06.09.2026 — promovarea postarii pe Facebook, 3 zile, prin reclama
+  // platita, inclusa in pret. Clientul alege ziarul din lista (local sau
+  // national); null = alegem noi ziarul din judetul lui. Coloana se adauga
+  // in productie prin /api/admin/fix-db sau automat la prima comanda
+  // (vezi lib/ensure-columns.ts).
+  fbBoostPaper: text("fb_boost_paper"),
   generatedByAi: boolean("generated_by_ai").notNull().default(false),
   isCasino: boolean("is_casino").notNull().default(false),
   // "card" = platit prin Stripe (confirmarea vine din webhook);

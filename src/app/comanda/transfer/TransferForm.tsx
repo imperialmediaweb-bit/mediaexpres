@@ -12,6 +12,7 @@ import {
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
+import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 
@@ -42,6 +43,7 @@ export function TransferForm({
   const [proof, setProof] = useState<Uploaded | null>(null);
   const [uniquePerSite, setUniquePerSite] = useState(true);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<"images" | "proof" | null>(null);
@@ -131,6 +133,7 @@ export function TransferForm({
           facebookOptIn,
           uniquePerSite,
           contentDeclaration,
+          fbBoostPaper,
         }),
       });
       const j = await res.json();
@@ -318,6 +321,9 @@ export function TransferForm({
             <input type="checkbox" checked={facebookOptIn} onChange={(e) => setFacebookOptIn(e.target.checked)} className="mt-1" />
             <span className="text-slate-700">Distribuiți articolul și pe paginile de Facebook asociate.</span>
           </label>
+          {facebookOptIn && (
+            <FbBoostSelect value={fbBoostPaper} onChange={setFbBoostPaper} className="pt-2" />
+          )}
         </div>
       </section>
 

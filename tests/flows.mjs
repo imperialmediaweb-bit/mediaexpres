@@ -300,7 +300,7 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   // mare sus ("Pasul 1: fa plata") — datele de plata vin cu factura, iar aici
   // raman pliate, pentru cine vrea sa vireze inainte. Verificam AMBELE fete:
   // inchis nu se vede, deschis exista.
-  check(!t.includes("RO15BTRLRONCRT0652757201"), "IBAN-ul nu mai sta desfasurat inaintea comenzii");
+  check(!t.includes("RO15BTRLRONCRT0652757201"), "IBAN-ul nu apare deloc pe pagina de vanzare");
   await p.locator("summary", { hasText: "Datele contului" }).click();
   await p.waitForTimeout(300);
   t = await p.locator("body").innerText();
@@ -310,6 +310,10 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   // 5 campuri de facturare (email, telefon, firma, CUI, adresa). Titlul NU
   // mai e obligatoriu: cine ne cere sa scriem noi articolul nu are titlu.
   check((await p.locator('input[required]').count()) >= 5, "campuri de facturare obligatorii");
+  // Promovarea pe Facebook (3 zile) e inclusa; clientul alege ziarul din lista.
+  const sel = p.locator('select[name="fbBoostPaper"]');
+  check((await sel.count()) === 1, "alegerea ziarului pentru promovarea pe Facebook exista");
+  check((await sel.locator("option").count()) >= 50, `lista ziarelor in select: ${await sel.locator("option").count()} optiuni`);
   check((await p.locator('input[placeholder*="propunem noi"]').count()) === 1, "titlul e optional (il propunem noi)");
   check(t.includes("Încarcă dovada plății"), "incarcare dovada");
   // Dovada platii e OPTIONALA prin design: cerinta veche il obliga pe client

@@ -158,6 +158,7 @@ t("raspunsurile pregatite tin cifrele: 10 lei/ziar, 1.000 cazino, 500 vs 4.500",
 t("nu promite trafic sau pozitii nicaieri", !/garantam pozitii/i.test(k.replace(/Nu garantam pozitii/g, "")) && !/mii de vizitatori/i.test(k));
 t("are argumentul trait 500 vs 4.500", /4\.500 de lei pentru un singur articol/.test(k));
 t("stie ca publicarea e esalonata", /ESALONATA/.test(k));
+t("stie de promovarea pe Facebook 3 zile, fara cifre promise", /PROMOVARE PE FACEBOOK, 3 ZILE, INCLUSA/.test(k) && /NU promite afisari/.test(k));
 t("confirma ca linkurile sunt dofollow, dar fara promisiuni", /Linkurile SUNT dofollow/.test(k) && /nu spune adevarul/.test(k));
 t("raspunde cinstit la „primesc backlinkuri?”", /Primesc backlinkuri\?/.test(k) && /fara atribute care le anuleaza/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));

@@ -13,6 +13,7 @@ import {
   Layers,
   Link as LinkIcon,
   Image as ImageIcon,
+  Megaphone,
   XCircle,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
@@ -21,7 +22,6 @@ import { promoDeadlineLabel } from "@/data/packages";
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 const deadline = promoDeadlineLabel();
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
-import { BankTransferBox } from "@/components/BankTransferBox";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
 
@@ -101,6 +101,17 @@ const INCLUDED = [
     title: "Distribuire pe paginile de Facebook",
     description:
       "Publicațiile își postează articolul pe paginile lor de Facebook, fără cost suplimentar. Poți refuza distribuirea la comandă, dacă vrei doar publicarea pe site.",
+  },
+  {
+    // 06.09.2026 — inclus in pret, fara cifra de cost pe pagina: postarea
+    // ziarului cu articolul primeste reclama platita 3 zile, pe ziarul ales
+    // de client din lista (local, catre orasul lui, sau national). Raspunde
+    // la „nu aduce vizitatori" fara sa promita cifre — si creste, in
+    // trecere, pagina ziarului. Nu promitem afisari sau clickuri.
+    icon: Megaphone,
+    title: "Promovat 3 zile pe Facebook, prin reclamă",
+    description:
+      "Pe lângă postarea de pe pagina ziarului, articolul primește și reclamă plătită timp de 3 zile — pe ziarul pe care îl alegi tu din listă: local, către orașul tău, sau național. Inclus în preț.",
   },
   {
     icon: ImageIcon,
@@ -225,7 +236,7 @@ const FAQ = [
 
   {
     q: "Îmi aduce vizitatori pe site?",
-    a: "Puțini, și îți spunem asta dinainte. Un advertorial nu aduce trafic — nici la noi, nici la o publicație națională de 4.500 de lei. Aduce prezență: apari, rămâi, poți arăta. Dacă ce cauți sunt strict vizitatori pe site-ul tău, ai nevoie de reclamă plătită, nu de asta.",
+    a: "Puțini, și îți spunem asta dinainte. Un advertorial nu aduce trafic — nici la noi, nici la o publicație națională de 4.500 de lei. Aduce prezență: apari, rămâi, poți arăta. Ce facem în plus: promovăm postarea cu articolul tău 3 zile, prin reclamă pe Facebook, pe ziarul ales de tine — în orașul tău sau național. Nici așa nu promitem cifre. Dacă ce cauți sunt strict vizitatori pe site-ul tău, ai nevoie de o campanie de reclamă, nu de asta.",
   },
   {
     // 06.09.2026 — proprietarul, corect: „dar linkul chiar exista, si chiar e de
@@ -640,9 +651,10 @@ export default function Oferta500Page() {
                 </h3>
                 <p className="mt-2 text-sm leading-relaxed text-slate-600">
                   Un articol de presă aduce notorietate, nu trafic — la fel și la
-                  publicațiile care cer 4.500 de lei. Dacă ce cauți sunt
-                  vizitatori pe site-ul tău, ai nevoie de reclamă plătită, și
-                  ți-o spunem din start.
+                  publicațiile care cer 4.500 de lei. Îl promovăm 3 zile pe
+                  Facebook, pe ziarul ales de tine, dar nu promitem cifre. Dacă
+                  ce cauți sunt vizitatori pe site-ul tău, ai nevoie de o
+                  campanie de reclamă, și ți-o spunem din start.
                 </p>
               </div>
             </div>
@@ -740,12 +752,13 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* Plata prin transfer bancar */}
-      <section className="section">
-        <div className="container">
-          <BankTransferBox note="Nu e obligatoriu cardul. Poți plăti prin OP: 500 lei (standard) sau 1.000 lei (cazino/iGaming)." />
-        </div>
-      </section>
+      {/*
+        06.09.2026 — caseta cu IBAN-ul si beneficiarul a fost SCOASA de aici
+        (proprietarul: „este pe traseul comenzii"). Datele de plata apar oricum
+        pe /comanda/transfer, unde omul chiar plateste; pe pagina de vanzare
+        ocupau un ecran intreg cu ceva ce nu vinde si ce nu-i trebuie inca.
+        Faptul ca se poate plati prin OP e spus in oferta si in intrebari.
+      */}
 
       {/* Intrebari frecvente */}
       <section id="intrebari" className="scroll-mt-20 section bg-slate-50">

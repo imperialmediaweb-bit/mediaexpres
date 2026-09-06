@@ -106,6 +106,7 @@ t("transfer OP: declaratie bifata pe fals -> 400", (await post("/api/comanda/tra
     packageId: "promo-50", email, contactPhone: "0740000000",
     companyName: "Revine SRL", companyCui: "RO999", companyAddress: "Str. Test 2",
     title: "", body: "Tema pentru articol: firma deschide un nou punct de lucru si vrea sa anunte clientii din judet. " + "x".repeat(60),
+    fbBoostPaper: "Bihor Expres",
     contentDeclaration: true,
   });
   t("revine: comanda OP fara titlu -> 200 (titlul il propunem noi)", r0.status === 200 && r0.body?.ok === true);

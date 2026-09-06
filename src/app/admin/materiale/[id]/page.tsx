@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { ArrowLeft, Paperclip, ExternalLink } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, publicationReports, clientMessages } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
@@ -39,6 +40,8 @@ export default async function MaterialDetailPage({
 }) {
   const session = getSession();
   if (!session) redirect(`/admin/login?from=/admin/materiale/${params.id}`);
+  // Coloana noua (fb_boost_paper) poate lipsi pana la fix-db; o adaugam aici.
+  await ensureOrderColumns();
 
   const [r] = await db
     .select()
@@ -139,7 +142,7 @@ export default async function MaterialDetailPage({
               ? {
                   culoare: "border-sky-300 bg-sky-50 text-sky-900",
                   titlu: "Următorul pas: trimite raportul cu linkurile",
-                  text: "Articolul e publicat. Lipește linkurile mai jos și trimite raportul — PDF-ul și Excelul se generează automat.",
+                  text: `Articolul e publicat. ${r.facebookOptIn ? `Pornește promovarea postării pe Facebook — 3 zile, ~20 lei, de pe pagina ${r.fbBoostPaper || "ziarului din județul clientului"}, țintit pe orașul lui. ` : ""}Apoi lipește linkurile mai jos și trimite raportul — PDF-ul și Excelul se generează automat.`,
                 }
               : {
                   culoare: "border-slate-300 bg-slate-50 text-slate-700",
@@ -362,6 +365,12 @@ export default async function MaterialDetailPage({
                 }
               />
               <Row label="Facebook" value={r.facebookOptIn ? "da" : "NU (refuzat)"} />
+              {r.facebookOptIn && (
+                <Row
+                  label="Promovare FB, 3 zile"
+                  value={r.fbBoostPaper || "alegem noi — ziarul din județul clientului"}
+                />
+              )}
               <Row label="Scris cu AI" value={r.generatedByAi ? "da" : "text propriu"} />
               <Row
                 label="Referință"

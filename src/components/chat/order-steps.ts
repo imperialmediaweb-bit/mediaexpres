@@ -17,6 +17,8 @@ import { CONTENT_DECLARATION_SHORT } from "@/lib/content-policy";
 
 export interface OrderData {
   isCasino: boolean;
+  /** Ziarul din lista pe care promovam postarea 3 zile; gol = alegem noi. */
+  fbBoostPaper: string;
   method: "card" | "op" | null;
   email: string;
   contactPhone: string;
@@ -33,6 +35,7 @@ export interface OrderData {
 
 export const EMPTY_ORDER: OrderData = {
   isCasino: false,
+  fbBoostPaper: "",
   method: null,
   email: "",
   contactPhone: "",
@@ -216,6 +219,17 @@ export const STEPS: Step[] = [
     ask: () => "Ai poze pentru articol? Poți încărca până la 3. Dacă nu ai, publicăm fără.",
   },
   {
+    // Promovarea pe Facebook (3 zile, reclama platita, inclusa): clientul
+    // alege ziarul din lista, local sau national. Sare = alegem noi.
+    id: "fbBoostPaper",
+    kind: "text",
+    skip: (d) => d.method !== "op",
+    skippable: true,
+    ask: () =>
+      "Articolul primește și reclamă plătită pe Facebook, 3 zile, inclusă în preț. Pe ce ziar din listă o vrei? Scrie numele (de ex. „Cluj Expres” sau „România Expres”) — sau sari, și alegem noi ziarul din județul tău.",
+    placeholder: "Numele ziarului, sau sari",
+  },
+  {
     id: "declaration",
     kind: "choice",
     skip: (d) => d.method !== "op",
@@ -290,6 +304,7 @@ export function buildSubmission(d: OrderData) {
     title: d.hasArticle ? d.title.trim() : `[De redactat] ${d.companyName.trim()}`,
     body,
     siteUrl: d.siteUrl.trim() || undefined,
+    fbBoostPaper: d.fbBoostPaper.trim() || undefined,
     contentDeclaration: d.contentDeclaration,
   };
 }

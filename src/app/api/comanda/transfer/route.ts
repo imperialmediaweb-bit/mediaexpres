@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
@@ -46,6 +47,8 @@ const schema = z.object({
     errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
   }),
   isCasino: z.boolean().default(false),
+  // Ziarul din lista pe care promovam postarea 3 zile; gol = alegem noi.
+  fbBoostPaper: z.string().max(120).optional(),
 });
 
 /**
@@ -90,8 +93,10 @@ export async function POST(req: NextRequest) {
   const reference = `op_${crypto.randomUUID()}`;
 
   try {
+    await ensureOrderColumns();
     await db.insert(orderSubmissions).values({
       stripeSessionId: reference,
+      fbBoostPaper: d.fbBoostPaper?.trim() || null,
       email,
       packageId: d.packageId,
       title: d.title,
@@ -159,6 +164,7 @@ export async function POST(req: NextRequest) {
         ${kv("Denumire", d.companyName)}
         ${kv("CUI", d.companyCui)}
         ${kv("Adresă", d.companyAddress)}
+        ${kv("Promovare Facebook (3 zile)", d.fbBoostPaper?.trim() || "alegem noi — ziarul din județul clientului")}
         ${kv("Email", email)}
         ${kv("Sumă", `${pkg.price} RON`)}
         ${kv("Serviciu", `${pkg.name}`)}

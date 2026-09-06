@@ -3,6 +3,7 @@ import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
@@ -28,6 +29,7 @@ const schema = z.object({
   title: z.string().min(3).max(300),
   body: z.string().min(20).max(30000),
   siteUrl: z.string().max(300).optional(),
+  fbBoostPaper: z.string().max(120).optional(),
   /** Incasata deja? Atunci publicarea e libera imediat. */
   paid: z.boolean().default(false),
   facebookOptIn: z.boolean().default(true),
@@ -44,6 +46,7 @@ export async function POST(req: NextRequest) {
 
   let raw: unknown;
   try {
+    await ensureOrderColumns();
     raw = await req.json();
   } catch {
     return NextResponse.json({ ok: false, error: "JSON invalid" }, { status: 400 });
@@ -93,6 +96,7 @@ export async function POST(req: NextRequest) {
           uniquePerSite: d.uniquePerSite,
           isCasino: pkg.category === "casino",
           paymentMethod: "op",
+          fbBoostPaper: d.fbBoostPaper?.trim() || null,
           status: d.paid ? "paid" : "pending_payment",
         })
         .returning({ id: orderSubmissions.id });

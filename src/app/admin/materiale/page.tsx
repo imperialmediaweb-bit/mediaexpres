@@ -3,6 +3,7 @@ import Link from "next/link";
 import { desc } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { MarkPublishedButton } from "./MarkPublishedButton";
@@ -20,6 +21,8 @@ function fmt(d: Date | null) {
 }
 
 export default async function MaterialePage() {
+  // Coloana noua (fb_boost_paper) poate lipsi pana la fix-db; o adaugam aici.
+  await ensureOrderColumns();
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/materiale");
 

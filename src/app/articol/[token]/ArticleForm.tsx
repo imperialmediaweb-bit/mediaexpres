@@ -10,6 +10,7 @@ import {
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
+import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 
 type Mode = "ai" | "write";
 
@@ -48,6 +49,7 @@ export function ArticleForm({
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  const [fbBoostPaper, setFbBoostPaper] = useState("");
   // Implicit rescriem unic pentru fiecare ziar (fara continut duplicat).
   // Clientul poate cere textul identic peste tot — comunicat oficial, text
   // aprobat juridic — caz in care nu atingem nimic.
@@ -208,6 +210,7 @@ export function ArticleForm({
           uniquePerSite,
           contentDeclaration,
           generatedByAi,
+          fbBoostPaper,
         }),
       });
       const json = await res.json();
@@ -548,12 +551,15 @@ export function ArticleForm({
               Distribuie articolul și pe paginile de Facebook
             </strong>
             <span className="mt-1 block text-sm text-slate-600">
-              Cele 50 de publicații au pagini de Facebook cu 300–10.000 de
-              urmăritori. Inclus, fără cost suplimentar. Poți refuza dacă
-              preferi doar publicarea pe site.
+              Cele 46 de pagini de Facebook ale publicațiilor, 37.323 de
+              urmăritori în total. Inclus, fără cost suplimentar. Poți refuza
+              dacă preferi doar publicarea pe site.
             </span>
           </span>
         </label>
+        {facebookOptIn && (
+          <FbBoostSelect value={fbBoostPaper} onChange={setFbBoostPaper} className="mt-4" />
+        )}
       </section>
 
       <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />

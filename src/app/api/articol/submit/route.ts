@@ -4,6 +4,7 @@ import { verifyOrderToken } from "@/lib/order-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { db } from "@/db";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
@@ -23,6 +24,7 @@ const schema = z.object({
   companyName: z.string().max(200).optional(),
   siteUrl: z.string().max(300).optional(),
   contactPhone: z.string().max(40).optional(),
+  fbBoostPaper: z.string().max(120).optional(),
   metaDescription: z.string().max(400).optional(),
   keywords: z.array(z.string().max(80)).max(20).optional(),
   images: z.array(imageSchema).max(3).default([]),
@@ -79,10 +81,12 @@ export async function POST(req: NextRequest) {
   // stripeSessionId respinge a doua trimitere pe aceeasi comanda.
   let alreadySubmitted = false;
   try {
+    await ensureOrderColumns();
     const inserted = await db
       .insert(orderSubmissions)
       .values({
         stripeSessionId: order.sessionId,
+        fbBoostPaper: d.fbBoostPaper?.trim() || null,
         email: order.email,
         packageId: order.packageId,
         title: d.title,
@@ -140,6 +144,7 @@ export async function POST(req: NextRequest) {
       ${kv("Email client", order.email)}
       ${kv("Telefon", d.contactPhone || "—")}
       ${kv("Firmă", d.companyName || "—")}
+      ${kv("Promovare Facebook (3 zile)", d.fbBoostPaper?.trim() || "alegem noi — ziarul din județul clientului")}
       ${kv("Site", d.siteUrl || "—")}
       ${kv("Publicare", d.uniquePerSite ? "Variantă unică pe fiecare ziar" : "⚠️ IDENTIC pe toate — clientul a cerut textul neschimbat")}
       ${kv("Distribuire Facebook", d.facebookOptIn ? "✅ Da" : "❌ Nu (clientul a refuzat)")}
