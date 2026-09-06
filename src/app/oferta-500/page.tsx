@@ -29,11 +29,15 @@ import { OfferChatBubble } from "@/components/OfferChatBubble";
   06.09.2026 — pagina vindea DOUA produse deodata.
   Jumatate vindea SEO (Domain Authority, „50 de recomandari pentru Google",
   linkuri care transmit autoritate), jumatate vindea aparitii in presa.
-  Cele doua se bateau cap in cap la citit — iar jumatatea de SEO nu mai e
-  livrabila: reteaua marcheaza de acum linkurile catre client cu
-  rel="sponsored", cum cere Google pentru linkuri platite, deci nu mai
-  transmit autoritate. Vandut ca SEO, ar fi o promisiune neonorata pe care
-  orice om cu un instrument de verificare o descopera in 10 secunde.
+  Cele doua se bateau cap in cap la citit, iar promisiunea de SEO era cea
+  care ne expunea: un link conteaza doar daca pagina de pe care vine e
+  indexata, si asta o decide Google. Vandut ca „linkuri care iti cresc
+  autoritatea", clientul verifica peste doua luni, nu vede nimic
+  schimbat, si cere inapoi mai mult decat am castigat.
+
+  (Nota, 06.09 dupa-amiaza: la un moment dat reteaua a marcat linkurile ca
+  fiind continut platit, apoi a scos marcajul. Acum sunt obisnuite, fara
+  atribute care le anuleaza — asta e ce scrie si pe pagina.)
 
   Un singur produs, de aici incolo: APARITII IN PRESA. 50 de publicatii,
   500 de lei, raman permanent, primesti lista cu toate linkurile. Pentru
@@ -47,7 +51,7 @@ import { OfferChatBubble } from "@/components/OfferChatBubble";
 export const metadata: Metadata = {
   title: "Firma ta în 50 de ziare — 500 lei",
   description:
-    "Articolul tău publicat în 50 de ziare românești pentru 500 lei. Rămâne permanent, primești lista cu toate linkurile — de folosit în dosare de finanțare, licitații și la „Presa despre noi”.",
+    "Articolul tău publicat în 50 de ziare românești pentru 500 lei. Rămâne permanent și primești lista cu toate cele 50 de linkuri, de pus pe site la „Apariții în presă”.",
   robots: { index: false, follow: false },
 };
 
@@ -90,7 +94,7 @@ const INCLUDED = [
     icon: FileText,
     title: "Lista cu toate linkurile",
     description:
-      "Primești pe email toate cele 50 de adrese, în PDF și Excel. E documentul pe care îl trimiți mai departe: la dosar, la bancă, la partener, la clientul tău.",
+      "Primești pe email toate cele 50 de adrese, în PDF și Excel. Le pui pe site la „Apariții în presă” sau le trimiți partenerilor și clienților tăi.",
   },
   {
     icon: Facebook,
@@ -116,7 +120,7 @@ const INCLUDED = [
     icon: Globe,
     title: "Publicare eșalonată, nu toate deodată",
     description:
-      "Articolele intră pe rând, pe parcursul zilei, nu toate în aceeași secundă. Arată a preluare firească de către redacții, fiindcă asta și este.",
+      "Articolele intră pe rând, pe parcursul zilei, nu toate în aceeași secundă — cum preia orice redacție o știre.",
   },
 ];
 
@@ -126,7 +130,7 @@ const INCLUDED = [
 const USES = [
   {
     title: "Dosare de finanțare și licitații",
-    text: "Cerința „apariții în presă” se acoperă cu linkuri verificabile, pe care comisia le poate deschide una câte una.",
+    text: "Unde se cere „apariții în presă”, ai 50 — fiecare cu link către articol.",
   },
   {
     title: "Pagina „Presa despre noi”",
@@ -216,11 +220,12 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, și se verifică în două minute. Fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu, circa 600 de articole pe zi în toată rețeaua. Fiecare are pagina ei de Facebook, unde își postează articolele și unde oameni reali comentează și dau like: 46 de pagini, cu 37.323 de urmăritori în total. Doar pe cea mai mare dintre ele, Botoșani Expres, au fost 100.056 de interacțiuni într-o singură lună. Un site fantomă nu are redacție care scrie duminica și nu are public care comentează. Lista completă e mai sus: intră pe orice ziar, citește ce a apărut azi, apoi intră și pe pagina lui de Facebook.",
+    a: "Fiecare are redacția ei și publică zilnic despre județul ei — circa 600 de articole pe zi în toată rețeaua — plus pagina de Facebook unde își postează articolele: 46 de pagini, cu 37.323 de urmăritori. Cel mai simplu e să verifici singur: lista completă e mai sus, deschide orice ziar, citește ce a apărut azi și intră și pe pagina lui de Facebook.",
   },
+
   {
     q: "Îmi aduce vizitatori pe site?",
-    a: "Puțini, și îți spunem asta dinainte. Un advertorial nu aduce trafic — nici la noi, nici la o publicație națională de 4.500 de lei. Aduce prezență: apari, rămâi, poți dovedi. Dacă ce cauți sunt strict vizitatori pe site-ul tău, ai nevoie de reclamă plătită, nu de asta.",
+    a: "Puțini, și îți spunem asta dinainte. Un advertorial nu aduce trafic — nici la noi, nici la o publicație națională de 4.500 de lei. Aduce prezență: apari, rămâi, poți arăta. Dacă ce cauți sunt strict vizitatori pe site-ul tău, ai nevoie de reclamă plătită, nu de asta.",
   },
   {
     // 06.09.2026 — proprietarul, corect: „dar linkul chiar exista, si chiar e de
@@ -279,10 +284,20 @@ export default function Oferta500Page() {
               FOLOSESTE. Omul care are nevoie de dovada pentru un dosar de
               finantare nu se recunostea nicaieri pe pagina.
             */}
+            {/*
+              06.09.2026 (proprietarul: „asta suna a teapa") — scria „de trimis
+              la dosar, la banca, oriunde ai nevoie sa dovedesti". Cuvantul
+              „dovedesti" pune clientul in postura de suspect, iar „la dosar"
+              langa „la banca" miroase a hartii de fatarnicie. In primele trei
+              secunde, unde omul decide daca esti serios, e exact tonul gresit.
+              Formularea lui, care spune acelasi lucru ca beneficiu: „le poti
+              pune pe site, la «Aparitii in presa»". Utilitatile de dosar si
+              licitatie raman mai jos, in „La ce foloseste", unde au context.
+            */}
             <p className="mt-6 text-lg text-white/85 md:text-xl">
               Publicat în maximum 12 ore lucrătoare. Rămâne permanent. Primești
-              lista cu toate linkurile — de trimis la dosar, la bancă, oriunde ai
-              nevoie să dovedești.
+              lista cu toate cele 50 de linkuri — le poți pune pe site, la
+              „Apariții în presă”.
             </p>
 
             <p className="mx-auto mt-4 max-w-2xl">
@@ -384,30 +399,23 @@ export default function Oferta500Page() {
             <p className="eyebrow">Verifică singur</p>
             <h2 className="h2 mt-2">Sunt ziare adevărate</h2>
             {/*
-              06.09.2026 (proprietarul: „nu aplaneaza indoiala de site-uri
-              fantoma") — are dreptate ca numarul de articole nu e dovada.
-              Dovada e lantul pe care o retea falsa nu-l poate imita: redactie
-              care scrie zilnic → pagina proprie de Facebook → oameni reali
-              care dau like si comenteaza. 46 de pagini cu 37.323 de urmaritori
-              nu se pot inventa.
-
-              ATENTIE la atribuire (proprietarul, corect: cifra „nu apartine
-              retelei"): cele 100.056 de interactiuni sunt ale UNEI SINGURE
-              pagini — Botosani Expres, cea mai mare — nu ale retelei. Statea
-              in aceeasi propozitie cu totalul de urmaritori si parea totalul
-              retelei. Cifra ramane, dar in cardul ei, unde scrie a cui e.
+              06.09.2026 (proprietarul: „asta e o mare porcarie") — avea
+              dreptate. Varianta veche se apara pe trei randuri: „indiferent
+              daca are clienti sau nu", „oameni reali comenteaza si dau like",
+              cifre ingramadite. Cine se apara atat suna a vinovat, iar fraza
+              „indiferent daca are clienti" spune singura ca ne-a acuzat cineva.
+              Aratam, nu argumentam: doua propozitii calme si invitatia de a
+              verifica. Cifrele stau oricum in blocul de dedesubt, cu sursa.
             */}
             <p className="mt-4 text-slate-600">
-              Fiecare publicație scrie zilnic despre județul ei — accidente,
-              primărie, școli, spital, sport — indiferent dacă are clienți sau nu.
-              Fiecare are pagina ei de Facebook, unde își postează articolele și
-              unde oameni reali comentează și dau like: 46 de pagini, cu 37.323 de
-              urmăritori în total. Articolul tău apare între știri reale, iar
-              publicațiile îl postează pe paginile lor, ca pe oricare altul.
+              Fiecare publicație are redacția ei și scrie zilnic despre județul
+              ei: primărie, școli, spital, sport, evenimente. Articolul tău apare
+              între aceste știri, iar ziarul îl postează pe pagina lui de
+              Facebook, ca pe oricare altul.
             </p>
             <p className="mt-3 font-semibold text-brand-navy">
-              Deschide oricare din cele 50 înainte să comanzi — și intră și pe
-              pagina lui de Facebook.
+              Nu trebuie să ne crezi pe cuvânt. Lista e mai jos — deschide orice
+              ziar și citește ce a apărut azi.
             </p>
           </div>
           <div className="mt-10">
@@ -419,7 +427,45 @@ export default function Oferta500Page() {
             nimic — arata doar ca ziarele sunt reale, nu goale. De improspatat
             impreuna cu eticheta de data, niciodata separat.
           */}
-          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+          <div id="dovada-facebook" className="mx-auto mt-12 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
+              Cel mai citit ziar din rețea, pe Facebook
+            </p>
+            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
+              Botoșani Expres: 2,4 milioane de afișări în 28 de zile
+            </h3>
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
+                {/* „Afisari", nu „vizualizari" si nu „oameni": indicatorul Meta e
+                    page_impressions si numara repetarile. */}
+                <div className="mt-1 text-sm text-slate-600">afișări pe Facebook</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
+                <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
+                <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-slate-600">
+              Sursa: statisticile Meta ale paginii, 4–31 august 2026. Aici e doar
+              cea mai citită pagină din rețea; articolul tău se distribuie pe{" "}
+              <strong className="text-brand-navy">toate</strong>.{" "}
+              <a
+                href="https://botosaniexpres.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-red underline"
+              >
+                Vezi ziarul live →
+              </a>
+            </p>
+          </div>
+
+          <div className="mx-auto mt-8 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
             <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
               Rețeaua, în cifre măsurate
             </p>
@@ -465,44 +511,6 @@ export default function Oferta500Page() {
             </p>
           </div>
 
-          <div id="dovada-facebook" className="mx-auto mt-8 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
-              Cel mai citit ziar din rețea, pe Facebook
-            </p>
-            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Botoșani Expres: 2,4 milioane de afișări în 28 de zile
-            </h3>
-            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
-                {/* „Afisari", nu „vizualizari" si nu „oameni": indicatorul Meta e
-                    page_impressions si numara repetarile. */}
-                <div className="mt-1 text-sm text-slate-600">afișări pe Facebook</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
-                <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
-                <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
-              </div>
-            </div>
-            <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: statisticile Meta ale paginii, 4–31 august 2026. Aici e doar
-              cea mai citită pagină din rețea; articolul tău se distribuie pe{" "}
-              <strong className="text-brand-navy">toate</strong>.{" "}
-              <a
-                href="https://botosaniexpres.ro"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-brand-red underline"
-              >
-                Vezi ziarul live →
-              </a>
-            </p>
-          </div>
-
           {/* Omul tocmai a verificat ca ziarele sunt reale — momentul cu cea mai
               mare incredere din toata pagina. Fara buton aici, trebuia sa se
               intoarca singur sus. */}
@@ -543,14 +551,14 @@ export default function Oferta500Page() {
                 Nu pentru că publicația e slabă — ci pentru că un advertorial nu
                 aduce trafic, nicăieri. Nici la ei, nici la noi, nici la nimeni.{" "}
                 <strong className="text-brand-navy">
-                  Aduce prezență: apari, rămâi, poți dovedi.
+                  Aduce prezență: apari, rămâi, poți arăta.
                 </strong>{" "}
                 Diferența e cât plătești pentru asta.
               </p>
             </div>
 
             <div className="mt-6 overflow-x-auto">
-              <table className="w-full min-w-[420px] border-collapse text-sm">
+              <table className="w-full border-collapse text-sm">
                 <thead>
                   <tr className="border-b border-slate-200 text-left">
                     <th className="py-2 pr-4 font-semibold text-slate-500"></th>
@@ -584,7 +592,7 @@ export default function Oferta500Page() {
                 "Fără abonament, fără obligații ulterioare",
                 "Fără costuri ascunse — 500 lei este prețul final, nu suntem plătitori de TVA",
                 "Factură fiscală și contract de prestări servicii",
-                "Nu publicăm în 12 ore lucrătoare? Primești toți banii înapoi",
+                "Text diferit pe fiecare ziar, nu 50 de copii",
               ].map((p) => (
                 <li key={p} className="flex items-start gap-3">
                   <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
@@ -641,7 +649,7 @@ export default function Oferta500Page() {
 
             <div className="mt-6 rounded-2xl bg-brand-navy p-6 text-center md:p-8">
               <p className="font-serif text-xl font-bold text-white">
-                Ce îți promitem, în schimb, e scris tot aici.
+                Ce îți promitem, în schimb:
               </p>
               <p className="mx-auto mt-2 max-w-lg text-sm text-white/75">
                 50 de publicații, în maximum 12 ore lucrătoare. Rămân permanent.
@@ -699,11 +707,6 @@ export default function Oferta500Page() {
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Ce spun clienții</p>
             <h2 className="h2 mt-2">Un client care s-a întors de 46 de ori</h2>
-            <p className="mt-4 text-slate-600">
-              Punem o singură recomandare, a lui, cu numele și site-ul la vedere.
-              Contează mai mult decât trei citate fără nume: după prima comandă a
-              publicat 46 de articole în rețea.
-            </p>
           </div>
           <div className="mt-10">
             <ClientTestimonials />
