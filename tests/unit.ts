@@ -158,8 +158,8 @@ t("raspunsurile pregatite tin cifrele: 10 lei/ziar, 1.000 cazino, 500 vs 4.500",
 t("nu promite trafic sau pozitii nicaieri", !/garantam pozitii/i.test(k.replace(/Nu garantam pozitii/g, "")) && !/mii de vizitatori/i.test(k));
 t("are argumentul trait 500 vs 4.500", /4\.500 de lei pentru un singur articol/.test(k));
 t("stie ca publicarea e esalonata", /ESALONATA/.test(k));
-t("interzice vanzarea ca instrument de SEO", /NU vinde produsul ca instrument de SEO/.test(k));
-t("dar raspunde cinstit la „primesc backlinkuri?”", /Primesc backlinkuri\?/.test(k) && /marcate conform regulilor Google/.test(k));
+t("confirma ca linkurile sunt dofollow, dar fara promisiuni", /Linkurile SUNT dofollow/.test(k) && /nu spune adevarul/.test(k));
+t("raspunde cinstit la „primesc backlinkuri?”", /Primesc backlinkuri\?/.test(k) && /fara atribute care le anuleaza/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));
@@ -590,7 +590,8 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
     // sa ramana nicaieri, nici in emailuri, nici in PDF, nici in chat.
     [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
     // Acelasi lucru, in TOT src/: nu doar pe paginile randate.
-    [/dofollow/i, "dofollow — linkurile sunt marcate ca platite"],
+    // „dofollow" e permis in cunostintele consultantului: linkurile CHIAR sunt,
+    // iar la telefon intrebarea vine exact asa. Interzise raman promisiunile.
     [/\d+\s*(de\s*)?backlink/i, "„N backlinks” — vindem aparitii, nu pachete de linkuri"],
     [/backlink[a-zăâîșț]*\s+(SEO|dofollow)/i, "„backlink SEO” — nu mai vindem asta"],
     // Exceptie: liniile care INTERZIC un cuvant trebuie sa-l poata numi.
@@ -610,7 +611,7 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
   // comentariile din cod explica de ce s-a scos. Cautam linie cu linie tocmai
   // ca sa putem face exceptia asta fara sa slabim regula pentru textul real.
   const esteInterdictie = (linie: string) =>
-    /NU folosi|Nu spune niciodata|nu mai vindem|— nu mai|scos|interzis|vindem aparitii/i.test(linie);
+    /NU folosi|NU ai voie|Nu spune niciodata|Nu promite niciodata|nu mai vindem|— nu mai|scos|interzis|vindem aparitii/i.test(linie);
 
   const gasite: string[] = [];
   for (const f of files) {

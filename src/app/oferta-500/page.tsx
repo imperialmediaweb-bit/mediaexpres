@@ -11,6 +11,7 @@ import {
   Award,
   CreditCard,
   Layers,
+  Link as LinkIcon,
   Image as ImageIcon,
   XCircle,
 } from "lucide-react";
@@ -72,6 +73,18 @@ const INCLUDED = [
     title: "Text diferit pe fiecare ziar",
     description:
       "Nu 50 de copii identice. Fiecare publicație primește altă formulare și alt titlu, cu același mesaj și aceleași date de contact. Deschide două linkuri din raport și vezi diferența.",
+  },
+  {
+    // 06.09.2026, dupa-amiaza — reteaua a scos marcajul de continut platit:
+    // linkurile sunt acum obisnuite, fara atribute care le anuleaza. Se poate
+    // spune, si e verificabil in codul paginii. Ce ramane interzis e
+    // PROMISIUNEA de rezultat: un link conteaza doar daca pagina de pe care
+    // vine e indexata, iar asta o decide Google. Cine garanteaza pozitii
+    // ajunge sa dea banii inapoi peste doua luni, cu vorba proasta pe deasupra.
+    icon: LinkIcon,
+    title: "50 de linkuri către site-ul tău",
+    description:
+      "Din fiecare articol, câte până la 3 linkuri către adresele tale, cu textul ales de tine. Permanente și fără atribute care le anulează.",
   },
   {
     icon: FileText,
@@ -175,7 +188,7 @@ const CONDITIONS = [
   {
     title: "Articol redacțional, fără eticheta (P)",
     detail:
-      "Apare ca articol în publicație, nu ca banner sau reclamă marcată. Linkurile către tine sunt marcate conform regulilor Google pentru conținut plătit.",
+      "Apare ca articol în publicație, nu ca banner sau reclamă marcată. Linkurile către tine sunt obișnuite, fără atribute care le anulează.",
   },
   {
     title: "Dacă nu publicăm la timp, primești banii înapoi",
@@ -215,8 +228,9 @@ const FAQ = [
     // de crestere in clasament. Raspunsul spune si ce primesti, si ce nu face —
     // si intoarce marcajul in avantaj, fiindca il poti verifica singur.
     q: "Primesc backlinkuri? Mă ajută la SEO?",
-    a: "Primești, în fiecare articol, linkuri către site-ul tău — de pe 50 de domenii .ro diferite, cu Domain Authority 37 și Page Authority 30 (Moz, măsurat 6 septembrie 2026), și rămân permanent. Ce nu-ți promitem e că te urcă în clasamentul Google: linkurile sunt marcate conform regulilor Google pentru conținut plătit, cum cere Google de la orice publicație care primește bani pentru un articol. Poți verifica singur în codul paginii. Cine îți vinde linkuri plătite nemarcate îți pune site-ul în risc, nu pe al lui — iar noi nu facem asta.",
+    a: "Primești 50 de linkuri către site-ul tău, de pe 50 de publicații de presă diferite — permanente și fără atribute care le anulează. Ce nu-ți promitem sunt poziții în Google: un link contează doar dacă pagina de pe care vine e indexată, iar asta o decide Google, nu noi. Cine îți garantează creșterea poziției nu spune adevărul.",
   },
+
   {
     q: "Articolele apar în Google?",
     a: "Trimitem fiecare articol la indexare în ziua publicării, prin canalele oficiale ale motoarelor de căutare. Când și dacă intră în index decide Google, nu noi — și nu promitem poziții. Ce îți garantăm e că articolul e publicat, are adresă proprie și rămâne acolo.",
