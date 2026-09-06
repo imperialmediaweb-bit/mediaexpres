@@ -203,7 +203,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, cu redacții reale: fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu. Circa 600 de articole pe zi în toată rețeaua. Lista completă e mai sus pe această pagină: dă click pe orice ziar, citește ce a apărut azi și verifică singur, înainte să comanzi.",
+    a: "Sunt reale, și se verifică în două minute. Fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu, circa 600 de articole pe zi în toată rețeaua. Fiecare are pagina ei de Facebook, unde își postează articolele și unde oameni reali comentează și dau like: 46 de pagini, 37.323 de urmăritori, 100.056 de interacțiuni într-o lună. Un site fantomă nu are redacție care scrie duminica și nu are public care comentează. Lista completă e mai sus: intră pe orice ziar, citește ce a apărut azi, apoi intră și pe pagina lui de Facebook.",
   },
   {
     q: "Îmi aduce vizitatori pe site?",
@@ -290,12 +290,20 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* Stats — masurate, cu data. O cifra fara data devine minciuna in trei luni. */}
+      {/*
+        Cele patru cifre de sus sunt lucruri pe care le PRIMESTE clientul.
+        „~600 de articole pe zi in retea" statea aici si a fost scoasa
+        (06.09.2026, proprietarul: „nu cred ca e relevanta asta") — are
+        dreptate: cate articole publica reteaua nu-i spune cumparatorului
+        nimic despre ce ia el pe 500 de lei. Cifra ramane mai jos, in
+        sectiunea „Sunt ziare adevarate", unde chiar are treaba: acolo
+        raspunde la „sunt site-uri fantoma?".
+      */}
       <section className="border-b border-slate-200 bg-slate-50">
         <div className="container py-12">
           <div className="grid gap-8 text-center md:grid-cols-4">
             <Stat value="50" label="publicații online" />
-            <Stat value="~600" label="articole pe zi în rețea" />
+            <Stat value="permanent" label="cât rămâne articolul" />
             <Stat value="46" label="pagini de Facebook" />
             <Stat value="12 ore lucrătoare" label="până la publicare" />
           </div>
@@ -361,11 +369,26 @@ export default function Oferta500Page() {
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Verifică singur</p>
             <h2 className="h2 mt-2">Sunt ziare adevărate</h2>
+            {/*
+              06.09.2026 (proprietarul: „nu aplaneaza indoiala de site-uri
+              fantoma") — are dreptate ca numarul de articole nu e dovada.
+              Dovada e lantul pe care o retea falsa nu-l poate imita: redactie
+              care scrie zilnic → pagina proprie de Facebook → oameni reali
+              care dau like si comenteaza. 46 de pagini si 100.056 de
+              interactiuni intr-o luna nu se pot inventa.
+            */}
             <p className="mt-4 text-slate-600">
               Fiecare publicație scrie zilnic despre județul ei — accidente,
               primărie, școli, spital, sport — indiferent dacă are clienți sau nu.
-              Articolul tău apare între știri reale. Deschide oricare din cele 50
-              înainte să comanzi.
+              Fiecare are pagina ei de Facebook, unde își postează articolele și
+              unde oameni reali comentează și dau like: 46 de pagini, 37.323 de
+              urmăritori și 100.056 de interacțiuni într-o lună. Articolul tău
+              apare între știri reale, iar publicațiile îl postează pe paginile
+              lor, ca pe oricare altul.
+            </p>
+            <p className="mt-3 font-semibold text-brand-navy">
+              Deschide oricare din cele 50 înainte să comanzi — și intră și pe
+              pagina lui de Facebook.
             </p>
           </div>
           <div className="mt-10">

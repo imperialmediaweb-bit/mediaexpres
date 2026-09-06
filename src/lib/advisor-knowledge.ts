@@ -126,6 +126,7 @@ ${newspapersBlock()}
 
 SUNT ZIARE ADEVARATE (raspunsul la „retea fantoma"; cifre masurate, cu data — nu le umfla si nu inventa altele):
 - Fiecare publicatie scrie ZILNIC despre judetul ei — accidente, primarie, scoli, spital, sport — indiferent daca are clienti sau nu. Articolul clientului apare intre stiri reale.
+- CEL MAI BUN ARGUMENT impotriva acuzatiei de „retea fantoma" nu e numarul de articole, ci LANTUL pe care o retea falsa nu-l poate imita: redactie care scrie zilnic → fiecare ziar isi posteaza articolele pe pagina LUI de Facebook → oameni reali comenteaza si dau like. Un site fantoma nu are redactie care scrie duminica si nu are public care comenteaza. Invita-l sa intre pe orice ziar din lista SI pe pagina lui de Facebook.
 - Circa 600 de articole noi pe zi in toata reteaua.
 - 46 de pagini de Facebook, 37.323 de urmaritori.
 - Ultimele 28 de zile, pe toate cele 50: 11.960 cititori unici, 43.546 vizualizari de pagina, 55.737 afisari in Google, 1.978 vizite din cautari.
