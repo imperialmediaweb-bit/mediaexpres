@@ -686,12 +686,24 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* Dovada sociala, dupa ce omul a vazut produsul si conditiile. */}
+      {/*
+        Dovada sociala, dupa ce omul a vazut produsul si conditiile.
+        06.09.2026 — ramane UN singur testimonial (proprietarul: „mai punem
+        tot unul"). Un citat anonim in plus n-ar adauga nimic; ce cantareste
+        aici e ca omul care l-a scris a publicat 46 de articole in retea,
+        adica s-a intors de 46 de ori. Asta spune incadrarea, ca cititorul sa
+        nu vada „doar unul", ci „unul care a ramas".
+      */}
       <section className="section">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Ce spun clienții</p>
-            <h2 className="h2 mt-2">Din partea unui client, nu a noastră</h2>
+            <h2 className="h2 mt-2">Un client care s-a întors de 46 de ori</h2>
+            <p className="mt-4 text-slate-600">
+              Punem o singură recomandare, a lui, cu numele și site-ul la vedere.
+              Contează mai mult decât trei citate fără nume: după prima comandă a
+              publicat 46 de articole în rețea.
+            </p>
           </div>
           <div className="mt-10">
             <ClientTestimonials />
