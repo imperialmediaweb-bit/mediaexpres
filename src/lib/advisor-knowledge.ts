@@ -126,9 +126,9 @@ ${newspapersBlock()}
 
 SUNT ZIARE ADEVARATE (raspunsul la „retea fantoma"; cifre masurate, cu data — nu le umfla si nu inventa altele):
 - Fiecare publicatie scrie ZILNIC despre judetul ei — accidente, primarie, scoli, spital, sport — indiferent daca are clienti sau nu. Articolul clientului apare intre stiri reale.
-- CEL MAI BUN ARGUMENT impotriva acuzatiei de „retea fantoma" nu e numarul de articole, ci LANTUL pe care o retea falsa nu-l poate imita: redactie care scrie zilnic → fiecare ziar isi posteaza articolele pe pagina LUI de Facebook → oameni reali comenteaza si dau like. Un site fantoma nu are redactie care scrie duminica si nu are public care comenteaza. Invita-l sa intre pe orice ziar din lista SI pe pagina lui de Facebook.
+- CEL MAI BUN ARGUMENT impotriva acuzatiei de „retea fantoma" nu e numarul de articole, ci LANTUL pe care o retea falsa nu-l poate imita: redactie care scrie zilnic → fiecare ziar isi posteaza articolele pe pagina LUI de Facebook → oameni reali comenteaza si dau like (doar pe cea mai mare pagina, Botosani Expres, 100.056 de interactiuni intr-o luna). Un site fantoma nu are redactie care scrie duminica si nu are public care comenteaza. Invita-l sa intre pe orice ziar din lista SI pe pagina lui de Facebook.
 - Circa 600 de articole noi pe zi in toata reteaua.
-- 46 de pagini de Facebook, 37.323 de urmaritori.
+- 46 de pagini de Facebook, cu 37.323 de urmaritori IN TOTAL pe toata reteaua. ATENTIE: cifra de 100.056 de interactiuni e a UNEI SINGURE pagini (Botosani Expres, cea mai mare), nu a retelei — nu le amesteca in aceeasi propozitie.
 - Ultimele 28 de zile, pe toate cele 50: 11.960 cititori unici, 43.546 vizualizari de pagina, 55.737 afisari in Google, 1.978 vizite din cautari.
 - Botosani Expres (cea mai citita pagina din retea): 2.430.444 AFISARI pe Facebook si 100.056 interactiuni intr-o luna. Spune „afisari", nu „vizualizari" si nu „oameni" — indicatorul Meta numara repetarile.
 - Domain Authority 37 / Page Authority 30 (Moz) — scor public, verificabil de oricine. E un FAPT despre domenii, NU o promisiune ca articolul va urca site-ul clientului in Google.

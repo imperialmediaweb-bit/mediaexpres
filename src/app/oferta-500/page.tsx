@@ -203,7 +203,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, și se verifică în două minute. Fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu, circa 600 de articole pe zi în toată rețeaua. Fiecare are pagina ei de Facebook, unde își postează articolele și unde oameni reali comentează și dau like: 46 de pagini, 37.323 de urmăritori, 100.056 de interacțiuni într-o lună. Un site fantomă nu are redacție care scrie duminica și nu are public care comentează. Lista completă e mai sus: intră pe orice ziar, citește ce a apărut azi, apoi intră și pe pagina lui de Facebook.",
+    a: "Sunt reale, și se verifică în două minute. Fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu, circa 600 de articole pe zi în toată rețeaua. Fiecare are pagina ei de Facebook, unde își postează articolele și unde oameni reali comentează și dau like: 46 de pagini, cu 37.323 de urmăritori în total. Doar pe cea mai mare dintre ele, Botoșani Expres, au fost 100.056 de interacțiuni într-o singură lună. Un site fantomă nu are redacție care scrie duminica și nu are public care comentează. Lista completă e mai sus: intră pe orice ziar, citește ce a apărut azi, apoi intră și pe pagina lui de Facebook.",
   },
   {
     q: "Îmi aduce vizitatori pe site?",
@@ -374,17 +374,22 @@ export default function Oferta500Page() {
               fantoma") — are dreptate ca numarul de articole nu e dovada.
               Dovada e lantul pe care o retea falsa nu-l poate imita: redactie
               care scrie zilnic → pagina proprie de Facebook → oameni reali
-              care dau like si comenteaza. 46 de pagini si 100.056 de
-              interactiuni intr-o luna nu se pot inventa.
+              care dau like si comenteaza. 46 de pagini cu 37.323 de urmaritori
+              nu se pot inventa.
+
+              ATENTIE la atribuire (proprietarul, corect: cifra „nu apartine
+              retelei"): cele 100.056 de interactiuni sunt ale UNEI SINGURE
+              pagini — Botosani Expres, cea mai mare — nu ale retelei. Statea
+              in aceeasi propozitie cu totalul de urmaritori si parea totalul
+              retelei. Cifra ramane, dar in cardul ei, unde scrie a cui e.
             */}
             <p className="mt-4 text-slate-600">
               Fiecare publicație scrie zilnic despre județul ei — accidente,
               primărie, școli, spital, sport — indiferent dacă are clienți sau nu.
               Fiecare are pagina ei de Facebook, unde își postează articolele și
-              unde oameni reali comentează și dau like: 46 de pagini, 37.323 de
-              urmăritori și 100.056 de interacțiuni într-o lună. Articolul tău
-              apare între știri reale, iar publicațiile îl postează pe paginile
-              lor, ca pe oricare altul.
+              unde oameni reali comentează și dau like: 46 de pagini, cu 37.323 de
+              urmăritori în total. Articolul tău apare între știri reale, iar
+              publicațiile îl postează pe paginile lor, ca pe oricare altul.
             </p>
             <p className="mt-3 font-semibold text-brand-navy">
               Deschide oricare din cele 50 înainte să comanzi — și intră și pe
