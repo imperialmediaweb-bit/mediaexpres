@@ -153,7 +153,7 @@ export function VisibilityCalculator() {
             <li className="flex items-center gap-3">
               <LinkIcon className="h-5 w-5 shrink-0 text-brand-red" />
               <div className="flex-1 flex justify-between gap-3">
-                <span className="text-slate-600">Backlinks SEO</span>
+                <span className="text-slate-600">Linkuri către site-ul tău</span>
                 <span className="font-bold text-brand-navy">{result.newspapers}</span>
               </div>
             </li>

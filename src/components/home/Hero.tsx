@@ -59,9 +59,9 @@ export function Hero() {
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/85">
-            Distribuție rapidă de comunicate de presă pe 50 de ziare și 50 pagini Facebook.
+            Distribuție rapidă de comunicate de presă pe 50 de ziare și 46 de pagini de Facebook.
             Primești raport PDF și Excel cu toate linkurile. Publicare permanentă,
-            backlinks SEO incluse.
+            linkuri permanente către site-ul tău.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">
@@ -84,7 +84,7 @@ export function Hero() {
           </div>
 
           <ul className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/80">
-            {["Livrare 12 ore lucrătoare", "Raport PDF inclus", "Publicare permanentă", "50 backlinks SEO"].map(
+            {["Livrare 12 ore lucrătoare", "Lista cu linkurile inclusă", "Publicare permanentă", "50 de publicații"].map(
               (item) => (
                 <li key={item} className="flex items-center gap-2">
                   <CheckCircle2 className="h-4 w-4 text-brand-gold" /> {item}

@@ -25,7 +25,11 @@ export const NEWSPAPERS: Newspaper[] = [
   // Transilvania (13)
   { name: "Cluj Expres", region: "Transilvania", type: "local", county: "Cluj", city: "Cluj-Napoca", url: "https://clujexpres.ro" },
   { name: "Brașov Expres", region: "Transilvania", type: "local", county: "Brașov", city: "Brașov", url: "https://brasovexpress.ro" },
-  { name: "Sibiu Expres", region: "Transilvania", type: "local", county: "Sibiu", city: "Sibiu", url: "https://sibiuexpres.ro" },
+  // 06.09.2026 — SCOS din lista publica: sibiuexpres.ro nu exista inca.
+  // Statea fix in sectiunea „deschide oricare si convinge-te ca sunt reale",
+  // deci un client care dadea click primea eroare exact acolo unde ii cerem
+  // sa aiba incredere. Se pune la loc cand se cumpara domeniul.
+  // { name: "Sibiu Expres", region: "Transilvania", type: "local", county: "Sibiu", city: "Sibiu", url: "https://sibiuexpres.ro" },
   { name: "Mureș Expres", region: "Transilvania", type: "local", county: "Mureș", city: "Târgu Mureș", url: "https://muresexpres.ro" },
   { name: "Alba Expres", region: "Transilvania", type: "local", county: "Alba", city: "Alba Iulia", url: "https://albaexpres.ro" },
   { name: "Bihor Expres", region: "Transilvania", type: "local", county: "Bihor", city: "Oradea", url: "https://bihorexpres.ro" },

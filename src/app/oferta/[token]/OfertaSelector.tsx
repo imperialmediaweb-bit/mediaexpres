@@ -51,8 +51,8 @@ const PACKAGES: Array<{
     reach: "50 ziare (41 locale + 9 naționale)",
     highlights: [
       "1 articol pe 50 de ziare",
-      "Distribuție pe 50 pagini Facebook",
-      "50 backlinks SEO din domenii .ro",
+      "Distribuție pe 46 de pagini de Facebook",
+      "50 de linkuri permanente către site-ul tău",
       "Raport PDF complet",
     ],
     badge: "Cel mai popular",

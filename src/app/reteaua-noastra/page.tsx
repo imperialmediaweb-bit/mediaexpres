@@ -10,7 +10,7 @@ import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
   description:
-    "Lista completă a celor 50 de ziare MediaExpres: 41 locale + 9 naționale, cu link către fiecare publicație. Plus 50 pagini Facebook asociate.",
+    "Lista completă a celor 50 de ziare MediaExpres: 41 locale + 9 naționale, cu link către fiecare publicație. Plus 46 de pagini de Facebook asociate.",
   alternates: { canonical: "/reteaua-noastra" },
   // Pagina e in sitemap si e continutul unic al retelei — trebuie indexata.
   // Avea noindex din perioada in care lista era ascunsa dupa formular.

@@ -131,7 +131,7 @@ export function ProspectOfertaPage({ token, prospect }: Props) {
                   "50 articole publicate simultan",
                   "AI scrie comunicatul — tu trimiți tematica",
                   "Raport PDF cu toate URL-urile",
-                  "50 backlinks permanente → +SEO",
+                  "50 de linkuri permanente către site-ul tău",
                   "Distribuție pe Facebook a fiecărui ziar",
                   "Factură fiscală, transmisă prin e-Factura",
                 ].map((item, i) => (

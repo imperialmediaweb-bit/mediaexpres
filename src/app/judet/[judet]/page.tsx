@@ -207,7 +207,7 @@ export default function CountyPage({
             <ul className="mt-8 grid gap-3 text-left max-w-xl mx-auto">
               {[
                 "Publicare permanentă (linkurile rămân online ani de zile)",
-                "Backlink real către site-ul tău (autoritate SEO)",
+                "Link permanent către site-ul tău, din articol",
                 "Distribuție automată pe Facebook",
                 "Raport PDF cu toate URL-urile pentru evidență",
                 "Plată unică, factură fiscală, fără abonament obligatoriu",

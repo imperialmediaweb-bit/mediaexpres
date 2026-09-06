@@ -126,16 +126,16 @@ t("stie de publicarea in 12 ore", /12\s*(DE\s*)?ORE/i.test(k));
 // drumul comenzii cap-coada.
 t("stie ziarele pe nume, cu judet", /Cluj Expres — judetul Cluj \(clujexpres\.ro\)/.test(k));
 t("stie ziarele nationale", /România Expres \(romaniaexpres\.ro\)/.test(k));
-t("stie autoritatea (DA 36-37, 120+ domenii)", /36-37/.test(k) && /120 de domenii/.test(k));
-t("spune cinstit ca nu vinde trafic", /NU vindem trafic/.test(k) && /cateva sute/.test(k));
-t("stie ce cumpara clientul de fapt", /50 de linkuri dofollow permanente/.test(k));
+t("stie cifrele masurate, cu data", /37 \/ Page Authority 30|Page Authority 30/.test(k) && /6 septembrie 2026/.test(k));
+t("spune cinstit ca nu vinde SEO si nu vinde trafic", /NU vindem SEO si NU vindem trafic/.test(k));
+t("stie ce vinde: aparitii in presa", /Vindem APARITII IN PRESA/.test(k) && /dosare de finantare/.test(k));
 t("stie regula banilor la declaratie falsa", /suma NU se restituie/.test(k));
 t("stie garantia de 12 ore", /GARANTIE: daca nu publicam in 12 ore lucratoare/.test(k));
 t("explica rescris vs original si recomanda rescris", /RESCRIS SAU ORIGINAL/.test(k) && /RECOMANDAT: varianta rescrisa/.test(k));
 t("stie drumul OP: factura -> plata -> 12 ore -> raport", /primeste FACTURA pe email in aceeasi zi lucratoare[\s\S]*plateste pe baza ei[\s\S]*12 ore lucratoare[\s\S]*RAPORTUL/.test(k));
 t("stie ca factura NU e automata", !/se emite AUTOMAT/.test(k) && /nu automat/.test(k));
 t("stie ca clientul revenit trimite dovada/articolul in chat", /Am platit — trimit dovada/.test(k));
-t("are raspuns pentru expertul SEO", /EXPERT SEO/.test(k) && /Nu promite pozitii/.test(k));
+t("are raspuns pentru expertul SEO", /EXPERT SEO/.test(k) && /NU vindem SEO/.test(k));
 t("are raspuns pentru sceptic", /SCEPTICUL/.test(k));
 t("are raspuns pentru cazino, institutie, agentie", /CAZINO \/ PARIURI/.test(k) && /INSTITUTIE/.test(k) && /AGENTIE/.test(k));
 // Raspunsurile pregatite: fiecare tip de client isi gaseste intrebarile.
@@ -154,8 +154,12 @@ for (const [profil, intrebari] of [
   t(`raspunsuri pregatite: profilul „${profil}”`, k.includes(`[${profil}`));
   for (const q of intrebari) t(`  are raspuns la „${q}”`, k.includes(`„${q}`));
 }
-t("raspunsurile pregatite tin cifrele: 500, 10 lei/ziar, 12 ore, DA 36-37, 1.000 cazino", /10 lei pe ziar/.test(k) && /1\.000 lei promo/.test(k) && /DA 36-37 \(Moz\)/.test(k));
+t("raspunsurile pregatite tin cifrele: 10 lei/ziar, 1.000 cazino, 500 vs 4.500", /10 lei pe ziar/.test(k) && /1\.000 lei promo/.test(k) && /4\.500/.test(k));
 t("nu promite trafic sau pozitii nicaieri", !/garantam pozitii/i.test(k.replace(/Nu garantam pozitii/g, "")) && !/mii de vizitatori/i.test(k));
+t("are argumentul trait 500 vs 4.500", /4\.500 de lei pentru un singur articol/.test(k));
+t("stie ca publicarea e esalonata", /ESALONATA/.test(k));
+t("interzice vanzarea ca instrument de SEO", /NU vinde produsul ca instrument de SEO/.test(k));
+t("dar raspunde cinstit la „primesc backlinkuri?”", /Primesc backlinkuri\?/.test(k) && /marcate conform regulilor Google/.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));
 t("stie sa raspunda la canibalizare", /canibaliz/i.test(k));
 t("stie ca abonamentele-s doar pe card", k.includes("DOAR cu cardul"));
@@ -545,7 +549,11 @@ console.log("\n########## O. LISTA IN PDF ##########");
 
   t("spune pretul si termenul real", raw.includes("500 lei") && raw.includes("12 ore lucratoare"));
   t("nu promite termenul vechi de 4 ore", !/\b4 ore\b/i.test(raw));
-  t("explica diferenta dintre 50 promise si cate sunt", raw.includes("bonus"));
+  // 06.09.2026 — dupa scoaterea Sibiu Expres (domeniu inexistent) reteaua are
+  // exact 50 = 41 locale + 9 nationale, adica fix cat promitem. Linia de
+  // „bonus" (pentru cand livram mai mult decat vindem) reapare singura daca
+  // se adauga publicatii; aici verificam ca lista nu promite mai mult decat are.
+  t("lista nu promite mai multe ziare decat exista", NEWSPAPERS.length >= 50);
   t("explica adresele xn-- (domenii cu diacritice)", raw.includes("xn--"));
 }
 
@@ -581,6 +589,12 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
     // Termenul s-a schimbat a doua oara (24 → 12): vechiul text nu are voie
     // sa ramana nicaieri, nici in emailuri, nici in PDF, nici in chat.
     [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
+    // Acelasi lucru, in TOT src/: nu doar pe paginile randate.
+    [/dofollow/i, "dofollow — linkurile sunt marcate ca platite"],
+    [/\d+\s*(de\s*)?backlink/i, "„N backlinks” — vindem aparitii, nu pachete de linkuri"],
+    [/backlink[a-zăâîșț]*\s+(SEO|dofollow)/i, "„backlink SEO” — nu mai vindem asta"],
+    // Exceptie: liniile care INTERZIC un cuvant trebuie sa-l poata numi.
+    // Vezi filtrul de mai jos (`esteInterdictie`).
     // Proprietarul a corectat cifra: nu 1.200, ci circa 600 de articole pe zi.
     [/1\.200\s*(de\s*)?articole|1\.200\+/i, "cifra veche de articole pe zi — acum e circa 600"],
     [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
@@ -591,12 +605,24 @@ console.log("\n########## P. SCANARE PE TOT CODUL ##########");
     [/\b4 ORE LUCRATOARE\b/, "promisiunea veche, cu majuscule"],
   ];
 
+  // O linie care INTERZICE un cuvant trebuie sa-l poata numi: promptul
+  // consultantului ii spune modelului „nu spune niciodata «dofollow»", iar
+  // comentariile din cod explica de ce s-a scos. Cautam linie cu linie tocmai
+  // ca sa putem face exceptia asta fara sa slabim regula pentru textul real.
+  const esteInterdictie = (linie: string) =>
+    /NU folosi|Nu spune niciodata|nu mai vindem|— nu mai|scos|interzis|vindem aparitii/i.test(linie);
+
   const gasite: string[] = [];
   for (const f of files) {
-    const txt = fs.readFileSync(f, "utf8");
+    const linii = fs.readFileSync(f, "utf8").split("\n");
     for (const [re, ce] of rele) {
-      const m = txt.match(re);
-      if (m) gasite.push(`${f}: ${ce} → "${m[0]}"`);
+      for (const linie of linii) {
+        const m = linie.match(re);
+        if (m && !esteInterdictie(linie)) {
+          gasite.push(`${f}: ${ce} → "${m[0]}"`);
+          break;
+        }
+      }
     }
   }
   t(

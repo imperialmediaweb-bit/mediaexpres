@@ -42,8 +42,8 @@ STRUCTURA OBLIGATORIE (toate elementele trebuie sa apara, in aceasta ordine):
    - "rețea de 50 de ziare online"
    - "41 locale (câte unul per județ) + 9 naționale + 1 pentru diaspora"
    - "circa 600 de articole publicate zilnic în rețea"
-   - "distribuție și pe 50 pagini de Facebook"
-   Poti compacta: "50 ziare proprii (41 locale, 9 naționale, 1 diaspora) + 50 pagini Facebook, circa 600 de articole/zi"
+   - "distribuție și pe 46 de pagini de Facebook"
+   Poti compacta: "50 ziare proprii (41 locale, 9 naționale, 1 diaspora) + 46 de pagini de Facebook, circa 600 de articole/zi"
 
 5. CTA: ii ceri adresa de email ca sa-i trimiti oferta:
    * "Vă trimit oferta pe email — îmi confirmați adresa?"
@@ -66,18 +66,18 @@ REGULI ABSOLUTE:
 EXEMPLE (referinta de stil — fiecare arata o varianta de formulare):
 
 Pentru Alexandra Raut, Marketing Director la Nespresso:
-Bună ziua, Alexandra! Sunt ${SENDER_FIRST}, administrator MediaExpres — aș vrea să vă prezint o oportunitate: rețea de 50 de ziare online proprii (41 locale + 9 naționale + 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Vă trimit oferta pe email — îmi confirmați adresa?
+Bună ziua, Alexandra! Sunt ${SENDER_FIRST}, administrator MediaExpres — aș vrea să vă prezint o oportunitate: rețea de 50 de ziare online proprii (41 locale + 9 naționale + 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 46 de pagini de Facebook. Vă trimit oferta pe email — îmi confirmați adresa?
 
 Pentru Mădălina Săvulescu, Communication Manager la Nespresso:
-Bună ziua, Mădălina! Sunt ${SENDER_FIRST} de la MediaExpres. Vă contactez cu o ofertă relevantă pentru rolul dvs.: rețeaua noastră de 50 de ziare proprii (41 locale, 9 naționale, 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Detaliile vi le trimit pe email — îmi spuneți adresa?
+Bună ziua, Mădălina! Sunt ${SENDER_FIRST} de la MediaExpres. Vă contactez cu o ofertă relevantă pentru rolul dvs.: rețeaua noastră de 50 de ziare proprii (41 locale, 9 naționale, 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 46 de pagini de Facebook. Detaliile vi le trimit pe email — îmi spuneți adresa?
 
 Pentru Cristian, PR Specialist la o agenție:
-Bună ziua, Cristian! Am o propunere care s-ar potrivi cu activitatea dvs. de PR — MediaExpres: 50 de ziare online proprii (41 locale + 9 naționale + 1 diaspora), circa 600 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Sunt ${SENDER_FIRST}. Vă pot trimite oferta pe email — confirmați adresa?
+Bună ziua, Cristian! Am o propunere care s-ar potrivi cu activitatea dvs. de PR — MediaExpres: 50 de ziare online proprii (41 locale + 9 naționale + 1 diaspora), circa 600 de articole publicate zilnic și distribuție pe 46 de pagini de Facebook. Sunt ${SENDER_FIRST}. Vă pot trimite oferta pe email — confirmați adresa?
 
 Pentru Andrei, Founder:
-Bună ziua, Andrei! Sunt ${SENDER_FIRST} de la MediaExpres. Vă scriu fiindcă văd o oportunitate concretă: rețea de 50 de ziare online proprii (41 locale, 9 naționale, 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 50 pagini Facebook. Vă trimit pachetele și tarifele pe email — îmi dați adresa?
+Bună ziua, Andrei! Sunt ${SENDER_FIRST} de la MediaExpres. Vă scriu fiindcă văd o oportunitate concretă: rețea de 50 de ziare online proprii (41 locale, 9 naționale, 1 diaspora), cu circa 600 de articole publicate zilnic și distribuție pe 46 de pagini de Facebook. Vă trimit pachetele și tarifele pe email — îmi dați adresa?
 
-Raspunde DOAR cu textul mesajului. Niciun caracter in plus. FAPTELE DESPRE RETEA (41 locale, 9 naționale, 1 diaspora, ziare PROPRII, circa 600 de articole/zi, 50 pagini Facebook) trebuie MEREU sa apara — ele dau credibilitate.`;
+Raspunde DOAR cu textul mesajului. Niciun caracter in plus. FAPTELE DESPRE RETEA (41 locale, 9 naționale, 1 diaspora, ziare PROPRII, circa 600 de articole/zi, 46 de pagini de Facebook) trebuie MEREU sa apara — ele dau credibilitate.`;
 
 function cleanMessage(text: string): string {
   return text

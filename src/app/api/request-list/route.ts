@@ -115,7 +115,7 @@ export async function POST(req: NextRequest) {
       <p>Un articol publicat pe <strong>toate cele 50 de ziare</strong> — 41 locale + 9 naționale — pentru <strong>500 de lei</strong> în loc de 1.500. Nu un ziar, nu zece. Toate.</p>
       <ul style="margin:16px 0;padding-left:20px;line-height:1.7;">
         <li><strong>Articol unic pe fiecare ziar</strong> — nu același text copiat de 50 de ori</li>
-        <li>50 de backlinks dofollow permanente, din 50 de domenii .ro diferite</li>
+        <li>50 de linkuri permanente către site-ul tău, din 50 de publicații diferite</li>
         <li>Publicare în maximum 12 ore lucrătoare</li>
         <li>Raport cu toate linkurile + factură fiscală</li>
       </ul>

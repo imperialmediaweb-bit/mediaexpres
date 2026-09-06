@@ -40,7 +40,7 @@ export const INDUSTRIES: Industry[] = [
     ],
     reasons: [
       { title: "Încredere la achiziția vieții", text: "Nimeni nu dă 100.000 € pe baza unui banner. Articolele de presă construiesc legitimitatea dezvoltatorului." },
-      { title: "SEO pe numele proiectului", text: "50 de backlinks către site-ul proiectului urcă paginile tale în căutările de tip „ansamblu rezidențial + oraș\"." },
+      { title: "Dovadă pentru finanțatori și parteneri", text: "50 de apariții în presă pe numele proiectului, de arătat la bancă, la fondul de investiții sau în dosarul de autorizare." },
       { title: "Țintire locală exactă", text: "Vinzi în Cluj? Publici în presa din Cluj. Cumpărătorii de locuințe caută aproape întotdeauna local." },
       { title: "Material pentru agenți", text: "Echipa de vânzări trimite clienților linkuri de presă, nu PDF-uri de prezentare." },
     ],
@@ -71,7 +71,7 @@ export const INDUSTRIES: Industry[] = [
     ],
     reasons: [
       { title: "Autoritate medicală locală", text: "Clinica menționată constant în presă devine reflexul „acolo mă duc\" al orașului." },
-      { title: "Pacienții caută pe Google", text: "„Cardiolog + orașul tău\" — articolele cu backlink urcă site-ul clinicii exact pe astfel de căutări." },
+      { title: "Încredere înainte de prima programare", text: "Cine caută o clinică se uită dacă s-a scris despre ea. 50 de apariții care rămân online, nu doar recenzii." },
       { title: "Conform cu reglementările", text: "Redactăm în limitele publicității medicale: informativ, fără promisiuni de vindecare, fără comparații interzise." },
       { title: "Recrutare de medici", text: "Clinicile vizibile în presă atrag mai ușor specialiști buni — și ei citesc despre angajatori." },
     ],
@@ -103,7 +103,7 @@ export const INDUSTRIES: Industry[] = [
     reasons: [
       { title: "Autoritate, nu reclamă", text: "Formatul editorial respectă restricțiile de publicitate ale profesiei — informezi publicul, nu te lauzi." },
       { title: "Clientul potrivit te găsește", text: "Cine citește analiza ta despre moșteniri are, de multe ori, chiar o problemă de moștenire." },
-      { title: "SEO pe domenii de practică", text: "„Avocat divorț + oraș\" — articolele cu backlink împing site-ul cabinetului pe primele poziții." },
+      { title: "Prezență de arătat clientului", text: "Un cabinet despre care s-a scris în 50 de publicații cântărește altfel la prima întâlnire." },
       { title: "Arhivă de credibilitate", text: "Linkurile de presă rămân permanent — un portofoliu public pe care îl arăți clienților corporate." },
     ],
     exampleTopics: [
@@ -134,7 +134,7 @@ export const INDUSTRIES: Industry[] = [
     reasons: [
       { title: "Due diligence favorabil", text: "Investitorii și clienții B2B verifică presa înainte de orice semnătură. Fii găsibil." },
       { title: "Recrutare tech", text: "Developerii buni aleg firme despre care se aude. Articolele de angajări aduc CV-uri." },
-      { title: "Backlinks pentru domain authority", text: "50 de linkuri dofollow din domenii .ro cu DA 37+ — fundația SEO pe care produsul tău crește organic." },
+      { title: "Presa despre noi, pentru investitori", text: "50 de apariții permanente, de pus în pitch deck și pe pagina de presă a produsului." },
       { title: "Momentum public", text: "Fiecare milestone publicat devine muniție pentru următorul pitch, următorul client, următoarea rundă." },
     ],
     exampleTopics: [
@@ -147,7 +147,7 @@ export const INDUSTRIES: Industry[] = [
     faq: [
       { q: "Presa națională sau doar locală?", a: "Pachetul Național include 9 publicații naționale + 41 locale. Pentru tech recomandăm Naționalul — audiența ta e distribuită." },
       { q: "Puteți scrie voi articolul în limbaj accesibil?", a: "Da — descrii produsul în câteva fraze, iar redactorul nostru AI scrie articolul pe înțelesul publicului larg, fără jargon. Îl editezi înainte de publicare." },
-      { q: "Ajută la SEO pentru un SaaS?", a: "Direct: 50 de backlinks permanente din domenii distincte. E genul de profil de linkuri pe care agențiile îl vând cu mii de euro." },
+      { q: "La ce îmi folosește, concret?", a: "Ai 50 de apariții în publicații, permanente, cu linkuri către produs. Le pui pe pagina de presă, în pitch deck, în dosarele de finanțare. Nu îți promitem trafic sau poziții în Google." },
     ],
     keywords: ["PR startup Romania", "comunicat presa lansare produs", "comunicat finantare startup", "PR companie IT", "promovare aplicatie presa"],
   },
@@ -155,15 +155,15 @@ export const INDUSTRIES: Industry[] = [
     slug: "ecommerce",
     name: "magazine online",
     heading: "Comunicate de presă pentru magazine online",
-    metaTitle: "PR pentru eCommerce — trafic și backlinks din 50 de ziare",
+    metaTitle: "PR pentru eCommerce — 50 de apariții în presă",
     metaDescription:
-      "Crește autoritatea magazinului tău online: lansări de gamă, campanii sezoniere, povestea brandului. 50 de backlinks dofollow + trafic real. De la 150 RON.",
+      "Lansări de gamă, campanii sezoniere, povestea brandului — publicate în 50 de ziare și rămase permanent. De la 150 RON.",
     intro: [
-      "În eCommerce, bătălia se dă pe Google. Iar Google clasează magazinele cu autoritate — adică profil de backlinks din surse credibile. Presa e cea mai naturală sursă de astfel de linkuri: 50 de articole în 50 de ziare înseamnă 50 de domenii distincte care garantează pentru tine.",
+      "Un magazin despre care s-a scris în presă e altceva decât unul care doar face reclamă. 50 de articole în 50 de publicații, fiecare cu linkurile tale, rămân online permanent — de arătat partenerilor, furnizorilor și clienților care verifică înainte să cumpere.",
       "Dincolo de SEO: cumpărătorii verifică magazinele necunoscute înainte să lase datele cardului. Articolele de presă sunt exact dovada de legitimitate care transformă vizitatorul sceptic în client.",
     ],
     reasons: [
-      { title: "Backlinks care mută serios", text: "50 de linkuri dofollow din domenii .ro diferite — cel mai eficient raport preț/autoritate din piață." },
+      { title: "50 de apariții, un singur cost", text: "Un advertorial cumpărat direct de la o publicație costă cât toate 50 la noi." },
       { title: "Încredere = conversie", text: "Magazinul menționat în presă convertește mai bine: scepticismul la primul checkout scade." },
       { title: "Campanii sezoniere amplificate", text: "Black Friday, Crăciun, reduceri de vară — articolul de presă prinde valul de căutări la timp." },
       { title: "Povestea brandului", text: "Fondatorii cu poveste vând mai mult decât cataloagele de produse. Presa spune povești." },
@@ -176,11 +176,11 @@ export const INDUSTRIES: Industry[] = [
       "Campania de Black Friday: ce reduceri pregătește magazinul X",
     ],
     faq: [
-      { q: "Pot pune linkuri către paginile de produs?", a: "Da, până la 3 linkuri per articol — către homepage, categorie sau produs. Toate dofollow, permanente." },
+      { q: "Pot pune linkuri către paginile de produs?", a: "Da, până la 3 linkuri per articol — către homepage, categorie sau produs. Rămân permanent, la aceeași adresă." },
       { q: "Cât de repede se văd efectele SEO?", a: "Linkurile se indexează în zile, efectul în ranking se acumulează în săptămâni. De aceea abonamentul lunar bate one-shot-ul: profil de linkuri care crește constant." },
       { q: "Merge și pentru marketplace-uri mici sau doar magazine mari?", a: "Orice magazin cu produs real. Pentru început recomandăm un articol de brand + unul de campanie sezonieră." },
     ],
-    keywords: ["backlinks magazin online", "PR ecommerce Romania", "promovare magazin online presa", "comunicat presa lansare produs", "SEO magazin online"],
+    keywords: ["PR ecommerce Romania", "promovare magazin online presa", "comunicat presa lansare produs", "advertorial magazin online", "apariții în presă ecommerce"],
   },
   {
     slug: "restaurante-horeca",
@@ -352,7 +352,7 @@ export const INDUSTRIES: Industry[] = [
       { title: "Expertiza se arată, nu se afirmă", text: "„Contabil autorizat\" scrie oricine pe site. Articolul care explică noile plafoane TVA demonstrează." },
       { title: "Calendar fiscal = calendar editorial", text: "Ianuarie (declarații), martie (bilanțuri), modificări legislative — mereu există un subiect fierbinte." },
       { title: "Clienți B2B cu valoare mare", text: "Firmele care caută consultant financiar aleg pe criteriul încrederii — și plătesc retainer, nu o dată." },
-      { title: "SEO pe întrebări fiscale", text: "„Impozit dividende 2026\" — articolele tale cu backlink prind căutări cu intenție comercială reală." },
+      { title: "Autoritate în fața clienților", text: "Articole semnate pe teme fiscale, publicate în presă — de trimis clientului care ezită între tine și altcineva." },
     ],
     exampleTopics: [
       "Ce se schimbă la impozitul pe dividende din 2026 — explicat pe cazuri concrete",
@@ -383,7 +383,7 @@ export const INDUSTRIES: Industry[] = [
       { title: "Clientul e la distanță", text: "Pachetul Național pune pensiunea ta în fața cititorilor din toate județele — bazinul real de turiști." },
       { title: "Sezonalitate amplificată", text: "Paște, 1 Mai, vară, Crăciun — articolul publicat cu 4-6 săptămâni înainte prinde valul de rezervări." },
       { title: "Poveștile vând destinații", text: "„Pensiunea unde faci brânză cu gazda\" bate „cazare 3 stele\" în orice format editorial." },
-      { title: "SEO pe destinație", text: "„Cazare + zona ta\" — backlinkurile din 50 de domenii urcă site-ul tău peste agregatoare." },
+      { title: "Apariții pe care le vede turistul", text: "50 de publicații scriu despre locul tău — material de pus pe site și în ofertele către agenții." },
     ],
     exampleTopics: [
       "Destinația de weekend: ce poți face 3 zile în zona X",

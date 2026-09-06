@@ -4,7 +4,7 @@ export const SITE = {
   url: process.env.NEXT_PUBLIC_SITE_URL || "https://mediaexpress.ro",
   tagline: "Articolul tău în 50 de ziare românești în 12 ore lucrătoare",
   description:
-    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 50 pagini Facebook. Livrare în 12 ore lucrătoare, raport PDF, linkuri permanente.",
+    "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 46 de pagini de Facebook. Livrare în 12 ore lucrătoare, raport PDF, linkuri permanente.",
   email: "contact@mediaexpress.ro",
   phone: "+40 758 169 388",
   // Acelasi numar, in formatul cerut de wa.me: prefix de tara fara "+" si fara spatii.

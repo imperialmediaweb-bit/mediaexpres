@@ -43,7 +43,7 @@ function verdict(last30: number): { label: string; tone: "good" | "warn" | "bad"
     label: "Lipsă din presă",
     tone: "bad",
     recommendation:
-      "Concurenții tăi sigur apar. Un singur articol Național 50 (1500 RON) îți dă 50 de menționări instant + autoritate SEO.",
+      "Concurenții tăi sigur apar. Un singur articol Național 50 (1500 RON) îți dă 50 de mențiuni în presă, care rămân permanent.",
   };
 }
 
@@ -186,7 +186,7 @@ export function AuditClient() {
               <p className="mt-1">
                 Asta poate însemna 2 lucruri: fie firma e foarte nouă, fie n-ai investit
                 niciodată în PR. Cu un singur articol Național (1500 RON) îți creezi
-                instant 50 de menționări online + autoritate SEO.
+                instant 50 de mențiuni în presă, care rămân permanent.
               </p>
             </div>
           )}

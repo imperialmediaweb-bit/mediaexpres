@@ -46,9 +46,9 @@ const BENEFITS = [
   },
   {
     icon: LinkIcon,
-    title: "Backlink-uri pe platforme cu DA 37+",
+    title: "Linkuri permanente din articole",
     description:
-      "Linkuri dofollow de pe domenii cu autoritate ridicată — ajută la SEO și la autoritatea brandului.",
+      "Fiecare articol conține linkuri către site-ul tău și rămâne online permanent, la aceeași adresă.",
     wide: true,
   },
 ];
@@ -57,7 +57,7 @@ const CONDITIONS = [
   "Articol permanent pe site-ul nostru.",
   "12 ore pe pagina principală, apoi permanent în secțiunea proprie.",
   "Distribuire pe paginile noastre de Facebook.",
-  "3 poze și 3 linkuri dofollow incluse.",
+  "3 poze și 3 linkuri incluse.",
   "Servicii de redactare articole — la cerere.",
   "Acceptăm orice conținut comercial legal (fără articole medicale despre tratarea bolilor).",
   "Nu adăugăm eticheta (P) la articole.",

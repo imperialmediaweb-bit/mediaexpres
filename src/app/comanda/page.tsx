@@ -42,7 +42,7 @@ export default function ComandaPage({ searchParams }: PageProps) {
           <div className="sticky top-24 rounded-2xl bg-brand-navy p-8 text-white">
             <p className="eyebrow text-brand-gold">Ce primești</p>
             <h2 className="mt-2 font-serif text-2xl font-bold">
-              Vizibilitate pe 50 ziare + 50 pagini Facebook
+              Vizibilitate pe 50 ziare + 46 de pagini de Facebook
             </h2>
             <ul className="mt-6 space-y-3">
               {BENEFITS.map((b) => (

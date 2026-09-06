@@ -168,8 +168,8 @@ export async function POST(req: NextRequest) {
 
   // Articolele tocmai publicate sunt anuntate imediat la motoarele de cautare.
   // Fara asta, un articol nou astepta sa fie descoperit de crawler — zile sau
-  // saptamani. Clientul plateste pentru backlinkuri care conteaza abia dupa
-  // indexare, deci minutele astea sunt parte din produs, nu un moft.
+  // saptamani. Un articol gasit repede e parte din ce livram,
+  // deci minutele astea nu sunt un moft.
   // Nu asteptam raspunsul si nu blocam nimic: indexarea e bonus, emailul e
   // obligatia.
   if (links.length > 0) {
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
       ${links.length ? `<p>Linkurile, ca să le verifici pe fiecare:</p>${linksHtml}` : ""}
       ${entries.length || hasFile ? '<p>Găsești raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
-      <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, iar backlinkurile rămân active.</p>
+      <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, la aceeași adresă, iar linkurile funcționează și peste ani.</p>
       <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul tău: intră pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primești link de conectare).</p>
       ${/*
         Cererea de recenzie sta AICI, in emailul cu raportul, si nu intr-un

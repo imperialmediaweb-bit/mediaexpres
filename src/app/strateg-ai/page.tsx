@@ -66,7 +66,7 @@ export default function StrategAiPage() {
             </div>
             <p className="mt-8 text-sm text-white/60 max-w-xl mx-auto">
               Bazat pe portofoliul real de 50 publicatii romanesti (1 per judet + 9 nationale) si
-              50 pagini Facebook asociate. Fara cont, fara email.
+              46 de pagini de Facebook asociate. Fara cont, fara email.
             </p>
           </div>
         </div>

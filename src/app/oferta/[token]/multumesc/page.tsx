@@ -38,7 +38,7 @@ export default async function MultumescPage({
           <Step
             icon={Clock}
             title="Publicare în 12 ore"
-            desc="AI redactează articolul pe baza tematicii tale, apoi îl distribuim pe 50 ziare și 50 pagini Facebook."
+            desc="AI redactează articolul pe baza tematicii tale, apoi îl distribuim pe 50 ziare și 46 de pagini de Facebook."
           />
           <Step
             icon={FileText}

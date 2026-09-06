@@ -15,7 +15,7 @@ const FEATURES = [
   },
   {
     icon: Facebook,
-    title: "50 pagini Facebook",
+    title: "46 de pagini de Facebook",
     description: "Distribuție automată pe paginile asociate. Include fiecare pachet.",
   },
   {
@@ -31,7 +31,7 @@ const FEATURES = [
   {
     icon: Link2,
     title: "Linkuri permanente",
-    description: "Articolele rămân online indefinit. SEO on-page + backlinks câștigate.",
+    description: "Articolele rămân online permanent, la aceeași adresă. Nu expiră și nu se șterg.",
   },
   {
     icon: Headphones,

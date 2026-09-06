@@ -3,15 +3,16 @@ import {
   Newspaper,
   Globe,
   Facebook,
-  Link as LinkIcon,
   FileText,
   Clock,
   CheckCircle2,
   ShieldCheck,
   Star,
-  Zap,
   Award,
   CreditCard,
+  Layers,
+  Image as ImageIcon,
+  XCircle,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
 import { promoDeadlineLabel } from "@/data/packages";
@@ -23,10 +24,29 @@ import { BankTransferBox } from "@/components/BankTransferBox";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
 
+/*
+  06.09.2026 — pagina vindea DOUA produse deodata.
+  Jumatate vindea SEO (Domain Authority, „50 de recomandari pentru Google",
+  linkuri care transmit autoritate), jumatate vindea aparitii in presa.
+  Cele doua se bateau cap in cap la citit — iar jumatatea de SEO nu mai e
+  livrabila: reteaua marcheaza de acum linkurile catre client cu
+  rel="sponsored", cum cere Google pentru linkuri platite, deci nu mai
+  transmit autoritate. Vandut ca SEO, ar fi o promisiune neonorata pe care
+  orice om cu un instrument de verificare o descopera in 10 secunde.
+
+  Un singur produs, de aici incolo: APARITII IN PRESA. 50 de publicatii,
+  500 de lei, raman permanent, primesti lista cu toate linkurile. Pentru
+  firme care trebuie sa arate cuiva ca s-a scris despre ele — dosare de
+  finantare, licitatii, banci, parteneri, „Presa despre noi".
+
+  Cifrele au data si sursa langa ele: o cifra adevarata azi devine afirmatie
+  falsa peste trei luni, iar pagina ramane online.
+*/
+
 export const metadata: Metadata = {
-  title: "Articol în 50 de ziare — 500 lei",
+  title: "Firma ta în 50 de ziare — 500 lei",
   description:
-    "Ofertă limitată: articolul tău publicat în 50 de ziare românești pentru 500 lei. 41 ziare locale + 9 naționale, 50 backlinks, raport PDF în 12 ore lucrătoare.",
+    "Articolul tău publicat în 50 de ziare românești pentru 500 lei. Rămâne permanent, primești lista cu toate linkurile — de folosit în dosare de finanțare, licitații și la „Presa despre noi”.",
   robots: { index: false, follow: false },
 };
 
@@ -37,51 +57,75 @@ export const revalidate = 3600;
 const INCLUDED = [
   {
     icon: Newspaper,
-    title: "50 de articole UNICE",
+    title: "50 de publicații, dintr-o singură comandă",
     description:
-      "Nu publicăm copii. Fiecare ziar primește o variantă rescrisă unic — alt titlu, altă formulare, altă adresă — cu același mesaj și aceleași linkuri. Google vede 50 de articole diferite, nu unul copiat de 50 de ori.",
+      "41 de ziare locale, câte unul pentru fiecare județ, plus 9 publicații naționale. Un singur articol, trimis o singură dată.",
   },
   {
     icon: Award,
-    title: "50 de apariții în presă, de folosit oriunde",
+    title: "Rămâne permanent",
     description:
-      "După publicare ai 50 de linkuri din presă pe care le poți arăta: pe site-ul tău la secțiunea Presa despre noi, în oferte, în emailuri către clienți, pe rețelele tale. A apărea în presă cântărește altfel decât a scrie pe propriul site — iar linkurile rămân valabile ani de zile.",
+      "Nu expiră ca o reclamă plătită. Peste doi ani articolul e la aceeași adresă și linkurile funcționează la fel. Nu se șterge și nu plătești nimic în plus.",
   },
   {
-    icon: Zap,
-    title: "Trimise la indexare, în ziua publicării",
+    icon: Layers,
+    title: "Text diferit pe fiecare ziar",
     description:
-      "Fiecare articol e anunțat automat la Google, Bing și Yandex imediat ce apare — la Google prin API-ul oficial de indexare, nu doar prin sitemap. Nu așteaptă să fie descoperit de crawler. Momentul indexării îl decide fiecare motor de căutare.",
-  },
-  {
-    icon: Globe,
-    title: "41 locale + 9 naționale",
-    description:
-      "Câte un ziar pentru fiecare județ, plus 9 publicații naționale. Acoperire completă dintr-un singur plasament.",
-  },
-  {
-    icon: LinkIcon,
-    title: "50 backlinks dofollow, DA 36+ pe toate domeniile",
-    description:
-      "Linkuri reale, permanente, din 50 de domenii .ro diferite — nu de pe subpagini ale aceluiași site. Domain Authority 36–37 pe toate, măsurat de Moz. Linkurile rămân active și după ani, fără să plătești nimic în plus.",
-  },
-  {
-    icon: Facebook,
-    title: "Distribuire pe 50 pagini Facebook",
-    description:
-      "Fiecare publicație are pagina ei de Facebook, cu între 300 și 10.000 de urmăritori. Inclus, fără cost extra — articolul ajunge pe paginile publicațiilor odată cu publicarea pe site.",
+      "Nu 50 de copii identice. Fiecare publicație primește altă formulare și alt titlu, cu același mesaj și aceleași date de contact. Deschide două linkuri din raport și vezi diferența.",
   },
   {
     icon: FileText,
-    title: "Raport PDF complet",
+    title: "Lista cu toate linkurile",
     description:
-      "Primești toate cele 50 de URL-uri, în PDF și Excel — dă click pe fiecare și verifici publicarea.",
+      "Primești pe email toate cele 50 de adrese, în PDF și Excel. E documentul pe care îl trimiți mai departe: la dosar, la bancă, la partener, la clientul tău.",
+  },
+  {
+    icon: Facebook,
+    title: "Distribuire pe paginile de Facebook",
+    description:
+      "Publicațiile își postează articolul pe paginile lor de Facebook, fără cost suplimentar. Poți refuza distribuirea la comandă, dacă vrei doar publicarea pe site.",
+  },
+  {
+    icon: ImageIcon,
+    title: "Până la 3 poze",
+    description:
+      "Trimiți până la 3 imagini, dintre care una devine imaginea principală a articolului. Dacă nu ai, publicăm fără.",
   },
   {
     icon: Clock,
     title: "Publicat în 12 ore lucrătoare",
     description:
-      "De la confirmarea plății până la linkurile live trec maximum 12 ore lucrătoare. Comanda făcută seara sau în weekend se publică a doua zi lucrătoare.",
+      "De la confirmarea plății până la linkurile live trec maximum 12 ore lucrătoare — de obicei mai puțin. Comanda făcută seara sau în weekend se publică a doua zi lucrătoare.",
+  },
+  {
+    // 06.09.2026 — argumentul cerut de proprietar: publicarea nu e o descarcare
+    // automata, ci intra pe rand, ca orice stire preluata de o redactie.
+    icon: Globe,
+    title: "Publicare eșalonată, nu toate deodată",
+    description:
+      "Articolele intră pe rând, pe parcursul zilei, nu toate în aceeași secundă. Arată a preluare firească de către redacții, fiindcă asta și este.",
+  },
+];
+
+// La ce foloseste, in cuvintele clientului. Pana acum pagina spunea ce
+// primeste, nu la ce ii trebuie — iar omul care avea nevoie de dovada
+// pentru un dosar de finantare nu se recunostea nicaieri.
+const USES = [
+  {
+    title: "Dosare de finanțare și licitații",
+    text: "Cerința „apariții în presă” se acoperă cu linkuri verificabile, pe care comisia le poate deschide una câte una.",
+  },
+  {
+    title: "Pagina „Presa despre noi”",
+    text: "50 de apariții de pus pe site-ul tău. Cântărește altfel decât ce scrii singur despre tine.",
+  },
+  {
+    title: "Credibilitate în fața băncilor și partenerilor",
+    text: "Când cineva îți caută firma înainte să semneze, găsește articole în publicații, nu doar site-ul tău.",
+  },
+  {
+    title: "Lansări, deschideri, aniversări, comunicate",
+    text: "Un anunț care rămâne consemnat undeva, nu doar o postare care coboară în feed.",
   },
 ];
 
@@ -93,7 +137,7 @@ const STEPS = [
   {
     n: "1",
     title: "Trimiți articolul",
-    text: "Textul și pozele tale — sau doar tema, și îl scriem noi. Alegi cum plătești: card sau ordin de plată, cu factură fiscală.",
+    text: "Textul și pozele tale — sau doar tema, și îl scriem noi, inclus în preț. Alegi cum plătești: card sau ordin de plată, cu factură fiscală.",
   },
   {
     n: "2",
@@ -102,8 +146,8 @@ const STEPS = [
   },
   {
     n: "3",
-    title: "Publicăm și primești raportul",
-    text: "În maximum 12 ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești raportul cu fiecare link.",
+    title: "Publicăm și primești lista",
+    text: "În maximum 12 ore lucrătoare de la încasare, articolul e live în toate cele 50 de ziare. Primești lista cu fiecare link, în PDF și Excel.",
   },
 ];
 
@@ -111,12 +155,12 @@ const CONDITIONS = [
   {
     title: "Articol permanent pe site",
     detail:
-      "Odată publicat, articolul rămâne online. Nu se șterge după o perioadă, iar backlinkurile rămân active.",
+      "Odată publicat, articolul rămâne online. Nu se șterge după o perioadă și nu expiră.",
   },
   {
     title: "12 ore pe prima pagină",
     detail:
-      "Articolul stă 12 ore pe pagina principală a fiecărei publicații, apoi trece în secțiunea lui permanentă.",
+      "Articolul stă 12 ore pe pagina principală a fiecărei publicații, apoi trece în secțiunea lui permanentă, la aceeași adresă.",
   },
   {
     title: "3 poze incluse",
@@ -126,7 +170,17 @@ const CONDITIONS = [
   {
     title: "Distribuire pe Facebook — inclusă, o poți refuza",
     detail:
-      "Articolul se distribuie automat pe paginile de Facebook ale publicațiilor, fără cost suplimentar. Dacă preferi doar publicarea pe site, debifezi la comandă. Postările le vezi direct pe pagini — raportul PDF adună linkurile de pe site-uri, pe care le poți verifica unul câte unul.",
+      "Articolul se distribuie pe paginile de Facebook ale publicațiilor, fără cost suplimentar. Dacă preferi doar publicarea pe site, debifezi la comandă.",
+  },
+  {
+    title: "Articol redacțional, fără eticheta (P)",
+    detail:
+      "Apare ca articol în publicație, nu ca banner sau reclamă marcată. Linkurile către tine sunt marcate conform regulilor Google pentru conținut plătit.",
+  },
+  {
+    title: "Dacă nu publicăm la timp, primești banii înapoi",
+    detail:
+      "Nu publicăm în 12 ore lucrătoare de la încasare și de la primirea materialelor? Returnăm integral. Riscul e al nostru.",
   },
 ];
 
@@ -137,48 +191,56 @@ const FAQ = [
   },
   {
     q: "Cum plătesc și primesc factură?",
-    a: "Cum îți e mai ușor: cu cardul, prin Stripe, sau prin ordin de plată. În ambele cazuri primești factura fiscală pe email după comandă — la OP, contabilitatea ta plătește pe baza ei. Nu trebuie să fi plătit ca să comanzi.",
+    a: "Cum îți e mai ușor: cu cardul, prin Stripe, sau prin ordin de plată. În ambele cazuri primești factura fiscală pe email după comandă — la OP, contabilitatea ta plătește pe baza ei. Nu trebuie să fi plătit ca să comanzi. 500 lei este prețul final: firma nu e plătitoare de TVA, deci nu se adaugă nimic peste.",
+  },
+  {
+    q: "E același articol copiat pe toate ziarele?",
+    a: "Nu e copiat. Fiecare ziar primește o variantă unică: alt titlu, altă formulare, altă adresă — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Deschide două linkuri din raport și compari. Dacă vrei textul tău identic peste tot (comunicat oficial, text aprobat juridic), spui la comandă și îl publicăm neschimbat.",
+  },
+  {
+    q: "Sunt ziare tipărite sau site-uri online?",
+    a: "Online — 50 de site-uri de știri, câte unul pentru fiecare județ, plus cele naționale. Avantajul față de tipărit: un articol din ziarul de hârtie se citește o zi și dispare, pe când al tău rămâne online permanent, la aceeași adresă, și poate fi arătat oricând.",
+  },
+  {
+    q: "Sunt ziare reale sau site-uri fantomă?",
+    a: "Sunt reale, cu redacții reale: fiecare publicație scrie zilnic despre județul ei — accidente, primărie, școli, spital, sport — indiferent dacă are clienți sau nu. Circa 600 de articole pe zi în toată rețeaua. Lista completă e mai sus pe această pagină: dă click pe orice ziar, citește ce a apărut azi și verifică singur, înainte să comanzi.",
+  },
+  {
+    q: "Îmi aduce vizitatori pe site?",
+    a: "Puțini, și îți spunem asta dinainte. Un advertorial nu aduce trafic — nici la noi, nici la o publicație națională de 4.500 de lei. Aduce prezență: apari, rămâi, poți dovedi. Dacă ce cauți sunt strict vizitatori pe site-ul tău, ai nevoie de reclamă plătită, nu de asta.",
+  },
+  {
+    // 06.09.2026 — proprietarul, corect: „dar linkul chiar exista, si chiar e de
+    // pe un domeniu cu DA 37". Asa e. Fals ar fi doar sa-l vindem ca instrument
+    // de crestere in clasament. Raspunsul spune si ce primesti, si ce nu face —
+    // si intoarce marcajul in avantaj, fiindca il poti verifica singur.
+    q: "Primesc backlinkuri? Mă ajută la SEO?",
+    a: "Primești, în fiecare articol, linkuri către site-ul tău — de pe 50 de domenii .ro diferite, cu Domain Authority 37 și Page Authority 30 (Moz, măsurat 6 septembrie 2026), și rămân permanent. Ce nu-ți promitem e că te urcă în clasamentul Google: linkurile sunt marcate conform regulilor Google pentru conținut plătit, cum cere Google de la orice publicație care primește bani pentru un articol. Poți verifica singur în codul paginii. Cine îți vinde linkuri plătite nemarcate îți pune site-ul în risc, nu pe al lui — iar noi nu facem asta.",
+  },
+  {
+    q: "Articolele apar în Google?",
+    a: "Trimitem fiecare articol la indexare în ziua publicării, prin canalele oficiale ale motoarelor de căutare. Când și dacă intră în index decide Google, nu noi — și nu promitem poziții. Ce îți garantăm e că articolul e publicat, are adresă proprie și rămâne acolo.",
   },
   {
     q: "De ce costă dublu pentru cazino și pariuri?",
     a: "Conținutul din zona iGaming are cerințe suplimentare de conformitate (ONJN, mențiuni despre joc responsabil) și un risc editorial mai mare pentru publicații. De aceea tariful este 1.000 lei în loc de 500. Bifezi declarația la comandă. Dacă un articol de cazino este trimis nedeclarat, publicarea se oprește și suma nu se rambursează.",
   },
   {
-    q: "E același articol copiat pe toate ziarele? Nu penalizează Google?",
-    a: "Nu e copiat. Fiecare ziar primește o variantă unică a articolului: alt titlu, altă formulare, altă adresă URL — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Zero conținut duplicat între publicații. Iar „canibalizarea” de care se vorbește e o problemă doar între paginile propriului tău site — articolele apar pe domeniile noastre și trimit linkuri către tine, exact ce contează pentru SEO.",
-  },
-  {
-    // Intrebarile astea trei au consumat, intr-o singura zi, aproape o ora de
-    // WhatsApp cu un om care oricum n-avea sa cumpere. Puse aici, il lasa sa se
-    // descalifice singur inainte sa scrie — si il conving pe cel potriv  {
-    q: "Sunt ziare tipărite sau site-uri online?",
-    a: "Online — 50 de site-uri de știri, câte unul pentru fiecare județ, plus cele naționale. Avantajul față de tipărit: un articol din ziarul de hârtie se citește o zi și dispare, pe când al tău rămâne online permanent, poate fi găsit oricând în căutări și îți lasă un link către site.",
-  },
-  {
-    q: "Ce autoritate au domeniile? Linkurile chiar contează pentru SEO?",
-    a: "Toate cele 50 de domenii au Domain Authority 36+ (scorul Moz, de la 0 la 100) și peste 120 de domenii care fac linkuri către fiecare. Un blog nou are DA 1–5, deci diferența e mare. Linkurile sunt dofollow, de pe 50 de domenii .ro diferite — nu subpagini ale aceluiași site — și rămân permanent. Scorul e public și verificabil de oricine, pentru orice domeniu din listă.",
-  },
-  {
-    q: "Articolele ajung în Google?",
-    a: "Fiecare articol e trimis automat la indexare imediat după publicare — la Google prin API-ul oficial de indexare, plus Bing și Yandex. Nu așteptăm să-l descopere crawlerul. Momentul exact în care intră în index îl decide fiecare motor de căutare, de regulă între câteva ore și câteva zile. La cerere, îți spunem starea articolelor tale.",
-  },
-  {
-    q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Sunt reale, cu redacții reale: fiecare publicație are jurnalistul ei și publică constant — circa 600 de articole publicate zilnic în rețea, plus distribuția pe paginile de Facebook asociate. Lista completă e publicată mai sus pe această pagină — dă click pe orice ziar, citește ce a apărut azi și verifică singur.",
-  },
-  {
     q: "Ce fel de conținut acceptați?",
-    a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu adăugăm eticheta (P). Nu publicăm însă articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — nici produse sau terapii prezentate ca alternativă la tratamentul medical. La comandă bifezi o declarație că articolul nu intră în aceste categorii: dacă declarația se dovedește falsă, comanda se anulează și suma nu se restituie. Dacă noi refuzăm dintr-un alt motiv, returnăm integral în 3 zile lucrătoare.",
+    a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu publicăm articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — nici produse sau terapii prezentate ca alternativă la tratamentul medical, și nici atacuri la persoană. La comandă bifezi o declarație că articolul nu intră în aceste categorii: dacă declarația se dovedește falsă, comanda se anulează, articolul se retrage și suma nu se restituie. Dacă noi refuzăm dintr-un alt motiv, returnăm integral în 3 zile lucrătoare.",
   },
   {
     q: "Pot să-mi scriu eu articolul?",
-    a: "Da, iar asta e varianta recomandată. Trimiți textul tău, 3 poze și până la 3 linkuri. Dacă preferi, îl redactăm noi pe baza temei tale, la cerere.",
+    a: "Da, iar asta e varianta recomandată. Trimiți textul tău, până la 3 poze și până la 3 linkuri. Dacă preferi, îl redactăm noi pe baza temei tale, fără cost suplimentar — îl citești și îl poți modifica înainte de publicare.",
+  },
+  {
+    q: "Ce se întâmplă dacă articolul nu poate fi publicat?",
+    a: "Dacă îl refuzăm noi la verificare, din alt motiv decât o declarație falsă, primești banii înapoi integral în 3 zile lucrătoare. Dacă un articol deja publicat trebuie retras la cererea unei autorități sau a unei persoane vizate, îl retragem și îți spunem de pe ce publicații.",
   },
   {
     q: "Articolele rămân online permanent?",
-    a: "Da. Articolele rămân publicate permanent, nu se șterg după o perioadă. Backlinkurile rămân active.",
+    a: "Da. Nu se șterg după o perioadă, nu expiră și nu plătești nimic ca să rămână. Linkurile din raport funcționează și peste ani.",
   },
-
 ];
 
 export default function Oferta500Page() {
@@ -195,101 +257,59 @@ export default function Oferta500Page() {
                 : "Ofertă limitată"}
             </span>
             <h1 className="mt-5 font-serif text-4xl font-bold leading-tight md:text-6xl">
-              Articolul tău în{" "}
-              <span className="text-brand-gold">50 de ziare</span> românești
+              Firma ta, în{" "}
+              <span className="text-brand-gold">50 de ziare</span>. 500 de lei.
             </h1>
+            {/*
+              Titlul vechi („Articolul tau in 50 de ziare") spunea CE, nu LA CE
+              FOLOSESTE. Omul care are nevoie de dovada pentru un dosar de
+              finantare nu se recunostea nicaieri pe pagina.
+            */}
             <p className="mt-6 text-lg text-white/85 md:text-xl">
-              41 de ziare locale + 9 naționale. Un singur articol, publicat pe
-              toate, în 12 ore lucrătoare. Cu raport PDF și 50 de backlinks reale.
+              Publicat în maximum 12 ore lucrătoare. Rămâne permanent. Primești
+              lista cu toate linkurile — de trimis la dosar, la bancă, oriunde ai
+              nevoie să dovedești.
             </p>
-          {/* Cifra de audienta pe PRIMUL ecran, inclusiv pe telefon — jos, in
-              dreptul butoanelor, cadea sub margine la 390px si n-o vedea fix
-              publicul din reclama. Dovada completa ramane la lista (ancora). */}
-          <p className="mx-auto mt-3 max-w-2xl">
-            <a
-              href="#dovada-facebook"
-              className="text-sm font-semibold text-brand-gold underline decoration-brand-gold/40 underline-offset-4 hover:decoration-brand-gold"
-            >
-              ★ Pe Facebook: 2,4 mil. vizualizări în 28 de zile, doar pe cea mai mare pagină din rețea — vezi dovada ↓
-            </a>
-          </p>
-          {/*
-            Usa spre raspunsuri, inainte de pret si de butonul de comanda.
-            O zi intreaga de WhatsApp s-a dus pe trei intrebari — cate ziare,
-            ce trafic au, sunt tiparite? — puse de oameni care nu gaseau
-            raspunsul si scriau. Prima varianta a butonului statea langa pret
-            si cadea la y=1052 pe un ecran de 844: invizibila fix pentru
-            publicul din reclama, care intra de pe telefon.
 
-            Textul nu mai spune „ce trafic" si „ce nu iti promitem". Cifrele
-            raman intregi la #detalii — cine verifica le gaseste si ramane,
-            fiindcă le-am spus noi primii. Dar pe primul ecran ridicau o
-            indoiala celui care n-avea niciuna: omul intrat din reclama nu se
-            gandise la trafic pana nu i-am scris noi cuvantul sub titlu.
-
-            Ancora duce la #lista-ziare, nu la #detalii: textul promite cele
-            50 de ziare, deci trebuie sa livreze lista. Prima varianta cadea
-            in „Nu vindem trafic" — exact indoiala pe care o mutasem de aici.
-            Cifrele raman la #detalii, unde ajunge cine deruleaza mai jos.
-          */}
-          <p className="mx-auto mt-4 max-w-2xl">
-            <a
-              href="#lista-ziare"
-              className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-5 py-2 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
-            >
-              Vezi cele 50 de ziare și ce primești exact →
-            </a>
-          </p>
+            <p className="mx-auto mt-4 max-w-2xl">
+              <a
+                href="#lista-ziare"
+                className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-5 py-2 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
+              >
+                Vezi cele 50 de ziare, înainte să comanzi →
+              </a>
+            </p>
 
             <div className="mt-10">
               <PromoOffer />
             </div>
             <p className="mt-4 text-sm text-white/60">
-              Card sau ordin de plată • factură fiscală • publicare în 12 ore lucrătoare
+              Card sau ordin de plată • factură fiscală • 500 lei, preț final
             </p>
           </div>
         </div>
       </section>
 
-      {/* Stats */}
+      {/* Stats — masurate, cu data. O cifra fara data devine minciuna in trei luni. */}
       <section className="border-b border-slate-200 bg-slate-50">
         <div className="container py-12">
           <div className="grid gap-8 text-center md:grid-cols-4">
-            <Stat value="50" label="ziare online" />
-            {/* "320.000+ vizitatori" era neverificabila si argumentul gresit:
-                omul nu cumpara traficul site-urilor noastre, ci aparitia in
-                presa si linkurile. Domeniile sunt verificabile — lista e mai
-                jos in pagina. */}
-            <Stat value="50" label="domenii .ro proprii" />
-            <Stat value="~600" label="articole publicate zilnic în rețea" />
+            <Stat value="50" label="publicații online" />
+            <Stat value="~600" label="articole pe zi în rețea" />
+            <Stat value="46" label="pagini de Facebook" />
             <Stat value="12 ore lucrătoare" label="până la publicare" />
           </div>
         </div>
       </section>
 
-      {/* Dovada sociala vine devreme: increderea se castiga inainte de pret,
-          nu dupa. Titlul e la singular cinstit — avem un client care a scris,
-          nu un cor; "Nu doar noi zicem" promitea plural si livra unul. */}
-      <section className="section bg-slate-50">
-        <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Ce spun clienții</p>
-            <h2 className="h2 mt-2">Din partea unui client, nu a noastră</h2>
-          </div>
-          <div className="mt-10">
-            <ClientTestimonials />
-          </div>
-        </div>
-      </section>
-
-      {/* Ce include */}
+      {/* Ce primesti */}
       <section className="section">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Ce include oferta</p>
             <h2 className="h2 mt-2">Tot ce primești pentru 500 de lei</h2>
           </div>
-          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="mt-12 grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             {INCLUDED.map((item) => (
               <div
                 key={item.title}
@@ -302,6 +322,298 @@ export default function Oferta500Page() {
                 <p className="mt-2 text-sm text-slate-600">{item.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* La ce foloseste */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">La ce folosește</p>
+            <h2 className="h2 mt-2">Pentru ce cumpără oamenii asta</h2>
+          </div>
+          <div className="mx-auto mt-10 grid max-w-4xl gap-4 md:grid-cols-2">
+            {USES.map((u) => (
+              <div
+                key={u.title}
+                className="flex items-start gap-3 rounded-xl border border-slate-200 bg-white p-5"
+              >
+                <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+                <span>
+                  <strong className="text-brand-navy">{u.title}</strong>
+                  <span className="mt-1 block text-sm text-slate-600">{u.text}</span>
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/*
+        Lista ziarelor, mutata SUS (06.09.2026): e dovada, iar dovada convinge
+        inainte de pret. Statea dupa cinci sectiuni, adica dupa ce omul deja
+        decisese. Aici raspunde direct acuzatiei de „retea fantoma" —
+        deschide oricare si citeste ce a aparut azi.
+      */}
+      <section id="lista-ziare" className="section scroll-mt-20">
+        <div className="container">
+          <div className="mx-auto max-w-2xl text-center">
+            <p className="eyebrow">Verifică singur</p>
+            <h2 className="h2 mt-2">Sunt ziare adevărate</h2>
+            <p className="mt-4 text-slate-600">
+              Fiecare publicație scrie zilnic despre județul ei — accidente,
+              primărie, școli, spital, sport — indiferent dacă are clienți sau nu.
+              Articolul tău apare între știri reale. Deschide oricare din cele 50
+              înainte să comanzi.
+            </p>
+          </div>
+          <div className="mt-10">
+            <NewspaperDirectory />
+          </div>
+
+          {/*
+            Cifrele rețelei, cu data si sursa langa ele. Nu promit clientului
+            nimic — arata doar ca ziarele sunt reale, nu goale. De improspatat
+            impreuna cu eticheta de data, niciodata separat.
+          */}
+          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
+              Rețeaua, în cifre măsurate
+            </p>
+            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
+              Ultimele 28 de zile, pe toate cele 50
+            </h3>
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-4">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">11.960</div>
+                <div className="mt-1 text-xs text-slate-600">cititori unici</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">43.546</div>
+                <div className="mt-1 text-xs text-slate-600">vizualizări de pagină</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">55.737</div>
+                <div className="mt-1 text-xs text-slate-600">afișări în Google</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">1.978</div>
+                <div className="mt-1 text-xs text-slate-600">vizite din căutări</div>
+              </div>
+            </div>
+            <div className="mt-4 grid gap-4 text-center sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">46</div>
+                <div className="mt-1 text-xs text-slate-600">pagini de Facebook, 37.323 urmăritori</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">~600</div>
+                <div className="mt-1 text-xs text-slate-600">articole noi pe zi în rețea</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-2xl font-bold text-brand-navy">37 / 30</div>
+                <div className="mt-1 text-xs text-slate-600">Domain Authority / Page Authority (Moz)</div>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-slate-600">
+              Măsurat 6 septembrie 2026 — Google Search Console, statistici Meta și
+              statisticile proprii ale publicațiilor. Scorul Moz e public: îl poți
+              verifica singur pentru oricare domeniu din listă.
+            </p>
+          </div>
+
+          <div id="dovada-facebook" className="mx-auto mt-8 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
+            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
+              Cel mai citit ziar din rețea, pe Facebook
+            </p>
+            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
+              Botoșani Expres: 2,4 milioane de afișări în 28 de zile
+            </h3>
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
+                {/* „Afisari", nu „vizualizari" si nu „oameni": indicatorul Meta e
+                    page_impressions si numara repetarile. */}
+                <div className="mt-1 text-sm text-slate-600">afișări pe Facebook</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
+                <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-4">
+                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
+                <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
+              </div>
+            </div>
+            <p className="mt-5 text-center text-sm text-slate-600">
+              Sursa: statisticile Meta ale paginii, 4–31 august 2026. Aici e doar
+              cea mai citită pagină din rețea; articolul tău se distribuie pe{" "}
+              <strong className="text-brand-navy">toate</strong>.{" "}
+              <a
+                href="https://botosaniexpres.ro"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-semibold text-brand-red underline"
+              >
+                Vezi ziarul live →
+              </a>
+            </p>
+          </div>
+
+          {/* Omul tocmai a verificat ca ziarele sunt reale — momentul cu cea mai
+              mare incredere din toata pagina. Fara buton aici, trebuia sa se
+              intoarca singur sus. */}
+          <div className="mt-10 text-center">
+            <a
+              href="#oferta"
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
+            >
+              <CreditCard className="h-5 w-5" />
+              Comandă acum — 500 lei
+            </a>
+            <p className="mt-3 text-sm text-slate-500">
+              Publicare în 12 ore lucrătoare · text diferit pe fiecare ziar · factură fiscală
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/*
+        06.09.2026 — argumentul proprietarului, trait: a platit 4.500 de lei
+        pentru un singur articol pe o publicatie nationala si „au venit cativa
+        vizitori". Muta discutia de la „merita 500?" la „merita 4.500?" si e
+        credibil tocmai fiindca e impotriva noastra.
+      */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto max-w-3xl rounded-2xl border-2 border-brand-red/20 bg-white p-8 md:p-12">
+            <p className="eyebrow">De ce merită</p>
+            <h2 className="mt-2 font-serif text-2xl font-bold text-brand-navy md:text-3xl">
+              De ce 500 și nu 4.500
+            </h2>
+            <div className="mt-4 space-y-3 text-slate-600">
+              <p>
+                Am plătit odată 4.500 de lei pentru un singur articol pe o
+                publicație națională mare. A venit o mână de oameni.
+              </p>
+              <p>
+                Nu pentru că publicația e slabă — ci pentru că un advertorial nu
+                aduce trafic, nicăieri. Nici la ei, nici la noi, nici la nimeni.{" "}
+                <strong className="text-brand-navy">
+                  Aduce prezență: apari, rămâi, poți dovedi.
+                </strong>{" "}
+                Diferența e cât plătești pentru asta.
+              </p>
+            </div>
+
+            <div className="mt-6 overflow-x-auto">
+              <table className="w-full min-w-[420px] border-collapse text-sm">
+                <thead>
+                  <tr className="border-b border-slate-200 text-left">
+                    <th className="py-2 pr-4 font-semibold text-slate-500"></th>
+                    <th className="py-2 pr-4 font-semibold text-slate-600">Un site național</th>
+                    <th className="py-2 font-semibold text-brand-navy">Rețeaua Expres</th>
+                  </tr>
+                </thead>
+                <tbody className="text-slate-700">
+                  {[
+                    ["Preț", "3.000 – 5.000 lei", "500 lei"],
+                    ["Publicații", "1", "50"],
+                    ["Cât rămâne", "permanent", "permanent"],
+                    ["Trafic adus", "puțin", "puțin"],
+                  ].map(([k, a, b]) => (
+                    <tr key={k} className="border-b border-slate-100 last:border-0">
+                      <td className="py-2.5 pr-4 font-medium text-slate-500">{k}</td>
+                      <td className="py-2.5 pr-4">{a}</td>
+                      <td className="py-2.5 font-semibold text-brand-navy">{b}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <p className="mt-6 text-slate-600">
+              Îți spunem pe față: și noi, și ei livrăm același lucru. Doar că la
+              noi apari în 50 de locuri, cu de nouă ori mai puțini bani.
+            </p>
+            <ul className="mt-6 space-y-3">
+              {[
+                "Fără abonament, fără obligații ulterioare",
+                "Fără costuri ascunse — 500 lei este prețul final, nu suntem plătitori de TVA",
+                "Factură fiscală și contract de prestări servicii",
+                "Nu publicăm în 12 ore lucrătoare? Primești toți banii înapoi",
+              ].map((p) => (
+                <li key={p} className="flex items-start gap-3">
+                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+                  <span className="text-slate-700">{p}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      {/*
+        Sectiunea care vinde cel mai tare, tocmai fiindca nu vinde.
+        Toti ceilalti promit Google. Cine spune pe fata ce NU livreaza e crezut
+        si cand spune restul. Inlocuieste „Datele, pe fata" — aceeasi idee,
+        fara cifrele de trafic care ridicau o indoiala in loc s-o stinga.
+      */}
+      <section id="detalii" className="section scroll-mt-20">
+        <div className="container">
+          <div className="mx-auto max-w-3xl">
+            <div className="text-center">
+              <p className="eyebrow">Fără surprize</p>
+              <h2 className="h2 mt-2">Ce NU îți promitem</h2>
+              <p className="mt-4 text-slate-600">
+                Preferăm să știi dinainte ce cumperi, decât să afli după.
+              </p>
+            </div>
+
+            <div className="mt-10 grid gap-4 md:grid-cols-2">
+              <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6">
+                <XCircle className="h-7 w-7 text-brand-red" />
+                <h3 className="mt-3 font-serif text-lg font-bold text-brand-navy">
+                  Nu-ți promitem prima pagină în Google
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  Trimitem articolele la indexare în ziua publicării, dar când și
+                  dacă apar în căutări decide Google. Cine îți garantează poziții
+                  nu spune adevărul.
+                </p>
+              </div>
+              <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6">
+                <XCircle className="h-7 w-7 text-brand-red" />
+                <h3 className="mt-3 font-serif text-lg font-bold text-brand-navy">
+                  Nu-ți promitem mii de vizitatori
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  Un articol de presă aduce notorietate, nu trafic — la fel și la
+                  publicațiile care cer 4.500 de lei. Dacă ce cauți sunt
+                  vizitatori pe site-ul tău, ai nevoie de reclamă plătită, și
+                  ți-o spunem din start.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-6 rounded-2xl bg-brand-navy p-6 text-center md:p-8">
+              <p className="font-serif text-xl font-bold text-white">
+                Ce îți promitem, în schimb, e scris tot aici.
+              </p>
+              <p className="mx-auto mt-2 max-w-lg text-sm text-white/75">
+                50 de publicații, în maximum 12 ore lucrătoare. Rămân permanent.
+                Primești lista cu toate linkurile. Dacă nu publicăm la timp,
+                primești banii înapoi.
+              </p>
+              <a
+                href="#oferta"
+                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
+              >
+                <CreditCard className="h-5 w-5" />
+                Comandă acum — 500 lei
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -332,189 +644,15 @@ export default function Oferta500Page() {
         </div>
       </section>
 
-      {/* Comparatie */}
+      {/* Dovada sociala, dupa ce omul a vazut produsul si conditiile. */}
       <section className="section">
         <div className="container">
-          <div className="mx-auto max-w-3xl rounded-2xl border-2 border-brand-red/20 bg-white p-8 md:p-12">
-            <p className="eyebrow">De ce merită</p>
-            <h2 className="mt-2 font-serif text-2xl font-bold text-brand-navy md:text-3xl">
-              500 de lei pentru 50 de publicări înseamnă 10 lei pe ziar
-            </h2>
-            <p className="mt-4 text-slate-600">
-              Un singur advertorial cumpărat direct de la o publicație locală
-              costă între 150 și 400 de lei. Aici plătești 10 lei per publicare
-              și primești în plus distribuirea pe Facebook, backlinkul dofollow
-              și raportul cu dovezi.
-            </p>
-            <ul className="mt-8 space-y-3">
-              {[
-                "Fără abonament, fără obligații ulterioare",
-                "Fără costuri ascunse — 500 lei este prețul final",
-                "Factură fiscală și contract de prestări servicii",
-                "Articolele rămân online permanent",
-              ].map((p) => (
-                <li key={p} className="flex items-start gap-3">
-                  <CheckCircle2 className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
-                  <span className="text-slate-700">{p}</span>
-                </li>
-              ))}
-            </ul>
-          </div>
-        </div>
-      </section>
-
-      {/* Lista ziarelor — vizibila inainte de plata, cu linkuri.
-          id-ul e tinta butonului "Vezi lista" de sub CTA. */}
-      <section id="lista-ziare" className="section scroll-mt-20">
-        <div className="container">
           <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Transparență totală</p>
-            <h2 className="h2 mt-2">Vezi exact unde se publică</h2>
-            <p className="mt-4 text-slate-600">
-              Nu cumperi pe încredere. Astea sunt publicațiile — dă click pe
-              oricare și convinge-te că sunt reale.
-            </p>
+            <p className="eyebrow">Ce spun clienții</p>
+            <h2 className="h2 mt-2">Din partea unui client, nu a noastră</h2>
           </div>
           <div className="mt-10">
-            <NewspaperDirectory />
-          </div>
-
-          {/*
-            Cifrele de aici sunt din Meta Insights, pagina Botosani Expres,
-            3–30 august 2026 — captura primita de la proprietar. Perioada e
-            spusa explicit tocmai ca cifra sa nu poata fi contestata in
-            comentariile de la reclama, cum au fost contestate cifrele vagi
-            de trafic pe care le-am scos de pe site. Cand cifrele se schimba,
-            se schimba AICI si in eticheta de perioada, impreuna.
-          */}
-          {/*
-            Autoritatea domeniilor, spusa ca text si invitand la verificare.
-            NU punem capturi din Moz: oricine poate verifica gratuit in 30 de
-            secunde, deci o captura n-ar adauga incredere, dar ar parea aleasa
-            de noi. Un numar plus "verifica singur" e mai puternic.
-            Nu pomenim cuvintele-cheie pe care rankeaza ziarele: nu vindem
-            pozitii in Google, vindem backlinkuri de pe domenii puternice —
-            iar aia e afirmatia pe care o putem sustine.
-          */}
-          <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
-              De ce contează unde apare articolul
-            </p>
-            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              50 de recomandări, de pe 50 de site-uri puternice
-            </h3>
-
-            <div className="mx-auto mt-5 max-w-2xl space-y-4 text-sm leading-relaxed text-slate-600">
-              <p>
-                Google judecă un site după cine îl recomandă. Un link primit de pe un site
-                puternic e ca o recomandare din partea cuiva de încredere. Unul de pe un blog
-                pe care nu-l cunoaște nimeni nu cântărește aproape nimic.
-              </p>
-              <p>
-                Puterea unui site se măsoară cu un scor de la 0 la 100, numit{" "}
-                <strong className="text-brand-navy">Domain Authority</strong>. Un blog nou are
-                1–5. Ziarele din rețeaua noastră au{" "}
-                <strong className="text-brand-navy">36–37 — toate, nu doar câteva</strong>, cu
-                peste 120 de site-uri care fac linkuri către fiecare.
-              </p>
-              <p>
-                Tu primești <strong className="text-brand-navy">50 de astfel de recomandări
-                dintr-o dată</strong>, de pe 50 de domenii diferite, și rămân permanent.
-              </p>
-              {/*
-                Argumentul care le leaga pe celelalte doua si pe care il intelege
-                oricine: Google trece des pe unde se intampla ceva. Un domeniu
-                parcat, oricat de vechi si de puternic, e vizitat rar.
-              */}
-              <p>
-                Și încă ceva, care cântărește la fel de mult:{" "}
-                <strong className="text-brand-navy">site-urile sunt vii</strong>. În rețea apar
-                circa 600 de articole în fiecare zi, deci motoarele de căutare trec pe ele
-                constant. Un domeniu ținut doar pentru linkuri, oricât de vechi, e vizitat rar —
-                articolul tău ar aștepta săptămâni. Aici e găsit repede, iar în ziua publicării
-                îl anunțăm noi la Google, prin API-ul oficial de indexare.
-              </p>
-            </div>
-
-            {/*
-              Cifrele in fata, ca la cardul de Facebook: omul le vede, nu i se
-              cere sa se documenteze singur. Sursa si data raman scrise, ca sa
-              nu fie o afirmatie fara acoperire — si ca sa stim cand trebuie
-              improspatate.
-            */}
-            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">36–37</div>
-                <div className="mt-1 text-sm text-slate-600">Domain Authority, pe toate cele 50</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">120+</div>
-                <div className="mt-1 text-sm text-slate-600">domenii care dau linkuri către fiecare ziar</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-emerald-600">50</div>
-                <div className="mt-1 text-sm text-slate-600">linkuri dofollow, permanente</div>
-              </div>
-            </div>
-            <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: Moz Domain Analysis, verificat în august 2026 — scor public, verificabil
-              pentru oricare domeniu din listă. Un blog nou are Domain Authority 1–5.
-            </p>
-            <div className="hidden">
-            </div>
-          </div>
-
-          <div id="dovada-facebook" className="mx-auto mt-12 max-w-3xl scroll-mt-24 rounded-2xl border border-slate-200 bg-white p-6 md:p-8">
-            <p className="text-center text-xs font-bold uppercase tracking-wider text-brand-red">
-              Cel mai citit ziar din rețea, pe Facebook
-            </p>
-            <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Botoșani Expres: 2,4 milioane de vizualizări pe Facebook, în 28 de zile
-            </h3>
-            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
-                <div className="mt-1 text-sm text-slate-600">vizualizări pe Facebook</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
-                <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
-                <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
-              </div>
-            </div>
-            <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: statisticile Meta ale paginii, perioada 4–31 august. Toate cele 50 de
-              ziare au pagini de Facebook active, fiecare cu publicul ei — aici am arătat-o
-              doar pe cea mai citită. Articolul tău se distribuie pe{" "}
-              <strong className="text-brand-navy">toate cele 50</strong>.{" "}
-              <a
-                href="https://botosaniexpres.ro"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="font-semibold text-brand-red underline"
-              >
-                Vezi ziarul live →
-              </a>
-            </p>
-          </div>
-
-          {/* Omul tocmai a verificat ca ziarele sunt reale — momentul cu cea mai
-              mare incredere din toata pagina. Fara buton aici, trebuia sa se
-              intoarca singur sus. */}
-          <div className="mt-10 text-center">
-            <a
-              href="#oferta"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
-            >
-              <CreditCard className="h-5 w-5" />
-              Comandă acum — 500 lei
-            </a>
-            <p className="mt-3 text-sm text-slate-500">
-              Publicare în 12 ore lucrătoare · articol unic pe fiecare ziar · factură fiscală
-            </p>
+            <ClientTestimonials />
           </div>
         </div>
       </section>
@@ -549,102 +687,6 @@ export default function Oferta500Page() {
       <section className="section">
         <div className="container">
           <BankTransferBox note="Nu e obligatoriu cardul. Poți plăti prin OP: 500 lei (standard) sau 1.000 lei (cazino/iGaming)." />
-        </div>
-      </section>
-
-      {/*
-        Datele, ca sectiune de sine statatoare — tinta butoanelor din antet si
-        de langa comanda.
-        Erau un raspuns lung in intrebari frecvente, adica un zid de text pe
-        care nu-l citea nimeni. Aici sunt cifre, pe rand, inclusiv cele slabe:
-        o zi intreaga de WhatsApp s-a dus pe intrebari la care raspunsul exista
-        deja, doar ca ingropat.
-      */}
-      <section id="detalii" className="section scroll-mt-20">
-        <div className="container">
-          <div className="mx-auto max-w-3xl">
-            <div className="text-center">
-              <p className="eyebrow">Fără surprize</p>
-              <h2 className="h2 mt-2">Datele, pe față</h2>
-              <p className="mt-4 text-slate-600">
-                Inclusiv cele care nu ne avantajează. Preferăm să știi dinainte ce cumperi.
-              </p>
-            </div>
-
-            <div className="mt-10 space-y-4">
-              <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6">
-                <h3 className="font-serif text-lg font-bold text-brand-navy">
-                  Nu vindem trafic. Iată cifrele reale.
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                  Sunt publicații locale, fiecare pentru județul ei, nu portaluri naționale.
-                  Măsurat în Google Analytics, august 2026, traficul diferă foarte mult de la
-                  o publicație la alta:
-                </p>
-                <div className="mt-4 grid gap-3 sm:grid-cols-3">
-                  <div className="rounded-xl bg-slate-50 p-4 text-center">
-                    <div className="font-serif text-2xl font-bold text-brand-navy">20.000</div>
-                    <div className="mt-1 text-xs text-slate-600">cea mai mare (Botoșani Expres), într-o lună</div>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 p-4 text-center">
-                    <div className="font-serif text-2xl font-bold text-brand-navy">câteva sute</div>
-                    <div className="mt-1 text-xs text-slate-600">majoritatea publicațiilor</div>
-                  </div>
-                  <div className="rounded-xl bg-slate-50 p-4 text-center">
-                    <div className="font-serif text-2xl font-bold text-brand-navy">câteva zeci</div>
-                    <div className="mt-1 text-xs text-slate-600">cele mai noi din rețea</div>
-                  </div>
-                </div>
-                <p className="mt-4 text-sm text-slate-600">
-                  Rețeaua e tânără și în creștere. Dacă ce cauți sunt strict vizitatori direcți
-                  pe site-ul tău, <strong className="text-brand-navy">îți spunem de la început
-                  că nu asta e soluția potrivită</strong>.
-                </p>
-              </div>
-
-              <div className="grid gap-4 sm:grid-cols-2">
-                <div className="rounded-2xl border border-slate-200 bg-white p-6">
-                  <h3 className="font-serif text-lg font-bold text-brand-navy">
-                    Unde e audiența: pe Facebook
-                  </h3>
-                  <p className="mt-2 text-sm leading-relaxed text-slate-600">
-                    Fiecare publicație are pagina ei, iar articolul se distribuie automat.
-                    Cea mai mare pagină din rețea, Botoșani Expres, a avut{" "}
-                    <strong className="text-brand-navy">2,4 milioane de vizualizări</strong> și
-                    100.056 interacțiuni într-o singură lună (statistici Meta, august 2026).
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-slate-200 bg-white p-6">
-                  <h3 className="font-serif text-lg font-bold text-brand-navy">
-                    Ce cumperi de fapt
-                  </h3>
-                  <ul className="mt-2 space-y-1.5 text-sm text-slate-600">
-                    <li>50 de linkuri dofollow permanente, DA 36–37</li>
-                    <li>50 de apariții în presă, de arătat clienților tăi</li>
-                    <li>Prezență care rămâne online și peste ani</li>
-                    <li>Distribuire pe paginile de Facebook</li>
-                  </ul>
-                </div>
-              </div>
-
-              <div className="rounded-2xl bg-brand-navy p-6 text-center md:p-8">
-                <p className="font-serif text-xl font-bold text-white">
-                  Ai văzut tot, inclusiv ce nu ne avantajează.
-                </p>
-                <p className="mx-auto mt-2 max-w-lg text-sm text-white/75">
-                  Dacă asta cauți, comanda durează două minute. Publicăm în maximum 12 ore
-                  lucrătoare și primești raportul cu toate linkurile.
-                </p>
-                <a
-                  href="#oferta"
-                  className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
-                >
-                  <CreditCard className="h-5 w-5" />
-                  Comandă acum — 500 lei
-                </a>
-              </div>
-            </div>
-          </div>
         </div>
       </section>
 
@@ -684,7 +726,7 @@ export default function Oferta500Page() {
           </h2>
           <p className="lead mx-auto mt-4 max-w-2xl text-white/85">
             Ofertă limitată pentru clienți noi. Comanzi acum, trimiți articolul,
-            iar în 12 ore lucrătoare ai raportul cu toate cele 50 de linkuri.
+            iar în 12 ore lucrătoare ai lista cu toate cele 50 de linkuri.
           </p>
           <div className="mt-8">
             <PromoOffer showPrice={false} />

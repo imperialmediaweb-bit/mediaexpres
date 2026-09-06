@@ -81,11 +81,11 @@ export const STANDARD_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
-      "Distribuție pe 50 pagini Facebook",
+      "Distribuție pe 46 de pagini de Facebook",
       "Linkuri livrate în 12 ore lucrătoare",
-      "Raport PDF complet",
+      "Lista cu toate linkurile (PDF + Excel)",
       "Permanent online",
-      "50 backlinks SEO",
+      "50 de linkuri către site-ul tău",
     ],
   },
 ];
@@ -136,9 +136,9 @@ export const CASINO_PACKAGES: Package[] = [
     badge: "Recomandat iGaming",
     highlights: [
       "1 articol pe 50 de ziare",
-      "Distribuție pe 50 pagini Facebook",
+      "Distribuție pe 46 de pagini de Facebook",
       "Linkuri livrate în 12 ore lucrătoare",
-      "Raport PDF complet",
+      "Lista cu toate linkurile (PDF + Excel)",
       "Permanent online",
     ],
   },
@@ -201,11 +201,11 @@ export const PROMO_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
-      "Distribuție pe 50 pagini Facebook",
+      "Distribuție pe 46 de pagini de Facebook",
       "Linkuri livrate în 12 ore lucrătoare",
-      "Raport PDF complet cu toate URL-urile",
+      "Lista cu toate linkurile (PDF + Excel)",
       "Permanent online",
-      "50 backlinks SEO dofollow",
+      "50 de linkuri către site-ul tău, permanente",
     ],
   },
   {
@@ -220,11 +220,11 @@ export const PROMO_PACKAGES: Package[] = [
     highlights: [
       "1 articol pe 50 de ziare (41 locale + 9 naționale)",
       "Variantă unică pe fiecare ziar — zero conținut duplicat",
-      "Distribuție pe 50 pagini Facebook",
+      "Distribuție pe 46 de pagini de Facebook",
       "Linkuri livrate în 12 ore lucrătoare",
-      "Raport PDF complet cu toate URL-urile",
+      "Lista cu toate linkurile (PDF + Excel)",
       "Permanent online",
-      "50 backlinks SEO dofollow",
+      "50 de linkuri către site-ul tău, permanente",
     ],
   },
 ];

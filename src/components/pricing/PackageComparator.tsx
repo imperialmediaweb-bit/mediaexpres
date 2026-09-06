@@ -9,7 +9,7 @@ const ROWS: Array<{
   { label: "Număr ziare", values: ["1 județean", "10 regionale", "41 locale + 9 naționale"], highlight: true },
   { label: "Cititori estimați / lună", values: ["~3.000", "~30.000", "~250.000+"], highlight: true },
   { label: "Pagini Facebook (distribuție)", values: ["1", "8", "50"] },
-  { label: "Backlinks SEO", values: ["1", "10", "50"] },
+  { label: "Linkuri către site-ul tău", values: ["1", "10", "50"] },
   { label: "Acoperire geografică", values: ["1 județ", "1 zonă (5-8 jud.)", "Toată România"] },
   { label: "Livrare", values: ["≤ 12 ore lucrătoare", "≤ 12 ore lucrătoare", "≤ 12 ore lucrătoare"] },
   { label: "Articole indexate Google", values: [true, true, true] },

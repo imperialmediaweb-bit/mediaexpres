@@ -292,10 +292,10 @@ export interface OutreachEmail {
 }
 
 const BRAND_PITCH_FULL =
-  "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Avem un portofoliu de 50 publicatii (cate 1 per judet + 9 ziare nationale, toate cu DA 37 si trafic solid), plus 50 pagini de Facebook asociate fiecarei publicatii.";
+  "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Avem un portofoliu de 50 publicatii (cate 1 per judet + 9 ziare nationale, toate cu DA 37 si trafic solid), plus 46 de pagini de Facebook asociate fiecarei publicatii.";
 
 const BRAND_PITCH_AGENCY =
-  "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Portofoliu: 50 publicatii (1 per judet + 9 nationale, toate cu DA 37, trafic solid) + 50 pagini Facebook asociate.";
+  "Salut, sunt Andrei de la MediaExpres - cea mai mare retea de presa online din Romania. Portofoliu: 50 publicatii (1 per judet + 9 nationale, toate cu DA 37, trafic solid) + 46 de pagini de Facebook asociate.";
 
 export async function generateOutreachEmail(
   input: OutreachEmailInput
@@ -318,10 +318,10 @@ export async function generateOutreachEmail(
   const SOCIAL_PROOF =
     "Colaboram deja cu June, Emblema Grup, WhitePress (jucator European top), Blogatu si magazine online de renume din Romania.";
 
-  const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de publicatii online + 50 pagini Facebook, raport in 12h, raport PDF):
+  const PACKAGES_CONTEXT = `Oferta MediaExpres (publicare comunicate de presa pe 50 de publicatii online + 46 de pagini de Facebook, raport in 12h, raport PDF):
 - Pachet Local: 150 RON - 1 publicatie judeteana (test rapid)
 - Pachet Regional: 500 RON - 10 publicatii dintr-o zona
-- Pachet National 50: 1500 RON - 50 publicatii (41 locale + 9 nationale) + 50 pagini Facebook + 50 backlinks SEO permanente -- ACESTA ESTE PACHETUL RECOMANDAT DEFAULT
+- Pachet National 50: 1500 RON - 50 publicatii (41 locale + 9 nationale) + 46 de pagini de Facebook + 50 de linkuri permanente catre site-ul clientului -- ACESTA ESTE PACHETUL RECOMANDAT DEFAULT
 - Pachet Cazino Local: 300 RON / Cazino Regional: 900 RON / Cazino National: 2500 RON (pentru iGaming, conform ONJN)
 
 Abonamente lunare cu pret per articol mai mic:
@@ -353,7 +353,7 @@ Mentioneaza in CTA ca dupa click vede lista ziarelor + oferta completa + STRATEG
   const PLACEHOLDER_RULE = `REGULA ABSOLUTA: NICIODATA placeholders cu paranteze patrate sau acolade [oras], [domeniu], {x}, <city> etc. Daca info LIPSESTE, OMITE complet propozitia sau foloseste fallback generic ("Va scriu pentru un parteneriat scurt"). NU inventa orase, NU inventa industrii.`;
 
   const FACTS_ONLY_RULE = `REGULA FACTS (fapte verificabile DOAR):
-PERMIS: 50 publicatii online, 1/judet, 9 nationale, DA 37, trafic solid (calitativ, fara cifra), 50 pagini Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), agentul nostru/echipa noastra te ajuta cu redactarea, 3 poze, factura post-publicare, contact dedicat per partener, STRATEG EDITORIAL AI gratuit (unic in piata).
+PERMIS: 50 publicatii online, 1/judet, 9 nationale, articol permanent, 46 de pagini de Facebook, raport 12h, articol permanent online (linkuri permanente), articol redactional (jurnalistic, nu reclama), agentul nostru/echipa noastra te ajuta cu redactarea, 3 poze, factura post-publicare, contact dedicat per partener, STRATEG EDITORIAL AI gratuit (unic in piata).
 INTERZIS: nr cititori/luna exact, procent crestere trafic, DR Ahrefs, cuvantul "AI" sau "inteligenta artificiala" pentru redactare (foloseste "agentul nostru" sau "echipa noastra"). EXCEPTIE: poti folosi denumirea "Strateg Editorial AI" ca nume de produs - este branded astfel intentionat.`;
 
   const PR_AGENCY_SYSTEM = `Esti un BD manager B2B care construieste reseller-program intre MediaExpres si agentii PR din Romania. NU vinzi articole direct - propui parteneriat reseller in care agentia foloseste reteaua MediaExpres pentru clientii lor.
@@ -429,7 +429,7 @@ Reguli email:
   PUNE OPTIUNEA (g) OBLIGATORIU - este diferentiatorul cheie vs competitia. Restul: alege 4 din a-f in functie de industrie.
   + social proof scurt: "colaboram cu June, Emblema, WhitePress si magazine online de renume din RO"
   PARAGRAFUL 2 = recomanda pachetul:
-    - DEFAULT firme normale: Pachet National 50 (1500 RON) - 41 locale + 9 nationale + 50 Facebook + 50 backlinks permanente
+    - DEFAULT firme normale: Pachet National 50 (1500 RON) - 41 locale + 9 nationale + 50 Facebook + 50 de aparitii permanente
     - DACA E iGaming/cazino: Pachet Cazino National (2500 RON), conform ONJN
   + mentioneaza ca agentul nostru ajuta cu redactarea, voi furnizati doar tematica + 3 poze
 - CTA: INTERZIS apel/meeting/proforma. Daca LINK CTA UNIC exista: "Vezi oferta + lista 50 ziare + testeaza Strategul AI gratuit + completeaza datele aici:" + link. Daca NU: "Testati Strategul Editorial AI gratuit pe mediaexpress.ro/strateg-ai (30 sec) si raspundeti cu DA daca vreti detaliile complete."

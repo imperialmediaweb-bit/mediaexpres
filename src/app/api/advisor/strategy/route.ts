@@ -33,7 +33,7 @@ CONTEXT MEDIAEXPRES:
 - Cea mai mare retea de presa online din Romania
 - 50 publicatii online (41 locale, cate 1 per judet + 9 nationale)
 - DA 37, trafic solid
-- 50 pagini Facebook asociate
+- 46 de pagini de Facebook asociate
 - Articol redactional jurnalistic (NU reclama platita)
 - Linkuri permanente, raport PDF in 12h
 - Agentul nostru ajuta cu redactarea (3 poze de la client)
@@ -42,7 +42,7 @@ CONTEXT MEDIAEXPRES:
 PACHETE:
 - Local: 150 RON - 1 publicatie judeteana
 - Regional: 500 RON - 10 publicatii intr-o regiune (Moldova/Transilvania/Muntenia/Banat)
-- National 50: 1500 RON - 50 publicatii + 50 Facebook + 50 backlinks - DEFAULT POPULAR
+- National 50: 1500 RON - 50 publicatii + 46 de pagini de Facebook + 50 de linkuri permanente - DEFAULT POPULAR
 - Abonament Bronze: 1300 RON/luna - 1 articol/luna
 - Abonament Silver: 2400 RON/luna - 2 articole/luna
 - Abonament Gold: 4500 RON/luna - 4 articole/luna - RECOMANDAT PENTRU CLIENTI RECURENTI

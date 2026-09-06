@@ -75,6 +75,21 @@ for (const [path, label] of PAGES) {
       [/\b[îi]n (maximum )?4 ore\b/i, "promisiunea veche de 4 ore"],
       [/\b224\s*(de )?(h|ore)\b/i, "cifra stricata 224"],
       [/\b24 de ore lucr/i, "termenul vechi de 24 de ore — acum e 12 ore lucratoare"],
+      // 06.09.2026 — un singur produs: aparitii in presa, nu SEO. Reteaua
+      // marcheaza linkurile catre client conform regulilor Google pentru
+      // continut platit, deci „dofollow" si „backlink SEO" ar fi promisiuni
+      // pe care un client tehnic le verifica in 10 secunde.
+      [/dofollow/i, "dofollow — linkurile sunt marcate ca platite, nu mai promitem asta"],
+      // Cuvantul „backlink" nu e interzis: linkul CHIAR exista si chiar e de pe
+      // un domeniu cu DA 37 — asta se poate spune. Interzisa e PROMISIUNEA:
+      // „50 de backlinks SEO", adica vandut ca instrument de clasament.
+      [/\d+\s*(de\s*)?backlink/i, "„N backlinks” — vindem aparitii, nu pachete de linkuri SEO"],
+      [/backlink[a-zăâîșț]*\s+(SEO|dofollow)/i, "„backlink SEO” — nu mai vindem asta"],
+      [/pentru domain authority|autoritate SEO/i, "vandut ca instrument de SEO"],
+      [/\bDA 36|36[–-]37\b/i, "cifra veche de autoritate — acum DA 37 / PA 30, cu data"],
+      [/Sibiu Expres/i, "sibiuexpres.ro nu exista inca — scos din lista publica"],
+      [/vizualiz[ăa]ri pe Facebook/i, "indicatorul Meta e page_impressions — se spune „afisari”"],
+      [/50 (de )?pagini (de )?Facebook/i, "sunt 46 de pagini, nu 50"],
       [/1\.200\s*(de\s*)?articole|1\.200\+/i, "cifra veche de articole pe zi — acum e circa 600"],
       [/lucr[ăa]toare\s+lucr[ăa]toare/i, "cuvant dublat"],
       [/320\.000|320k|vizitatori unici/i, "cifre de vizitatori — nu le mai folosim"],

@@ -312,7 +312,7 @@ async function handleCheckoutCompleted(
           <p style="margin:16px 0;font-size:18px;"><strong>Abonament lunar: ${monthlyPrice} lei/lună</strong> — cu ${oncePrice - monthlyPrice} lei mai puțin decât plata unică.</p>
           <ul style="margin:16px 0;padding-left:20px;color:#334155;">
             <li style="margin:6px 0;">1 articol nou pe cele 50 de ziare, în fiecare lună</li>
-            <li style="margin:6px 0;">50 de backlinks noi lunar — SEO-ul crește constant</li>
+            <li style="margin:6px 0;">50 de apariții noi în fiecare lună, care rămân permanent</li>
             <li style="margin:6px 0;">Îți scrii articolul din cont sau îl generezi cu AI</li>
             <li style="margin:6px 0;">Anulezi oricând, fără penalizări</li>
           </ul>
@@ -451,7 +451,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
       }, dar plata a rămas neterminată.</p>
       ${
         isPromo
-          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de backlinks permanente, distribuire pe 50 de pagini de Facebook și raportul cu toate linkurile — publicat în 12 ore lucrătoare. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
+          ? `<p>Ca să știi ce lași pe masă: <strong>50 de publicații reale</strong>, 50 de apariții care rămân permanent, distribuire pe paginile de Facebook și lista cu toate linkurile — publicat în 12 ore lucrătoare. La prețul ăsta e cea mai ieftină intrare în presă din România: <strong>10 lei pe ziar</strong>.</p>`
           : ""
       }
       <p>Comanda ta e salvată — o poți relua exact de unde ai rămas, într-un minut:</p>

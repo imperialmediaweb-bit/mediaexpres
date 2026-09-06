@@ -51,7 +51,7 @@ export default function OfertaFbPage() {
               <li className="flex items-start gap-3">
                 <TrendingUp className="mt-0.5 h-5 w-5 flex-shrink-0 text-brand-red" />
                 <span>
-                  <strong className="text-brand-navy">SEO backlinks</strong>{" "}
+                  <strong className="text-brand-navy">linkuri permanente</strong>{" "}
                   reali din 50 domenii diferite
                 </span>
               </li>

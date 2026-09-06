@@ -57,7 +57,7 @@ export const ARTICLE_SPECS_HTML = `
       </tr>
       <tr>
         <td style="padding:6px 8px 6px 0;color:#64748b;vertical-align:top;white-space:nowrap;">Linkuri</td>
-        <td style="padding:6px 0;color:#111111;">Până la <strong>3 linkuri</strong> către site-ul tău, cu textul de ancoră ales de tine. Sunt <strong>dofollow</strong> și rămân active permanent.</td>
+        <td style="padding:6px 0;color:#111111;">Până la <strong>3 linkuri</strong> către site-ul tău, cu textul de ancoră ales de tine. Rămân active permanent, la aceeași adresă.</td>
       </tr>
       <tr>
         <td style="padding:6px 8px 6px 0;color:#64748b;vertical-align:top;white-space:nowrap;">Imagini</td>

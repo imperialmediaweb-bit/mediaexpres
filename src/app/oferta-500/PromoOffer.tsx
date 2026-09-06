@@ -490,8 +490,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </span>
           </li>
           <li>
-            <strong className="text-white">4.</strong> Primești pe email raportul cu
-            toate linkurile publicate.{" "}
+            <strong className="text-white">4.</strong> Primești pe email lista cu toate
+            cele 50 de linkuri, în PDF și Excel — documentul pe care îl trimiți
+            mai departe.{" "}
             <span className="text-white/60">
               Factura fiscală o primești pe email în aceeași zi lucrătoare, indiferent cum plătești.
             </span>
