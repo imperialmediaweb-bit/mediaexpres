@@ -120,7 +120,7 @@ const INCLUDED = [
     icon: Globe,
     title: "Publicare eșalonată, nu toate deodată",
     description:
-      "Articolele intră pe rând, pe parcursul zilei, nu toate în aceeași secundă — cum preia orice redacție o știre.",
+      "Articolele intră pe rând, pe parcursul zilei, nu toate în aceeași secundă — cum apare orice știre, una după alta.",
   },
 ];
 
@@ -220,7 +220,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Fiecare are redacția ei și publică zilnic despre județul ei — circa 600 de articole pe zi în toată rețeaua — plus pagina de Facebook unde își postează articolele: 46 de pagini, cu 37.323 de urmăritori. Cel mai simplu e să verifici singur: lista completă e mai sus, deschide orice ziar, citește ce a apărut azi și intră și pe pagina lui de Facebook.",
+    a: "Fiecare publică zilnic articole despre județul lui — circa 600 de articole pe zi în toată rețeaua — plus pagina de Facebook unde își postează articolele: 46 de pagini, cu 37.323 de urmăritori. Cel mai simplu e să verifici singur: lista completă e mai sus, deschide orice ziar, citește ce a apărut azi și intră și pe pagina lui de Facebook.",
   },
 
   {
@@ -408,10 +408,10 @@ export default function Oferta500Page() {
               verifica. Cifrele stau oricum in blocul de dedesubt, cu sursa.
             */}
             <p className="mt-4 text-slate-600">
-              Fiecare publicație are redacția ei și scrie zilnic despre județul
-              ei: primărie, școli, spital, sport, evenimente. Articolul tău apare
-              între aceste știri, iar ziarul îl postează pe pagina lui de
-              Facebook, ca pe oricare altul.
+              Fiecare ziar publică zilnic articole despre județul lui: primărie,
+              școli, spital, sport, evenimente. Articolul tău apare între aceste
+              știri, iar ziarul îl postează pe pagina lui de Facebook, ca pe
+              oricare altul.
             </p>
             <p className="mt-3 font-semibold text-brand-navy">
               Nu trebuie să ne crezi pe cuvânt. Lista e mai jos — deschide orice

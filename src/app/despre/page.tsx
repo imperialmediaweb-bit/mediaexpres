@@ -29,7 +29,7 @@ const VALUES = [
     icon: Award,
     title: "Calitate editorială",
     description:
-      "Publicăm doar pe site-uri active, cu redacții care scriu zilnic — circa 600 de articole pe zi în rețea.",
+      "Publicăm doar pe site-uri active, care publică zilnic — circa 600 de articole pe zi în rețea.",
   },
   {
     icon: Handshake,
