@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { Loader2, Send, Clock, CheckCircle2 } from "lucide-react";
 
 /**
@@ -25,6 +26,33 @@ const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
       "",
       "O zi bună,",
       "Echipa MediaExpres",
+    ].join("\n"),
+  },
+  {
+    // 07.09.2026 — clientul care a platit cu cardul si a inchis formularul.
+    // Reamintirea automata pleaca la 10 minute; asta e varianta scrisa de om,
+    // pentru cand a trecut o zi si tot n-a trimis nimic.
+    eticheta: "Cere articolul",
+    subiect: "Mai avem nevoie de articolul dumneavoastră ca să publicăm",
+    text: [
+      "Bună ziua,",
+      "",
+      "Vă mulțumesc pentru comandă — plata a fost primită, iar factura o găsiți atașată.",
+      "",
+      "Ca să pot publica, mai am nevoie de materialul dumneavoastră. Aveți două variante:",
+      "",
+      "1. Dacă aveți articolul scris — îmi trimiteți textul, până la 3 poze și adresa site-ului către care punem linkurile.",
+      "",
+      "2. Dacă nu aveți articol — îl scriem noi, e inclus în preț. Îmi dați doar câteva detalii: ce face firma, ce vreți să comunicați acum și site-ul dumneavoastră. Vi-l trimit spre citire înainte de publicare.",
+      "",
+      "Vă întreb și cum preferați publicarea: variantă unică pe fiecare ziar (recomandat, se indexează mult mai bine) sau textul dumneavoastră identic pe toate cele 50, dacă e aprobat oficial și nu are voie schimbat.",
+      "",
+      "De la primirea materialelor, în maximum 12 ore lucrătoare public pe toate cele 50 de ziare și revin cu raportul complet, cu toate linkurile.",
+      "",
+      "Îmi puteți răspunde direct la acest email sau pe WhatsApp: https://wa.me/40758169388",
+      "",
+      "Cu stimă,",
+      "Ionuț Aioniţoaie — MediaExpres",
     ].join("\n"),
   },
   {
@@ -62,9 +90,17 @@ const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
 ];
 
 export function ComposeForm() {
-  const [recipientsRaw, setRecipientsRaw] = useState("");
-  const [subject, setSubject] = useState("");
-  const [body, setBody] = useState("");
+  // Butonul „Cere articolul" din Materiale trimite aici cu ?to=...&sablon=...
+  // ca sa nu mai copiezi adresa cu mana si sa nu mai cauti sablonul in lista.
+  const params = useSearchParams();
+  const sablonCerut = params.get("sablon");
+  const preselectat = SABLOANE.find(
+    (t) => t.eticheta.toLowerCase().replace(/\s+/g, "-") === sablonCerut ||
+      (sablonCerut === "material" && t.eticheta === "Cere articolul"),
+  );
+  const [recipientsRaw, setRecipientsRaw] = useState(params.get("to") || "");
+  const [subject, setSubject] = useState(preselectat?.subiect || "");
+  const [body, setBody] = useState(preselectat?.text || "");
   const [template, setTemplate] = useState<"brand" | "personal">("brand");
   const [when, setWhen] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");

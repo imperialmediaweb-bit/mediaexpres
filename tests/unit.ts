@@ -159,6 +159,22 @@ t("nu promite trafic sau pozitii nicaieri", !/garantam pozitii/i.test(k.replace(
 t("are argumentul trait 500 vs 4.500", /4\.500 de lei pentru un singur articol/.test(k));
 t("stie ca publicarea e esalonata", /ESALONATA/.test(k));
 t("stie de promovarea pe Facebook 3 zile, fara cifre promise", /PROMOVARE PE FACEBOOK, 3 ZILE, INCLUSA/.test(k) && /NU promite afisari/.test(k));
+
+// 07.09.2026 (proprietarul: „nu vorbim la per tu") — emailurile catre clientii
+// care au platit se scriu cu „dumneavoastra". Pagina de vanzare ramane la „tu":
+// acolo vorbim cu vizitatorul, nu cu omul care ne-a dat bani.
+{
+  const catreClienti = [
+    "src/app/api/webhook/stripe/route.ts",
+    "src/lib/invoicing.ts",
+    "src/lib/list-email.ts",
+    "src/app/api/order/route.ts",
+    "src/app/api/oferta-fb/route.ts",
+    "src/app/api/request-list/route.ts",
+  ];
+  const cuSalut = catreClienti.filter((f) => /<p>Salut/.test(fs.readFileSync(f, "utf8")));
+  t("emailurile catre clienti nu mai incep cu „Salut”", cuSalut.length === 0, cuSalut.join(", "));
+}
 t("confirma ca linkurile sunt dofollow, dar fara promisiuni", /Linkurile SUNT dofollow/.test(k) && /nu spune adevarul/.test(k));
 t("raspunde cinstit la „primesc backlinkuri?”", /Primesc backlinkuri\?/.test(k) && /fara atribute care le anuleaza/i.test(k));
 t("stie de articolul unic", k.includes("ARTICOL UNIC"));

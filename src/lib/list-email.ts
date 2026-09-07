@@ -78,7 +78,7 @@ export function buildListEmail(firstName: string): string {
   return wrapEmail(
     `Lista completă a celor ${OFFICIAL_TOTAL} de ziare`,
     `
-    <p>Salut ${firstName},</p>
+    <p>Bună ziua, ${firstName},</p>
     <p><strong>Ai lista și atașată în PDF</strong>, la finalul acestui email — o poți salva sau trimite mai departe colegilor.</p>
     <p>Mai jos ai <strong>toate publicațiile</strong> din rețeaua MediaExpres — dă click pe oricare să o vezi live. Fiecare are și pagină de Facebook asociată.${
       bonus > 0

@@ -101,6 +101,14 @@ export async function POST(req: NextRequest) {
       `,
     },
     {
+      step: "order: cand au plecat reamintirea si alerta pentru materialul lipsa",
+      query: sql`
+        ALTER TABLE "order"
+          ADD COLUMN IF NOT EXISTS "material_reminder_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "material_alert_at" timestamp
+      `,
+    },
+    {
       step: "tabel client_message (mesajele din contul clientului)",
       query: sql`
         CREATE TABLE IF NOT EXISTS "client_message" (

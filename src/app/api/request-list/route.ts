@@ -110,7 +110,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Toate cele 50 de ziare, pentru 500 de lei",
       `
-      <p>Salut ${firstName},</p>
+      <p>Bună ziua, ${firstName},</p>
       <p>Acum câteva zile ai cerut lista rețelei MediaExpres. Îți scriu pentru un singur lucru: <strong>oferta de intrare${deadlineLabel ? `, valabilă până pe ${deadlineLabel}` : ""}</strong>.</p>
       <p>Un articol publicat pe <strong>toate cele 50 de ziare</strong> — 41 locale + 9 naționale — pentru <strong>500 de lei</strong> în loc de 1.500. Nu un ziar, nu zece. Toate.</p>
       <ul style="margin:16px 0;padding-left:20px;line-height:1.7;">
@@ -140,7 +140,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       deadlineLabel ? `Expiră pe ${deadlineLabel}` : "Ultima chemare",
       `
-      <p>Salut ${firstName},</p>
+      <p>Bună ziua, ${firstName},</p>
       <p>Ultimul mesaj pe tema asta${deadlineLabel ? `: oferta de intrare expiră pe <strong>${deadlineLabel}</strong>` : ""}.</p>
       <p><strong>500 de lei</strong> pentru un articol pe toate cele 50 de ziare, în loc de 1.500. După expirare, același lucru costă prețul întreg.</p>
       <p>Dacă ai ezitat pentru că nu ai text scris — îl scriem noi, fără cost suplimentar. Dacă ai ezitat din alt motiv, răspunde-mi cu el; poate am o soluție.</p>

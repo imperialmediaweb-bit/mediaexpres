@@ -87,6 +87,14 @@ export const orders = pgTable("order", {
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   paidAt: timestamp("paid_at"),
+  // 07.09.2026 — un client a platit cu cardul si n-a mai trimis niciodata
+  // articolul; proprietarul a aflat abia uitandu-se in admin. Aici se scrie
+  // cand a plecat reamintirea catre client si cand a plecat alerta catre
+  // proprietar, ca fiecare sa plece O SINGURA data, oricat de des ruleaza
+  // cronul. Coloanele se adauga prin /api/admin/fix-db si, ca plasa,
+  // prin lib/ensure-columns.ts.
+  materialReminderAt: timestamp("material_reminder_at"),
+  materialAlertAt: timestamp("material_alert_at"),
 });
 
 export const articles = pgTable("article", {

@@ -12,8 +12,12 @@ let done: Promise<void> | null = null;
 
 export function ensureOrderColumns(): Promise<void> {
   if (!done) {
-    done = db
-      .execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "fb_boost_paper" text`)
+    done = Promise.all([
+      db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "fb_boost_paper" text`),
+      db.execute(
+        sql`ALTER TABLE "order" ADD COLUMN IF NOT EXISTS "material_reminder_at" timestamp, ADD COLUMN IF NOT EXISTS "material_alert_at" timestamp`,
+      ),
+    ])
       .then(() => undefined)
       .catch((e) => {
         done = null;

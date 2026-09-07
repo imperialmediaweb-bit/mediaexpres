@@ -137,7 +137,7 @@ export async function issueInvoiceForOrder(
         html: wrapEmail(
           dePlata ? "Factura ta — o dai la plată" : "Factura ta",
           `
-          <p>Salut,</p>
+          <p>Bună ziua,</p>
           <p>Ai mai jos factura pentru <strong>${INVOICE_PRODUCT_NAME}</strong> — ${input.amount.toFixed(2)} RON.</p>
           <p style="margin-top:16px;">
             <a href="${invoice.shareUrl}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Vezi factura</a>

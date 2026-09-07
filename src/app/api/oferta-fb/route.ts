@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
     html: wrapEmail(
       "Oferta ta personalizată — MediaExpres",
       `
-      <p>Salut ${firstName},</p>
+      <p>Bună ziua, ${firstName},</p>
       <p>Am pregătit pentru tine <strong>oferta personalizată</strong> cu toate detaliile — pachete, prețuri și lista completă a rețelei noastre de 50 de ziare.</p>
       <p style="margin:24px 0;text-align:center;">
         <a href="${offerUrl}" style="display:inline-block;background:#C8102E;color:white;padding:14px 32px;border-radius:8px;font-weight:700;text-decoration:none;font-size:16px;">

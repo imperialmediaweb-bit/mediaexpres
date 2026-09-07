@@ -32,6 +32,8 @@ t("admin/send-list refuza fara sesiune", (await post("/api/admin/send-list", { e
 t("admin/materiale PATCH refuza fara sesiune", (await (await fetch(B + "/api/admin/materiale/x", { method: "PATCH" })).status) === 401);
 t("cron promo-announce refuza fara cheie", (await post("/api/cron/promo-announce")).status === 401);
 t("cron promo-announce refuza cheie gresita", (await post("/api/cron/promo-announce", undefined, { "x-api-key": "gresit" })).status === 401);
+t("cron materiale-lipsa refuza fara cheie", (await post("/api/cron/materiale-lipsa")).status === 401);
+t("cron materiale-lipsa refuza cheie gresita", (await post("/api/cron/materiale-lipsa", undefined, { "x-api-key": "gresit" })).status === 401);
 t("fix-db refuza fara cheie", (await post("/api/admin/fix-db")).status === 401);
 t("paginile de admin cer autentificare", (await get("/admin/materiale")).status === 307);
 t("paginile de cont cer autentificare", (await get("/cont/mesaje")).status === 307);

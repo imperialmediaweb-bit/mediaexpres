@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { getSession } from "@/lib/auth";
 import { ComposeForm } from "./ComposeForm";
@@ -19,7 +20,9 @@ export default function TrimiteEmailPage() {
         avans). Statusul apare apoi în pagina Emailuri.
       </p>
       <div className="mt-8">
-        <ComposeForm />
+        <Suspense fallback={null}>
+          <ComposeForm />
+        </Suspense>
       </div>
     </div>
   );

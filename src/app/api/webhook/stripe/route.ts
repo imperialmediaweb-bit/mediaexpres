@@ -307,7 +307,7 @@ async function handleCheckoutCompleted(
         html: wrapEmail(
           "Ți-a plăcut? Fă-o lunar, mai ieftin.",
           `
-          <p>Salut${firstName ? " " + firstName : ""},</p>
+          <p>Bună ziua${firstName ? " " + firstName : ""},</p>
           <p>Ai plătit <strong>${oncePrice} lei</strong> pentru articolul tău în cele 50 de ziare. Dacă vrei prezență constantă în presă, avem o variantă mai bună:</p>
           <p style="margin:16px 0;font-size:18px;"><strong>Abonament lunar: ${monthlyPrice} lei/lună</strong> — cu ${oncePrice - monthlyPrice} lei mai puțin decât plata unică.</p>
           <ul style="margin:16px 0;padding-left:20px;color:#334155;">
@@ -445,7 +445,7 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
     html: wrapEmail(
       "Ai fost la un pas 👀",
       `
-      <p>Salut${firstName ? " " + firstName : ""},</p>
+      <p>Bună ziua${firstName ? " " + firstName : ""},</p>
       <p>Ai început comanda${amount ? ` de <strong>${amount.toFixed(0)} lei</strong>` : ""} pentru publicarea articolului tău${
         isPromo ? " în <strong>cele 50 de ziare</strong> din rețeaua MediaExpres" : ""
       }, dar plata a rămas neterminată.</p>
@@ -619,7 +619,7 @@ async function sendConfirmationEmails(args: {
     const customerHtml = wrapEmail(
       kind === "payment" ? "Plata confirmata — MediaExpres" : "Abonament activ — MediaExpres",
       `
-      <p>Salut${firstName ? " " + firstName : ""},</p>
+      <p>Bună ziua${firstName ? " " + firstName : ""},</p>
       <p>Multumim pentru plata! Am primit <strong>${amount.toFixed(2)} RON</strong>${
         kind === "subscription" ? " pentru primul ciclu al abonamentului" : ""
       }.</p>

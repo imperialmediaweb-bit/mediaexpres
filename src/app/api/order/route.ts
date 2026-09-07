@@ -104,7 +104,7 @@ export async function POST(req: NextRequest) {
   const customerHtml = wrapEmail(
     "Comandă primită — MediaExpres",
     `
-    <p>Salut ${data.name.split(" ")[0]},</p>
+    <p>Bună ziua, ${data.name.split(" ")[0]},</p>
     <p>Îți mulțumim că ai ales MediaExpres! Comanda ta a fost primită cu succes.</p>
     <table style="width:100%;border-collapse:collapse;margin:16px 0;">
       ${kv("Pachet", packageLabel)}

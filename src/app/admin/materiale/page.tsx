@@ -1,10 +1,10 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { desc } from "drizzle-orm";
+import { and, desc, eq, isNotNull, notInArray } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { orderSubmissions } from "@/db/schema";
+import { orderSubmissions, orders } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { MarkPublishedButton } from "./MarkPublishedButton";
 import { NewOrderForm } from "./NewOrderForm";
@@ -36,6 +36,36 @@ export default async function MaterialePage() {
   // Comenzile prin OP asteapta confirmarea incasarii inainte de publicare.
   const awaitingPayment = rows.filter((r) => r.status === "pending_payment").length;
 
+  // 07.09.2026 — clientul care a platit cu cardul si n-a trimis materialul.
+  // Nu apare in lista de mai jos, fiindca lista arata MATERIALE, iar el n-a
+  // trimis niciunul: pana acum se vedea doar daca te uitai in Clienti, comanda
+  // cu comanda. Reamintirea automata pleaca oricum la 10 minute (cron
+  // materiale-lipsa), dar cine plateste 500 de lei merita si un om.
+  const platiteFaraMaterial = await db
+    .select({
+      id: orders.id,
+      email: orders.email,
+      packageId: orders.packageId,
+      amount: orders.amount,
+      createdAt: orders.createdAt,
+      reminderAt: orders.materialReminderAt,
+    })
+    .from(orders)
+    .where(
+      and(
+        eq(orders.status, "paid"),
+        isNotNull(orders.stripeSessionId),
+        rows.length
+          ? notInArray(
+              orders.stripeSessionId,
+              rows.map((r) => r.stripeSessionId).filter(Boolean) as string[],
+            )
+          : undefined,
+      ),
+    )
+    .orderBy(desc(orders.createdAt))
+    .limit(20);
+
   return (
     <div>
       <div className="flex flex-wrap items-start justify-between gap-3">
@@ -55,6 +85,44 @@ export default async function MaterialePage() {
           </strong>
         )}
       </p>
+
+      {platiteFaraMaterial.length > 0 && (
+        <div className="mt-6 rounded-xl border-2 border-brand-red bg-red-50 p-5">
+          <p className="font-serif text-base font-bold text-brand-red">
+            {platiteFaraMaterial.length === 1
+              ? "O comandă plătită care n-a trimis încă articolul"
+              : `${platiteFaraMaterial.length} comenzi plătite care n-au trimis încă articolul`}
+          </p>
+          <p className="mt-1 text-sm text-red-900">
+            Au plătit cu cardul și au închis formularul. Reamintirea pleacă
+            automat la 10 minute de la plată; dacă a trecut mult, sună-i sau
+            scrie-le pe WhatsApp.
+          </p>
+          <ul className="mt-3 space-y-2">
+            {platiteFaraMaterial.map((o) => (
+              <li
+                key={o.id}
+                className="flex flex-wrap items-center gap-x-3 gap-y-1 rounded-lg bg-white px-3 py-2 text-sm"
+              >
+                <span className="font-semibold text-brand-navy">{o.email}</span>
+                <span className="text-slate-500">
+                  {findPackageById(o.packageId)?.name || o.packageId} ·{" "}
+                  {(o.amount / 100).toFixed(0)} lei · {fmt(o.createdAt)}
+                </span>
+                <span className={o.reminderAt ? "text-emerald-700" : "text-slate-400"}>
+                  {o.reminderAt ? `reamintire trimisă ${fmt(o.reminderAt)}` : "reamintirea n-a plecat încă"}
+                </span>
+                <a
+                  href={`/admin/trimite-email?to=${encodeURIComponent(o.email)}&sablon=material`}
+                  className="ml-auto rounded-lg bg-brand-red px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-red/90"
+                >
+                  Cere articolul
+                </a>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {rows.length === 0 ? (
         <div className="mt-8 rounded-xl border border-slate-200 bg-white p-10 text-center text-slate-500">
