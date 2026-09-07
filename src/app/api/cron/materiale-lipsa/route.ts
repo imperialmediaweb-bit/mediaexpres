@@ -1,10 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { and, eq, isNull, isNotNull, lt, notInArray } from "drizzle-orm";
+import { and, eq, gt, isNull, isNotNull, lt, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, orderSubmissions } from "@/db/schema";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { signOrderToken } from "@/lib/order-token";
-import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
+import {
+  sendEmail,
+  wrapEmail,
+  kv,
+  escapeHtml as esc,
+  bankTransferEmailBox,
+  ADMIN_EMAIL,
+} from "@/lib/email";
 import { SITE } from "@/data/site";
 import { findPackageById } from "@/data/packages";
 import { waLink } from "@/lib/whatsapp";
@@ -40,8 +47,31 @@ export const maxDuration = 60;
  */
 
 const MINUTE = 60 * 1000;
+const ZI = 24 * 60 * MINUTE;
 const PRAG_REAMINTIRE = 10 * MINUTE;
-const PRAG_ALERTA = 3 * 24 * 60 * MINUTE;
+const PRAG_ALERTA = 3 * ZI;
+
+// Comenzile prin OP la care clientul a trimis materialul si a primit factura,
+// dar n-a platit. Prima impingere dupa 2 zile (contabilitatea lor are nevoie
+// de timp), a doua dupa inca 3, apoi ne oprim si te anuntam pe tine —
+// mai mult de doua reamintiri automate devine sacaiala.
+const PRAG_PLATA_1 = 2 * ZI;
+const PRAG_PLATA_2 = 3 * ZI;
+const MAX_REAMINTIRI_PLATA = 2;
+
+/**
+ * Nu atingem comenzile vechi.
+ *
+ * Prima rulare pe baza de test a trimis 50 de emailuri deodata: comenzi
+ * abandonate cu luni in urma, toate deodata. In productie ar fi fost un val
+ * de reamintiri catre oameni care au uitat de mult ca ne-au scris — cel mai
+ * bun mod de a ajunge la „raportez ca spam" si de a strica si mai rau
+ * reputatia domeniului, care si asa e pe o lista neagra.
+ *
+ * Reamintirile sunt pentru comenzile din ultimele 30 de zile. Restul sunt
+ * treaba unui om, daca mai merita.
+ */
+const VECHIME_MAXIMA = 30 * ZI;
 
 /** Comenzile platite, fara material, mai vechi decat pragul dat. */
 async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
@@ -56,6 +86,8 @@ async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
     eq(orders.status, "paid"),
     isNotNull(orders.stripeSessionId),
     lt(orders.createdAt, inainteDe),
+    // Nu ne intoarcem in trecut: vezi VECHIME_MAXIMA.
+    gt(orders.createdAt, new Date(Date.now() - VECHIME_MAXIMA)),
     campGol === "reminder"
       ? isNull(orders.materialReminderAt)
       : isNull(orders.materialAlertAt),
@@ -167,5 +199,114 @@ export async function POST(req: NextRequest) {
     }
   }
 
-  return NextResponse.json({ ok: true, reamintiri, alerte, erori });
+  // ——— 3. Comenzile prin OP care n-au fost platite ———
+  //
+  // Materialul a ajuns, factura a plecat, publicarea sta blocata pana la
+  // incasare. Daca proprietarul a apasat deja „Confirma plata", comanda nu
+  // mai e „pending_payment" si nu mai intra aici — reamintirea se opreste
+  // singura, fara sa fie nevoie sa dezactiveze nimeni nimic.
+  const acum = Date.now();
+  const neplatite = await db
+    .select({
+      id: orderSubmissions.id,
+      email: orderSubmissions.email,
+      companyName: orderSubmissions.companyName,
+      contactPhone: orderSubmissions.contactPhone,
+      packageId: orderSubmissions.packageId,
+      isCasino: orderSubmissions.isCasino,
+      createdAt: orderSubmissions.createdAt,
+      trimise: orderSubmissions.paymentRemindersSent,
+      ultima: orderSubmissions.paymentReminderAt,
+    })
+    .from(orderSubmissions)
+    .where(
+      and(
+        eq(orderSubmissions.status, "pending_payment"),
+        eq(orderSubmissions.paymentMethod, "op"),
+        lt(orderSubmissions.paymentRemindersSent, MAX_REAMINTIRI_PLATA + 1),
+        // Nu ne intoarcem in trecut: vezi VECHIME_MAXIMA.
+        gt(orderSubmissions.createdAt, new Date(Date.now() - VECHIME_MAXIMA)),
+      ),
+    )
+    // Cel mult 20 pe rulare: chiar si in fereastra de 30 de zile, un val de
+    // zeci de emailuri deodata arata a robot. Cronul ruleaza des; restul
+    // pleaca la urmatoarea trecere.
+    .limit(20);
+
+  let reamintiriPlata = 0;
+  let alertePlata = 0;
+
+  for (const c of neplatite) {
+    const dela = (c.ultima ?? c.createdAt).getTime();
+    const prag = c.trimise === 0 ? PRAG_PLATA_1 : PRAG_PLATA_2;
+    if (acum - dela < prag) continue;
+
+    const pkg = findPackageById(c.packageId);
+    const suma = pkg ? (c.isCasino && pkg.id === "promo-50" ? 1000 : pkg.price) : 500;
+
+    try {
+      if (c.trimise >= MAX_REAMINTIRI_PLATA) {
+        // Doua reamintiri au plecat degeaba — mai departe e treaba unui om.
+        await sendEmail({
+          to: ADMIN_EMAIL,
+          replyTo: c.email,
+          subject: `⚠️ OP neîncasat după 2 reamintiri — ${c.companyName || c.email}`,
+          html: wrapEmail(
+            "Comandă prin OP, neîncasată",
+            `
+      <p>Materialul a ajuns, factura a plecat, clientul a primit două reamintiri automate și tot n-a plătit. Publicarea e blocată. Merită un telefon.</p>
+      <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
+        ${kv("Firmă", c.companyName)}
+        ${kv("Email", c.email)}
+        ${kv("Telefon", c.contactPhone)}
+        ${kv("Sumă", `${suma} lei`)}
+        ${kv("Comandat la", c.createdAt.toLocaleString("ro-RO"))}
+      </table>
+      <p>${c.contactPhone ? `<a href="${waLink(c.contactPhone) || "#"}">Scrie-i pe WhatsApp</a> · ` : ""}<a href="${SITE.url}/admin/materiale/${c.id}">Deschide comanda</a></p>
+    `,
+          ),
+        });
+        alertePlata++;
+      } else {
+        const alDoilea = c.trimise === 1;
+        await sendEmail({
+          to: c.email,
+          subject: alDoilea
+            ? "Comanda dumneavoastră așteaptă plata — nu am început încă publicarea"
+            : "Am primit articolul — mai așteptăm doar plata ca să publicăm",
+          html: wrapEmail(
+            "Comanda așteaptă plata",
+            `
+      <p>Bună ziua${c.companyName ? `, ${esc(c.companyName)}` : ""},</p>
+      <p>Am primit articolul dumneavoastră și v-am trimis factura pe email. <strong>Nu am început încă publicarea</strong>, fiindcă mai așteptăm plata.</p>
+      ${bankTransferEmailBox(`${suma} lei`, "Detalii plată: numărul facturii primite pe email")}
+      <p><strong>Ați plătit deja?</strong> Trimiteți-ne o dovadă — o captură din aplicația băncii sau ordinul de plată din contul firmei — ca răspuns la acest email sau pe WhatsApp, și confirmăm pe loc.</p>
+      <p>Imediat ce vedem încasarea, pornim tot: publicăm pe cele 50 de ziare în maximum 12 ore lucrătoare, pornim și campania de promovare pe Facebook a postării cu articolul dumneavoastră, și vă trimitem raportul cu toate linkurile.</p>
+      <p style="color:#64748b;font-size:13px;">Dacă e ceva neclar cu factura sau vreți să plătiți altfel, scrieți-ne pe WhatsApp la <a href="${waLink(SITE.phone) || "#"}" style="color:#c1121f;">${esc(SITE.phone)}</a>.</p>
+      <p style="margin-top:24px;">Cu stimă,<br/><strong>Echipa MediaExpres</strong></p>
+    `,
+          ),
+        });
+        reamintiriPlata++;
+      }
+      await db
+        .update(orderSubmissions)
+        .set({
+          paymentRemindersSent: c.trimise + 1,
+          paymentReminderAt: new Date(),
+        })
+        .where(eq(orderSubmissions.id, c.id));
+    } catch (e) {
+      erori.push(`plata ${c.email}: ${e instanceof Error ? e.message : e}`);
+    }
+  }
+
+  return NextResponse.json({
+    ok: true,
+    reamintiri,
+    alerte,
+    reamintiriPlata,
+    alertePlata,
+    erori,
+  });
 }

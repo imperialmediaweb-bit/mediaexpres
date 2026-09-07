@@ -33,6 +33,17 @@ function Row({ label, value }: { label: string; value: React.ReactNode }) {
   );
 }
 
+/**
+ * 07.09.2026 — clientii scriu site-ul fara „https://" („www.tomaenache.ro").
+ * Pus asa intr-un <a href>, browserul il ia ca adresa RELATIVA si ajunge la
+ * mediaexpress.ro/admin/materiale/www.tomaenache.ro — link mort exact acolo
+ * unde ai nevoie sa deschizi site-ul clientului.
+ */
+function adresaCompleta(u: string): string {
+  const t = u.trim();
+  return /^https?:\/\//i.test(t) ? t : `https://${t}`;
+}
+
 export default async function MaterialDetailPage({
   params,
 }: {
@@ -213,7 +224,7 @@ export default async function MaterialDetailPage({
                     {all.map((u) => (
                       <li key={u} className="flex items-center gap-2 text-xs">
                         <a
-                          href={u}
+                          href={adresaCompleta(u)}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="min-w-0 flex-1 truncate font-mono text-brand-red hover:underline"
@@ -326,7 +337,7 @@ export default async function MaterialDetailPage({
                 value={
                   r.siteUrl ? (
                     <a
-                      href={r.siteUrl}
+                      href={adresaCompleta(r.siteUrl)}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-brand-red hover:underline"

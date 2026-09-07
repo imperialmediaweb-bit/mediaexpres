@@ -218,6 +218,12 @@ export const orderSubmissions = pgTable("order_submission", {
   // in productie prin /api/admin/fix-db sau automat la prima comanda
   // (vezi lib/ensure-columns.ts).
   fbBoostPaper: text("fb_boost_paper"),
+  // 07.09.2026 — comanda prin OP la care clientul a trimis materialul si a
+  // primit factura, dar n-a platit. Publicarea sta blocata pana la incasare,
+  // deci fara o impingere ramane acolo la nesfarsit. Numaram cate reamintiri
+  // au plecat (maximum doua) si cand a plecat ultima.
+  paymentRemindersSent: integer("payment_reminders_sent").notNull().default(0),
+  paymentReminderAt: timestamp("payment_reminder_at"),
   generatedByAi: boolean("generated_by_ai").notNull().default(false),
   isCasino: boolean("is_casino").notNull().default(false),
   // "card" = platit prin Stripe (confirmarea vine din webhook);
