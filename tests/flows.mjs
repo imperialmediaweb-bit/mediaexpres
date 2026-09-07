@@ -632,6 +632,55 @@ console.log("\n" + "=".repeat(60));
     "fisierul fara tip MIME se incarca (era ignorat in tacere)",
   );
 
+  // 07.09.2026 — CURSA care a costat pozele unui client.
+  //
+  // Enache Toma a ales pozele, le-a vazut in formular si a apasat „Trimite"
+  // cat inca urcau la Cloudinary. Comanda a plecat cu lista goala, iar
+  // emailul catre proprietar a spus „Nicio poza incarcata" — desi omul chiar
+  // le pusese. Butonul era blocat doar cat se trimitea comanda, nu si cat
+  // urcau pozele (pe formularul de OP era corect; pe cel de dupa card, nu).
+  //
+  // Verificam POZITIV: cat timp o incarcare e in curs, butonul de trimitere
+  // e blocat. Tinem raspunsul Cloudinary in loc cateva sute de ms ca sa
+  // existe cu adevarat o fereastra in care sa apasam.
+  {
+    let elibereaza;
+    const incet = new Promise((res) => (elibereaza = res));
+    await p.unroute("**/api.cloudinary.com/**");
+    await p.route("**/api.cloudinary.com/**", async (r) => {
+      await incet;
+      await r.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ secure_url: "https://res.cloudinary.com/test/poza-lenta.png" }),
+      });
+    });
+    const trimite = p.getByRole("button", { name: /Trimite comanda/ });
+    await p.setInputFiles('h2:has-text("3. Articolul") ~ div input[type=file][accept="image/*"]', {
+      name: "poza-lenta.png",
+      mimeType: "image/png",
+      buffer: PIXEL,
+    });
+    await p.waitForTimeout(300);
+    check(await trimite.isDisabled(), "cat urca pozele, butonul de trimitere e blocat");
+    elibereaza();
+    await p.waitForTimeout(900);
+    check(!(await trimite.isDisabled()), "dupa ce s-au incarcat, butonul se deblocheaza");
+    check(
+      (await p.locator("img[src*='poza-lenta']").count()) === 1,
+      "poza lenta a ajuns totusi in formular",
+    );
+    // punem la loc raspunsul rapid pentru restul testului
+    await p.unroute("**/api.cloudinary.com/**");
+    await p.route("**/api.cloudinary.com/**", async (r) => {
+      await r.fulfill({
+        status: 200,
+        contentType: "application/json",
+        body: JSON.stringify({ secure_url: "https://res.cloudinary.com/test/poza-flows.png" }),
+      });
+    });
+  }
+
   // Acum tot drumul pana la server, cu poza in comanda.
   await p.fill('input[type="email"]', "poze-flows@test.ro");
   await p.fill('input[type="tel"]', "0758169388");
@@ -646,7 +695,7 @@ console.log("\n" + "=".repeat(60));
   await p.waitForTimeout(1500);
 
   check(
-    comanda?.images?.length === 2 && comanda.images[0].url.includes("poza-flows"),
+    comanda?.images?.length === 3 && comanda.images[0].url.includes("poza-flows"),
     `pozele ajung in comanda trimisa la server (${comanda?.images?.length ?? 0} poze)`,
   );
   await p.close();

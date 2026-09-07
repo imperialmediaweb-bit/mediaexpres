@@ -366,7 +366,10 @@ export function IntakeForm({
 
       <button
         type="submit"
-        disabled={loading}
+        // Aceeasi scapare ca pe formularul de dupa card: butonul trebuie
+        // blocat si cat urca pozele, altfel comanda pleaca cu lista goala,
+        // iar clientul e convins ca le-a pus — si are dreptate.
+        disabled={loading || uploading}
         className="w-full rounded-2xl bg-brand-red py-4 text-lg font-bold text-white shadow-lg transition hover:bg-brand-red/90 disabled:opacity-50"
       >
         {loading ? "Se trimite..." : "Trimite materialele →"}

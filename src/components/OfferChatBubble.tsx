@@ -830,7 +830,9 @@ export function OfferChatBubble() {
           <button
             type="button"
             onClick={() => void submitOrder()}
-            disabled={loading}
+            // Si aici: cat urca pozele, comanda nu pleaca. Altfel ajunge la
+            // noi fara ele si omul crede ca le-a trimis.
+            disabled={loading || uploading}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-3 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90 disabled:opacity-60"
           >
             {loading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ShoppingCart className="h-4 w-4" />}

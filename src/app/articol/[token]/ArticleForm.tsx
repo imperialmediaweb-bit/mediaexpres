@@ -568,10 +568,20 @@ export function ArticleForm({
 
       <button
         type="submit"
-        disabled={submitting}
+        // 07.09.2026 — un client a ales pozele, le-a vazut in formular si a
+        // apasat „Trimite" cat inca urcau la Cloudinary: comanda a plecat cu
+        // lista goala, iar emailul a spus „Nicio poza incarcata". Omul avea
+        // dreptate ca le-a pus. Formularul de OP era deja protejat asa; asta
+        // nu era. Blocam si cat urca, si cat se genereaza textul.
+        disabled={submitting || uploading || generating}
         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-red py-4 text-lg font-bold text-white shadow-lg transition hover:bg-brand-red/90 disabled:opacity-60"
       >
-        {submitting ? (
+        {uploading ? (
+          <>
+            <Loader2 className="h-5 w-5 animate-spin" />
+            Se încarcă pozele — nu închide pagina
+          </>
+        ) : submitting ? (
           <>
             <Loader2 className="h-5 w-5 animate-spin" />
             Se trimite...
