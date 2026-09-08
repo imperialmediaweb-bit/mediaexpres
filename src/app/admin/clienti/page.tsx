@@ -3,7 +3,7 @@ import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { users, orders, subscriptions, orderSubmissions } from "@/db/schema";
-import { desc, eq, or, sql } from "drizzle-orm";
+import { and, desc, eq, or, sql } from "drizzle-orm";
 import { findPackageById } from "@/data/packages";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
 import { ImportLeadsButton } from "./ImportLeadsButton";
@@ -26,6 +26,14 @@ export default async function AdminClientiPage() {
   // exista inainte ca omul sa-si activeze contul. Fara ele, un client care a
   // platit 500 lei prin OP aparea in lista cu 0,00 RON si 0 plati, adica exact
   // pe dos fata de realitate.
+  //
+  // 08.09.2026 — filtrul pe `paymentMethod` lipsea, si un client cu o singura
+  // comanda platita cu cardul aparea cu 2 plati si suma dubla. Motivul:
+  // `orderSubmissions` tine materialele TUTUROR comenzilor, nu doar ale celor
+  // prin OP. La card exista si rand in `orders` (scris de webhook), si rand
+  // aici (articolul trimis dupa plata) — iar cand publicam, randul de aici
+  // trece pe „published" si intra a doua oara la socoteala. Numaram de aici
+  // strict comenzile prin OP, singurele care lipsesc din `orders`.
   const opPlati = await db
     .select({
       email: orderSubmissions.email,
@@ -33,9 +41,12 @@ export default async function AdminClientiPage() {
     })
     .from(orderSubmissions)
     .where(
-      or(
-        eq(orderSubmissions.status, "paid"),
-        eq(orderSubmissions.status, "published"),
+      and(
+        eq(orderSubmissions.paymentMethod, "op"),
+        or(
+          eq(orderSubmissions.status, "paid"),
+          eq(orderSubmissions.status, "published"),
+        ),
       ),
     );
 

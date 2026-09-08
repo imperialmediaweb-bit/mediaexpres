@@ -763,6 +763,18 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     [/12 ore lucrătoare/, "termenul de publicare"],
   ];
   for (const [re, ce] of cerute) t(`termenii contin ${ce}`, re.test(termeni));
+
+  // 08.09.2026 — un client cu o singura comanda platita cu cardul aparea in
+  // /admin/clienti cu 2 plati si 1.000 lei. Pagina aduna `orders` (Stripe) cu
+  // `orderSubmissions`, iar a doua tabela tine materialele TUTUROR comenzilor,
+  // nu doar ale celor prin OP: la card exista rand in amandoua, iar publicarea
+  // il aducea si pe al doilea la socoteala. Filtrul pe paymentMethod e singurul
+  // lucru care tine cifrele adevarate — daca dispare, se dubleaza la loc.
+  const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
+  t(
+    "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",
+    /eq\(orderSubmissions\.paymentMethod,\s*"op"\)/.test(clientiAdmin),
+  );
   t("termenii spun cine e firma", termeni.includes("L.cui") || termeni.includes(l.cui));
 }
 
