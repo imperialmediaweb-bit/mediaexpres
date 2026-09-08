@@ -254,6 +254,30 @@ export const publicationReports = pgTable("publication_report", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
+// Recenziile clientilor. Se cer in emailul cu raportul final — momentul in
+// care omul tocmai a primit cele 50 de linkuri si e cel mai multumit. Doua
+// cai: butonul catre /recenzie/[token] (ajunge aici cu source "form") sau
+// raspunsul direct la email, pe care il introducem noi din admin (source
+// "email"). Legatura se face pe EMAIL, ca la rapoarte si mesaje: comanda si
+// raportul exista inainte ca omul sa-si activeze contul.
+//
+// Nu se publica nicaieri automat. `consentPublic` retine daca omul a bifat
+// ca putem folosi textul pe site; abia dupa aia are voie sa ajunga acolo, si
+// tot manual. `displayName` e numele SAU firma sub care vrea sa apara — asta
+// a cerut-o proprietarul explicit, ca sa nu ghicim.
+export const reviews = pgTable("review", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  email: text("email").notNull(),
+  displayName: text("display_name").notNull(),
+  rating: integer("rating").notNull().default(5),
+  quote: text("quote").notNull(),
+  siteUrl: text("site_url"),
+  consentPublic: boolean("consent_public").notNull().default(false),
+  // "form" = a completat pagina; "email" = a raspuns la email si am pus-o noi.
+  source: text("source").notNull().default("form"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 // Conversatia client <-> MediaExpres, din contul clientului.
 // Motivul: clientii cer modificari si trimit materiale (capturi, sigle,
 // referinte) pe email, iar cererile se pierdeau intre notificari. Aici stau

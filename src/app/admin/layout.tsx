@@ -17,6 +17,7 @@ import {
   Mail,
   ClipboardCheck,
   SendHorizonal,
+  Star,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -34,6 +35,7 @@ const NAV = [
   { href: "/admin/articole", label: "Articole", icon: FileText },
   { href: "/admin/comenzi", label: "Comenzi", icon: ShoppingBag },
   { href: "/admin/rapoarte", label: "Raport publicare", icon: ClipboardCheck },
+  { href: "/admin/recenzii", label: "Recenzii", icon: Star },
   { href: "/admin/abonamente", label: "Abonamente", icon: Repeat },
   { href: "/admin/prospecti", label: "Prospecți B2B", icon: Send },
   { href: "/admin/emailuri", label: "Emailuri", icon: Mail },

@@ -189,6 +189,28 @@ export async function POST(req: NextRequest) {
         )
       `,
     },
+    {
+      step: "review: index pe email",
+      query: sql`CREATE INDEX IF NOT EXISTS "review_email_idx" ON "review" ("email")`,
+    },
+    {
+      // ULTIMA intrare din lista = PRIMA executata (vezi .reverse() de mai
+      // jos). Tabelul trebuie sa existe inainte de indexul de deasupra.
+      step: "review: tabelul de recenzii",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "review" (
+          "id" text PRIMARY KEY NOT NULL,
+          "email" text NOT NULL,
+          "display_name" text NOT NULL,
+          "rating" integer NOT NULL DEFAULT 5,
+          "quote" text NOT NULL,
+          "site_url" text,
+          "consent_public" boolean NOT NULL DEFAULT false,
+          "source" text NOT NULL DEFAULT 'form',
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `,
+    },
   ];
 
   // Tabelele se creeaza INAINTE de coloanele adaugate pe ele.

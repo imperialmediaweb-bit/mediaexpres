@@ -15,6 +15,7 @@ import { buildReportXlsx, buildReportPdf } from "@/lib/report-files";
 import { FONT_ENCODING } from "@/lib/report-font";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
+import { signReviewToken, verifyReviewToken } from "@/lib/review-token";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
 import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
@@ -776,6 +777,69 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     /eq\(orderSubmissions\.paymentMethod,\s*"op"\)/.test(clientiAdmin),
   );
   t("termenii spun cine e firma", termeni.includes("L.cui") || termeni.includes(l.cui));
+}
+
+
+// ##########################################################################
+// S. RECENZIILE
+//
+// Se cer in emailul cu raportul — momentul in care omul tocmai a primit cele
+// 50 de linkuri. Doua cai: butonul catre /recenzie/[token] si raspunsul la
+// email. Tokenul il identifica singur, ca sa nu-l punem sa-si scrie iar
+// emailul; deci tokenul trebuie sa fie imposibil de falsificat, altfel oricine
+// poate lasa recenzii in numele altui client.
+// ##########################################################################
+console.log("\n########## S. RECENZII ##########");
+{
+  const bun = signReviewToken({ email: "client@firma.ro", clientName: "Ion Popescu" });
+  const dec = verifyReviewToken(bun);
+  t("tokenul se verifica si intoarce emailul", dec?.email === "client@firma.ro");
+  t("tokenul pastreaza numele clientului", dec?.clientName === "Ion Popescu");
+  t("tokenul stricat e respins", verifyReviewToken(bun.slice(0, -3) + "aaa") === null);
+  t("tokenul lipsa e respins", verifyReviewToken(undefined) === null);
+  t("gunoiul e respins", verifyReviewToken("nu-e-token") === null);
+  // Semnatura acopera si emailul: nu poti lua un token valid si sa-i schimbi omul.
+  {
+    const [p64, sig] = bun.split(".");
+    const platit = Buffer.from(p64, "base64url").toString().replace("client@firma.ro", "hoto@rau.ro");
+    const falsificat = `${Buffer.from(platit).toString("base64url")}.${sig}`;
+    t("emailul schimbat in payload invalideaza tokenul", verifyReviewToken(falsificat) === null);
+  }
+  t("clientul fara nume primeste totusi token", verifyReviewToken(signReviewToken({ email: "a@b.ro", clientName: "" }))?.email === "a@b.ro");
+
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const raport = citesteFisier("src/app/api/admin/raport/route.ts");
+  t("emailul cu raportul are butonul de recenzie", /\/recenzie\/\$\{reviewToken\}/.test(raport));
+  t("emailul pastreaza si varianta „raspundeti la acest email”", /r[ăa]spunde[țt]i la acest email/i.test(raport));
+  t(
+    "raportul pleaca si daca tokenul de recenzie nu se poate semna",
+    /let reviewToken = "";[\s\S]{0,400}catch/.test(raport),
+  );
+  t("emailul cu raportul vorbeste cu „dumneavoastra”", /dumneavoastr[ăa]/.test(raport) && !/<p>Salut/.test(raport));
+
+  t(
+    "formularul de recenzie cere numele sau firma care sa apara",
+    /Numele sau firma care s[ăa] apar[ăa]/.test(citesteFisier("src/app/recenzie/[token]/ReviewForm.tsx")),
+  );
+  t(
+    "formularul cere acordul de publicare separat",
+    /consentPublic/.test(citesteFisier("src/app/recenzie/[token]/ReviewForm.tsx")),
+  );
+  const api = citesteFisier("src/app/api/recenzie/route.ts");
+  t("API-ul ia emailul din token, nu din formular", /verifyReviewToken\(d\.token\)/.test(api));
+  t("API-ul are honeypot si limita de cereri", /website/.test(api) && /isRateLimited/.test(api));
+  t(
+    "tabelul de recenzii e in fix-db",
+    /CREATE TABLE IF NOT EXISTS "review"/.test(citesteFisier("src/app/api/admin/fix-db/route.ts")),
+  );
+  t(
+    "exista si plasa de siguranta pentru tabel",
+    /ensureReviewsTable/.test(citesteFisier("src/lib/ensure-columns.ts")),
+  );
+  t(
+    "recenziile nu ajung automat pe site",
+    !/CLIENT_TESTIMONIALS/.test(api) && !/reviews/.test(citesteFisier("src/app/oferta-500/page.tsx")),
+  );
 }
 
 console.log("\n" + "=".repeat(64));

@@ -29,3 +29,36 @@ export function ensureOrderColumns(): Promise<void> {
   }
   return done;
 }
+
+/**
+ * Acelasi motiv, pentru tabelul de recenzii: pagina /recenzie/[token] e
+ * publica si clientul o deschide din emailul cu raportul, posibil inainte ca
+ * proprietarul sa fi apelat fix-db. Fara plasa asta, prima recenzie s-ar
+ * pierde — exact aia care conteaza, de la primul client multumit.
+ */
+let reviewsDone: Promise<void> | null = null;
+
+export function ensureReviewsTable(): Promise<void> {
+  if (!reviewsDone) {
+    reviewsDone = db
+      .execute(
+        sql`CREATE TABLE IF NOT EXISTS "review" (
+          "id" text PRIMARY KEY NOT NULL,
+          "email" text NOT NULL,
+          "display_name" text NOT NULL,
+          "rating" integer NOT NULL DEFAULT 5,
+          "quote" text NOT NULL,
+          "site_url" text,
+          "consent_public" boolean NOT NULL DEFAULT false,
+          "source" text NOT NULL DEFAULT 'form',
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )`,
+      )
+      .then(() => undefined)
+      .catch((e) => {
+        reviewsDone = null;
+        console.error("[ensure-columns] review", e);
+      });
+  }
+  return reviewsDone;
+}

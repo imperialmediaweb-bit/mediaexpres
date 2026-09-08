@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { signReviewToken } from "@/lib/review-token";
 import { pingIndexNow } from "@/lib/indexnow";
 import { buildReportPdf, buildReportXlsx } from "@/lib/report-files";
 import { submitToGoogle } from "@/lib/google-indexing";
@@ -180,6 +181,18 @@ export async function POST(req: NextRequest) {
   }
 
   const firstName = clientName.split(/\s+/)[0] || "";
+  // Linkul de recenzie il identifica singur pe client — nu-l punem sa-si scrie
+  // iar emailul intr-un formular, ca acolo pierdem jumatate din oameni.
+  //
+  // Semnarea arunca daca SESSION_SECRET lipseste in productie. Raportul e insa
+  // obligatia noastra, recenzia e bonus: daca tokenul nu se poate semna,
+  // trimitem emailul fara buton, cu varianta „raspundeti la acest email".
+  let reviewToken = "";
+  try {
+    reviewToken = signReviewToken({ email, clientName });
+  } catch (err) {
+    console.error("[raport] nu am putut semna tokenul de recenzie:", err);
+  }
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
   const linksHtml = entries.length
@@ -203,35 +216,48 @@ export async function POST(req: NextRequest) {
       ? `Raport publicare — „${articleTitle}"`
       : "Raport publicare — articolul tău e live",
     html: wrapEmail(
-      "Articolul tău e publicat 🎉",
+      "Articolul dumneavoastră e publicat 🎉",
       `
-      <p>Salut${firstName ? " " + firstName : ""},</p>
+      <p>Bună ziua${firstName ? " " + firstName : ""},</p>
       <p>${
         articleTitle
           ? `Articolul <strong>„${articleTitle}"</strong> este acum live`
-          : "Articolul tău este acum live"
+          : "Articolul dumneavoastră este acum live"
       } în <strong>${links.length || 50} de publicații</strong> din rețeaua MediaExpres.</p>
-      ${links.length ? `<p>Linkurile, ca să le verifici pe fiecare:</p>${linksHtml}` : ""}
-      ${entries.length || hasFile ? '<p>Găsești raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
+      ${links.length ? `<p>Linkurile, ca să le puteți verifica pe fiecare:</p>${linksHtml}` : ""}
+      ${entries.length || hasFile ? '<p>Găsiți raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, la aceeași adresă, iar linkurile funcționează și peste ani.</p>
-      <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul tău: intră pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primești link de conectare).</p>
+      <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul dumneavoastră: intrați pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primiți link de conectare).</p>
       ${/*
         Cererea de recenzie sta AICI, in emailul cu raportul, si nu intr-un
         mesaj separat de peste cateva zile: acum e momentul in care omul tocmai
         a deschis linkurile si a vazut ca totul e la locul lui. Peste trei zile
         entuziasmul e deja consumat, iar emailul pare cersit.
-        Cerem un raspuns la email, nu o recenzie pe vreo platforma — asa nu-i
-        dam nicio bataie de cap si primim un text pe care il putem folosi ca
-        testimonial, cu acordul lui.
+
+        Doua cai, nu una. Butonul duce la un formular care il identifica
+        singur (tokenul e in link), cu stele, text si campul „numele sau firma
+        care sa apara" — proprietarul a cerut explicit sa nu ghicim noi sub ce
+        nume publicam. Iar dedesubt ramane varianta lenesa: raspunde la email.
+        Cine nu da click tot ne poate scrie, si atunci punem noi recenzia in
+        admin. Nu trimitem pe nicio platforma externa: acolo pierdem si omul,
+        si textul.
       */ ""}
       <div style="margin-top:24px;background:#f8f5f0;border-radius:10px;padding:16px;">
-        <p style="margin:0 0 8px;font-weight:600;color:#111111;">Ne spui cum ți s-a părut?</p>
-        <p style="margin:0;color:#334155;font-size:14px;line-height:1.6;">
-          Dacă ești mulțumit de rezultat, răspunde la acest email cu două-trei
-          rânduri despre experiența ta. Ne ajută enorm — iar dacă ne dai voie,
-          le publicăm pe site ca recomandare, cu numele firmei tale și link
-          către ea.
+        <p style="margin:0 0 8px;font-weight:600;color:#111111;">Ne spuneți cum vi s-a părut?</p>
+        <p style="margin:0 0 14px;color:#334155;font-size:14px;line-height:1.6;">
+          Dacă sunteți mulțumit de rezultat, lăsați-ne două-trei rânduri. Ne
+          ajută enorm, iar dacă ne dați voie le publicăm pe site ca recomandare,
+          cu numele pe care îl alegeți dumneavoastră.
+        </p>
+        ${
+          reviewToken
+            ? `<a href="${SITE.url}/recenzie/${reviewToken}" style="display:inline-block;background:#c1121f;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;">Lăsați o părere</a>`
+            : ""
+        }
+        <p style="margin:12px 0 0;color:#64748b;font-size:13px;">
+          Sau pur și simplu răspundeți la acest email, cu părerea dumneavoastră
+          și cu numele ori firma sub care doriți să apară.
         </p>
       </div>
       <p style="margin-top:24px;">Mulțumim pentru încredere!<br/><strong>Echipa MediaExpres</strong></p>
