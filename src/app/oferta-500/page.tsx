@@ -16,6 +16,8 @@ import {
   Image as ImageIcon,
   Megaphone,
   XCircle,
+  Users,
+  Check,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
 import { promoDeadlineLabel } from "@/data/packages";
@@ -140,6 +142,20 @@ const INCLUDED = [
 // La ce foloseste, in cuvintele clientului. Pana acum pagina spunea ce
 // primeste, nu la ce ii trebuie — iar omul care avea nevoie de dovada
 // pentru un dosar de finantare nu se recunostea nicaieri.
+// Lista scurta din reclama. Creativul simplificat a scos-o de pe imagine —
+// acolo aglomera mesajul pe telefon — dar oamenii o citesc: e felul in care
+// omul isi recunoaste propria situatie intr-o enumerare. Locul ei e aici,
+// unde are spatiu, imediat sub explicatiile lungi.
+const RECOMANDAT_PENTRU = [
+  "Comunicate de presă",
+  "Campanii de PR",
+  "Apariții în presă",
+  "Promovarea firmei sau brandului",
+  "Lansări de produse și servicii",
+  "Evenimente și proiecte",
+  "Creșterea notorietății",
+];
+
 const USES = [
   {
     title: "Dosare de finanțare și licitații",
@@ -396,6 +412,21 @@ export default function Oferta500Page() {
                 </span>
               </div>
             ))}
+          </div>
+
+          <div className="mx-auto mt-6 max-w-4xl rounded-2xl border-2 border-brand-red/20 bg-white p-6 md:p-8">
+            <div className="flex items-center gap-3">
+              <Users className="h-6 w-6 shrink-0 text-brand-red" />
+              <h3 className="font-serif text-xl font-bold text-brand-navy">Recomandat pentru</h3>
+            </div>
+            <ul className="mt-5 grid gap-x-8 gap-y-3 sm:grid-cols-2">
+              {RECOMANDAT_PENTRU.map((r) => (
+                <li key={r} className="flex items-start gap-2.5 text-slate-700">
+                  <Check className="mt-0.5 h-5 w-5 shrink-0 text-brand-red" />
+                  <span>{r}</span>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
       </section>
