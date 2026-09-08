@@ -159,6 +159,7 @@ export function bankTransferEmailBox(amount: string, paymentDetails: string): st
       <p style="margin:0 0 10px;"><strong>Plata prin transfer bancar (OP)</strong> — direct în contul nostru:</p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
         <tr><td style="padding:3px 0;color:#64748b;width:110px;">Beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.company}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">CUI beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.legal.cui}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">IBAN</td><td style="padding:3px 0;font-weight:600;font-family:monospace;">${SITE.billing.iban}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">Banca</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.bank}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">Suma</td><td style="padding:3px 0;font-weight:600;">${amount}</td></tr>

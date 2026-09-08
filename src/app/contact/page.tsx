@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { SITE } from "@/data/site";
+import { DateFirma } from "@/components/DateFirma";
 
 export const metadata: Metadata = {
   title: "Contact — MediaExpres",
@@ -49,7 +50,14 @@ export default function ContactPage() {
                   {SITE.schedule}
                 </InfoRow>
               </ul>
-              <div className="mt-10 rounded-xl bg-brand-ivory p-6">
+              {/*
+                Datele firmei. Un vizitator a intrebat cine e firma din spatele
+                site-ului si n-a gasit nicaieri CUI-ul sau numarul de la
+                Registrul Comertului — pe pagina de contact e primul loc unde
+                le cauta cineva.
+              */}
+              <DateFirma titlu="Datele firmei" className="mt-10" />
+              <div className="mt-6 rounded-xl bg-brand-ivory p-6">
                 <h3 className="font-serif text-lg font-semibold text-brand-navy">
                   Răspundem rapid
                 </h3>

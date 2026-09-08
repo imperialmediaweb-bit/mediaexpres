@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LegalLayout } from "@/components/LegalLayout";
+import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
   title: "Politica de confidențialitate",
@@ -17,8 +18,11 @@ export default function ConfidentialitatePage() {
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Operator de date</h2>
       <p>
-        MediaExpres SRL (denumit &bdquo;noi&rdquo;), cu sediul în București, România, email{" "}
-        <a href="mailto:contact@mediaexpress.ro">contact@mediaexpress.ro</a>.
+        {SITE.legal.companyName} (denumit &bdquo;noi&rdquo;), CUI {SITE.legal.cui},
+        înregistrată la Registrul Comerțului sub nr. {SITE.legal.regCom}, cu sediul în{" "}
+        {SITE.legal.address}, email{" "}
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>. MediaExpres este numele comercial
+        sub care firma oferă aceste servicii.
       </p>
 
       <h2 className="font-serif text-2xl font-bold text-brand-navy">Ce date colectăm</h2>

@@ -5,9 +5,18 @@ export function StructuredData() {
     "@context": "https://schema.org",
     "@type": "Organization",
     name: SITE.name,
+    // Numele comercial e MediaExpres, dar firma care factureaza e alta. Fara
+    // legalName/taxID, Google nu avea de unde sti cine e entitatea reala.
+    legalName: SITE.legal.companyName,
+    taxID: SITE.legal.cui,
     url: SITE.url,
     logo: `${SITE.url}/logo.svg`,
     description: SITE.description,
+    address: {
+      "@type": "PostalAddress",
+      addressLocality: "Botoșani",
+      addressCountry: "RO",
+    },
     contactPoint: {
       "@type": "ContactPoint",
       email: SITE.email,

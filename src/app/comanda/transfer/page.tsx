@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { FileText, Landmark, Send } from "lucide-react";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
+import { DateFirma } from "@/components/DateFirma";
 import { TransferForm } from "./TransferForm";
 
 export const metadata: Metadata = {
@@ -95,6 +96,8 @@ export default function TransferPage({
           <dl className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
             <dt className="text-slate-500">Beneficiar</dt>
             <dd className="font-semibold text-brand-navy">{SITE.billing.company}</dd>
+            <dt className="text-slate-500">CUI beneficiar</dt>
+            <dd className="font-semibold text-brand-navy">{SITE.legal.cui}</dd>
             <dt className="text-slate-500">IBAN</dt>
             <dd className="break-all font-mono font-semibold text-brand-navy">{SITE.billing.iban}</dd>
             <dt className="text-slate-500">Banca</dt>
@@ -108,6 +111,13 @@ export default function TransferPage({
             Dacă ai plătit deja, încarcă dovada în formular — confirmăm mai repede.
           </p>
         </details>
+
+        {/*
+          Cine e firma care incaseaza. Pe pagina de comanda intrebarea asta
+          apare cel mai des si costa cel mai mult daca ramane fara raspuns —
+          un vizitator a cautat datele si nu le-a gasit nicaieri pe site.
+        */}
+        <DateFirma className="mt-8" />
 
         <p className="mt-8 text-center text-sm text-slate-500">
           Preferi să ne trimiți totul pe WhatsApp? Scrie-ne la{" "}

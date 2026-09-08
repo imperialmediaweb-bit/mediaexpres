@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import {
   Newspaper,
   Globe,
@@ -24,6 +25,7 @@ const deadline = promoDeadlineLabel();
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
+import { DateFirma } from "@/components/DateFirma";
 
 /*
   06.09.2026 — pagina vindea DOUA produse deodata.
@@ -657,6 +659,30 @@ export default function Oferta500Page() {
                   campanie de reclamă, și ți-o spunem din start.
                 </p>
               </div>
+              {/*
+                Al treilea refuz, cel care conteaza juridic: ne obligam sa
+                publicam, nu sa producem vanzari. Aceeasi formulare e in
+                termeni, ca sa nu existe diferenta intre ce citeste omul aici
+                si ce semneaza la comanda.
+              */}
+              <div className="rounded-2xl border-2 border-brand-red/20 bg-white p-6 md:col-span-2">
+                <XCircle className="h-7 w-7 text-brand-red" />
+                <h3 className="mt-3 font-serif text-lg font-bold text-brand-navy">
+                  Nu-ți promitem clienți, vânzări sau cereri de ofertă
+                </h3>
+                <p className="mt-2 text-sm leading-relaxed text-slate-600">
+                  Ne obligăm să publicăm articolul în cele 50 de publicații și
+                  să-ți dăm lista cu toate linkurile — atât. Ce faci mai departe
+                  cu aparițiile, cât de bun e textul și cât de căutat e ce vinzi
+                  nu depind de noi. Nu promitem nici poziții în Google, nici
+                  creșterea vreunui indicator SEO, nici un anumit număr de
+                  afișări pe Facebook. Toate limitele sunt scrise pe larg în{" "}
+                  <Link href="/legal/termeni" className="font-semibold text-brand-red hover:underline">
+                    termeni și condiții
+                  </Link>
+                  .
+                </p>
+              </div>
             </div>
 
             <div className="mt-6 rounded-2xl bg-brand-navy p-6 text-center md:p-8">
@@ -800,6 +826,14 @@ export default function Oferta500Page() {
           </p>
           <div className="mt-8">
             <PromoOffer showPrice={false} />
+          </div>
+          {/*
+            Cine incaseaza cei 500 de lei, chiar sub ultimul buton. Un vizitator
+            a cautat datele firmei pe site si nu le-a gasit — inainte de plata e
+            exact momentul in care omul vrea sa verifice cu cine are de-a face.
+          */}
+          <div className="mx-auto mt-10 max-w-md text-left">
+            <DateFirma dark />
           </div>
         </div>
       </section>

@@ -9,7 +9,11 @@ export const SITE = {
   phone: "+40 758 169 388",
   // Acelasi numar, in formatul cerut de wa.me: prefix de tara fara "+" si fara spatii.
   whatsapp: "40758169388",
-  address: "București, România",
+  // Sediul social e in Botosani, nu in Bucuresti. Pana in 07.09.2026 aici scria
+  // „Bucuresti, Romania" — aparea in footer si pe /contact la „Sediu", adica o
+  // firma din Botosani se prezenta ca fiind din Bucuresti. Afisam doar orasul:
+  // strada si numarul raman pe factura, unde ajung oricum la client.
+  address: "Botoșani, România",
   schedule: "Luni – Vineri, 09:00 – 18:00",
   social: {
     facebook: "https://facebook.com/mediaexpres",
@@ -21,6 +25,25 @@ export const SITE = {
     company: "LEGIO WEB DEVELOPMENT TOOLS S.R.L.",
     iban: "RO15BTRLRONCRT0652757201",
     bank: "Banca Transilvania",
+  },
+  // Identitatea juridica a firmei, afisata public. Un vizitator a intrebat cine
+  // e firma din spatele site-ului si n-a gasit nicaieri — nici CUI, nici numar
+  // de inregistrare. In plus site-ul spunea doua nume diferite: politica de
+  // confidentialitate inventase o firma cu numele comercial, iar beneficiarul
+  // de la OP e LEGIO WEB DEVELOPMENT TOOLS. Aici e singura sursa; paginile citesc
+  // de aici, ca sa nu mai apara doua firme pe acelasi site.
+  //
+  // CUI-ul se scrie fara prefixul „RO": firma NU e platitoare de TVA.
+  legal: {
+    companyName: "Legio Web Development Tools S.R.L.",
+    cui: "46466484",
+    regCom: "J07/506/2022",
+    // Doar orasul, fara strada — cerinta proprietarului.
+    address: "Botoșani, România",
+    vat: "Firma nu este plătitoare de TVA. Prețurile nu conțin TVA.",
+    anpc: "https://anpc.ro/",
+    anpcSal: "https://anpc.ro/ce-este-sal/",
+    anpcSol: "https://ec.europa.eu/consumers/odr",
   },
 };
 

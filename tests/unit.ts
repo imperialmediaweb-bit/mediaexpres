@@ -693,6 +693,79 @@ console.log("\n########## Q. CURATAREA TEXTULUI ##########");
   t("un text curat ramane identic", cleanArticleText(bun) === bun);
 }
 
+
+// ##########################################################################
+// R. DATELE FIRMEI SI LIMITELE DIN TERMENI
+//
+// Un vizitator a intrebat cine e firma din spatele site-ului si n-a gasit
+// nicaieri CUI-ul sau numarul de la Registrul Comertului. In plus, site-ul
+// spunea doua nume diferite: politica de confidentialitate zicea „MediaExpres
+// SRL", iar beneficiarul de la plata prin OP e LEGIO WEB DEVELOPMENT TOOLS.
+// Verificarile de aici tin datele intr-un singur loc si tin scrise negru pe
+// alb limitele pe care le promitem — ca sa nu dispara la o rescriere.
+// ##########################################################################
+console.log("\n########## R. DATELE FIRMEI ##########");
+{
+  const l = SITE.legal;
+  t("CUI-ul e cel real", l.cui === "46466484");
+  t("CUI-ul se scrie fara prefixul RO (firma nu e platitoare de TVA)", !/^RO/i.test(l.cui));
+  t("numarul de la Registrul Comertului e completat", l.regCom === "J07/506/2022");
+  t("denumirea juridica e a firmei care factureaza", /Legio Web Development Tools/i.test(l.companyName));
+  t("sediul afisat e Botosani, nu Bucuresti", /Botoșani/.test(l.address) && !/București/.test(l.address));
+  t("adresa afisata nu contine strada si numarul", !/Aleea|nr\./i.test(l.address));
+  t("se spune ca firma nu e platitoare de TVA", /nu este plătitoare de TVA/i.test(l.vat));
+  t("exista linkurile ANPC SAL si SOL", /anpc\.ro/.test(l.anpcSal) && /consumers\/odr/.test(l.anpcSol));
+  t("SITE.address urmeaza sediul real", /Botoșani/.test(SITE.address));
+  t("beneficiarul din OP e aceeasi firma", /LEGIO WEB DEVELOPMENT TOOLS/i.test(SITE.billing.company));
+  t("caseta de OP din email da si CUI-ul beneficiarului", bankTransferEmailBox("500 lei", "test").includes(l.cui));
+
+  // Denumirea inventata nu mai are voie sa existe nicaieri in cod.
+  const fisiere: string[] = [];
+  const plimba = (dir: string) => {
+    for (const e of fs.readdirSync(dir, { withFileTypes: true })) {
+      const full = path.join(dir, e.name);
+      if (e.isDirectory()) {
+        if (e.name === "node_modules" || e.name === ".next") continue;
+        plimba(full);
+      } else if (/\.(ts|tsx)$/.test(e.name)) fisiere.push(full);
+    }
+  };
+  plimba("src");
+  const cu = (re: RegExp) => fisiere.filter((f) => re.test(fs.readFileSync(f, "utf8")));
+  t("„MediaExpres SRL” nu mai apare nicaieri", cu(/MediaExpres\s+S\.?R\.?L\.?/i).length === 0, cu(/MediaExpres\s+S\.?R\.?L\.?/i).join(", "));
+  t("CUI-ul nu apare nicaieri cu prefix RO", cu(/RO46466484/).length === 0);
+  t("codul intracomunitar gresit nu apare", cu(/46808153/).length === 0);
+  t("strada sediului nu apare in cod", cu(/Aleea Parcului/i).length === 0);
+
+  // Datele apar acolo unde omul le cauta: footer, contact, paginile de comanda.
+  const citeste = (f: string) => fs.readFileSync(f, "utf8");
+  t("footerul afiseaza datele firmei", /DateFirmaLinie/.test(citeste("src/components/layout/Footer.tsx")));
+  t("footerul are linkurile ANPC si SOL", /anpcSal/.test(citeste("src/components/layout/Footer.tsx")) && /anpcSol/.test(citeste("src/components/layout/Footer.tsx")));
+  t("pagina de contact afiseaza datele firmei", /DateFirma/.test(citeste("src/app/contact/page.tsx")));
+  t("pagina de comanda prin OP afiseaza datele firmei", /DateFirma/.test(citeste("src/app/comanda/transfer/page.tsx")));
+  t("pagina de oferta afiseaza datele firmei", /DateFirma/.test(citeste("src/app/oferta-500/page.tsx")));
+  t("consultantul stie datele firmei", buildAdvisorKnowledge().includes(l.cui));
+
+  // Termenii: limitele scrise pe puncte. Daca dispar, cade testul.
+  const termeni = citeste("src/app/legal/termeni/page.tsx");
+  const cerute: [RegExp, string][] = [
+    [/de mijloace, nu de rezultat/i, "obligatia de mijloace"],
+    [/trafic sau vizitatori/i, "refuzul de a promite trafic"],
+    [/vânzări, clienți, cereri de ofertă/i, "refuzul de a promite vanzari"],
+    [/poziții în Google/i, "refuzul de a promite pozitii"],
+    [/indexarea articolelor/i, "refuzul de a promite indexarea"],
+    [/Domain Authority|Domain Rating/i, "refuzul indicatorilor SEO"],
+    [/afișări, aprecieri, comentarii/i, "refuzul cifrelor de Facebook"],
+    [/nu poate depăși suma plătită/i, "limitarea raspunderii"],
+    [/OUG 34\/2014/, "dreptul de retragere"],
+    [/forță majoră/i, "forta majora"],
+    [/ne despăgubește/i, "despagubirea de la client"],
+    [/12 ore lucrătoare/, "termenul de publicare"],
+  ];
+  for (const [re, ce] of cerute) t(`termenii contin ${ce}`, re.test(termeni));
+  t("termenii spun cine e firma", termeni.includes("L.cui") || termeni.includes(l.cui));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

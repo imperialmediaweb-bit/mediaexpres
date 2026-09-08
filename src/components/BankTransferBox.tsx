@@ -17,6 +17,9 @@ export function BankTransferBox({ note }: { note: string }) {
       <dl className="mt-4 grid gap-x-8 gap-y-2 text-sm sm:grid-cols-[auto_1fr]">
         <dt className="text-slate-500">Beneficiar</dt>
         <dd className="font-semibold text-brand-navy">{SITE.billing.company}</dd>
+        {/* Contabilul clientului cere CUI-ul beneficiarului ca sa inregistreze plata. */}
+        <dt className="text-slate-500">CUI beneficiar</dt>
+        <dd className="font-semibold text-brand-navy">{SITE.legal.cui}</dd>
         <dt className="text-slate-500">IBAN</dt>
         <dd className="font-mono font-semibold text-brand-navy break-all">{SITE.billing.iban}</dd>
         <dt className="text-slate-500">Banca</dt>

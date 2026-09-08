@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { SITE, FOOTER_LINKS } from "@/data/site";
+import { DateFirmaLinie } from "@/components/DateFirma";
 
 export function Footer() {
   return (
@@ -100,6 +101,35 @@ export function Footer() {
               </li>
             ))}
           </ul>
+        </div>
+
+        {/*
+          Identificarea firmei. Pana acum footerul nu spunea nicaieri cine
+          incaseaza banii — un vizitator a intrebat si n-a gasit. Aici e locul
+          unde se uita omul cand vrea sa verifice o firma, inainte sa plateasca.
+        */}
+        <div className="mt-6 flex flex-col gap-3 border-t border-white/10 pt-6 text-xs text-white/50 md:flex-row md:items-center md:justify-between">
+          <p>
+            <DateFirmaLinie /> · {SITE.legal.vat}
+          </p>
+          <p className="flex flex-wrap gap-4">
+            <a
+              href={SITE.legal.anpcSal}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-white"
+            >
+              ANPC — SAL
+            </a>
+            <a
+              href={SITE.legal.anpcSol}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="transition-colors hover:text-white"
+            >
+              Platforma SOL
+            </a>
+          </p>
         </div>
       </div>
     </footer>
