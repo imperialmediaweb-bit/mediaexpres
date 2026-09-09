@@ -43,6 +43,18 @@ export async function POST(req: NextRequest) {
   const linksRaw = String(form.get("links") || "");
   const file = form.get("file");
   const invoice = form.get("invoice");
+  // Ora vine din `datetime-local`, adica in ora calculatorului, fara fus.
+  // O trecem prin Date ca sa iasa ISO cu fusul corect; daca e in trecut sau
+  // neinteligibila, ignoram programarea si trimitem acum — un raport plecat
+  // acum e mai bun decat unul pierdut intr-o data gresita.
+  const trimiteLaRaw = String(form.get("trimiteLa") || "").trim();
+  let scheduledAt: string | undefined;
+  if (trimiteLaRaw) {
+    const cand = new Date(trimiteLaRaw);
+    if (!Number.isNaN(cand.getTime()) && cand.getTime() > Date.now()) {
+      scheduledAt = cand.toISOString();
+    }
+  }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     return NextResponse.json({ ok: false, error: "Emailul clientului nu e valid" }, { status: 400 });
@@ -265,6 +277,7 @@ export async function POST(req: NextRequest) {
     ),
     replyTo: ADMIN_EMAIL,
     attachments: attachments.length ? attachments : undefined,
+    scheduledAt,
   });
 
   if (!result.ok) {
@@ -274,5 +287,11 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  return NextResponse.json({ ok: true, linksCount: links.length, attached: attachments.length, invoiceAttached: hasInvoice });
+  return NextResponse.json({
+    ok: true,
+    linksCount: links.length,
+    attached: attachments.length,
+    invoiceAttached: hasInvoice,
+    programatLa: scheduledAt ?? null,
+  });
 }

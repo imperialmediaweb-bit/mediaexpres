@@ -19,6 +19,8 @@ export function RaportForm({
   const [fileName, setFileName] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const [invoiceName, setInvoiceName] = useState("");
+  // Gol = pleaca acum. Completat = Resend il tine si il livreaza la ora ceruta.
+  const [trimiteLa, setTrimiteLa] = useState("");
   const invoiceRef = useRef<HTMLInputElement>(null);
 
   const [sending, setSending] = useState(false);
@@ -46,19 +48,23 @@ export function RaportForm({
       if (f) fd.set("file", f);
       const inv = invoiceRef.current?.files?.[0];
       if (inv) fd.set("invoice", inv);
+      if (trimiteLa) fd.set("trimiteLa", trimiteLa);
 
       const res = await fetch("/api/admin/raport", { method: "POST", body: fd });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Trimiterea a eșuat");
 
       setDone(
-        `Raportul a plecat către ${email}` +
+        (json.programatLa
+          ? `Raportul e programat pentru ${new Date(json.programatLa).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" })}, către ${email}`
+          : `Raportul a plecat către ${email}`) +
           (json.linksCount ? ` cu ${json.linksCount} linkuri` : "") +
           (json.attached ? ` + ${json.attached} fișiere atașate` : "") +
           (json.invoiceAttached ? ", inclusiv factura" : "") +
           ".",
       );
       setLinks("");
+      setTrimiteLa("");
       setFileName("");
       setInvoiceName("");
       if (fileRef.current) fileRef.current.value = "";
@@ -167,6 +173,28 @@ export function RaportForm({
             onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
           />
         </label>
+      </div>
+
+      {/*
+        Programarea trimiterii. Rapoartele se termina des seara tarziu sau in
+        weekend, iar un email primit la 23:40 arata a robot. Cu campul asta il
+        pregatesti cand ai timp si ajunge la client luni dimineata.
+        Gol = pleaca imediat, ca pana acum.
+      */}
+      <div>
+        <label htmlFor="trimiteLa" className="mb-1.5 block text-sm font-medium text-slate-700">
+          Trimite mai târziu <span className="font-normal text-slate-500">(opțional)</span>
+        </label>
+        <input
+          id="trimiteLa"
+          type="datetime-local"
+          value={trimiteLa}
+          onChange={(e) => setTrimiteLa(e.target.value)}
+          className="w-full max-w-xs rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-1 focus:ring-brand-red"
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Lasă gol ca să plece acum. Ora e cea de pe calculatorul tău.
+        </p>
       </div>
 
       {error && (

@@ -785,6 +785,19 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   // nu doar ale celor prin OP: la card exista rand in amandoua, iar publicarea
   // il aducea si pe al doilea la socoteala. Filtrul pe paymentMethod e singurul
   // lucru care tine cifrele adevarate — daca dispare, se dubleaza la loc.
+  // Raportul se poate programa: rapoartele se termina des seara tarziu, iar un
+  // email la 23:40 arata a robot. Ora goala inseamna „acum", ca pana acum.
+  const rutaRaport = citeste("src/app/api/admin/raport/route.ts");
+  t("raportul poate fi programat", /scheduledAt/.test(rutaRaport) && /trimiteLa/.test(rutaRaport));
+  t(
+    "o ora din trecut nu blocheaza raportul",
+    /cand\.getTime\(\) > Date\.now\(\)/.test(rutaRaport),
+  );
+  t(
+    "formularul de raport are campul de programare",
+    /datetime-local/.test(citeste("src/app/admin/rapoarte/RaportForm.tsx")),
+  );
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",
