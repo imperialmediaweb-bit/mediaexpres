@@ -23,6 +23,14 @@ export function cleanArticleText(raw: string): string {
         (line) =>
           line
             .trim()
+            // 09.09.2026 — un articol generat a ajuns in admin cu subtitlurile
+            // scrise „**Alege firma de reparatii**". Promptul cere explicit
+            // „fara markdown", dar modelul tot le pune uneori, iar de aici
+            // treceau neatinse pana pe ziare: cu stelute cu tot, pe 50 de
+            // site-uri. Scoatem marcajele, pastram textul.
+            .replace(/^#{1,6}\s+/, "")
+            .replace(/\*\*(.+?)\*\*/g, "$1")
+            .replace(/__(.+?)__/g, "$1")
             // Orice sir de spatii/taburi devine un singur spatiu.
             .replace(/[ \t]{2,}/g, " ")
             // "cuvant , cuvant" -> "cuvant, cuvant" (si pentru . ! ? : ;)
@@ -44,5 +52,12 @@ export function cleanArticleText(raw: string): string {
 
 /** Varianta pentru titluri: un singur rand, un singur spatiu intre cuvinte. */
 export function cleanTitle(raw: string): string {
-  return raw.replace(/\s+/g, " ").replace(/ +([,.;:!?])/g, "$1").trim();
+  return raw
+    // Titlul vine uneori cu aceleasi marcaje de markdown ca textul.
+    .replace(/^#{1,6}\s+/, "")
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/__(.+?)__/g, "$1")
+    .replace(/\s+/g, " ")
+    .replace(/ +([,.;:!?])/g, "$1")
+    .trim();
 }

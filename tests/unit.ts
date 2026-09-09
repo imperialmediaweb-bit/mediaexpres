@@ -689,6 +689,20 @@ console.log("\n########## Q. CURATAREA TEXTULUI ##########");
   t("CRLF si 4 randuri goale se normalizeaza", cleanArticleText("a\r\n\r\n\r\n\r\nb") === "a\n\nb");
   t("spatiul non-breaking din Word devine spatiu", cleanArticleText("unu\u00a0doi") === "unu doi");
   t("titlul pierde orice rand si spatiu in plus", cleanTitle("  Ce este  cancerul ,\n tratament ") === "Ce este cancerul, tratament");
+  // 09.09.2026 — un articol generat a ajuns in admin cu „**subtitlu**".
+  // Fara curatare, stelutele ar fi aparut literal pe 50 de site-uri.
+  t(
+    "subtitlul cu stelute isi pierde stelutele",
+    cleanArticleText("**Alege firma de reparatii**\n\nText normal.") ===
+      "Alege firma de reparatii\n\nText normal.",
+  );
+  t("bold in mijlocul frazei se curata", cleanArticleText("firma **noastra** repara") === "firma noastra repara");
+  t("underscore dublu se curata", cleanArticleText("__Montaj acoperisuri__") === "Montaj acoperisuri");
+  t("titlul de tip markdown ramane fara diez", cleanArticleText("## Reparatii acoperisuri") === "Reparatii acoperisuri");
+  t("titlul cu stelute se curata si el", cleanTitle("**Reparatii si Montaj**") === "Reparatii si Montaj");
+  // Un asterisc singur nu e formatare — poate fi nota de subsol, nu-l atingem.
+  t("asteriscul singur ramane", cleanArticleText("pret 500 lei*") === "pret 500 lei*");
+
   // Curatarea nu are voie sa strice un text deja bun.
   const bun = "Primul paragraf, corect.\n\nAl doilea paragraf, tot corect.";
   t("un text curat ramane identic", cleanArticleText(bun) === bun);
