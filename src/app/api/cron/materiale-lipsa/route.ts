@@ -147,6 +147,7 @@ export async function POST(req: NextRequest) {
           `
       <p>Bună ziua, ${esc(numeFrumos)},</p>
       <p>Plata a fost confirmată, vă mulțumim. Ca să putem publica, mai avem nevoie de materialul dumneavoastră — durează două minute:</p>
+      <p>Pe pagina de mai jos ne dați articolul, <strong>pozele</strong> (până la 3), adresa site-ului dumneavoastră și <strong>ziarul pe care doriți promovarea pe Facebook</strong> — 3 zile de promovare plătită a postării cu articolul dumneavoastră sunt incluse în preț.</p>
       <p style="margin:20px 0;">
         <a href="${link}" style="background:#c1121f;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:700;">Trimiteți articolul →</a>
       </p>
