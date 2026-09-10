@@ -850,6 +850,19 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     /isoDinOraRomaniei/.test(citeste("src/app/admin/trimite-email/ComposeForm.tsx")),
   );
 
+  // 10.09.2026 — un email a plecat la clientul GRESIT. Formularul citea
+  // adresa din URL o singura data, la montare; a doua oara cand intrai acolo
+  // de la alta comanda, campul pastra clientul precedent.
+  const compose = citeste("src/app/admin/trimite-email/ComposeForm.tsx");
+  t(
+    "adresa se actualizeaza cand se schimba clientul din URL",
+    /if \(toDinUrl !== ultimulTo\)/.test(compose) && /setRecipientsRaw\(toDinUrl\)/.test(compose),
+  );
+  t(
+    "si sablonul se schimba odata cu clientul",
+    /if \(\(sablonCerut \|\| ""\) !== ultimulSablon\)/.test(compose),
+  );
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",

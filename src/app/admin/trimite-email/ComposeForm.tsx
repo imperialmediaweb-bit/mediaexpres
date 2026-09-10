@@ -108,6 +108,34 @@ export function ComposeForm() {
   const [recipientsRaw, setRecipientsRaw] = useState(params.get("to") || "");
   const [subject, setSubject] = useState(preselectat?.subiect || "");
   const [body, setBody] = useState(preselectat?.text || "");
+
+  /*
+    10.09.2026 — un email a plecat la clientul GRESIT.
+
+    `useState(params.get("to"))` citeste adresa O SINGURA DATA, la montare.
+    In App Router, cand intri aici de la o comanda si apoi de la alta, pagina
+    nu se remonteaza — doar se re-randeaza — deci starea ramane cu adresa
+    veche, iar campul arata clientul precedent. Proprietarul a vrut sa scrie
+    unui client si mesajul a plecat la altul.
+
+    De aceea urmarim explicit parametrul din URL: cand se schimba, rescriem
+    campurile. Ne uitam la ce am aplicat ULTIMA data, nu la ce e in casuta —
+    altfel am sterge peste ce a scris omul cu mana.
+  */
+  const toDinUrl = params.get("to") || "";
+  const [ultimulTo, setUltimulTo] = useState(toDinUrl);
+  const [ultimulSablon, setUltimulSablon] = useState(sablonCerut || "");
+  if (toDinUrl !== ultimulTo) {
+    setUltimulTo(toDinUrl);
+    setRecipientsRaw(toDinUrl);
+  }
+  if ((sablonCerut || "") !== ultimulSablon) {
+    setUltimulSablon(sablonCerut || "");
+    if (preselectat) {
+      setSubject(preselectat.subiect);
+      setBody(preselectat.text);
+    }
+  }
   const [template, setTemplate] = useState<"brand" | "personal">("brand");
   const [when, setWhen] = useState<"now" | "later">("now");
   const [scheduledAt, setScheduledAt] = useState("");
