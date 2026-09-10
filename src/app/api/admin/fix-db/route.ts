@@ -190,6 +190,10 @@ export async function POST(req: NextRequest) {
       `,
     },
     {
+      step: "publication_report: link catre raportul gazduit",
+      query: sql`ALTER TABLE "publication_report" ADD COLUMN IF NOT EXISTS "report_url" text`,
+    },
+    {
       step: "review: index pe email",
       query: sql`CREATE INDEX IF NOT EXISTS "review_email_idx" ON "review" ("email")`,
     },

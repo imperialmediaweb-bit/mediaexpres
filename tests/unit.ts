@@ -798,6 +798,22 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     /datetime-local/.test(citeste("src/app/admin/rapoarte/RaportForm.tsx")),
   );
 
+  // Raportul gazduit (pagina cu toate aparitiile, postarile de Facebook si
+  // confirmarea indexarii) ramane in contul clientului. Emailurile se pierd,
+  // contul nu — de aceea linkul se si salveaza, nu doar se trimite.
+  t("linkul raportului ajunge in baza de date", /reportUrl: reportUrl \|\| null/.test(rutaRaport));
+  t("emailul are butonul catre raportul complet", /Deschideți raportul complet/.test(rutaRaport));
+  t(
+    "clientul vede raportul in contul lui",
+    /r\.reportUrl/.test(citeste("src/app/cont/rapoarte/page.tsx")),
+  );
+  t(
+    "coloana se adauga si prin fix-db",
+    /publication_report" ADD COLUMN IF NOT EXISTS "report_url/.test(
+      citeste("src/app/api/admin/fix-db/route.ts"),
+    ),
+  );
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",

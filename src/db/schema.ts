@@ -251,6 +251,10 @@ export const publicationReports = pgTable("publication_report", {
   articleTitle: text("article_title"),
   // JSON: string[] — linkurile articolelor publicate.
   links: text("links").notNull().default("[]"),
+  // 10.09.2026 — linkul catre raportul gazduit (pagina cu toate cele 50 de
+  // aparitii, postarile de Facebook si confirmarea indexarii). Emailul il
+  // contine oricum, dar emailul se pierde; in contul clientului ramane.
+  reportUrl: text("report_url"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

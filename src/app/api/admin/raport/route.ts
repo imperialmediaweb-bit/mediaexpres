@@ -47,6 +47,9 @@ export async function POST(req: NextRequest) {
   // O trecem prin Date ca sa iasa ISO cu fusul corect; daca e in trecut sau
   // neinteligibila, ignoram programarea si trimitem acum — un raport plecat
   // acum e mai bun decat unul pierdut intr-o data gresita.
+  // Linkul catre raportul gazduit (pagina cu toate aparitiile). Il pune
+  // proprietarul, dupa ce a generat raportul in platforma de publicare.
+  const reportUrl = String(form.get("reportUrl") || "").trim();
   const trimiteLaRaw = String(form.get("trimiteLa") || "").trim();
   let scheduledAt: string | undefined;
   if (trimiteLaRaw) {
@@ -165,6 +168,7 @@ export async function POST(req: NextRequest) {
       // Salvam obiecte {url, title}. Rapoartele vechi au string[] simplu —
       // cititorii trateaza ambele forme.
       links: JSON.stringify(entries),
+      reportUrl: reportUrl || null,
     });
     // Clientul fara cont primeste unul implicit (login cu magic link pe email).
     const [existing] = await db
@@ -236,6 +240,14 @@ export async function POST(req: NextRequest) {
           ? `Articolul <strong>„${articleTitle}"</strong> este acum live`
           : "Articolul dumneavoastră este acum live"
       } în <strong>${links.length || 50} de publicații</strong> din rețeaua MediaExpres.</p>
+      ${
+        reportUrl
+          ? `<p style="margin:20px 0;">
+               <a href="${esc(reportUrl)}" style="background:#0f172a;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:700;">Deschideți raportul complet →</a>
+             </p>
+             <p style="color:#64748b;font-size:13px;">Raportul conține toate aparițiile, postările de pe paginile de Facebook și confirmarea trimiterii la indexare. Rămâne disponibil permanent, la aceeași adresă.</p>`
+          : ""
+      }
       ${links.length ? `<p>Linkurile, ca să le puteți verifica pe fiecare:</p>${linksHtml}` : ""}
       ${entries.length || hasFile ? '<p>Găsiți raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}

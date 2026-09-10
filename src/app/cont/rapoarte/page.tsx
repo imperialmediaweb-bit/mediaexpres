@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
-import { FileSpreadsheet, FileText } from "lucide-react";
+import { ExternalLink, FileSpreadsheet, FileText } from "lucide-react";
 import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
@@ -79,6 +79,23 @@ export default async function RapoartePage() {
                   </p>
 
                   <div className="mt-4 flex flex-wrap gap-2">
+                    {/*
+                      Raportul gazduit, cand exista: are si postarile de
+                      Facebook si confirmarea indexarii, deci e mai complet
+                      decat fisierele. De aceea sta primul si e singurul buton
+                      plin — restul sunt descarcari.
+                    */}
+                    {r.reportUrl && (
+                      <a
+                        href={r.reportUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-2 rounded-lg bg-brand-navy px-3 py-2 text-sm font-semibold text-white transition hover:bg-brand-navy/90"
+                      >
+                        <ExternalLink className="h-4 w-4" />
+                        Raportul complet
+                      </a>
+                    )}
                     <a
                       href={`/api/cont/raport/${r.id}?format=xlsx`}
                       className="inline-flex items-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-brand-navy transition hover:border-brand-navy hover:bg-slate-50"

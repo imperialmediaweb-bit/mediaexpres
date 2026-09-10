@@ -14,15 +14,43 @@
  * rand din fisierul asta si gata.
  */
 export interface ArticolExemplu {
+  /**
+   * Firma sau organizatia care a comandat. Se completeaza doar cand stim sigur
+   * — nu ghicim niciodata dupa titlu. Lipsa lui nu strica pagina: cardul arata
+   * atunci doar categoria si articolul.
+   */
+  client?: string;
   titlu: string;
   publicatie: string;
+  /** Un articol din campanie, ca sa se vada cum arata publicarea. */
   url: string;
   categorie: string;
   data: string;
+  /**
+   * Raportul campaniei — pagina cu TOATE cele 50 de linkuri, postarile de
+   * Facebook si confirmarea trimiterii la indexare. Cand exista, cardul
+   * primeste al doilea buton, iar asta e de fapt dovada grea: un articol
+   * arata cum scriem, raportul arata ce inseamna 50 de aparitii.
+   */
+  raportUrl?: string;
+  /** Acelasi raport, ca fisier, pentru cine il vrea la dosar. */
+  raportPdf?: string;
 }
 
 export const PORTOFOLIU: ArticolExemplu[] = [
   {
+    client: "C.A.R. Bistrița IFN",
+    titlu:
+      "A dispărut dosarul cu șină! Ce trebuie să știi despre C.A.R.?",
+    publicatie: "toate cele 50 de publicații",
+    url: "https://reteau-expres-production.up.railway.app/raport/8Y1_oL7bP4-_JaCXeIyM8A3ihc89Mauv",
+    raportUrl:
+      "https://reteau-expres-production.up.railway.app/raport/8Y1_oL7bP4-_JaCXeIyM8A3ihc89Mauv",
+    categorie: "Servicii financiare",
+    data: "septembrie 2026",
+  },
+  {
+    client: "Fundația Bog'Art",
     titlu:
       "Fundația Bog'Art oferă premii de 10.000 de euro la New Wave Art Prize, ediția 2026",
     publicatie: "Iași Expres",
@@ -31,14 +59,16 @@ export const PORTOFOLIU: ArticolExemplu[] = [
     data: "aprilie 2026",
   },
   {
+    client: "Cineplexx România",
     titlu:
-      "Cineplexx România, alături de elevii CSEI „Sf. Vasile" Craiova, într-o acțiune dedicată educației și incluziunii",
+      "Cineplexx România, alături de elevii CSEI „Sf. Vasile” Craiova, într-o acțiune dedicată educației și incluziunii",
     publicatie: "Dolj Expres",
     url: "https://doljexpres.ro/local/comunicat-de-presa-incluziunea-merita-sa-fie-vazuta-cineplexx-romania-alaturi-de-elevii-csei-sf-vasile-craiova-intr-o-actiune-dedicata-educatiei-incluziunii-si-apartenentei",
     categorie: "Responsabilitate socială",
     data: "septembrie 2026",
   },
   {
+    client: "Seminar dr. Menis Yousry",
     titlu:
       "Brașovul găzduiește un seminar transformațional susținut de dr. Menis Yousry",
     publicatie: "Brașov Expres",
@@ -47,16 +77,18 @@ export const PORTOFOLIU: ArticolExemplu[] = [
     data: "mai 2026",
   },
   {
+    client: "Proiectul „Pachet de bază” Brașov",
     titlu:
-      "Inima proiectului „Pachet de bază" Brașov: oamenii care își ajută vecinii să urce pe scara succesului",
+      "Inima proiectului „Pachet de bază” Brașov: oamenii care își ajută vecinii să urce pe scara succesului",
     publicatie: "Brașov Expres",
     url: "https://www.brasovexpress.ro/2026/01/22/inima-proiectului-pachet-de-baza-brasov-oamenii-care-isi-ajuta-vecinii-sa-urce-pe-scara-succesului/",
     categorie: "Proiecte sociale",
     data: "ianuarie 2026",
   },
   {
+    client: "Proiectul „Pachet de bază” Brașov",
     titlu:
-      "Incluziune socială prin muncă: cum transformă proiectul „Pachet de bază" comunitățile vulnerabile din județul Brașov",
+      "Incluziune socială prin muncă: cum transformă proiectul „Pachet de bază” comunitățile vulnerabile din județul Brașov",
     publicatie: "Brașov Expres",
     url: "https://brasovexpress.ro/local/incluziune-sociala-prin-munca-cum-transforma-proiectul-pachet-de-baza-comunitatile-vulnerabile-din-judetul-brasov",
     categorie: "Proiecte sociale",

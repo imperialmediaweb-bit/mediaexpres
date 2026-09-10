@@ -21,6 +21,8 @@ export function RaportForm({
   const [invoiceName, setInvoiceName] = useState("");
   // Gol = pleaca acum. Completat = Resend il tine si il livreaza la ora ceruta.
   const [trimiteLa, setTrimiteLa] = useState("");
+  // Linkul raportului gazduit, generat in platforma de publicare.
+  const [reportUrl, setReportUrl] = useState("");
   const invoiceRef = useRef<HTMLInputElement>(null);
 
   const [sending, setSending] = useState(false);
@@ -49,6 +51,7 @@ export function RaportForm({
       const inv = invoiceRef.current?.files?.[0];
       if (inv) fd.set("invoice", inv);
       if (trimiteLa) fd.set("trimiteLa", trimiteLa);
+      if (reportUrl) fd.set("reportUrl", reportUrl.trim());
 
       const res = await fetch("/api/admin/raport", { method: "POST", body: fd });
       const json = await res.json();
@@ -64,6 +67,7 @@ export function RaportForm({
           ".",
       );
       setLinks("");
+      setReportUrl("");
       setTrimiteLa("");
       setFileName("");
       setInvoiceName("");
@@ -173,6 +177,27 @@ export function RaportForm({
             onChange={(e) => setFileName(e.target.files?.[0]?.name || "")}
           />
         </label>
+      </div>
+
+      {/*
+        Linkul raportului gazduit. Emailul il primeste ca buton mare, iar in
+        contul clientului ramane permanent — emailurile se pierd, contul nu.
+      */}
+      <div>
+        <label htmlFor="reportUrl" className="mb-1.5 block text-sm font-medium text-slate-700">
+          Link către raportul online <span className="font-normal text-slate-500">(opțional)</span>
+        </label>
+        <input
+          id="reportUrl"
+          type="url"
+          value={reportUrl}
+          onChange={(e) => setReportUrl(e.target.value)}
+          placeholder="https://..."
+          className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-1 focus:ring-brand-red"
+        />
+        <p className="mt-1 text-xs text-slate-500">
+          Apare ca buton în email și rămâne în contul clientului, la „Rapoartele mele”.
+        </p>
       </div>
 
       {/*
