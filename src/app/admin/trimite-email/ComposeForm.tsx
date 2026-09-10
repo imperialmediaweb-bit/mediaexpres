@@ -245,7 +245,7 @@ export function ComposeForm() {
             (unul pe linie{recipients.length > 0 ? ` — ${recipients.length} valizi` : ""})
           </span>
         </label>
-        <textarea
+        <textarea data-testid="destinatari"
           value={recipientsRaw}
           onChange={(e) => setRecipientsRaw(e.target.value)}
           rows={3}

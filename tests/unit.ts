@@ -863,6 +863,13 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     /if \(\(sablonCerut \|\| ""\) !== ultimulSablon\)/.test(compose),
   );
 
+  // Pe pagina comenzii, destinatarul e la vedere: sub titlul sectiunii si pe
+  // butonul de trimis. Emailul pleaca mereu la clientul comenzii, dar omul
+  // trebuie sa VADA asta inainte sa apese, nu sa presupuna.
+  const actiuni = citeste("src/app/admin/materiale/[id]/OrderActions.tsx");
+  t("pagina comenzii arata catre cine pleaca emailul", /data-testid="mail-catre"/.test(actiuni));
+  t("adresa e si pe butonul de trimis", /Trimite emailul către "\}\s*\{email\}/.test(actiuni));
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",

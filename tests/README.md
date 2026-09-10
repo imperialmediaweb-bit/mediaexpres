@@ -8,6 +8,7 @@ astea trebuie sa poata fi rulate de oricine, oricand, cu un singur `node`.
 | Fisier | Verificari | Ce acopera |
 |---|---|---|
 | `unit.ts` | 122 | logica pura: termenul rulant al ofertei, preturi si pachete, emailul cu lista, cunostintele consultantului, generatoarele de .xlsx si .pdf (validate byte cu byte), integritatea datelor retelei |
+| `destinatar.mjs` | 7 | emailul pleaca la clientul de pe pagina caruia ai apasat butonul: navigare in aplicatie intre doi clienti, fara reincarcare (bugul din 10.09.2026); ce scrii cu mana ramane; URL-ul nou castiga |
 | `api.mjs` | 40 | securitate (fiecare endpoint refuza fara sesiune/cheie) si validarea datelor de intrare |
 | `pages.mjs` | 27 | fiecare pagina publica, de admin si de cont raspunde 200, fara erori JavaScript |
 | `flows.mjs` | 69 | fluxurile reale in Chromium: comanda, pretul de cazino, pixelul, fluxul OP, mobil 390px, SEO |

@@ -400,6 +400,20 @@ export function OrderActions({
           Mesajul e deja scris, potrivit stării comenzii. Atașezi factura sau raportul
           mai jos și trimiți — totul dintr-un singur loc.
         </p>
+        {/*
+          Destinatarul, la vedere, PRIMUL lucru din sectiune. Emailul de aici
+          pleaca mereu la clientul comenzii — adresa nu se poate schimba din
+          formular, tocmai ca sa nu plece la altcineva. Dupa ce un raport a
+          ajuns la clientul gresit (din alt formular), regula e: inainte de
+          orice buton de trimis, omul vede negru pe alb catre cine pleaca.
+        */}
+        <p className="mt-3 flex flex-wrap items-center gap-2 rounded-lg bg-brand-ivory px-3 py-2 text-sm">
+          <span className="text-slate-500">Către:</span>
+          <strong className="text-brand-navy" data-testid="mail-catre">
+            {email}
+          </strong>
+          <span className="text-xs text-slate-500">— clientul acestei comenzi</span>
+        </p>
         <div className="mt-3 flex flex-wrap gap-2">
           {SABLOANE.map((t) => (
             <button
@@ -496,7 +510,8 @@ export function OrderActions({
           className="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-brand-navy hover:border-brand-navy disabled:opacity-60"
         >
           {busy === "mail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-          {mailLa ? "Programează emailul" : "Trimite emailul"}
+          {mailLa ? "Programează emailul către " : "Trimite emailul către "}
+          {email}
         </button>
         {/*
           Acelasi mesaj, dar pe WhatsApp. Exista pentru ca emailul poate fi
