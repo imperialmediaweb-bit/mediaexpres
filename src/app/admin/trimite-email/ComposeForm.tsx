@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { isoDinOraRomaniei, formatOraRomaniei } from "@/lib/ora-romaniei";
 import { useSearchParams } from "next/navigation";
 import { Loader2, Send, Clock, CheckCircle2 } from "lucide-react";
 
@@ -177,7 +178,7 @@ export function ComposeForm() {
           body,
           template,
           ...(when === "later"
-            ? { scheduledAt: new Date(scheduledAt).toISOString() }
+            ? { scheduledAt: isoDinOraRomaniei(scheduledAt) || new Date(scheduledAt).toISOString() }
             : {}),
           ...(attachments.length
             ? { attachments: attachments.map(({ filename, content }) => ({ filename, content })) }
@@ -189,7 +190,7 @@ export function ComposeForm() {
 
       setDone(
         json.scheduled
-          ? `Programat: ${json.sent} email${json.sent === 1 ? "" : "uri"} vor pleca la ${new Date(scheduledAt).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" })}.`
+          ? `Programat: ${json.sent} email${json.sent === 1 ? "" : "uri"} vor pleca la ${formatOraRomaniei(isoDinOraRomaniei(scheduledAt) || scheduledAt)} (ora României).`
           : `Trimis către ${json.sent} destinatar${json.sent === 1 ? "" : "i"}.`,
       );
       setRecipientsRaw("");

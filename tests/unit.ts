@@ -15,6 +15,7 @@ import { buildReportXlsx, buildReportPdf } from "@/lib/report-files";
 import { FONT_ENCODING } from "@/lib/report-font";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
+import { isoDinOraRomaniei, formatOraRomaniei } from "@/lib/ora-romaniei";
 import { signReviewToken, verifyReviewToken } from "@/lib/review-token";
 import { bankTransferEmailBox, escapeHtml } from "@/lib/email";
 import { extractRequestUserData, splitName } from "@/lib/meta-capi";
@@ -791,7 +792,7 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   t("raportul poate fi programat", /scheduledAt/.test(rutaRaport) && /trimiteLa/.test(rutaRaport));
   t(
     "o ora din trecut nu blocheaza raportul",
-    /cand\.getTime\(\) > Date\.now\(\)/.test(rutaRaport),
+    /new Date\(iso\)\.getTime\(\) > Date\.now\(\)/.test(rutaRaport),
   );
   t(
     "formularul de raport are campul de programare",
@@ -802,17 +803,10 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   // confirmarea indexarii) ramane in contul clientului. Emailurile se pierd,
   // contul nu — de aceea linkul se si salveaza, nu doar se trimite.
   t("linkul raportului ajunge in baza de date", /reportUrl: reportUrl \|\| null/.test(rutaRaport));
-  t("emailul are butonul catre raportul complet", /Deschideți raportul complet/.test(rutaRaport));
-  // In email, linkurile aratau adresa bruta. Clientul cumpara „50 de
-  // publicatii" — ca sa simta cifra, trebuie sa citeasca 50 de NUME.
-  t("linkurile din email arata numele publicatiei", /numePublicatie/.test(rutaRaport));
+  t("emailul are butonul catre toate linkurile", /Vezi toate linkurile/.test(rutaRaport));
   t(
-    "numele se deduce din lista reala de ziare",
-    /NEWSPAPERS/.test(rutaRaport),
-  );
-  t(
-    "un domeniu din afara retelei ramane afisat ca adresa",
-    /return gasit \? gasit\.name : host;/.test(rutaRaport),
+    "cand exista raportul gazduit, emailul nu mai insira cele 50 de linkuri",
+    /reportUrl\s*\n?\s*\?[\s\S]{0,600}: links\.length/.test(rutaRaport),
   );
   t(
     "emailul trimite clientul spre contul lui, cu buton",
@@ -831,6 +825,29 @@ console.log("\n########## R. DATELE FIRMEI ##########");
     /publication_report" ADD COLUMN IF NOT EXISTS "report_url/.test(
       citeste("src/app/api/admin/fix-db/route.ts"),
     ),
+  );
+
+  // Ora programarii e MEREU ora Romaniei. `datetime-local` nu are fus, iar
+  // `new Date(...)` o citea in fusul calculatorului: pe un laptop pe UTC,
+  // emailul programat la 9:30 pleca la 12:30, si aflai de la client.
+  t("iarna: 09:30 la Bucuresti inseamna 07:30 UTC", isoDinOraRomaniei("2026-01-15T09:30") === "2026-01-15T07:30:00.000Z");
+  t("vara: 09:30 la Bucuresti inseamna 06:30 UTC", isoDinOraRomaniei("2026-09-15T09:30") === "2026-09-15T06:30:00.000Z");
+  t("un text care nu e data intoarce null", isoDinOraRomaniei("aiurea") === null);
+  t(
+    "ora se afiseaza inapoi tot in ora Romaniei",
+    formatOraRomaniei("2026-09-15T06:30:00.000Z").includes("09:30"),
+  );
+  t(
+    "raportul foloseste ora Romaniei, nu fusul serverului",
+    /isoDinOraRomaniei/.test(rutaRaport),
+  );
+  t(
+    "programarea exista si pe pagina comenzii",
+    /isoDinOraRomaniei/.test(citeste("src/app/admin/materiale/[id]/OrderActions.tsx")),
+  );
+  t(
+    "programarea exista si la trimite-email",
+    /isoDinOraRomaniei/.test(citeste("src/app/admin/trimite-email/ComposeForm.tsx")),
   );
 
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");

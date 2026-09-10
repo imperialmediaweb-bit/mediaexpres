@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { isoDinOraRomaniei, formatOraRomaniei } from "@/lib/ora-romaniei";
 import { useRouter } from "next/navigation";
 import {
   Loader2,
@@ -112,6 +113,8 @@ export function OrderActions({
   const implicit = SABLOANE[isPublished ? 1 : 0];
   const [mailSubject, setMailSubject] = useState(implicit.subiect);
   const [mailBody, setMailBody] = useState(implicit.text);
+  // Gol = pleaca acum. Completat = ora Romaniei, oriunde ai fi.
+  const [mailLa, setMailLa] = useState("");
 
   // Numaram doar liniile care chiar sunt linkuri, ca sa nu promitem clientului
   // un numar gresit de publicatii cand lista contine si titluri.
@@ -213,6 +216,7 @@ export function OrderActions({
           subject: mailSubject.trim(),
           body: mailBody.trim(),
           template: "personal",
+          ...(isoDinOraRomaniei(mailLa) ? { scheduledAt: isoDinOraRomaniei(mailLa)! } : {}),
           ...(mailFiles.length
             ? { attachments: mailFiles.map(({ filename, content }) => ({ filename, content })) }
             : {}),
@@ -222,8 +226,14 @@ export function OrderActions({
       if (!r.ok || !j.ok) throw new Error(j.error || "Eroare");
       setMsg({
         kind: "ok",
-        text: `Email trimis către ${email}${mailFiles.length ? ` cu ${mailFiles.length} fișier(e) atașat(e)` : ""}.`,
+        text:
+          (mailLa
+            ? `Email programat către ${email} pentru ${formatOraRomaniei(isoDinOraRomaniei(mailLa) || mailLa)} (ora României)`
+            : `Email trimis către ${email}`) +
+          (mailFiles.length ? ` cu ${mailFiles.length} fișier(e) atașat(e)` : "") +
+          ".",
       });
+      setMailLa("");
       setMailFiles([]);
       if (mailFilesRef.current) mailFilesRef.current.value = "";
     } catch (e) {
@@ -453,7 +463,32 @@ export function OrderActions({
             />
           </label>
         )}
-        <br />
+        {/*
+          Programarea. Comenzile se rezolva des seara tarziu sau in weekend,
+          iar un email primit la 23:40 arata a robot. Gol = pleaca acum.
+        */}
+        <div className="mt-3 flex flex-wrap items-center gap-2 text-sm">
+          <label htmlFor="mailLa" className="text-slate-600">
+            Trimite mai târziu (ora României):
+          </label>
+          <input
+            id="mailLa"
+            type="datetime-local"
+            value={mailLa}
+            onChange={(e) => setMailLa(e.target.value)}
+            className="rounded-lg border border-slate-300 px-3 py-1.5 text-sm focus:border-brand-red focus:outline-none"
+          />
+          {mailLa && (
+            <button
+              type="button"
+              onClick={() => setMailLa("")}
+              className="text-xs text-slate-500 underline hover:text-brand-red"
+            >
+              anulează programarea
+            </button>
+          )}
+        </div>
+
         <button
           type="button"
           onClick={sendMail}
@@ -461,7 +496,7 @@ export function OrderActions({
           className="mt-2 inline-flex items-center gap-2 rounded-lg border border-slate-300 px-4 py-2 text-sm font-semibold text-brand-navy hover:border-brand-navy disabled:opacity-60"
         >
           {busy === "mail" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Mail className="h-4 w-4" />}
-          Trimite emailul
+          {mailLa ? "Programează emailul" : "Trimite emailul"}
         </button>
         {/*
           Acelasi mesaj, dar pe WhatsApp. Exista pentru ca emailul poate fi

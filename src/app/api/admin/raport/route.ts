@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
-import { NEWSPAPERS } from "@/data/newspapers";
+import { isoDinOraRomaniei } from "@/lib/ora-romaniei";
 import { signReviewToken } from "@/lib/review-token";
 import { pingIndexNow } from "@/lib/indexnow";
 import { buildReportPdf, buildReportXlsx } from "@/lib/report-files";
@@ -44,20 +44,18 @@ export async function POST(req: NextRequest) {
   const linksRaw = String(form.get("links") || "");
   const file = form.get("file");
   const invoice = form.get("invoice");
-  // Ora vine din `datetime-local`, adica in ora calculatorului, fara fus.
-  // O trecem prin Date ca sa iasa ISO cu fusul corect; daca e in trecut sau
-  // neinteligibila, ignoram programarea si trimitem acum — un raport plecat
-  // acum e mai bun decat unul pierdut intr-o data gresita.
+  // Ora scrisa e MEREU ora Romaniei, indiferent pe ce fus e calculatorul.
+  // Daca e in trecut sau neinteligibila, ignoram programarea si trimitem
+  // acum — un raport plecat acum e mai bun decat unul pierdut intr-o data
+  // gresita.
   // Linkul catre raportul gazduit (pagina cu toate aparitiile). Il pune
   // proprietarul, dupa ce a generat raportul in platforma de publicare.
   const reportUrl = String(form.get("reportUrl") || "").trim();
   const trimiteLaRaw = String(form.get("trimiteLa") || "").trim();
   let scheduledAt: string | undefined;
   if (trimiteLaRaw) {
-    const cand = new Date(trimiteLaRaw);
-    if (!Number.isNaN(cand.getTime()) && cand.getTime() > Date.now()) {
-      scheduledAt = cand.toISOString();
-    }
+    const iso = isoDinOraRomaniei(trimiteLaRaw);
+    if (iso && new Date(iso).getTime() > Date.now()) scheduledAt = iso;
   }
 
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -212,44 +210,17 @@ export async function POST(req: NextRequest) {
   }
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
-  /**
-   * Numele publicatiei, dedus din domeniu.
-   *
-   * Pana acum in email se vedea adresa bruta — „botosaniexpres.ro/2026/09/..."
-   * — si clientul nu stia in ce ziar a aparut fara sa dea click pe fiecare.
-   * Cifra pe care o vinde raportul e „50 de publicatii"; ca s-o simta, trebuie
-   * sa citeasca 50 de NUME, nu 50 de adrese. Cand domeniul nu e din reteaua
-   * noastra (un partener, o preluare), ramanem la adresa — mai bine ceva
-   * exact decat un nume ghicit.
-   */
-  const numePublicatie = (url: string): string => {
-    let host = "";
-    try {
-      host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
-    } catch {
-      return url.replace(/^https?:\/\//, "");
-    }
-    const gasit = NEWSPAPERS.find((z) => {
-      try {
-        return new URL(z.url).hostname.replace(/^www\./, "").toLowerCase() === host;
-      } catch {
-        return false;
-      }
-    });
-    return gasit ? gasit.name : host;
-  };
-
   const linksHtml = entries.length
     ? `<ol style="padding-left:20px;margin:16px 0;">${entries
         .map(
           (e) =>
-            `<li style="margin:12px 0;">${
+            `<li style="margin:10px 0;">${
               e.title
                 ? `<strong style="color:#111111;">${esc(e.title)}</strong><br/>`
                 : ""
-            }<a href="${esc(e.url)}" style="display:inline-block;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#0f172a;text-decoration:none;font-weight:600;font-size:13px;margin-top:2px;">${esc(
-              numePublicatie(e.url),
-            )} →</a></li>`,
+            }<a href="${esc(e.url)}" style="color:#c1121f;font-size:13px;">${esc(
+              e.url.replace(/^https?:\/\//, ""),
+            )}</a></li>`,
         )
         .join("")}</ol>`
     : "";
@@ -268,15 +239,24 @@ export async function POST(req: NextRequest) {
           ? `Articolul <strong>„${articleTitle}"</strong> este acum live`
           : "Articolul dumneavoastră este acum live"
       } în <strong>${links.length || 50} de publicații</strong> din rețeaua MediaExpres.</p>
+      ${/*
+        Cand avem raportul gazduit, emailul NU mai insira cele 50 de linkuri.
+        O lista de 50 de randuri intr-un email e de necitit pe telefon, se
+        taie in Gmail la „...mesaj trunchiat" si ingroapa tot ce vine dupa ea
+        — inclusiv cererea de recenzie si caseta cu contul. Un buton duce la
+        aceeasi informatie, intr-un loc unde chiar se poate citi.
+        Fara raport gazduit ramanem la lista: mai bine lunga decat inexistenta.
+      */ ""}
       ${
         reportUrl
-          ? `<p style="margin:20px 0;">
-               <a href="${esc(reportUrl)}" style="background:#0f172a;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:700;">Deschideți raportul complet →</a>
+          ? `<p style="margin:22px 0;">
+               <a href="${esc(reportUrl)}" style="background:#0f172a;color:#fff;padding:16px 32px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:700;font-size:16px;">Vezi toate linkurile →</a>
              </p>
-             <p style="color:#64748b;font-size:13px;">Raportul conține toate aparițiile, postările de pe paginile de Facebook și confirmarea trimiterii la indexare. Rămâne disponibil permanent, la aceeași adresă.</p>`
-          : ""
+             <p style="color:#334155;font-size:14px;line-height:1.6;">Raportul conține fiecare apariție în parte, postările de pe paginile de Facebook ale ziarelor și confirmarea trimiterii la indexare. Rămâne disponibil permanent, la aceeași adresă.</p>`
+          : links.length
+            ? `<p>Linkurile, ca să le puteți verifica pe fiecare:</p>${linksHtml}`
+            : ""
       }
-      ${links.length ? `<p>Linkurile, ca să le puteți verifica pe fiecare:</p>${linksHtml}` : ""}
       ${entries.length || hasFile ? '<p>Găsiți raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, la aceeași adresă, iar linkurile funcționează și peste ani.</p>

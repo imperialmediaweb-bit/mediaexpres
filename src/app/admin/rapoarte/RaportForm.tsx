@@ -1,6 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
+import { formatOraRomaniei } from "@/lib/ora-romaniei";
 import { Loader2, Send, CheckCircle2, Paperclip } from "lucide-react";
 
 export function RaportForm({
@@ -59,7 +60,7 @@ export function RaportForm({
 
       setDone(
         (json.programatLa
-          ? `Raportul e programat pentru ${new Date(json.programatLa).toLocaleString("ro-RO", { dateStyle: "medium", timeStyle: "short" })}, către ${email}`
+          ? `Raportul e programat pentru ${formatOraRomaniei(json.programatLa)} (ora României), către ${email}`
           : `Raportul a plecat către ${email}`) +
           (json.linksCount ? ` cu ${json.linksCount} linkuri` : "") +
           (json.attached ? ` + ${json.attached} fișiere atașate` : "") +
@@ -208,7 +209,7 @@ export function RaportForm({
       */}
       <div>
         <label htmlFor="trimiteLa" className="mb-1.5 block text-sm font-medium text-slate-700">
-          Trimite mai târziu <span className="font-normal text-slate-500">(opțional)</span>
+          Trimite mai târziu <span className="font-normal text-slate-500">(opțional, ora României)</span>
         </label>
         <input
           id="trimiteLa"
@@ -218,7 +219,7 @@ export function RaportForm({
           className="w-full max-w-xs rounded-xl border border-slate-300 px-4 py-2.5 text-sm focus:border-brand-red focus:outline-none focus:ring-1 focus:ring-brand-red"
         />
         <p className="mt-1 text-xs text-slate-500">
-          Lasă gol ca să plece acum. Ora e cea de pe calculatorul tău.
+          Lasă gol ca să plece acum. Ora e mereu ora României.
         </p>
       </div>
 
