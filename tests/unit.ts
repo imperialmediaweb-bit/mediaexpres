@@ -804,6 +804,14 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   t("linkul raportului ajunge in baza de date", /reportUrl: reportUrl \|\| null/.test(rutaRaport));
   t("emailul are butonul catre raportul complet", /Deschideți raportul complet/.test(rutaRaport));
   t(
+    "emailul trimite clientul spre contul lui, cu buton",
+    /Rapoartele mele →/.test(rutaRaport) && /\/cont\/rapoarte/.test(rutaRaport),
+  );
+  t(
+    "emailul spune ca raportul se descarca oricand din cont",
+    /se\s*\n?\s*descarcă oricând din contul dumneavoastră/.test(rutaRaport),
+  );
+  t(
     "clientul vede raportul in contul lui",
     /r\.reportUrl/.test(citeste("src/app/cont/rapoarte/page.tsx")),
   );

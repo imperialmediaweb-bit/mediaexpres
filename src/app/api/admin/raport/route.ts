@@ -252,7 +252,25 @@ export async function POST(req: NextRequest) {
       ${entries.length || hasFile ? '<p>Găsiți raportul complet și în fișierele atașate (PDF și Excel).</p>' : ""}
       ${hasInvoice ? '<p><strong>Factura fiscală</strong> este și ea atașată acestui email.</p>' : ""}
       <p style="margin-top:16px;color:#64748b;font-size:13px;">Articolele rămân online permanent, la aceeași adresă, iar linkurile funcționează și peste ani.</p>
-      <p style="color:#64748b;font-size:13px;">Raportul rămâne salvat și în contul dumneavoastră: intrați pe <a href="${SITE.url}/cont/rapoarte" style="color:#c1121f;">mediaexpress.ro/cont</a> cu acest email (fără parolă — primiți link de conectare).</p>
+      ${/*
+        Contul, spus clar si jos, nu pierdut in text. Emailul asta se rataceste
+        in inbox in doua saptamani; peste un an, cand omul are nevoie de lista
+        pentru un dosar, trebuie sa stie ca exista un loc unde o gaseste
+        oricand. De aceea are chenar, nu e un rand gri printre altele.
+      */ ""}
+      <div style="margin-top:24px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:10px;padding:16px;">
+        <p style="margin:0 0 8px;font-weight:600;color:#111111;">Raportul rămâne al dumneavoastră, permanent</p>
+        <p style="margin:0 0 12px;color:#334155;font-size:14px;line-height:1.6;">
+          Nu trebuie să păstrați acest email. Raportul, cu toate linkurile, se
+          descarcă oricând din contul dumneavoastră — în PDF sau Excel — și
+          rămâne acolo pe termen nelimitat.
+        </p>
+        <a href="${SITE.url}/cont/rapoarte" style="display:inline-block;border:1px solid #0f172a;color:#0f172a;text-decoration:none;font-weight:600;font-size:14px;padding:10px 20px;border-radius:8px;">Rapoartele mele →</a>
+        <p style="margin:10px 0 0;color:#64748b;font-size:13px;">
+          Intrați cu adresa aceasta de email. Nu aveți nevoie de parolă —
+          primiți un link de conectare.
+        </p>
+      </div>
       ${/*
         Cererea de recenzie sta AICI, in emailul cu raportul, si nu intr-un
         mesaj separat de peste cateva zile: acum e momentul in care omul tocmai
