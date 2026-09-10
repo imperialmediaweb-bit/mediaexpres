@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { publicationReports, users } from "@/db/schema";
 import { sendEmail, wrapEmail, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { NEWSPAPERS } from "@/data/newspapers";
 import { signReviewToken } from "@/lib/review-token";
 import { pingIndexNow } from "@/lib/indexnow";
 import { buildReportPdf, buildReportXlsx } from "@/lib/report-files";
@@ -211,17 +212,44 @@ export async function POST(req: NextRequest) {
   }
   const esc = (s: string) =>
     s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  /**
+   * Numele publicatiei, dedus din domeniu.
+   *
+   * Pana acum in email se vedea adresa bruta — „botosaniexpres.ro/2026/09/..."
+   * — si clientul nu stia in ce ziar a aparut fara sa dea click pe fiecare.
+   * Cifra pe care o vinde raportul e „50 de publicatii"; ca s-o simta, trebuie
+   * sa citeasca 50 de NUME, nu 50 de adrese. Cand domeniul nu e din reteaua
+   * noastra (un partener, o preluare), ramanem la adresa — mai bine ceva
+   * exact decat un nume ghicit.
+   */
+  const numePublicatie = (url: string): string => {
+    let host = "";
+    try {
+      host = new URL(url).hostname.replace(/^www\./, "").toLowerCase();
+    } catch {
+      return url.replace(/^https?:\/\//, "");
+    }
+    const gasit = NEWSPAPERS.find((z) => {
+      try {
+        return new URL(z.url).hostname.replace(/^www\./, "").toLowerCase() === host;
+      } catch {
+        return false;
+      }
+    });
+    return gasit ? gasit.name : host;
+  };
+
   const linksHtml = entries.length
     ? `<ol style="padding-left:20px;margin:16px 0;">${entries
         .map(
           (e) =>
-            `<li style="margin:10px 0;">${
+            `<li style="margin:12px 0;">${
               e.title
                 ? `<strong style="color:#111111;">${esc(e.title)}</strong><br/>`
                 : ""
-            }<a href="${esc(e.url)}" style="color:#c1121f;font-size:13px;">${esc(
-              e.url.replace(/^https?:\/\//, ""),
-            )}</a></li>`,
+            }<a href="${esc(e.url)}" style="display:inline-block;border:1px solid #cbd5e1;border-radius:6px;padding:6px 12px;color:#0f172a;text-decoration:none;font-weight:600;font-size:13px;margin-top:2px;">${esc(
+              numePublicatie(e.url),
+            )} →</a></li>`,
         )
         .join("")}</ol>`
     : "";

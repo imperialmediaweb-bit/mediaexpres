@@ -803,6 +803,17 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   // contul nu — de aceea linkul se si salveaza, nu doar se trimite.
   t("linkul raportului ajunge in baza de date", /reportUrl: reportUrl \|\| null/.test(rutaRaport));
   t("emailul are butonul catre raportul complet", /Deschideți raportul complet/.test(rutaRaport));
+  // In email, linkurile aratau adresa bruta. Clientul cumpara „50 de
+  // publicatii" — ca sa simta cifra, trebuie sa citeasca 50 de NUME.
+  t("linkurile din email arata numele publicatiei", /numePublicatie/.test(rutaRaport));
+  t(
+    "numele se deduce din lista reala de ziare",
+    /NEWSPAPERS/.test(rutaRaport),
+  );
+  t(
+    "un domeniu din afara retelei ramane afisat ca adresa",
+    /return gasit \? gasit\.name : host;/.test(rutaRaport),
+  );
   t(
     "emailul trimite clientul spre contul lui, cu buton",
     /Rapoartele mele →/.test(rutaRaport) && /\/cont\/rapoarte/.test(rutaRaport),
