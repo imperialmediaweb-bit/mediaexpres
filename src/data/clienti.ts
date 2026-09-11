@@ -21,7 +21,7 @@ export interface ClientAfisat {
 
 export const CLIENTI: ClientAfisat[] = [
   { nume: "Sublime Events", logo: "sublime.png", ce: "turneu de stand-up în 13 orașe" },
-  { nume: "Toma Enache", logo: "toma-enache.png", ce: "turneu de film" },
+  { nume: "Toma Enache", logo: "toma-enache.png", site: "https://tomaenache.ro/", ce: "turneu de film" },
   { nume: "RomCut.ro", logo: "romcut.png", ce: "optimizare debitare panouri" },
   { nume: "June", logo: "june.png" },
   { nume: "Emblema Group", logo: "emblema-group.png" },
