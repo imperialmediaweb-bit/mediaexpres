@@ -8,6 +8,14 @@ import { usePathname } from "next/navigation";
 // fallback-ul hardcodat face tag-ul functional imediat dupa deploy.
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-J48G1PDG1E";
 
+// 11.09.2026 — eticheta Google Ads (AW-…), ceruta la crearea primei campanii
+// Search. Merge pe ACELASI gtag.js incarcat pentru GA4: un `config` in plus,
+// nu un al doilea script. Fara ea, Google Ads nu poate lega clicul de
+// comanda, iar campania liciteaza orbeste. Conversiile in sine vin din GA4
+// (purchase, begin_checkout), importate in Google Ads — aici doar deschidem
+// canalul.
+const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-778865346";
+
 declare global {
   interface Window {
     gtag?: (...args: unknown[]) => void;
@@ -65,7 +73,8 @@ export function GoogleAnalytics() {
 function gtag(){dataLayer.push(arguments);}
 window.gtag = gtag;
 gtag('js', new Date());
-gtag('config', '${GA_ID}');`}
+gtag('config', '${GA_ID}');
+gtag('config', '${ADS_ID}');`}
       </Script>
     </>
   );

@@ -870,6 +870,12 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   t("pagina comenzii arata catre cine pleaca emailul", /data-testid="mail-catre"/.test(actiuni));
   t("adresa e si pe butonul de trimis", /Trimite emailul către "\}\s*\{email\}/.test(actiuni));
 
+  // Eticheta Google Ads sta pe acelasi gtag.js ca GA4 — un config in plus.
+  // Fara ea, prima campanie Search n-are cum sa lege clicul de comanda.
+  const ga = citeste("src/components/analytics/GoogleAnalytics.tsx");
+  t("eticheta Google Ads e configurata pe gtag", /AW-778865346/.test(ga) && /gtag\('config', '\$\{ADS_ID\}'\)/.test(ga));
+  t("Google Ads nu incarca un al doilea script", (ga.match(/googletagmanager\.com\/gtag\/js/g) || []).length === 1);
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",
