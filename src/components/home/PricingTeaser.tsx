@@ -22,7 +22,9 @@ export function PricingTeaser() {
           ))}
         </div>
         <div className="mt-12 text-center">
-          <Button variant="outline" size="lg" asChild>
+          {/* h-auto + whitespace-normal: pe telefon textul se rupe pe doua
+              randuri in loc sa impinga pagina in lateral. */}
+          <Button variant="outline" size="lg" asChild className="h-auto whitespace-normal py-3">
             <Link href="/pachete">
               Vezi toate pachetele (Cazino + Abonamente)
               <ArrowRight className="h-4 w-4" />

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { ClientiStrip } from "@/components/ClientiStrip";
+import { DovadaRaport } from "@/components/DovadaRaport";
 import {
   Newspaper,
   Globe,
@@ -375,6 +376,7 @@ export default function Oferta500Page() {
         al doilea conteaza mai mult decat primul.
       */}
       <ClientiStrip />
+      <DovadaRaport />
 
       {/* Ce primesti */}
       <section className="section">

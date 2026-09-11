@@ -1051,6 +1051,7 @@ console.log("\n########## S. RECENZII ##########");
   t("fiecare campanie are scop si cel putin 3 livrabile", CAMPANII.every((c) => c.scop.length > 20 && c.livrat.length >= 3));
   t("exemplul de raport exista pe disc", fs.existsSync("public" + EXEMPLU_RAPORT.url));
   t("un singur PDF de raport publicat", fs.readdirSync("public/rapoarte").filter((f) => f.endsWith(".pdf")).length === 1);
+  t("oferta arata raportul ca imagine, inainte de plata", /<DovadaRaport \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) && fs.existsSync("public/rapoarte/exemplu-raport-pagina-1.jpg"));
   t("portofoliul nu mai are linkuri interne (railway)", !/railway\.app/.test(citesteFisier("src/data/portfolio.ts")));
 }
 
