@@ -32,6 +32,9 @@ export function ClientiStrip({ className = "" }: { className?: string }) {
         <p className="text-center text-xs font-semibold uppercase tracking-[0.2em] text-slate-500">
           Au publicat prin MediaExpres
         </p>
+        <p className="mt-2 text-center font-serif text-lg font-bold text-brand-navy md:text-xl">
+          Agenții de comunicare, organizatori de turnee și firme din toată țara
+        </p>
         <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
           {CLIENTI.map((c) => {
             const areLogo = logoExista(c.logo);

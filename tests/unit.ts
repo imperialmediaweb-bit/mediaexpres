@@ -24,6 +24,7 @@ import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
 import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { CLIENTI } from "@/data/clienti";
+import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import {
   sursaDinUrl,
   serializeazaSursa,
@@ -1043,6 +1044,14 @@ console.log("\n########## S. RECENZII ##########");
     /<ClientiStrip \/>/.test(citesteFisier("src/app/page.tsx")) &&
     /<ClientiStrip \/>/.test(citesteFisier("src/app/exemple/page.tsx")));
   t("fara logo pe disc, apare numele ca text", /logoExista/.test(citesteFisier("src/components/ClientiStrip.tsx")));
+
+  // Campaniile: descrise, fara linkuri; un singur raport ca exemplu.
+  const camp = JSON.stringify(CAMPANII);
+  t("campaniile nu contin linkuri", !/https?:\/\//.test(camp));
+  t("fiecare campanie are scop si cel putin 3 livrabile", CAMPANII.every((c) => c.scop.length > 20 && c.livrat.length >= 3));
+  t("exemplul de raport exista pe disc", fs.existsSync("public" + EXEMPLU_RAPORT.url));
+  t("un singur PDF de raport publicat", fs.readdirSync("public/rapoarte").filter((f) => f.endsWith(".pdf")).length === 1);
+  t("portofoliul nu mai are linkuri interne (railway)", !/railway\.app/.test(citesteFisier("src/data/portfolio.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

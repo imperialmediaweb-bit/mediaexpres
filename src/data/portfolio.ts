@@ -39,27 +39,6 @@ export interface ArticolExemplu {
 
 export const PORTOFOLIU: ArticolExemplu[] = [
   {
-    client: "Reparații acoperișuri montaj",
-    titlu:
-      "Fii pregătit: montaj și reparații acoperișuri pentru protecția locuinței tale",
-    publicatie: "Botoșani Expres",
-    url: "https://botosaniexpres.ro/publicitate/fii-pregatit-montaj-si-reparatii-acoperisuri-pentru-protectia-locuintei-tale",
-    raportPdf: "/rapoarte/raport-reparatii-acoperisuri-montaj.pdf",
-    categorie: "Construcții",
-    data: "septembrie 2026",
-  },
-  {
-    client: "C.A.R. Bistrița IFN",
-    titlu:
-      "A dispărut dosarul cu șină! Ce trebuie să știi despre C.A.R.?",
-    publicatie: "toate cele 50 de publicații",
-    url: "https://reteau-expres-production.up.railway.app/raport/8Y1_oL7bP4-_JaCXeIyM8A3ihc89Mauv",
-    raportUrl:
-      "https://reteau-expres-production.up.railway.app/raport/8Y1_oL7bP4-_JaCXeIyM8A3ihc89Mauv",
-    categorie: "Servicii financiare",
-    data: "septembrie 2026",
-  },
-  {
     client: "Fundația Bog'Art",
     titlu:
       "Fundația Bog'Art oferă premii de 10.000 de euro la New Wave Art Prize, ediția 2026",
