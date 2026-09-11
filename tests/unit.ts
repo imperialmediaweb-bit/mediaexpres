@@ -876,6 +876,14 @@ console.log("\n########## R. DATELE FIRMEI ##########");
   t("eticheta Google Ads e configurata pe gtag", /AW-778865346/.test(ga) && /gtag\('config', '\$\{ADS_ID\}'\)/.test(ga));
   t("Google Ads nu incarca un al doilea script", (ga.match(/googletagmanager\.com\/gtag\/js/g) || []).length === 1);
 
+  // Conversia de Ads sta pe pagina care CHIAR se randeaza dupa plata cu
+  // cardul (/articol/[token]) — /comanda/multumim face redirect pe server.
+  const conv = citeste("src/components/analytics/AdsConversion.tsx");
+  t("conversia Ads foloseste eticheta de Achizitie", /vAvYCOnh6t0BEMKVsvMC/.test(conv) && /send_to: `\$\{ADS_ID\}\/\$\{PURCHASE_LABEL\}`/.test(conv));
+  t("conversia trimite transaction_id, ca sa nu numere dublu", /transaction_id: transactionId/.test(conv));
+  t("conversia e montata pe pagina de dupa plata cu cardul", /<AdsConversion transactionId=\{order\.sessionId\} value=\{pkg\?\.price\}/.test(citeste("src/app/articol/[token]/page.tsx")));
+  t("multumim NU e locul conversiei la card (face redirect)", /if \(outcome\.kind === "article"\) redirect\(outcome\.url\)/.test(citeste("src/app/comanda/multumim/page.tsx")));
+
   const clientiAdmin = citeste("src/app/admin/clienti/page.tsx");
   t(
     "in /admin/clienti se numara din orderSubmissions doar comenzile prin OP",

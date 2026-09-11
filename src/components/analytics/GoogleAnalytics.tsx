@@ -14,7 +14,7 @@ const GA_ID = process.env.NEXT_PUBLIC_GA_ID || "G-J48G1PDG1E";
 // comanda, iar campania liciteaza orbeste. Conversiile in sine vin din GA4
 // (purchase, begin_checkout), importate in Google Ads — aici doar deschidem
 // canalul.
-const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-778865346";
+export const ADS_ID = process.env.NEXT_PUBLIC_GOOGLE_ADS_ID || "AW-778865346";
 
 declare global {
   interface Window {

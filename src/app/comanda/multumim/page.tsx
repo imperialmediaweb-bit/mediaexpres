@@ -5,6 +5,7 @@ import { CheckCircle2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { getStripe } from "@/lib/stripe";
 import { signOrderToken } from "@/lib/order-token";
+import { AdsConversion } from "@/components/analytics/AdsConversion";
 
 export const dynamic = "force-dynamic";
 
@@ -74,6 +75,8 @@ export default async function MultumimPage({
   if (outcome.kind === "subscription") {
     return (
       <section className="bg-white">
+        {/* Abonamentul e singura plata care ajunge sa randeze pagina asta. */}
+        {searchParams.session_id && <AdsConversion transactionId={searchParams.session_id} />}
         <div className="container py-24 text-center">
           <div className="mx-auto inline-flex h-20 w-20 items-center justify-center rounded-full bg-green-50">
             <RefreshCw className="h-10 w-10 text-green-600" />

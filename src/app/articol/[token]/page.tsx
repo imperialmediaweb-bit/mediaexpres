@@ -4,6 +4,7 @@ import { CheckCircle2 } from "lucide-react";
 import { verifyOrderToken } from "@/lib/order-token";
 import { findPackageById } from "@/data/packages";
 import { ArticleForm } from "./ArticleForm";
+import { AdsConversion } from "@/components/analytics/AdsConversion";
 
 export const dynamic = "force-dynamic";
 
@@ -21,6 +22,11 @@ export default function ArticolPage({ params }: { params: { token: string } }) {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#F8F5F0] to-white">
+      {/*
+        Aici e confirmarea reala a platii cu cardul (vezi AdsConversion):
+        tokenul exista doar dupa o sesiune Stripe platita.
+      */}
+      <AdsConversion transactionId={order.sessionId} value={pkg?.price} />
       <div className="mx-auto max-w-2xl px-4 py-12">
         <div className="mb-8 rounded-2xl border border-green-200 bg-green-50 p-6 text-center">
           <CheckCircle2 className="mx-auto h-10 w-10 text-green-600" />
