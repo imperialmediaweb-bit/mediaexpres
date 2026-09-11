@@ -27,8 +27,8 @@ export const CLIENTI: ClientAfisat[] = [
     nume: "Sublime Events",
     // Din Cloudinary, cu potrivire la inaltimea benzii si format automat.
     logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1820_q1xj4n.png", site: "https://bilete.sublime.ro/", ce: "turneu de stand-up în 13 orașe" },
-  { nume: "Toma Enache", logo: "toma-enache.png", site: "https://tomaenache.ro/", ce: "turneu de film" },
-  { nume: "RomCut.ro", logo: "romcut.png", ce: "optimizare debitare panouri" },
+  { nume: "Toma Enache", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1825_ffcrra.png", site: "https://tomaenache.ro/", ce: "turneu de film" },
+  { nume: "RomCut.ro", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1824_mlb1jq.png", ce: "optimizare debitare panouri" },
   { nume: "June", logo: "june.png", site: "https://www.junecom.ro/" },
   { nume: "Emblema Group", logo: "emblema-group.png", site: "https://emblemasolutions.ro/" },
   { nume: "C.A.R. Bistrița IFN", ce: "servicii financiare" },
