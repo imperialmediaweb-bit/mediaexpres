@@ -23,6 +23,7 @@ import { STEPS, EMPTY_ORDER } from "@/components/chat/order-steps";
 import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
 import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
+import { CLIENTI } from "@/data/clienti";
 import {
   sursaDinUrl,
   serializeazaSursa,
@@ -1026,6 +1027,22 @@ console.log("\n########## S. RECENZII ##########");
   t("WhatsApp-ul de pe oferta si butonul flotant primesc propozitia",
     /useSursaWhatsApp\(\)/.test(citesteFisier("src/app/oferta-500/PromoOffer.tsx")) &&
     /useSursaWhatsApp\(\)/.test(citesteFisier("src/components/layout/WhatsAppButton.tsx")));
+}
+
+
+// ---------------------------------------------------------------------------
+// Banda cu clienti
+// ---------------------------------------------------------------------------
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("fiecare client are nume", CLIENTI.every((c) => c.nume.trim().length > 1));
+  t("numele clientilor sunt unice", new Set(CLIENTI.map((c) => c.nume)).size === CLIENTI.length);
+  t("logo-urile au nume de fisier simple", CLIENTI.every((c) => !c.logo || /^[a-z0-9-]+\.(png|svg|webp)$/.test(c.logo)));
+  t("banda e pe oferta, pe prima pagina si pe exemple",
+    /<ClientiStrip \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) &&
+    /<ClientiStrip \/>/.test(citesteFisier("src/app/page.tsx")) &&
+    /<ClientiStrip \/>/.test(citesteFisier("src/app/exemple/page.tsx")));
+  t("fara logo pe disc, apare numele ca text", /logoExista/.test(citesteFisier("src/components/ClientiStrip.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

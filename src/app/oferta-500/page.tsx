@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { ClientiStrip } from "@/components/ClientiStrip";
 import {
   Newspaper,
   Globe,
@@ -367,6 +368,13 @@ export default function Oferta500Page() {
           </div>
         </div>
       </section>
+
+      {/*
+        Clientii, imediat sub cifre: cifrele spun ce primesti, logo-urile spun
+        ca au mai cumparat si altii. Pentru omul care ezita la 500 de lei,
+        al doilea conteaza mai mult decat primul.
+      */}
+      <ClientiStrip />
 
       {/* Ce primesti */}
       <section className="section">

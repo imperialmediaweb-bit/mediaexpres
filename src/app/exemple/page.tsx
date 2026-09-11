@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowUpRight, Newspaper, CheckCircle2, CreditCard } from "lucide-react";
 import { PORTOFOLIU } from "@/data/portfolio";
+import { ClientiStrip } from "@/components/ClientiStrip";
 import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -43,15 +44,14 @@ export default function ExemplePage() {
         </div>
       </section>
 
+      <ClientiStrip />
+
       <section className="section bg-white">
         <div className="container">
           <div className="mx-auto grid max-w-5xl gap-5 md:grid-cols-2">
             {PORTOFOLIU.map((a) => (
-              <a
+              <div
                 key={a.url}
-                href={a.url}
-                target="_blank"
-                rel="noopener noreferrer"
                 className="group flex flex-col rounded-2xl border border-slate-200 bg-white p-6 transition hover:-translate-y-0.5 hover:border-brand-red hover:shadow-lg"
               >
                 <div className="flex items-start justify-between gap-4">
@@ -76,10 +76,27 @@ export default function ExemplePage() {
                   <span className="font-semibold text-brand-navy">{a.publicatie}</span>
                   <span>· {a.data}</span>
                 </div>
-                <span className="mt-2 text-sm font-semibold text-brand-red">
-                  Deschide articolul →
-                </span>
-              </a>
+                <div className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm font-semibold">
+                  <a
+                    href={a.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-brand-red hover:underline"
+                  >
+                    Deschide articolul →
+                  </a>
+                  {(a.raportUrl || a.raportPdf) && (
+                    <a
+                      href={a.raportUrl || a.raportPdf}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-brand-navy hover:underline"
+                    >
+                      {a.raportUrl ? "Raportul cu toate cele 50 de linkuri →" : "Raportul (PDF) →"}
+                    </a>
+                  )}
+                </div>
+              </div>
             ))}
           </div>
 
