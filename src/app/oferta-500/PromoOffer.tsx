@@ -10,6 +10,7 @@ import {
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
 import { SITE } from "@/data/site";
+import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 import { FormError } from "@/components/forms/FormError";
 
 // Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
@@ -132,6 +133,9 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   // "buna ziua" dupa care il intrebam noi de toate. Acelasi link apare pe
   // AMBELE ecrane — si inainte, si dupa "Comanda acum": cine prefera
   // WhatsApp nu trebuie sa descopere asta abia la pasul de plata.
+  // Ultima linie spune de unde a venit omul (Google, Facebook) — asa aflam
+  // si pentru leadurile de pe WhatsApp care reclama a adus comanda.
+  const propozitieSursa = useSursaWhatsApp();
   const waOrderHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
     [
       `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
@@ -140,6 +144,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
       "1. Datele firmei pentru factură: denumire, CUI, adresă",
       "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
       "3. Pozele (până la 3, opțional)",
+      ...(propozitieSursa ? ["", propozitieSursa] : []),
     ].join("\n"),
   )}`;
   const trackWaOrder = () => {

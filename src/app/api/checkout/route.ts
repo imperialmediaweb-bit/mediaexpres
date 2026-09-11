@@ -8,6 +8,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { extractRequestUserData } from "@/lib/meta-capi";
+import { sursaDinCerere } from "@/lib/sursa";
 import { extractGaClientId } from "@/lib/ga-mp";
 
 export const runtime = "nodejs";
@@ -49,12 +50,16 @@ export async function POST(req: NextRequest) {
   // asa ca in Ads Manager coloana Purchases ramane goala desi ai vandut.
   // Le trecem prin metadata sesiunii, singurul loc care supravietuieste drumului.
   const fbAttr = extractRequestUserData(req);
+  const sursa = sursaDinCerere(req);
   const gaCid = extractGaClientId(req);
   const fbMeta = {
     ...(fbAttr.fbp ? { fbp: fbAttr.fbp } : {}),
     ...(fbAttr.fbc ? { fbc: fbAttr.fbc } : {}),
     // client_id-ul GA, pe acelasi drum: browserul il are, webhookul nu.
     ...(gaCid ? { gacid: gaCid } : {}),
+    // Si sursa vizitei (Google Ads / Facebook / direct), ca sa apara in admin
+    // langa comanda. Tot din cookie, tot pe drumul asta.
+    ...(sursa ? { sursa } : {}),
   };
 
   const session = await auth();

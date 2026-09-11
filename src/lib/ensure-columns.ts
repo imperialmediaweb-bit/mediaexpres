@@ -23,6 +23,8 @@ export function ensureOrderColumns(): Promise<void> {
       db.execute(
         sql`ALTER TABLE "publication_report" ADD COLUMN IF NOT EXISTS "report_url" text`,
       ),
+      db.execute(sql`ALTER TABLE "order" ADD COLUMN IF NOT EXISTS "source" text`),
+      db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "source" text`),
     ])
       .then(() => undefined)
       .catch((e) => {

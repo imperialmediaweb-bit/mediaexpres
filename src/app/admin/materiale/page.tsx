@@ -5,6 +5,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, orders } from "@/db/schema";
+import { etichetaSursa } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
 import { MarkPublishedButton } from "./MarkPublishedButton";
 import { NewOrderForm } from "./NewOrderForm";
@@ -229,6 +230,7 @@ export default async function MaterialePage() {
                       "card (Stripe)"
                     )}
                   </p>
+                  <p><span className="text-slate-500">Sursă:</span> {etichetaSursa(r.source)}</p>
                   <p><span className="text-slate-500">Referință:</span> <span className="font-mono text-xs">{r.stripeSessionId}</span></p>
                   {r.companyCui && (
                     <p><span className="text-slate-500">CUI:</span> <strong>{r.companyCui}</strong></p>

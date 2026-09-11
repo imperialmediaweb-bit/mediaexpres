@@ -5,11 +5,16 @@ import { SITE } from "@/data/site";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { hasStickyMobileCta } from "@/components/conversion/ConversionWidgets";
+import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 
 const PREFILL =
   "Bună ziua! Am o întrebare despre oferta de 500 lei — articol în 50 de ziare.";
 
-const HREF = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(PREFILL)}`;
+/** Mesajul pre-scris, cu propozitia de sursa la final daca stim de unde a venit. */
+function hrefWhatsApp(propozitieSursa: string): string {
+  const text = propozitieSursa ? `${PREFILL} ${propozitieSursa}` : PREFILL;
+  return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(text)}`;
+}
 
 /** Logo-ul WhatsApp nu exista in lucide-react, deci il desenam inline. */
 function WhatsAppIcon({ className }: { className?: string }) {
@@ -27,6 +32,7 @@ function WhatsAppIcon({ className }: { className?: string }) {
 
 export function WhatsAppButton() {
   const pathname = usePathname();
+  const propozitieSursa = useSursaWhatsApp();
   if (!pathname || pathname.startsWith("/admin")) return null;
 
   // Pe ecrane mici, bara fixa de comanda ocupa banda de jos. Cand exista, urcam
@@ -35,7 +41,8 @@ export function WhatsAppButton() {
 
   return (
     <a
-      href={HREF}
+      href={hrefWhatsApp(propozitieSursa)}
+      data-testid="wa-flotant"
       target="_blank"
       rel="noopener noreferrer"
       onClick={() => {

@@ -11,6 +11,7 @@ import {
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
+import { SourceCapture } from "@/components/analytics/SourceCapture";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -104,6 +105,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className="min-h-screen font-sans flex flex-col">
         <MetaPixel />
         <GoogleAnalytics />
+        <SourceCapture />
         <StructuredData />
         <ConversionBanner />
         <Navbar />

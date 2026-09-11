@@ -79,6 +79,7 @@ export async function POST(req: NextRequest) {
         .insert(orderSubmissions)
         .values({
           stripeSessionId: reference,
+          source: "manual",
           email,
           packageId: d.packageId,
           // La mai multe articole din aceeasi comanda, titlurile se numeroteaza

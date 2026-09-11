@@ -4,6 +4,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { orders, users } from "@/db/schema";
 import { desc, eq } from "drizzle-orm";
+import { etichetaSursa } from "@/lib/sursa";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +30,7 @@ export default async function AdminComenziPage() {
       createdAt: orders.createdAt,
       paidAt: orders.paidAt,
       stripeSessionId: orders.stripeSessionId,
+      source: orders.source,
       userId: orders.userId,
       userName: users.name,
     })
@@ -37,6 +39,15 @@ export default async function AdminComenziPage() {
     .orderBy(desc(orders.createdAt));
 
   const totalCents = rows.filter((r) => r.status === "paid").reduce((sum, r) => sum + r.amount, 0);
+
+  // Cate plati a adus fiecare canal — raspunsul scurt la „merita reclama?".
+  const peSursa = new Map<string, number>();
+  for (const r of rows) {
+    if (r.status !== "paid") continue;
+    const k = etichetaSursa(r.source);
+    peSursa.set(k, (peSursa.get(k) || 0) + 1);
+  }
+  const sumarSurse = [...peSursa.entries()].sort((a, b) => b[1] - a[1]);
 
   return (
     <div>
@@ -48,6 +59,12 @@ export default async function AdminComenziPage() {
       <div className="mt-4 rounded-md bg-brand-ivory p-4 text-sm">
         <strong>Total încasat (plăți reușite):</strong> {formatRON(totalCents)} din{" "}
         {rows.filter((r) => r.status === "paid").length} plăți.
+        {sumarSurse.length > 0 && (
+          <p className="mt-2 text-slate-600">
+            <strong>De unde au venit:</strong>{" "}
+            {sumarSurse.map(([k, v]) => `${k}: ${v}`).join(" · ")}
+          </p>
+        )}
       </div>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -59,13 +76,14 @@ export default async function AdminComenziPage() {
               <th className="px-4 py-3">Pachet</th>
               <th className="px-4 py-3">Sumă</th>
               <th className="px-4 py-3">Status</th>
+              <th className="px-4 py-3">Sursă</th>
               <th className="px-4 py-3">Stripe</th>
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={6} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
                   Nicio comandă.
                 </td>
               </tr>
@@ -91,6 +109,7 @@ export default async function AdminComenziPage() {
                       o.status === "paid" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"
                     }`}>{o.status}</span>
                   </td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{etichetaSursa(o.source)}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-400 truncate max-w-[180px]">
                     {o.stripeSessionId || "—"}
                   </td>

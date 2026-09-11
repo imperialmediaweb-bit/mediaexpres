@@ -6,6 +6,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, publicationReports, clientMessages } from "@/db/schema";
+import { etichetaSursa } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
 import { CopyButton } from "./CopyButton";
@@ -365,6 +366,7 @@ export default async function MaterialDetailPage({
                   )
                 }
               />
+              <Row label="Sursă" value={etichetaSursa(r.source)} />
               <Row
                 label="Publicare"
                 value={

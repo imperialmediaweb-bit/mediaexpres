@@ -94,6 +94,9 @@ export const orders = pgTable("order", {
   // cronul. Coloanele se adauga prin /api/admin/fix-db si, ca plasa,
   // prin lib/ensure-columns.ts.
   materialReminderAt: timestamp("material_reminder_at"),
+  // De unde a venit clientul (Google Ads, Facebook, direct...) — formatul e in
+  // lib/sursa.ts. Vine din cookie-ul me_src prin metadata sesiunii Stripe.
+  source: text("source"),
   materialAlertAt: timestamp("material_alert_at"),
 });
 
@@ -230,6 +233,9 @@ export const orderSubmissions = pgTable("order_submission", {
   // "op" = transfer bancar, unde clientul incarca dovada, iar plata se
   // confirma manual de noi inainte de publicare.
   paymentMethod: text("payment_method").notNull().default("card"),
+  // Aceeasi sursa ca pe `order`, pentru comenzile care nu trec prin Stripe
+  // (transfer bancar) sau adaugate de admin („manual").
+  source: text("source"),
   // JSON: {url, name} — dovada platii incarcata la comenzile prin OP.
   paymentProof: text("payment_proof"),
   // Date de facturare, cerute explicit la OP (la card vin din Stripe).

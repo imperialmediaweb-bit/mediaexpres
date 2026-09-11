@@ -223,6 +223,7 @@ async function handleCheckoutCompleted(
         stripeSessionId: session.id,
         stripePaymentIntentId: paymentIntentId,
         paidAt: new Date(),
+        source: (session.metadata?.sursa as string) || null,
       })
       .onConflictDoNothing({ target: orders.stripeSessionId })
       .returning({ id: orders.id });

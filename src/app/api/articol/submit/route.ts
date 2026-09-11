@@ -9,6 +9,7 @@ import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
+import { sursaDinCerere } from "@/lib/sursa";
 
 export const runtime = "nodejs";
 
@@ -86,6 +87,7 @@ export async function POST(req: NextRequest) {
       .insert(orderSubmissions)
       .values({
         stripeSessionId: order.sessionId,
+        source: sursaDinCerere(req),
         fbBoostPaper: d.fbBoostPaper?.trim() || null,
         email: order.email,
         packageId: order.packageId,

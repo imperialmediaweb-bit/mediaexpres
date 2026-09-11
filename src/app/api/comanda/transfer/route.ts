@@ -10,6 +10,7 @@ import { SITE } from "@/data/site";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
+import { sursaDinCerere } from "@/lib/sursa";
 
 export const runtime = "nodejs";
 
@@ -96,6 +97,7 @@ export async function POST(req: NextRequest) {
     await ensureOrderColumns();
     await db.insert(orderSubmissions).values({
       stripeSessionId: reference,
+      source: sursaDinCerere(req),
       fbBoostPaper: d.fbBoostPaper?.trim() || null,
       email,
       packageId: d.packageId,

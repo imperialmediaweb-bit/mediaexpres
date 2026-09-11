@@ -24,6 +24,14 @@ import { extractGaClientId, sendGaPurchase } from "@/lib/ga-mp";
 import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import {
+  sursaDinUrl,
+  serializeazaSursa,
+  parseazaSursa,
+  sursaDinCookieHeader,
+  etichetaSursa,
+  propozitieSursaWhatsApp,
+} from "@/lib/sursa";
+import {
   screenContent,
   CONTENT_DECLARATION,
   CONTENT_DECLARATION_WARNING,
@@ -953,6 +961,65 @@ console.log("\n########## S. RECENZII ##########");
     "recenziile nu ajung automat pe site",
     !/CLIENT_TESTIMONIALS/.test(api) && !/reviews/.test(citesteFisier("src/app/oferta-500/page.tsx")),
   );
+}
+
+
+// ---------------------------------------------------------------------------
+// Sursa comenzii: Google Ads / Facebook / direct, pana in admin si pe WhatsApp
+// ---------------------------------------------------------------------------
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const ser = (r: ReturnType<typeof sursaDinUrl>) => (r ? serializeazaSursa(r.sursa) : null);
+  const g = sursaDinUrl("?gclid=abc123&utm_campaign=Advertoriale", "");
+  t("gclid = Google Ads, cu campania", ser(g) === "google|cpc|advertoriale" && g?.suprascrie === true);
+  const f = sursaDinUrl("?fbclid=xyz", "https://l.facebook.com/");
+  t("fbclid = Facebook Ads", ser(f) === "facebook|paid|" && f?.suprascrie === true);
+  t(
+    "utm_source castiga si suprascrie",
+    ser(sursaDinUrl("?utm_source=newsletter&utm_medium=email", "")) === "newsletter|email|",
+  );
+  const org = sursaDinUrl("", "https://www.google.com/");
+  t("referrer Google = cautare organica, NU suprascrie", ser(org) === "google|organic|" && org?.suprascrie === false);
+  t("referrer ChatGPT", ser(sursaDinUrl("", "https://chatgpt.com/c/123")) === "chatgpt|referral|");
+  t("referrer necunoscut = link de pe site-ul ala", ser(sursaDinUrl("", "https://forum.softpedia.com/x")) === "forum.softpedia.com|referral|");
+  t("navigare in site nu e sursa", sursaDinUrl("", "https://mediaexpress.ro/oferta-500") === null);
+  const d = sursaDinUrl("", "");
+  t("fara nimic = direct, nu suprascrie", ser(d) === "direct|none|" && d?.suprascrie === false);
+  t("valori murdare sunt curatate", serializeazaSursa({ source: "Face Book;|", medium: "<b>", campaign: "" }) === "face_book|b|");
+  t("parseaza respinge gunoi", parseazaSursa("<script>") === null && parseazaSursa("") === null);
+  t(
+    "citeste cookie-ul din header, printre altele",
+    sursaDinCookieHeader("_ga=GA1.1.1.1; me_src=google%7Ccpc%7Cadv; x=y") === "google|cpc|adv",
+  );
+  t("fara cookie = null", sursaDinCookieHeader("_ga=GA1.1.1.1") === null);
+  t("eticheta Google Ads", etichetaSursa("google|cpc|") === "Google Ads");
+  t("eticheta Google Ads cu campanie", etichetaSursa("google|cpc|adv") === "Google Ads — adv");
+  t("eticheta Facebook Ads", etichetaSursa("facebook|paid|") === "Facebook Ads");
+  t("eticheta Facebook organic", etichetaSursa("facebook|social|") === "Facebook");
+  t("eticheta manual", etichetaSursa("manual") === "adăugată manual");
+  t("eticheta necunoscuta pentru null", etichetaSursa(null) === "necunoscută");
+  t("propozitia WhatsApp pentru Google", propozitieSursaWhatsApp("google|cpc|") === "Am văzut oferta pe Google.");
+  t("propozitia WhatsApp pentru Facebook", propozitieSursaWhatsApp("facebook|paid|x") === "Am văzut oferta pe Facebook.");
+  t("fara propozitie cand e direct", propozitieSursaWhatsApp("direct|none|") === "");
+
+  // Drumul pana in baza: cookie → checkout → metadata Stripe → webhook → order.source
+  t("checkout pune sursa in metadata Stripe", /sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/checkout/route.ts")) && /\.\.\.\(sursa \? \{ sursa \}/.test(citesteFisier("src/app/api/checkout/route.ts")));
+  t("webhookul scrie order.source din metadata", /source: \(session\.metadata\?\.sursa as string\)/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")));
+  t("comanda prin transfer isi ia sursa din cookie", /source: sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
+  t("articolul trimis dupa plata cu cardul isi ia sursa din cookie", /source: sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+  t("comanda adaugata de admin e „manual”", /source: "manual"/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
+  const fixDb = citesteFisier("src/app/api/admin/fix-db/route.ts");
+  t("coloanele source sunt in fix-db", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb));
+  const ens = citesteFisier("src/lib/ensure-columns.ts");
+  t("si in plasa de siguranta", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(ens) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(ens));
+  t("captarea e montata in layout", /<SourceCapture \/>/.test(citesteFisier("src/app/layout.tsx")));
+  t("adminul arata sursa la comenzi, materiale si pe fiecare material",
+    /etichetaSursa\(o\.source\)/.test(citesteFisier("src/app/admin/comenzi/page.tsx")) &&
+    /etichetaSursa\(r\.source\)/.test(citesteFisier("src/app/admin/materiale/page.tsx")) &&
+    /etichetaSursa\(r\.source\)/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+  t("WhatsApp-ul de pe oferta si butonul flotant primesc propozitia",
+    /useSursaWhatsApp\(\)/.test(citesteFisier("src/app/oferta-500/PromoOffer.tsx")) &&
+    /useSursaWhatsApp\(\)/.test(citesteFisier("src/components/layout/WhatsAppButton.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

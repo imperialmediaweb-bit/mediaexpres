@@ -194,6 +194,14 @@ export async function POST(req: NextRequest) {
       query: sql`ALTER TABLE "publication_report" ADD COLUMN IF NOT EXISTS "report_url" text`,
     },
     {
+      step: "order + order_submission: sursa clientului (Google Ads / Facebook / direct)",
+      query: sql`ALTER TABLE "order" ADD COLUMN IF NOT EXISTS "source" text`,
+    },
+    {
+      step: "order_submission: sursa clientului",
+      query: sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "source" text`,
+    },
+    {
       step: "review: index pe email",
       query: sql`CREATE INDEX IF NOT EXISTS "review_email_idx" ON "review" ("email")`,
     },

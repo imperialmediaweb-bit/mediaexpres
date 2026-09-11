@@ -30,6 +30,7 @@ node_modules/.bin/esbuild tests/unit.ts --bundle --platform=node --format=esm \
 node tests/api.mjs
 node tests/pages.mjs
 node tests/flows.mjs
+node tests/sursa.mjs        # sursa comenzii (cookie me_src + WhatsApp)
 node tests/chat.mjs
 node tests/stress.mjs
 node tests/advisor-scenarios.mjs https://mediaexpress.ro   # LIVE, foloseste cheia de model        # 100 de iteratii; `node tests/stress.mjs 13` = una pe scenariu
