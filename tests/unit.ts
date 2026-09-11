@@ -1005,13 +1005,19 @@ console.log("\n########## S. RECENZII ##########");
   // Drumul pana in baza: cookie → checkout → metadata Stripe → webhook → order.source
   t("checkout pune sursa in metadata Stripe", /sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/checkout/route.ts")) && /\.\.\.\(sursa \? \{ sursa \}/.test(citesteFisier("src/app/api/checkout/route.ts")));
   t("webhookul scrie order.source din metadata", /source: \(session\.metadata\?\.sursa as string\)/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")));
-  t("comanda prin transfer isi ia sursa din cookie", /source: sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
-  t("articolul trimis dupa plata cu cardul isi ia sursa din cookie", /source: sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+  const tr = citesteFisier("src/app/api/comanda/transfer/route.ts");
+  t("comanda prin transfer isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(tr) && /source: sursa,/.test(tr));
+  const sub = citesteFisier("src/app/api/articol/submit/route.ts");
+  t("articolul trimis dupa plata cu cardul isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(sub) && /source: sursa,/.test(sub));
   t("comanda adaugata de admin e „manual”", /source: "manual"/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
   const fixDb = citesteFisier("src/app/api/admin/fix-db/route.ts");
   t("coloanele source sunt in fix-db", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb));
   const ens = citesteFisier("src/lib/ensure-columns.ts");
   t("si in plasa de siguranta", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(ens) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(ens));
+  t("emailurile catre admin spun de unde a venit clientul (card, transfer, articol)",
+    /kv\("De unde a venit", etichetaSursa\(source\)\)/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")) &&
+    /kv\("De unde a venit", etichetaSursa\(sursa\)\)/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")) &&
+    /kv\("De unde a venit", etichetaSursa\(sursa\)\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   t("captarea e montata in layout", /<SourceCapture \/>/.test(citesteFisier("src/app/layout.tsx")));
   t("adminul arata sursa la comenzi, materiale si pe fiecare material",
     /etichetaSursa\(o\.source\)/.test(citesteFisier("src/app/admin/comenzi/page.tsx")) &&

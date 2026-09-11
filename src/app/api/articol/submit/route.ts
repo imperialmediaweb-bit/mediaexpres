@@ -9,7 +9,7 @@ import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
-import { sursaDinCerere } from "@/lib/sursa";
+import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 
 export const runtime = "nodejs";
 
@@ -61,6 +61,7 @@ export async function POST(req: NextRequest) {
   d.body = cleanArticleText(d.body);
 
   const order = verifyOrderToken(d.token);
+  const sursa = sursaDinCerere(req);
   if (!order) {
     return NextResponse.json(
       { ok: false, error: "Link expirat sau invalid. Scrie-ne pe contact@mediaexpress.ro." },
@@ -87,7 +88,7 @@ export async function POST(req: NextRequest) {
       .insert(orderSubmissions)
       .values({
         stripeSessionId: order.sessionId,
-        source: sursaDinCerere(req),
+        source: sursa,
         fbBoostPaper: d.fbBoostPaper?.trim() || null,
         email: order.email,
         packageId: order.packageId,
@@ -151,6 +152,7 @@ export async function POST(req: NextRequest) {
       ${kv("Publicare", d.uniquePerSite ? "Variantă unică pe fiecare ziar" : "⚠️ IDENTIC pe toate — clientul a cerut textul neschimbat")}
       ${kv("Distribuire Facebook", d.facebookOptIn ? "✅ Da" : "❌ Nu (clientul a refuzat)")}
       ${kv("Scris cu AI", d.generatedByAi ? "Da" : "Nu — text propriu")}
+      ${kv("De unde a venit", etichetaSursa(sursa))}
       ${kv("Referință comandă", order.sessionId)}
     </table>
 

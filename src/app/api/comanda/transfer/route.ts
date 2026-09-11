@@ -10,7 +10,7 @@ import { SITE } from "@/data/site";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
-import { sursaDinCerere } from "@/lib/sursa";
+import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 
 export const runtime = "nodejs";
 
@@ -92,12 +92,13 @@ export async function POST(req: NextRequest) {
   // Identificator propriu, in acelasi camp unic ca la Stripe — o comanda OP nu
   // se poate trimite de doua ori din aceeasi pagina.
   const reference = `op_${crypto.randomUUID()}`;
+  const sursa = sursaDinCerere(req);
 
   try {
     await ensureOrderColumns();
     await db.insert(orderSubmissions).values({
       stripeSessionId: reference,
-      source: sursaDinCerere(req),
+      source: sursa,
       fbBoostPaper: d.fbBoostPaper?.trim() || null,
       email,
       packageId: d.packageId,
@@ -176,6 +177,7 @@ export async function POST(req: NextRequest) {
         ${kv("Categorie", d.isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
         ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}
         ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
+        ${kv("De unde a venit", etichetaSursa(sursa))}
       </table>
       ${d.paymentProof ? `<p><strong>Dovada plății:</strong> <a href="${esc(d.paymentProof.url)}">${esc(d.paymentProof.name)}</a></p>` : ""}
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>

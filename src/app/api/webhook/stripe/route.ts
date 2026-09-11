@@ -6,6 +6,7 @@ import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
 import { users, orders, subscriptions } from "@/db/schema";
 import { and, eq, gte } from "drizzle-orm";
+import { etichetaSursa } from "@/lib/sursa";
 import { findSubscriptionPlanById } from "@/data/packages";
 import { sendCapiEvent, splitName } from "@/lib/meta-capi";
 import { sendGaPurchase } from "@/lib/ga-mp";
@@ -269,6 +270,7 @@ async function handleCheckoutCompleted(
       amount: amount / 100,
       label: packageId,
       sessionId: session.id,
+      source: (session.metadata?.sursa as string) || null,
     });
 
     // Facturarea nu trebuie sa poata darama webhookul — issueInvoiceForOrder
@@ -380,6 +382,7 @@ async function handleCheckoutCompleted(
       amount: (session.amount_total || 0) / 100,
       label: (session.metadata?.planId as string) || "abonament",
       sessionId: session.id,
+      source: (session.metadata?.sursa as string) || null,
     });
 
     // Abonamentele nu primeau NICIODATA factura fiscala — nici la prima plata,
@@ -576,8 +579,10 @@ async function sendConfirmationEmails(args: {
   amount: number;
   label: string;
   sessionId: string;
+  /** De unde a venit clientul (lib/sursa.ts) — apare in emailul catre admin. */
+  source?: string | null;
 }) {
-  const { kind, email, customerName, amount, label, sessionId } = args;
+  const { kind, email, customerName, amount, label, sessionId, source } = args;
   // Numele vine din formularul Stripe, deci e input de la client: escapat
   // inainte de a intra in HTML-ul emailului.
   const firstName = escapeHtml((customerName || "").split(" ")[0] || "");
@@ -591,6 +596,7 @@ async function sendConfirmationEmails(args: {
       ${kv("Suma", `${amount.toFixed(2)} RON`)}
       ${kv("Email client", email || "—")}
       ${kv("Nume client", customerName || "—")}
+      ${kv("De unde a venit", etichetaSursa(source))}
       ${kv("Session ID", sessionId)}
     </table>
     <p style="margin-top:16px;color:#64748b;">Detalii complete in dashboardul clientului si in Stripe.</p>
