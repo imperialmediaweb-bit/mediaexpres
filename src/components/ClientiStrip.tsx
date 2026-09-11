@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import Link from "next/link";
 import { CLIENTI } from "@/data/clienti";
+import { EXEMPLU_RAPORT } from "@/data/campanii";
 
 /*
   Banda „Au publicat prin MediaExpres". Componenta de server: verifica pe
@@ -68,10 +69,22 @@ export function ClientiStrip({ className = "" }: { className?: string }) {
             );
           })}
         </ul>
-        <p className="mt-5 text-center text-sm text-slate-500">
-          <Link href="/exemple" className="font-semibold text-brand-red hover:underline">
-            Vezi articolele publicate →
+        {/*
+          Inainte sa comande, omul vrea sa vada doua lucruri: cum arata un
+          articol publicat si ce primeste la final. Amandoua, la un click.
+        */}
+        <p className="mt-5 flex flex-wrap items-center justify-center gap-x-6 gap-y-2 text-center text-sm font-semibold">
+          <Link href="/exemple" className="text-brand-red hover:underline">
+            Vezi campaniile și articolele publicate →
           </Link>
+          <a
+            href={EXEMPLU_RAPORT.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-navy hover:underline"
+          >
+            Așa arată raportul cu cele 50 de linkuri (PDF) →
+          </a>
         </p>
       </div>
     </section>

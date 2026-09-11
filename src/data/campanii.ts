@@ -111,7 +111,8 @@ export const CAMPANII: Campanie[] = [
 
 /** Raportul aratat ca exemplu — unul singur, sa se vada cum arata. */
 export const EXEMPLU_RAPORT = {
-  client: "Edrich SRL, Oradea",
+  client: "Reparații acoperișuri montaj",
   url: "/rapoarte/exemplu-raport-publicare.pdf",
-  descriere: "2 pagini: ce s-a livrat, cele 50 de publicații cu adresa fiecărui articol, confirmarea trimiterii la indexare.",
+  descriere:
+    "4 pagini: ce s-a livrat, captura din contul de publicitate, cele 50 de publicații cu adresa fiecărui articol și postarea de Facebook, confirmarea trimiterii la indexare.",
 };
