@@ -1037,7 +1037,7 @@ console.log("\n########## S. RECENZII ##########");
   const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
   t("fiecare client are nume", CLIENTI.every((c) => c.nume.trim().length > 1));
   t("numele clientilor sunt unice", new Set(CLIENTI.map((c) => c.nume)).size === CLIENTI.length);
-  t("logo-urile au nume de fisier simple", CLIENTI.every((c) => !c.logo || /^[a-z0-9-]+\.(png|svg|webp)$/.test(c.logo)));
+  t("logo-urile sunt fisier local simplu sau link https", CLIENTI.every((c) => !c.logo || /^[a-z0-9-]+\.(png|svg|webp)$/.test(c.logo) || /^https:\/\//.test(c.logo)));
   t("banda e pe oferta, pe prima pagina si pe exemple",
     /<ClientiStrip \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) &&
     /<ClientiStrip \/>/.test(citesteFisier("src/app/page.tsx")) &&

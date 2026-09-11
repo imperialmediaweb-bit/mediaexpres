@@ -11,7 +11,10 @@
  */
 export interface ClientAfisat {
   nume: string;
-  /** Numele fisierului din public/clienti/, ex. "romcut.png". */
+  /**
+   * Numele fisierului din public/clienti/ (ex. "romcut.png") SAU un link
+   * complet (https://res.cloudinary.com/...). Linkul se foloseste direct.
+   */
   logo?: string;
   /** Site-ul clientului, doar daca vrem sa trimitem oameni acolo. */
   site?: string;
@@ -20,7 +23,10 @@ export interface ClientAfisat {
 }
 
 export const CLIENTI: ClientAfisat[] = [
-  { nume: "Sublime Events", logo: "sublime.png", site: "https://bilete.sublime.ro/", ce: "turneu de stand-up în 13 orașe" },
+  {
+    nume: "Sublime Events",
+    // Din Cloudinary, cu potrivire la inaltimea benzii si format automat.
+    logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1820_q1xj4n.png", site: "https://bilete.sublime.ro/", ce: "turneu de stand-up în 13 orașe" },
   { nume: "Toma Enache", logo: "toma-enache.png", site: "https://tomaenache.ro/", ce: "turneu de film" },
   { nume: "RomCut.ro", logo: "romcut.png", ce: "optimizare debitare panouri" },
   { nume: "June", logo: "june.png", site: "https://www.junecom.ro/" },

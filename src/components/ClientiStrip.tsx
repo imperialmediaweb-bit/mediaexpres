@@ -9,8 +9,13 @@ import { CLIENTI } from "@/data/clienti";
   rupe cand lipseste un fisier — proprietarul le adauga cand le are.
 */
 
+function eLink(v?: string): boolean {
+  return !!v && /^https?:\/\//.test(v);
+}
+
 function logoExista(fisier?: string): boolean {
   if (!fisier) return false;
+  if (eLink(fisier)) return true;
   try {
     return fs.existsSync(path.join(process.cwd(), "public", "clienti", fisier));
   } catch {
@@ -33,7 +38,7 @@ export function ClientiStrip({ className = "" }: { className?: string }) {
             const continut = areLogo ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                src={`/clienti/${c.logo}`}
+                src={eLink(c.logo) ? c.logo : `/clienti/${c.logo}`}
                 alt={c.nume}
                 title={c.ce ? `${c.nume} — ${c.ce}` : c.nume}
                 loading="lazy"
