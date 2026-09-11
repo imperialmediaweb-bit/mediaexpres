@@ -20,17 +20,19 @@ export interface ClientAfisat {
   site?: string;
   /** Cu ce a venit la noi — o vorba, pentru tooltip. */
   ce?: string;
+  /** Logo pe fundal inchis: cartonasul lui se face inchis, sa para intentionat. */
+  fundalInchis?: boolean;
 }
 
 export const CLIENTI: ClientAfisat[] = [
   {
-    nume: "Sublime Events",
+    nume: "Sublime Events", fundalInchis: true,
     // Din Cloudinary, cu potrivire la inaltimea benzii si format automat.
-    logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1820_q1xj4n.png", site: "https://bilete.sublime.ro/", ce: "campania de presă pentru turneul „Atenție, vin urșii!” cu Micutzu, în 13 orașe" },
-  { nume: "Toma Enache", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1825_ffcrra.png", site: "https://tomaenache.ro/", ce: "promovarea turneului în presa locală" },
-  { nume: "RomCut.ro", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1824_mlb1jq.png", ce: "optimizare debitare panouri" },
-  { nume: "June", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1823_i7a9p6.png", site: "https://www.junecom.ro/" },
-  { nume: "Emblema Group", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1822_vgu6wi.png", site: "https://emblemasolutions.ro/" },
+    logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1820_q1xj4n.png", site: "https://bilete.sublime.ro/", ce: "campania de presă pentru turneul „Atenție, vin urșii!” cu Micutzu, în 13 orașe" },
+  { nume: "Toma Enache", fundalInchis: true, logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1825_ffcrra.png", site: "https://tomaenache.ro/", ce: "promovarea turneului în presa locală" },
+  { nume: "RomCut.ro", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1824_mlb1jq.png", ce: "optimizare debitare panouri" },
+  { nume: "June", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1823_i7a9p6.png", site: "https://www.junecom.ro/" },
+  { nume: "Emblema Group", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1822_vgu6wi.png", site: "https://emblemasolutions.ro/" },
   { nume: "C.A.R. Bistrița IFN", ce: "servicii financiare" },
   { nume: "Edrich Oradea", ce: "producător de atașamente pentru utilaje, din 1998" },
   { nume: "Cineplexx România", ce: "responsabilitate socială" },

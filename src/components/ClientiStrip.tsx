@@ -36,7 +36,7 @@ export function ClientiStrip({ className = "" }: { className?: string }) {
         <p className="mt-2 text-center font-serif text-lg font-bold text-brand-navy md:text-xl">
           Agenții de comunicare, organizatori de turnee și firme din toată țara
         </p>
-        <ul className="mt-5 flex flex-wrap items-center justify-center gap-x-10 gap-y-4">
+        <ul className="mt-6 flex flex-wrap items-center justify-center gap-3 md:gap-4">
           {CLIENTI.map((c) => {
             const areLogo = logoExista(c.logo);
             const continut = areLogo ? (
@@ -46,18 +46,25 @@ export function ClientiStrip({ className = "" }: { className?: string }) {
                 alt={c.nume}
                 title={c.ce ? `${c.nume} — ${c.ce}` : c.nume}
                 loading="lazy"
-                className="h-8 w-auto max-w-[140px] object-contain opacity-80 grayscale transition hover:opacity-100 hover:grayscale-0 md:h-9"
+                className="h-9 w-auto max-w-[150px] object-contain md:h-10"
               />
             ) : (
               <span
                 title={c.ce}
-                className="font-serif text-base font-bold text-slate-500 transition hover:text-brand-navy md:text-lg"
+                className="font-serif text-base font-bold text-brand-navy md:text-lg"
               >
                 {c.nume}
               </span>
             );
             return (
-              <li key={c.nume} className="flex items-center">
+              // Toate in cartonase egale: logo-urile vin ca screenshoturi cu
+              // fundaluri diferite, iar numele fara logo trebuie sa stea la fel.
+              <li
+                key={c.nume}
+                className={`flex h-16 items-center justify-center rounded-xl border px-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md ${
+                  c.fundalInchis ? "border-brand-navy bg-brand-navy" : "border-slate-200 bg-white"
+                }`}
+              >
                 {c.site ? (
                   <a href={c.site} target="_blank" rel="noopener noreferrer nofollow">
                     {continut}
