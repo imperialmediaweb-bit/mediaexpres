@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ClientiStrip } from "@/components/ClientiStrip";
 import { DovadaRaport } from "@/components/DovadaRaport";
+import { VideoTutorial } from "@/components/VideoTutorial";
 import {
   Newspaper,
   Globe,
@@ -772,6 +773,9 @@ export default function Oferta500Page() {
           </div>
         </div>
       </section>
+
+      {/* Pentru cine vrea sa vada, nu sa citeasca: clipurile scurte, la cerere. */}
+      <VideoTutorial />
 
       {/*
         Dovada sociala, dupa ce omul a vazut produsul si conditiile.
