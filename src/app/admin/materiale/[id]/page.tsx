@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, publicationReports, clientMessages } from "@/db/schema";
 import { etichetaSursa } from "@/lib/sursa";
+import { etichetaRitm, ritmDupaId } from "@/lib/ritm";
 import { campaniaPentruComanda, etichetaStareRetea, RETEA_URL } from "@/lib/retea";
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
@@ -457,6 +458,18 @@ export default async function MaterialDetailPage({
                     "variantă unică pe fiecare ziar"
                   ) : (
                     <strong className="text-amber-700">IDENTIC pe toate</strong>
+                  )
+                }
+              />
+              <Row
+                label="Ritm ales"
+                value={
+                  r.ritm === "rapid" ? (
+                    etichetaRitm(r.ritm)
+                  ) : (
+                    <strong className="text-amber-700">
+                      {etichetaRitm(r.ritm)} — pune eșalonarea pe {ritmDupaId(r.ritm).ore} ore în rețea
+                    </strong>
                   )
                 }
               />

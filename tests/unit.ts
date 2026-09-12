@@ -1018,6 +1018,26 @@ console.log("\n########## S. RECENZII ##########");
   }
   t("eticheta WhatsApp pentru comenzile puse de pe chat", etichetaSursa("whatsapp|direct|") === "WhatsApp");
 
+  // Ritmul de publicare: dropdown cu explicatie, salvat pe comanda, in admin si email.
+  {
+    const ritmSrc = citesteFisier("src/lib/ritm.ts");
+    t("trei ritmuri: rapid, 3 zile, 2 saptamani", /"rapid"/.test(ritmSrc) && /"zile3"/.test(ritmSrc) && /"sapt2"/.test(ritmSrc));
+    t("fiecare ritm are explicatie pentru client", (ritmSrc.match(/explicatie:/g) || []).length === 3);
+    t("dropdown-ul arata explicatia celei alese", /<select/.test(citesteFisier("src/components/forms/RitmSelect.tsx")) && /ritm-explicatie/.test(citesteFisier("src/components/forms/RitmSelect.tsx")));
+    for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
+      const s = citesteFisier(f);
+      t(`${f.split("/").pop()} are dropdown-ul de ritm si il trimite`, /<RitmSelect/.test(s) && /\britm,/.test(s));
+    }
+    for (const f of ["src/app/api/comanda/transfer/route.ts", "src/app/api/articol/submit/route.ts", "src/app/api/admin/comanda-noua/route.ts"]) {
+      const s = citesteFisier(f);
+      t(`${f.split("/").slice(-2, -1)[0]}: ritmul e validat si salvat`, /z\.enum\(RITM_IDS\)/.test(s) && /ritm: d\.ritm/.test(s));
+    }
+    t("ritmul apare in emailul catre admin", /etichetaRitm\(d\.ritm\)/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")) && /etichetaRitm\(d\.ritm\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+    t("ritmul apare in admin, pe comanda si in lista", /Ritm ales/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")) && /Ritm:/.test(citesteFisier("src/app/admin/materiale/page.tsx")));
+    const fixDb2 = citesteFisier("src/app/api/admin/fix-db/route.ts");
+    t("coloana ritm e in fix-db si in plasa", /"ritm" text NOT NULL DEFAULT 'rapid'/.test(fixDb2) && /"ritm" text NOT NULL DEFAULT 'rapid'/.test(citesteFisier("src/lib/ensure-columns.ts")));
+  }
+
   // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
   {
     const mat = citesteFisier("src/app/admin/materiale/[id]/page.tsx");

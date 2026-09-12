@@ -9,6 +9,7 @@ import { findPackageById } from "@/data/packages";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { verifyExtensionKey } from "@/lib/extension-auth";
 import { parseazaSursa, serializeazaSursa } from "@/lib/sursa";
+import { RITM_IDS } from "@/lib/ritm";
 
 export const runtime = "nodejs";
 
@@ -44,6 +45,8 @@ const schema = z.object({
    * Formatul din lib/sursa.ts; lipsa = „manual”.
    */
   source: z.string().max(80).optional(),
+  /** Ritmul de publicare cerut de client pe WhatsApp: rapid / zile3 / sapt2. */
+  ritm: z.enum(RITM_IDS).default("rapid"),
 });
 
 export async function POST(req: NextRequest) {
@@ -108,6 +111,7 @@ export async function POST(req: NextRequest) {
           featuredIndex: 0,
           facebookOptIn: d.facebookOptIn,
           uniquePerSite: d.uniquePerSite,
+          ritm: d.ritm,
           isCasino: pkg.category === "casino",
           paymentMethod: "op",
           fbBoostPaper: d.fbBoostPaper?.trim() || null,

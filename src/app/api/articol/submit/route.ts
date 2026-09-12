@@ -10,6 +10,7 @@ import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
+import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
 
 export const runtime = "nodejs";
 
@@ -32,6 +33,8 @@ const schema = z.object({
   featuredIndex: z.number().int().min(0).max(2).default(0),
   facebookOptIn: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
+  /** Ritmul de publicare ales: rapid / zile3 / sapt2 (lib/ritm.ts). */
+  ritm: z.enum(RITM_IDS).default("rapid"),
   // Bifa obligatorie, nu optionala cu default: intrebarea are rost doar daca
   // raspunsul e explicit. z.literal(true) refuza si `false`, si lipsa campului.
   contentDeclaration: z.literal(true, {
@@ -103,6 +106,7 @@ export async function POST(req: NextRequest) {
         featuredIndex: d.featuredIndex,
         facebookOptIn: d.facebookOptIn,
         uniquePerSite: d.uniquePerSite,
+        ritm: d.ritm,
         generatedByAi: d.generatedByAi,
         isCasino,
       })
@@ -150,6 +154,7 @@ export async function POST(req: NextRequest) {
       ${kv("Promovare Facebook (3 zile)", d.fbBoostPaper?.trim() || "alegem noi — ziarul din județul clientului")}
       ${kv("Site", d.siteUrl || "—")}
       ${kv("Publicare", d.uniquePerSite ? "Variantă unică pe fiecare ziar" : "⚠️ IDENTIC pe toate — clientul a cerut textul neschimbat")}
+      ${kv("Ritm ales de client", etichetaRitm(d.ritm))}
       ${kv("Distribuire Facebook", d.facebookOptIn ? "✅ Da" : "❌ Nu (clientul a refuzat)")}
       ${kv("Scris cu AI", d.generatedByAi ? "Da" : "Nu — text propriu")}
       ${kv("De unde a venit", etichetaSursa(sursa))}

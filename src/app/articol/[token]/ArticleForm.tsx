@@ -1,5 +1,8 @@
 "use client";
 
+import { RitmSelect } from "@/components/forms/RitmSelect";
+import { RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
+
 import { useState } from "react";
 import { Loader2, Sparkles, Upload, X, Star, CheckCircle2 } from "lucide-react";
 import {
@@ -54,6 +57,7 @@ export function ArticleForm({
   // Clientul poate cere textul identic peste tot — comunicat oficial, text
   // aprobat juridic — caz in care nu atingem nimic.
   const [uniquePerSite, setUniquePerSite] = useState(true);
+  const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
 
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -208,6 +212,7 @@ export function ArticleForm({
           featuredIndex,
           facebookOptIn,
           uniquePerSite,
+          ritm,
           contentDeclaration,
           generatedByAi,
           fbBoostPaper,
@@ -492,6 +497,7 @@ export function ArticleForm({
 
       {/* 4. Cum se publică pe cele 50 de ziare */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+        <RitmSelect value={ritm} onChange={setRitm} className="mb-6 border-b border-slate-100 pb-6" />
         <p className="font-semibold text-brand-navy">Cum publicăm pe cele 50 de ziare</p>
         <div className="mt-4 space-y-3">
           <label className="flex cursor-pointer items-start gap-3">

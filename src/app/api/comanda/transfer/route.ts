@@ -11,6 +11,7 @@ import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
+import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
 
 export const runtime = "nodejs";
 
@@ -42,6 +43,8 @@ const schema = z.object({
   paymentProof: fileSchema.optional(),
   facebookOptIn: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
+  /** Ritmul de publicare ales: rapid / zile3 / sapt2 (lib/ritm.ts). */
+  ritm: z.enum(RITM_IDS).default("rapid"),
   // Bifa obligatorie, nu optionala cu default: intrebarea are rost doar daca
   // raspunsul e explicit. z.literal(true) refuza si `false`, si lipsa campului.
   contentDeclaration: z.literal(true, {
@@ -113,6 +116,7 @@ export async function POST(req: NextRequest) {
       featuredIndex: d.featuredIndex,
       facebookOptIn: d.facebookOptIn,
       uniquePerSite: d.uniquePerSite,
+      ritm: d.ritm,
       isCasino: d.isCasino,
       paymentMethod: "op",
       paymentProof: d.paymentProof ? JSON.stringify(d.paymentProof) : null,
@@ -176,6 +180,7 @@ export async function POST(req: NextRequest) {
         ${kv("Telefon", d.contactPhone)}
         ${kv("Categorie", d.isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
         ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}
+        ${kv("Ritm ales de client", etichetaRitm(d.ritm))}
         ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
         ${kv("De unde a venit", etichetaSursa(sursa))}
       </table>

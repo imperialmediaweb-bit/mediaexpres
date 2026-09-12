@@ -1,5 +1,8 @@
 "use client";
 
+import { RitmSelect } from "@/components/forms/RitmSelect";
+import { RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
+
 import { useState } from "react";
 import { Loader2, Upload, X, CheckCircle2, FileCheck } from "lucide-react";
 import {
@@ -43,6 +46,7 @@ export function TransferForm({
   const [proof, setProof] = useState<Uploaded | null>(null);
   const [uniquePerSite, setUniquePerSite] = useState(true);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
   const [busy, setBusy] = useState(false);
@@ -132,6 +136,7 @@ export function TransferForm({
           ...(proof ? { paymentProof: proof } : {}),
           facebookOptIn,
           uniquePerSite,
+          ritm,
           contentDeclaration,
           fbBoostPaper,
         }),
@@ -308,6 +313,8 @@ export function TransferForm({
             </div>
           )}
         </div>
+
+        <RitmSelect value={ritm} onChange={setRitm} className="mt-5 border-t border-slate-100 pt-4" />
 
         <div className="mt-5 space-y-2 border-t border-slate-100 pt-4 text-sm">
           <label className="flex items-start gap-2">

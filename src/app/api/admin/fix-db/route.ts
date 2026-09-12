@@ -202,6 +202,10 @@ export async function POST(req: NextRequest) {
       query: sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "source" text`,
     },
     {
+      step: "order_submission: ritmul de publicare ales de client",
+      query: sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "ritm" text NOT NULL DEFAULT 'rapid'`,
+    },
+    {
       step: "review: index pe email",
       query: sql`CREATE INDEX IF NOT EXISTS "review_email_idx" ON "review" ("email")`,
     },

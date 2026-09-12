@@ -236,6 +236,9 @@ export const orderSubmissions = pgTable("order_submission", {
   // Aceeasi sursa ca pe `order`, pentru comenzile care nu trec prin Stripe
   // (transfer bancar) sau adaugate de admin („manual").
   source: text("source"),
+  // Ritmul de publicare ales de client: rapid (12 ore) / zile3 / sapt2.
+  // Vezi lib/ritm.ts. Coloana se adauga prin fix-db si ensure-columns.
+  ritm: text("ritm").notNull().default("rapid"),
   // JSON: {url, name} — dovada platii incarcata la comenzile prin OP.
   paymentProof: text("payment_proof"),
   // Date de facturare, cerute explicit la OP (la card vin din Stripe).

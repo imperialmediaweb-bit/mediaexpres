@@ -16,6 +16,8 @@ export default function sitemap(): MetadataRoute.Sitemap {
     { url: `${base}/oferta-500`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.95 },
     // Lista celor 50 de publicatii: pagina cu cel mai mult continut unic din site.
     { url: `${base}/reteaua-noastra`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
+    { url: `${base}/exemple`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${base}/ritm-publicare`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${base}/generator-comunicat`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/audit-mentiuni`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${base}/sabloane`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.75 },
