@@ -7,7 +7,7 @@ export const dynamic = "force-dynamic";
 export default function AdminRapoartePage({
   searchParams,
 }: {
-  searchParams?: { email?: string; client?: string; titlu?: string };
+  searchParams?: { email?: string; client?: string; titlu?: string; raport?: string };
 }) {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/rapoarte");
@@ -30,6 +30,7 @@ export default function AdminRapoartePage({
           initialEmail={searchParams?.email || ""}
           initialClientName={searchParams?.client || ""}
           initialTitle={searchParams?.titlu || ""}
+          initialReportUrl={searchParams?.raport || ""}
         />
       </div>
     </div>

@@ -7,6 +7,7 @@ import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, publicationReports, clientMessages } from "@/db/schema";
 import { etichetaSursa } from "@/lib/sursa";
+import { campaniaPentruComanda, etichetaStareRetea, RETEA_URL } from "@/lib/retea";
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
 import { CopyButton } from "./CopyButton";
@@ -97,6 +98,10 @@ export default async function MaterialDetailPage({
     .where(eq(clientMessages.email, r.email.toLowerCase()))
     .orderBy(desc(clientMessages.createdAt))
     .limit(5);
+
+  // Campania din platforma de publicare, cautata dupa referinta comenzii sau
+  // dupa email. Daca reteaua nu raspunde, pagina spune asta si merge mai departe.
+  const retea = await campaniaPentruComanda(r.stripeSessionId, r.email);
 
   return (
     <div>
@@ -351,6 +356,84 @@ export default async function MaterialDetailPage({
                 }
               />
             </div>
+          </section>
+
+          {/*
+            12.09.2026 — „poți face legătura între comenzile MediaExpres și
+            rețea?". Aici e: ce a publicat reteaua pentru comanda asta, fara sa
+            deschizi a doua aplicatie, si raportul gata de trimis.
+          */}
+          <section className="rounded-xl border border-slate-200 bg-white p-5">
+            <h2 className="font-serif text-lg font-bold text-brand-navy">Campania în rețea</h2>
+            {retea.stare === "gasita" ? (
+              <div className="mt-2">
+                <Row label="Stare" value={etichetaStareRetea(retea.campanie.stare)} />
+                <Row
+                  label="Publicate"
+                  value={
+                    <span>
+                      <strong>{retea.campanie.articoleLive}</strong> live din {retea.campanie.articole} programate
+                      {retea.campanie.articole > 0 && (
+                        <span className="ml-2 inline-block h-2 w-32 overflow-hidden rounded-full bg-slate-200 align-middle">
+                          <span
+                            className="block h-2 rounded-full bg-green-500"
+                            style={{ width: `${Math.round((retea.campanie.articoleLive / retea.campanie.articole) * 100)}%` }}
+                          />
+                        </span>
+                      )}
+                    </span>
+                  }
+                />
+                {retea.campanie.ultimulLa && <Row label="Ultimul articol" value={fmt(new Date(retea.campanie.ultimulLa))} />}
+                <Row
+                  label="Potrivire"
+                  value={
+                    retea.campanie.potrivire === "referinta" ? (
+                      "după referința comenzii (exactă)"
+                    ) : (
+                      <span className="text-amber-700">după email — verifică să fie campania bună (#{retea.campanie.id}, {retea.campanie.client})</span>
+                    )
+                  }
+                />
+                <div className="mt-3 flex flex-wrap gap-2">
+                  {retea.campanie.raportUrl && (
+                    <a
+                      href={retea.campanie.raportUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center rounded-lg border border-brand-navy px-3 py-1.5 text-sm font-semibold text-brand-navy hover:bg-brand-navy hover:text-white"
+                    >
+                      Raportul public
+                    </a>
+                  )}
+                  <a
+                    href={`/admin/rapoarte?email=${encodeURIComponent(r.email)}&client=${encodeURIComponent(r.companyName || "")}&titlu=${encodeURIComponent(r.title || "")}${retea.campanie.raportUrl ? `&raport=${encodeURIComponent(retea.campanie.raportUrl)}` : ""}`}
+                    className="inline-flex items-center rounded-lg bg-brand-red px-3 py-1.5 text-sm font-semibold text-white hover:bg-brand-red/90"
+                  >
+                    Trimite raportul clientului
+                  </a>
+                  <a
+                    href={`${RETEA_URL}/admin/comenzi`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center rounded-lg px-3 py-1.5 text-sm text-slate-600 hover:underline"
+                  >
+                    Deschide în rețea →
+                  </a>
+                </div>
+              </div>
+            ) : retea.stare === "negasita" ? (
+              <p className="mt-2 text-sm text-slate-600">
+                Nicio campanie în rețea pentru referința <span className="font-mono text-xs">{r.stripeSessionId}</span> sau
+                emailul {r.email}. Când o creezi în rețea, pune referința de mai sus la „comandă externă” ca să se lege singură.
+              </p>
+            ) : retea.stare === "neconfigurat" ? (
+              <p className="mt-2 text-sm text-slate-500">
+                Legătura cu rețeaua nu e configurată: lipsește RETEA_KEY (valoarea CRON_SECRET din aplicația rețelei) în Railway.
+              </p>
+            ) : (
+              <p className="mt-2 text-sm text-amber-700">Rețeaua nu a răspuns acum ({retea.mesaj}). Reîncarcă pagina.</p>
+            )}
           </section>
 
           <section className="rounded-xl border border-slate-200 bg-white p-5">

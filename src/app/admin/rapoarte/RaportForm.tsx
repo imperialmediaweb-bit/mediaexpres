@@ -8,10 +8,13 @@ export function RaportForm({
   initialEmail = "",
   initialClientName = "",
   initialTitle = "",
+  initialReportUrl = "",
 }: {
   initialEmail?: string;
   initialClientName?: string;
   initialTitle?: string;
+  /** Linkul raportului din retea, cand pagina comenzii l-a gasit deja. */
+  initialReportUrl?: string;
 }) {
   const [email, setEmail] = useState(initialEmail);
   const [clientName, setClientName] = useState(initialClientName);
@@ -23,7 +26,7 @@ export function RaportForm({
   // Gol = pleaca acum. Completat = Resend il tine si il livreaza la ora ceruta.
   const [trimiteLa, setTrimiteLa] = useState("");
   // Linkul raportului gazduit, generat in platforma de publicare.
-  const [reportUrl, setReportUrl] = useState("");
+  const [reportUrl, setReportUrl] = useState(initialReportUrl);
   const invoiceRef = useRef<HTMLInputElement>(null);
 
   const [sending, setSending] = useState(false);

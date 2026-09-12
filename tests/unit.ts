@@ -1017,6 +1017,15 @@ console.log("\n########## S. RECENZII ##########");
     t("comanda manuala accepta si cheia X-Api-Key, nu doar cookie-ul de admin", /verifyExtensionKey\(req\)/.test(cn));
   }
   t("eticheta WhatsApp pentru comenzile puse de pe chat", etichetaSursa("whatsapp|direct|") === "WhatsApp");
+
+  // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
+  {
+    const mat = citesteFisier("src/app/admin/materiale/[id]/page.tsx");
+    t("pagina comenzii intreaba reteaua dupa referinta si email", /campaniaPentruComanda\(r\.stripeSessionId, r\.email\)/.test(mat));
+    t("pagina comenzii arata cate articole sunt live si raportul public", /articoleLive/.test(mat) && /raportUrl/.test(mat));
+    t("fara RETEA_KEY pagina nu cade, spune ca nu e configurat", /neconfigurat/.test(citesteFisier("src/lib/retea.ts")) && /neconfigurat/.test(mat));
+    t("formularul de raport primeste linkul din retea", /initialReportUrl/.test(citesteFisier("src/app/admin/rapoarte/RaportForm.tsx")));
+  }
   const fixDb = citesteFisier("src/app/api/admin/fix-db/route.ts");
   t("coloanele source sunt in fix-db", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb));
   const ens = citesteFisier("src/lib/ensure-columns.ts");
