@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { buildAdvisorKnowledge } from "@/lib/advisor-knowledge";
 import { SITE } from "@/data/site";
@@ -78,9 +79,17 @@ export async function POST(req: Request) {
     }
     const { messages, prospectCompany, prospectIndustry, prospectCity } = parsed.data;
 
+    // Consultantul vorbeste cu oameni care sunt pe punctul sa plateasca 500 de
+    // lei. Merita modelul bun, nu cel mai ieftin: raspunsurile gresite despre
+    // pret sau despre ce contine pachetul se platesc in comenzi pierdute.
+    //
+    // Claude e prima alegere. OpenAI ramane ca plasa: daca ANTHROPIC_API_KEY nu
+    // e pus pe server, chatul merge mai departe pe calea veche, neschimbata.
+    // Asa, trecerea nu poate opri consultantul de pe un site care vinde.
+    const cheieClaude = process.env.ANTHROPIC_API_KEY;
     const key = process.env.OPENAI_API_KEY;
-    if (!key) {
-      console.error("[advisor] OPENAI_API_KEY missing");
+    if (!cheieClaude && !key) {
+      console.error("[advisor] lipsesc si ANTHROPIC_API_KEY si OPENAI_API_KEY");
       return NextResponse.json(
         { ok: false, error: "Configurare incompleta. Scrie-ne la contact@mediaexpress.ro." },
         { status: 500 }
@@ -96,41 +105,79 @@ export async function POST(req: Request) {
       systemPrompt += `\n\nCONTEXT DESPRE VIZITATORUL ACESTEI PAGINI DE OFERTA (foloseste pentru a personaliza recomandarea):\n${prospectContext.join("\n")}`;
     }
 
-    const openaiMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.slice(-10),
-    ];
+    const ultimele = messages.slice(-10);
+    let raw: string | undefined;
 
-    const res = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "content-type": "application/json",
-        authorization: `Bearer ${key}`,
-      },
-      body: JSON.stringify({
-        model: process.env.OPENAI_MODEL_FAST || "gpt-4o-mini",
-        messages: openaiMessages,
-        max_tokens: 480,
-        temperature: 0.4,
-      }),
-    });
+    if (cheieClaude) {
+      const client = new Anthropic({ apiKey: cheieClaude });
+      try {
+        const raspuns = await client.messages.create({
+          model: process.env.ANTHROPIC_MODEL || "claude-opus-5",
+          // Peste vechiul 480: la Claude, gandirea consuma din acelasi buget,
+          // iar un raspuns taiat in doua e mai rau decat unul lung. Lungimea
+          // reala o tine promptul, care cere raspunsuri scurte.
+          max_tokens: 2000,
+          // Efort mic: e o discutie de vanzari, nu o problema grea, iar omul
+          // asteapta raspunsul pe ecran. Mai mult efort ar insemna doar mai
+          // multa asteptare.
+          output_config: { effort: "low" },
+          system: systemPrompt,
+          messages: ultimele.map((m) => ({ role: m.role, content: m.content })),
+        });
 
-    if (!res.ok) {
-      const errText = await res.text();
-      console.error("[advisor] OpenAI error:", res.status, errText);
-      return NextResponse.json(
-        { ok: false, error: "Consultantul nu poate raspunde acum. Scrie-ne la contact@mediaexpress.ro." },
-        { status: 500 }
-      );
+        // Un refuz vine cu 200 si continut gol. Fara verificare, vizitatorul ar
+        // vedea o bula goala si ar pleca de pe pagina.
+        if (raspuns.stop_reason === "refusal") {
+          return NextResponse.json({
+            ok: true,
+            answer:
+              "La intrebarea asta prefer sa raspunda un om. Scrie-ne la contact@mediaexpress.ro sau pe WhatsApp si iti raspundem repede.",
+            action: null,
+          });
+        }
+
+        raw = raspuns.content
+          .filter((b): b is Anthropic.TextBlock => b.type === "text")
+          .map((b) => b.text)
+          .join("\n")
+          .trim();
+      } catch (e) {
+        console.error("[advisor] Anthropic error:", e instanceof Error ? e.message : e);
+        raw = undefined;
+      }
     }
 
-    const data = (await res.json()) as {
-      choices?: Array<{ message?: { content?: string } }>;
-    };
-    const raw = data?.choices?.[0]?.message?.content?.trim();
+    // Calea veche: fie n-avem cheie Claude, fie apelul a cazut. Un consultant
+    // care tace pe o pagina de vanzare costa mai mult decat un model mai slab.
+    if (!raw && key) {
+      const res = await fetch("https://api.openai.com/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "content-type": "application/json",
+          authorization: `Bearer ${key}`,
+        },
+        body: JSON.stringify({
+          model: process.env.OPENAI_MODEL_FAST || "gpt-4o-mini",
+          messages: [{ role: "system", content: systemPrompt }, ...ultimele],
+          max_tokens: 480,
+          temperature: 0.4,
+        }),
+      });
+
+      if (!res.ok) {
+        const errText = await res.text();
+        console.error("[advisor] OpenAI error:", res.status, errText);
+      } else {
+        const data = (await res.json()) as {
+          choices?: Array<{ message?: { content?: string } }>;
+        };
+        raw = data?.choices?.[0]?.message?.content?.trim();
+      }
+    }
+
     if (!raw) {
       return NextResponse.json(
-        { ok: false, error: "Raspuns gol" },
+        { ok: false, error: "Consultantul nu poate raspunde acum. Scrie-ne la contact@mediaexpress.ro." },
         { status: 500 }
       );
     }
