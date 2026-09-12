@@ -1011,7 +1011,12 @@ console.log("\n########## S. RECENZII ##########");
   t("comanda prin transfer isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(tr) && /source: sursa,/.test(tr));
   const sub = citesteFisier("src/app/api/articol/submit/route.ts");
   t("articolul trimis dupa plata cu cardul isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(sub) && /source: sursa,/.test(sub));
-  t("comanda adaugata de admin e „manual”", /source: "manual"/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
+  {
+    const cn = citesteFisier("src/app/api/admin/comanda-noua/route.ts");
+    t("comanda manuala: sursa data explicit sau „manual”", /sursaComenzii/.test(cn) && /"manual"/.test(cn));
+    t("comanda manuala accepta si cheia X-Api-Key, nu doar cookie-ul de admin", /verifyExtensionKey\(req\)/.test(cn));
+  }
+  t("eticheta WhatsApp pentru comenzile puse de pe chat", etichetaSursa("whatsapp|direct|") === "WhatsApp");
   const fixDb = citesteFisier("src/app/api/admin/fix-db/route.ts");
   t("coloanele source sunt in fix-db", /"order" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb) && /"order_submission" ADD COLUMN IF NOT EXISTS "source"/.test(fixDb));
   const ens = citesteFisier("src/lib/ensure-columns.ts");

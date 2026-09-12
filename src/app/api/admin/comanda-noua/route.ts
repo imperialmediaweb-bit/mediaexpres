@@ -7,6 +7,8 @@ import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
 import { findPackageById } from "@/data/packages";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
+import { verifyExtensionKey } from "@/lib/extension-auth";
+import { parseazaSursa, serializeazaSursa } from "@/lib/sursa";
 
 export const runtime = "nodejs";
 
@@ -36,11 +38,20 @@ const schema = z.object({
   uniquePerSite: z.boolean().default(true),
   /** Cate articole a cumparat — creeaza cate o comanda pentru fiecare. */
   count: z.number().int().min(1).max(10).default(1),
+  /**
+   * De unde a venit clientul, cand stim (a scris pe WhatsApp „Am vazut oferta
+   * pe Facebook”): „facebook|paid|”, „google|cpc|”, „whatsapp|direct|”.
+   * Formatul din lib/sursa.ts; lipsa = „manual”.
+   */
+  source: z.string().max(80).optional(),
 });
 
 export async function POST(req: NextRequest) {
+  // 12.09.2026 — comenzile de pe WhatsApp le poate introduce si asistentul,
+  // din afara adminului, cu aceeasi cheie ca extensia (X-Api-Key). Cookie-ul
+  // de admin ramane calea pentru formularul din admin.
   const session = getSession();
-  if (!session) {
+  if (!session && verifyExtensionKey(req)) {
     return NextResponse.json({ ok: false, error: "Neautentificat" }, { status: 401 });
   }
 
@@ -59,6 +70,8 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  const sursaData = parseazaSursa(d.source);
+  const sursaComenzii = sursaData ? serializeazaSursa(sursaData) : "manual";
 
   const pkg = findPackageById(d.packageId);
   if (!pkg) {
@@ -79,7 +92,7 @@ export async function POST(req: NextRequest) {
         .insert(orderSubmissions)
         .values({
           stripeSessionId: reference,
-          source: "manual",
+          source: sursaComenzii,
           email,
           packageId: d.packageId,
           // La mai multe articole din aceeasi comanda, titlurile se numeroteaza

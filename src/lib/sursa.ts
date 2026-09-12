@@ -190,6 +190,9 @@ export function etichetaSursa(v: string | null | undefined): string {
     case "email":
       nume = "Email";
       break;
+    case "whatsapp":
+      nume = "WhatsApp";
+      break;
     default:
       nume = s.medium === "referral" ? `Link de pe ${s.source}` : `${s.source} (${s.medium})`;
   }
