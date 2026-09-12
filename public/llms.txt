@@ -1,0 +1,47 @@
+# MediaExpres
+
+> Publicare de articole (advertoriale, comunicate de presă) în 50 de ziare online românești, dintr-o singură comandă: 41 de publicații locale (câte una pe județ) și 9 naționale. Rețea proprie, operată de Legio Web Development Tools S.R.L., Botoșani, România. Site: https://mediaexpress.ro
+
+## Ce facem
+
+- Publicăm articolul clientului pe toate cele 50 de publicații din rețea, cu câte o variantă unică pe fiecare ziar (titlu și formulare proprii, același mesaj și aceleași linkuri).
+- Articolele rămân online permanent, la adresă proprie, și sunt distribuite pe paginile de Facebook ale publicațiilor (46 de pagini).
+- Fiecare comandă primește un raport cu toate cele 50 de linkuri (PDF, Excel și pagină online), plus factură fiscală.
+- Dacă clientul nu are articol, îl scriem noi pe baza site-ului și a temei, inclus în preț; clientul îl verifică înainte de publicare.
+
+## Preț și condiții
+
+- Oferta de intrare: 500 lei pentru un articol în toate cele 50 de ziare (preț final, firma nu este plătitoare de TVA). Preț de listă: 1.500 lei.
+- Conținut de cazino / pariuri: 1.000 lei.
+- Abonament lunar: de la 400 lei/lună.
+- Campanii pe orașe (turnee, evenimente): 100 lei pe oraș, articol scris special pentru ziarul local.
+- Plată cu cardul (Stripe) sau prin transfer bancar cu factură emisă înainte.
+- Publicare în maximum 12 ore lucrătoare de la plată; la alegere, întinsă pe 3 zile sau pe 2 săptămâni.
+- Bonus inclus: 3 zile de promovare plătită pe Facebook a postării, pe ziarul ales de client.
+- Garanție: dacă nu publicăm în 12 ore lucrătoare de la plată și primirea materialelor, returnăm toți banii.
+
+## Ce NU promitem
+
+- Nu promitem poziții în Google și nu promitem trafic. Vindem apariții în presă verificabile, permanente, cu linkuri către site-ul clientului.
+- Nu publicăm conținut despre cauzele sau tratarea bolilor, terapii prezentate ca alternativă la tratamentul medical, sau atacuri la persoană.
+
+## Pentru cine
+
+- Firme mici și mijlocii care vor prezență în presă, dosare de finanțare sau licitații, credibilitate.
+- Agenții de comunicare și PR care publică comunicatele clienților lor.
+- Organizatori de evenimente și turnee (articol în ziarul fiecărui oraș).
+- Specialiști SEO care vor linkuri de pe domenii .ro de presă, cu ancore variate și ritm de publicare întins.
+
+## Pagini utile
+
+- Oferta: https://mediaexpress.ro/oferta-500
+- Lista celor 50 de publicații: https://mediaexpress.ro/reteaua-noastra
+- Clienți, campanii și articole publicate: https://mediaexpress.ro/exemple
+- Ritmul de publicare (12 ore / 3 zile / 2 săptămâni): https://mediaexpress.ro/ritm-publicare
+- Toate pachetele: https://mediaexpress.ro/pachete
+- Termeni și condiții: https://mediaexpress.ro/legal/termeni
+- Contact: https://mediaexpress.ro/contact (WhatsApp: +40 758 169 388, email: contact@mediaexpress.ro)
+
+## Date firmă
+
+Legio Web Development Tools S.R.L., CUI 46466484, J07/506/2022, Botoșani, România. Neplătitoare de TVA.

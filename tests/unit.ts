@@ -1038,6 +1038,14 @@ console.log("\n########## S. RECENZII ##########");
     t("coloana ritm e in fix-db si in plasa", /"ritm" text NOT NULL DEFAULT 'rapid'/.test(fixDb2) && /"ritm" text NOT NULL DEFAULT 'rapid'/.test(citesteFisier("src/lib/ensure-columns.ts")));
   }
 
+  // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
+  {
+    const llms = citesteFisier("public/llms.txt");
+    t("llms.txt exista si spune pretul, reteaua si ce NU promitem", /500 lei/.test(llms) && /50 de ziare/.test(llms) && /Nu promitem poziții/.test(llms));
+    t("llms.txt trimite la paginile utile", /\/oferta-500/.test(llms) && /\/reteaua-noastra/.test(llms) && /\/exemple/.test(llms));
+    t("oferta are schema FAQPage din aceleasi intrebari", /"@type": "FAQPage"/.test(citesteFisier("src/app/oferta-500/page.tsx")));
+  }
+
   // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
   {
     const mat = citesteFisier("src/app/admin/materiale/[id]/page.tsx");

@@ -838,6 +838,26 @@ export default function Oferta500Page() {
         Faptul ca se poate plati prin OP e spus in oferta si in intrebari.
       */}
 
+      {/*
+        Schema FAQPage: aceleasi intrebari, citite de Google (rich results) si
+        de modelele AI care recomanda servicii. Textul e cel din pagina, fara
+        promisiuni in plus.
+      */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            "@context": "https://schema.org",
+            "@type": "FAQPage",
+            mainEntity: FAQ.map((f) => ({
+              "@type": "Question",
+              name: f.q,
+              acceptedAnswer: { "@type": "Answer", text: f.a },
+            })),
+          }),
+        }}
+      />
+
       {/* Intrebari frecvente */}
       <section id="intrebari" className="scroll-mt-20 section bg-slate-50">
         <div className="container">
