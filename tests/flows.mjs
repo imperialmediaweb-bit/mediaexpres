@@ -132,27 +132,14 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
 // ---------- PUNTEA TELEFON -> BIROU ----------
 {
   const p = await (await b.newContext({ viewport: { width: 390, height: 844 } })).newPage();
-  console.log("\n=== 4c. Emailul de continuare la alegerea OP ===");
-  let continua = null;
-  await p.route("**/api/oferta/continua", async (r) => {
-    continua = JSON.parse(r.request().postData() || "{}");
-    await r.fulfill({ json: { ok: true } });
-  });
+  console.log("\n=== 4c. Drumul spre OP ramane deschis ===");
+  // 12.09.2026 — pasul cu email de dinainte de plata a disparut (si emailul
+  // de continuare trimis de acolo, o data cu el). Linkul spre transfer
+  // bancar ramane in caseta „Ce se intampla dupa plata", fara sa ceara nimic.
   await p.goto(B + "/oferta-500", { waitUntil: "networkidle" });
-  await p.locator("#oferta button", { hasText: "Comandă acum" }).first().click();
-  await p.waitForTimeout(400);
-  await p.locator("#oferta input[type=email]").fill("punte@firma.ro");
-  // Declaratia de continut se cere de-acum INAINTE de orice metoda de plata,
-  // card sau OP: pe card banii intra primii si o restituire prin Stripe
-  // dureaza saptamani, deci temeiul trebuie semnat inainte, nu dupa.
-  await p.locator('#oferta input[name="contentDeclaration"]').check();
-  await p.waitForTimeout(200);
-  // click pe OP fara sa navigam efectiv (route-ul de mai sus nu opreste nav,
-  // dar cererea keepalive pleaca inainte)
-  await p.locator('#oferta a[href*="/comanda/transfer"]').first().click();
-  await p.waitForTimeout(1500);
-  check(continua?.email === "punte@firma.ro" && continua?.packageId === "promo-50",
-    "clickul pe OP trimite emailul de continuare (linkul inapoi in inbox)");
+  const op = p.locator('#oferta a[href*="/comanda/transfer"]').first();
+  check(await op.isVisible(), "linkul spre OP e vizibil fara niciun pas intermediar");
+  check(/pachet=promo-50/.test((await op.getAttribute("href")) || ""), "linkul duce la transfer cu pachetul precompletat");
   await p.close();
 }
 
