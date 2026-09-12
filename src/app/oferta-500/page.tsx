@@ -128,9 +128,9 @@ const INCLUDED = [
   },
   {
     icon: Clock,
-    title: "Publicat în 12 ore lucrătoare",
+    title: "În 12 ore lucrătoare — sau în ritmul ales de tine",
     description:
-      "De la confirmarea plății până la linkurile live trec maximum 12 ore lucrătoare — de obicei mai puțin. Comanda făcută seara sau în weekend se publică a doua zi lucrătoare.",
+      "Implicit, de la confirmarea plății până la linkurile live trec maximum 12 ore lucrătoare. Dacă e pentru SEO și linkuri, alegi la comandă să apară întins pe 3 zile sau pe 2 săptămâni, ca plasările să arate ca un flux normal de presă.",
   },
   {
     // 06.09.2026 — argumentul cerut de proprietar: publicarea nu e o descarcare
@@ -157,6 +157,7 @@ const RECOMANDAT_PENTRU = [
   "Lansări de produse și servicii",
   "Evenimente și proiecte",
   "Creșterea notorietății",
+  "SEO și linkuri (ritm întins, ancore variate)",
 ];
 
 const USES = [
@@ -265,7 +266,13 @@ const FAQ = [
     // de crestere in clasament. Raspunsul spune si ce primesti, si ce nu face —
     // si intoarce marcajul in avantaj, fiindca il poti verifica singur.
     q: "Primesc backlinkuri? Mă ajută la SEO?",
-    a: "Primești 50 de linkuri către site-ul tău, de pe 50 de publicații de presă diferite — permanente și fără atribute care le anulează. Ce nu-ți promitem sunt poziții în Google: un link contează doar dacă pagina de pe care vine e indexată, iar asta o decide Google, nu noi. Cine îți garantează creșterea poziției nu spune adevărul.",
+    a: "Primești 50 de linkuri către site-ul tău, de pe 50 de publicații de presă diferite — permanente și fără atribute care le anulează. Pentru cine cumpără exact pentru asta, facem lucrurile cum se fac: textul linkului variază de la un ziar la altul (numele brandului, adresa, câteva ancore descriptive alese de tine), iar articolele pot apărea întinse pe 2 săptămâni, nu toate în aceeași zi. Ce nu-ți promitem sunt poziții în Google: un link contează doar dacă pagina de pe care vine e indexată, iar asta o decide Google, nu noi. Cine îți garantează creșterea poziției nu spune adevărul.",
+  },
+  {
+    // 12.09.2026 — ritmul la alegere: clientul de SEO vrea intins, cel cu
+    // eveniment vrea azi. Alegerea e in formularul de comanda.
+    q: "Pot alege în cât timp apar articolele?",
+    a: "Da, la comandă. Rapid, în 12 ore lucrătoare, pentru comunicate, evenimente și lansări. Întins pe 3 zile, pentru prezență în presă, aparițiile venind pe rând, ca știrile. Sau întins pe 2 săptămâni, dacă e pentru SEO și linkuri. Prețul e același. Detalii pe pagina „Ritmul de publicare” de pe site.",
   },
 
   {
@@ -327,9 +334,9 @@ export default function Oferta500Page() {
               licitatie raman mai jos, in „La ce foloseste", unde au context.
             */}
             <p className="mt-6 text-lg text-white/85 md:text-xl">
-              Publicat în maximum 12 ore lucrătoare. Rămâne permanent. Primești
-              lista cu toate cele 50 de linkuri — le poți pune pe site, la
-              „Apariții în presă”.
+              Publicat în maximum 12 ore lucrătoare, sau în ritmul ales de tine.
+              Rămâne permanent. Primești lista cu toate cele 50 de linkuri — le
+              poți pune pe site, la „Apariții în presă”.
             </p>
 
             <p className="mx-auto mt-4 max-w-2xl">
