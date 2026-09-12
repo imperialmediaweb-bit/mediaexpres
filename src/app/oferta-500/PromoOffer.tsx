@@ -1,14 +1,9 @@
 "use client";
 
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
-import { CreditCard, Loader2, RefreshCw, ChevronDown, Newspaper, Landmark, MessageCircle, ShieldCheck, Info } from "lucide-react";
+import { useState, useSyncExternalStore } from "react";
+import { CreditCard, RefreshCw, ChevronDown, Newspaper, MessageCircle, ShieldCheck } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
-import {
-  CONTENT_DECLARATION,
-  CONTENT_DECLARATION_ERROR,
-  CONTENT_DECLARATION_WARNING,
-} from "@/lib/content-policy";
 import { SITE } from "@/data/site";
 import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 import { FormError } from "@/components/forms/FormError";
@@ -49,24 +44,6 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   const { isCasino, monthly } = useSelection();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  // Pasul de email dinainte de plata. Stripe capteaza emailul abia pe pagina lui,
-  // deci cine pleaca de acolo mai devreme ramanea complet necunoscut si nu putea
-  // fi recuperat. Aici il cerem noi, il salvam ca lead si il trimitem precompletat
-  // mai departe — omul are un camp mai putin de scris la Stripe.
-  const [askEmail, setAskEmail] = useState(false);
-  const [email, setEmail] = useState("");
-  const [declar, setDeclar] = useState(false);
-  const emailFormRef = useRef<HTMLFormElement>(null);
-
-  // Pe telefon, formularul de email se deschidea SUB marginea ecranului —
-  // acoperit de bara fixa de comanda si de bula de chat. Omul apasa "Comanda
-  // acum" si nu vedea nicio schimbare, deci pleca. Il aducem in mijlocul
-  // ecranului imediat ce apare.
-  useEffect(() => {
-    if (askEmail) {
-      emailFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-  }, [askEmail]);
 
   const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
@@ -84,25 +61,17 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
     // Oglinda in GA4 — fara ea, Analytics arata "Evenimente importante: 0"
     // si rata de conversie a reclamei nu se poate citi nicaieri.
     trackGaEvent("begin_checkout", { value: offer.price, currency: "RON" });
-    setAskEmail(true);
+    void go();
   }
 
+  // 12.09.2026 — direct la plata. Intre 8 si 12 septembrie, dupa click pe
+  // „Comanda acum" aparea un pas cu email obligatoriu si declaratia de
+  // continut in caseta galbena. Rezultatul: 27 de oameni au apasat butonul,
+  // zero au platit, zero au scris pe WhatsApp — inainte era o comanda pe zi.
+  // Emailul il cere Stripe oricum; declaratia se bifeaza la trimiterea
+  // articolului (formularul de dupa plata o are), inainte de publicare.
   async function go() {
     if (loading) return;
-    const clean = email.trim();
-    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
-      setError("Scrie o adresă de email validă — acolo primești factura.");
-      return;
-    }
-    // La card, banii intra INAINTE sa vedem articolul — asa functioneaza
-    // Stripe. Nu putem verifica textul mai devreme, dar putem cere declaratia
-    // mai devreme: daca se dovedeste ca nu se poate publica, temeiul de a nu
-    // restitui exista deja, semnat inainte de plata. Pe transfer bancar
-    // articolul se verifica efectiv inainte sa plece vreun leu.
-    if (!declar) {
-      setError(CONTENT_DECLARATION_ERROR);
-      return;
-    }
     setLoading(true);
     setError(null);
     try {
@@ -110,7 +79,6 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          email: clean,
           packageId: offer.packageId,
           mode: monthly
             ? isCasino
@@ -243,168 +211,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         </label>
       </details>
 
-      {askEmail ? (
-        <form
-          // noValidate: fara el, browserul opreste trimiterea si arata bula lui
-          // nativa — in engleza pe multe telefoane, si dincolo de controlul
-          // nostru. Codul din `go()` nu mai ajunge sa ruleze, deci mesajul
-          // nostru in romana („Scrie o adresa de email valida") nu apare
-          // niciodata. Aceeasi tacere care a costat comenzi azi.
-          noValidate
-          ref={emailFormRef}
-          onSubmit={(e) => {
-            e.preventDefault();
-            void go();
-          }}
-          className="mt-6 rounded-xl border border-white/20 bg-white/5 p-4"
-        >
-          <label className="block text-left">
-            <span className="text-sm font-semibold text-white">
-              Emailul tău — acolo primești factura și raportul
-            </span>
-            <input
-              type="email"
-              autoFocus
-              required
-              value={email}
-              onChange={(ev) => setEmail(ev.target.value)}
-              placeholder="nume@firma.ro"
-              className="mt-2 w-full rounded-lg border border-white/20 bg-white px-4 py-3 text-base text-brand-navy placeholder:text-slate-400 focus:border-brand-gold focus:outline-none"
-            />
-            {/* O litera gresita aici = nici factura, nici raportul. */}
-            <span className="mt-1.5 block text-xs text-white/60">
-              Verifică adresa — dacă greșești, scrie-ne pe WhatsApp la {SITE.phone}.
-            </span>
-          </label>
-          {/*
-            Cele doua metode, ca alegere egala.
-            Inainte, cardul era un buton rosu mare iar transferul bancar o
-            notita gri de 12px sub el. Din 8 oameni care au ajuns pana aici, 0
-            au platit — o firma din Romania nu scoate cardul personal pentru un
-            serviciu B2B de 500 de lei, vrea ordin de plata si factura. Optiunea
-            exista, dar nu o vedea nimeni.
-          */}
-          <label className="mt-4 flex items-start gap-2.5 rounded-lg border border-amber-300/40 bg-amber-400/10 p-3 text-left">
-            <input
-              type="checkbox"
-              name="contentDeclaration"
-              checked={declar}
-              onChange={(ev) => setDeclar(ev.target.checked)}
-              className="mt-0.5 h-4 w-4 shrink-0 accent-brand-gold"
-            />
-            <span className="text-xs leading-relaxed text-white/85">
-              {CONTENT_DECLARATION}{" "}
-              <a href="/legal/termeni" target="_blank" rel="noreferrer" className="font-semibold text-brand-gold underline">
-                Regulile de conținut
-              </a>
-              <span className="mt-1 block text-white/60">{CONTENT_DECLARATION_WARNING}</span>
-            </span>
-          </label>
-
-          {/*
-            Eroarea sta AICI, lipita de butoane.
-            Statea la coada componentei, sub caseta „Ce se intampla dupa plata"
-            — adica la un ecran mai jos. Cine apasa „Card" fara sa bifeze
-            declaratia vedea ca nu se intampla NIMIC si pleca; un client ne-a
-            si scris „dau pe card sau pe op dar nu face nimic". Mesajul trebuie
-            sa fie in campul vizual al butonului apasat.
-          */}
-          <FormError
-            message={error}
-            className="mt-4 rounded-lg border border-red-400/40 bg-red-500/15 px-3 py-2 text-center text-sm font-semibold text-red-200"
-          />
-
-          <p className="mt-4 text-center text-sm font-semibold text-white">
-            Cum plătești?
-          </p>
-          <p className="mt-1 text-center text-xs text-white/55">
-            Cu cardul plătești acum, pe pagina securizată Stripe, iar la revenire trimiți
-            articolul. Prin ordin de plată trimiți întâi comanda și plătești după ce
-            primești factura.
-          </p>
-          <div className={`mt-2 grid gap-2 ${monthly ? "" : "sm:grid-cols-2"}`}>
-            <button
-              type="submit"
-              disabled={loading}
-              className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg bg-brand-red px-6 py-3.5 font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60"
-            >
-              <span className="inline-flex items-center gap-2 text-base">
-                {loading ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : (
-                  <CreditCard className="h-5 w-5" />
-                )}
-                Card — plătesc acum
-              </span>
-              <span className="text-xs font-normal text-white/80">
-                plată securizată, apoi trimiți articolul
-              </span>
-            </button>
-
-            {!monthly && (
-              <a
-                // Emailul scris mai sus pleaca in link: altfel omul care alege
-                // OP il scrie a doua oara pe formular — frictiune gratuita.
-                href={`/comanda/transfer?pachet=${offer.packageId}${/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email.trim()) ? `&email=${encodeURIComponent(email.trim())}` : ""}`}
-                onClick={(ev) => {
-                  // Puntea telefon -> birou: cine alege OP primeste pe loc un
-                  // email cu datele de plata si linkul precompletat, ca sa
-                  // poata termina de pe alt dispozitiv. keepalive: cererea
-                  // supravietuieste navigarii care incepe chiar acum.
-                  if (!declar) {
-                    // Acelasi prag ca la card: fara declaratie nu incepe nicio
-                    // comanda, indiferent de metoda de plata.
-                    ev.preventDefault();
-                    setError(CONTENT_DECLARATION_ERROR);
-                    return;
-                  }
-                  const clean = email.trim();
-                  if (/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(clean)) {
-                    void fetch("/api/oferta/continua", {
-                      method: "POST",
-                      keepalive: true,
-                      headers: { "Content-Type": "application/json" },
-                      body: JSON.stringify({ email: clean, packageId: offer.packageId }),
-                    }).catch(() => {});
-                  }
-                  trackGaEvent("select_content", { content_type: "plata_op" });
-                }}
-                className="inline-flex flex-col items-center justify-center gap-0.5 rounded-lg border-2 border-brand-gold bg-brand-gold/10 px-6 py-3.5 font-bold text-brand-gold transition hover:bg-brand-gold/20"
-              >
-                <span className="inline-flex items-center gap-2 text-base">
-                  <Landmark className="h-5 w-5" />
-                  Ordin de plată
-                </span>
-                <span className="text-xs font-normal text-brand-gold/80">
-                  transfer bancar, cu factură
-                </span>
-              </a>
-            )}
-          </div>
-          {/* A treia cale: omul care nu are incredere sa plateasca unui
-              necunoscut vrea intai sa vorbeasca cu cineva. Tina Digi a facut
-              exact asta pe cont propriu; acum drumul exista in pagina.
-              Evenimentul Contact il face vizibil in Ads Manager — altfel
-              conversatiile astea par ca reclama n-a produs nimic. */}
-          <a
-            href={waOrderHref}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={trackWaOrder}
-            className="mt-2 inline-flex w-full items-center justify-center gap-2 rounded-lg border border-white/25 px-6 py-2.5 text-sm font-semibold text-white/85 transition hover:border-white/50 hover:text-white"
-          >
-            <MessageCircle className="h-4 w-4" />
-            Comandă pe WhatsApp — îți spunem ce să trimiți
-          </a>
-          <p className="mt-1.5 text-center text-xs text-white/60">
-            Ai întrebări? Îți răspundem cu drag, tot acolo.
-          </p>
-          <p className="mt-3 text-center text-xs text-white/60">
-            {offer.price.toLocaleString("ro")} lei{offer.suffix} · factură fiscală în ambele
-            cazuri · publicare în 12 ore lucrătoare
-          </p>
-        </form>
-      ) : (
+      {(
         <div className="mt-6 flex flex-col items-center gap-3">
           <button
             type="button"

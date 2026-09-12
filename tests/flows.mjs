@@ -27,8 +27,15 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
     });
   });
   let sent = null;
+  // Butonul duce direct la Stripe, deci pagina pleaca imediat ce vine
+  // raspunsul. Pixelul si GA se citesc AICI, cat pagina inca exista.
+  let laClick = null;
   await p.route("**/api/checkout", async (r) => {
     sent = r.request().postDataJSON();
+    laClick = await p.evaluate(() => ({
+      fbq: window.__fbq || [],
+      dl: (window.dataLayer || []).map((e) => Array.from(e)),
+    })).catch(() => null);
     await r.fulfill({ status: 200, contentType: "application/json", body: JSON.stringify({ ok: true, url: B + "/?fake" }) });
   });
 
@@ -65,94 +72,21 @@ const b = await chromium.launch({ executablePath: "/opt/pw-browsers/chromium" })
   check(txt.includes("Îl scriem noi"), "scrie ca redactam noi articolul");
   check(txt.includes("transfer bancar (OP)"), "varianta OP mentionata");
 
-  console.log("\n=== 3. Email inainte de Stripe + pixel ===");
+  console.log("\n=== 3. Direct la plata + pixel ===");
+  // 12.09.2026 — intre 8 si 12 septembrie, dupa click aparea un pas cu email
+  // obligatoriu si declaratia in caseta galbena: 27 de oameni au apasat,
+  // zero au platit, zero au scris pe WhatsApp. Acum butonul duce direct la
+  // Stripe (care cere emailul oricum); declaratia se bifeaza la trimiterea
+  // articolului, inainte de publicare.
   await cta.first().click();
-  await p.waitForTimeout(700);
-  check((await p.locator('input[type="email"]').count()) > 0, "campul de email apare");
-  const calls = await p.evaluate(() => window.__fbq);
+  await p.waitForTimeout(1200);
+  check(sent !== null && laClick !== null, "clickul a plecat direct la /api/checkout, fara pas intermediar");
+  const calls = laClick?.fbq || [];
   check(calls.filter((c) => c[1] === "InitiateCheckout").length === 1, "pixel InitiateCheckout trimis la click");
-  // GA raporta doar page_view ("Evenimente importante: 0"); begin_checkout e
-  // oglinda evenimentului de pixel, ca funnelul sa fie vizibil si in Analytics.
-  // Citim dataLayer-ul REAL: un interceptor pe window.gtag ar fi suprascris de
-  // declaratia globala `function gtag()` din scriptul inline al tagului.
-  const bc = await p.evaluate(() =>
-    (window.dataLayer || [])
-      .map((e) => Array.from(e))
-      .filter((e) => e[0] === "event" && e[1] === "begin_checkout"),
-  );
+  const bc = (laClick?.dl || []).filter((e) => e[0] === "event" && e[1] === "begin_checkout");
   check(bc.length === 1 && bc[0][2]?.value === 500, "GA begin_checkout cu valoarea 500");
-  await p.locator('input[type="email"]').first().fill("gresit");
-  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
-  await p.waitForTimeout(400);
-  check(sent === null, "email invalid: blocat local, fara cerere la server");
-  await p.locator('input[type="email"]').first().fill("test@firma.ro");
-  // Fara declaratie nu pleaca nici plata cu cardul — verificam intai ca chiar
-  // blocheaza, ca bifa sa nu ramana un element decorativ.
-  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
-  await p.waitForTimeout(500);
-  check(sent === null, "fara declaratie: cardul nu pleaca la Stripe");
-
-  // TOATE OPRIRILE TREBUIE SA SPUNA DE CE, LANGA BUTON.
-  //
-  // Fiecare verificare de aici a fost, la un moment dat, o tacere: omul apasa
-  // si nu se intampla nimic vizibil. Prima a costat comenzi intr-o zi („dau pe
-  // card sau pe op dar nu face nimic"), a doua era ascunsa de validarea nativa
-  // a browserului, care blocheaza trimiterea si arata o bula in engleza, in
-  // timp ce mesajul nostru in romana nu mai ajunge sa ruleze.
-  {
-    const btn = () => p.getByRole("button", { name: /Card — plătesc acum/ }).first();
-    const langaButon = async (text) => {
-      const el = p.locator(`text=${text}`).first();
-      if (!(await el.isVisible().catch(() => false))) return -1;
-      const a = await el.boundingBox();
-      const c = await btn().boundingBox();
-      return a && c ? Math.abs(a.y - c.y) : -1;
-    };
-
-    await p.locator('input[type="email"]').first().fill("");
-    await btn().click();
-    await p.waitForTimeout(400);
-    let d = await langaButon("Scrie o adresă de email validă");
-    check(d >= 0 && d < 220, `fara email: mesajul apare langa buton (${Math.round(d)}px)`);
-
-    await p.locator('input[type="email"]').first().fill("gresit");
-    await btn().click();
-    await p.waitForTimeout(400);
-    d = await langaButon("Scrie o adresă de email validă");
-    check(d >= 0 && d < 220, `email invalid: mesajul apare langa buton (${Math.round(d)}px)`);
-
-    await p.locator('input[type="email"]').first().fill("test@firma.ro");
-    await btn().click();
-    await p.waitForTimeout(400);
-    d = await langaButon("Bifează declarația");
-    check(d >= 0 && d < 220, `fara declaratie: mesajul apare langa buton (${Math.round(d)}px)`);
-  }
-
-  // MESAJUL DE EROARE TREBUIE SA FIE LANGA BUTON, NU DOAR IN PAGINA.
-  //
-  // Testul asta exista pentru ca a lipsit exact cand trebuia. Mesajul
-  // „Bifeaza declaratia..." se randa la coada componentei, sub caseta „Ce se
-  // intampla dupa plata" — la peste un ecran sub butonul apasat. Verificarea
-  // veche cauta textul in pagina, il gasea, si trecea verde. Clientii apasau
-  // si nu vedeau nimic; unul a scris „dau pe card sau pe op dar nu face
-  // nimic", si s-au pierdut comenzi.
-  //
-  // De-aia se masoara acum POZITIA, nu prezenta: eroarea trebuie sa fie
-  // vizibila pe ecran si in aceeasi privire cu butonul care a produs-o.
-  {
-    const eroare = p.locator("text=Bifează declarația").first();
-    check(await eroare.isVisible(), "eroarea de declaratie e vizibila");
-    const be = await eroare.boundingBox();
-    const bb = await p.getByRole("button", { name: /Card — plătesc acum/ }).first().boundingBox();
-    const dist = be && bb ? Math.abs(be.y - bb.y) : 9999;
-    check(dist < 200, `eroarea sta langa buton (${Math.round(dist)}px)`);
-    const vh = p.viewportSize().height;
-    check(!!be && be.y > 0 && be.y < vh, "eroarea e in ecran, nu sub margine");
-  }
-  await p.locator('input[name="contentDeclaration"]').first().check();
-  await p.getByRole("button", { name: /Card — plătesc acum/ }).first().click();
-  await p.waitForTimeout(900);
-  check(sent?.email === "test@firma.ro" && sent?.packageId === "promo-50", `trimis la server: ${JSON.stringify(sent)}`);
+  check(sent?.packageId === "promo-50" && sent?.mode === "package", `cererea pleaca direct la server: ${JSON.stringify(sent)}`);
+  check(!("email" in (sent || {})), "fara email in cerere — il ia Stripe");
 
   console.log("\n=== 4. Consultant + WhatsApp + lista ===");
   await p.goto(B + "/oferta-500", { waitUntil: "domcontentloaded" });
