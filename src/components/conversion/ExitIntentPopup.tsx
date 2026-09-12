@@ -14,6 +14,7 @@ import { RequestListForm } from "@/components/forms/RequestListForm";
 import { promoDeadlineLabel } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
+import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 
 const STORAGE_KEY = "me_exit_intent_shown";
 // Pe mobil nu exista mouse-leave; declansam tarziu, ca sa nu intrerupem un om
@@ -34,6 +35,9 @@ export function ExitIntentPopup() {
   const [open, setOpen] = useState(false);
   const [vreaEmail, setVreaEmail] = useState(false);
   const deadline = promoDeadlineLabel();
+  // 12.09.2026 — un lead a scris pe WhatsApp de aici, fara „Am vazut oferta
+  // pe...": propozitia cu sursa era doar pe butoanele de pe oferta.
+  const propozitieSursa = useSursaWhatsApp();
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -90,7 +94,8 @@ export function ExitIntentPopup() {
           </Link>
           <a
             href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-              "Bună ziua! Mă interesează articolul în 50 de ziare (500 lei), dar am o întrebare înainte.",
+              "Bună ziua! Mă interesează articolul în 50 de ziare (500 lei), dar am o întrebare înainte." +
+                (propozitieSursa ? ` ${propozitieSursa}` : ""),
             )}`}
             target="_blank"
             rel="noopener noreferrer"

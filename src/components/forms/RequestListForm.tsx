@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { requestListSchema, type RequestListInput } from "@/lib/validators";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
+import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 
 interface RequestListFormProps {
   successHref?: string;
@@ -21,6 +22,7 @@ interface RequestListFormProps {
 export function RequestListForm({ successHref, successCtaLabel }: RequestListFormProps = {}) {
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const propozitieSursa = useSursaWhatsApp();
   const {
     register,
     handleSubmit,
@@ -114,7 +116,8 @@ export function RequestListForm({ successHref, successCtaLabel }: RequestListFor
             <Button variant="outline" asChild>
               <a
                 href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
-                  "Salut! Am primit lista cu cele 50 de ziare și vreau să comand publicarea unui articol.",
+                  "Salut! Am primit lista cu cele 50 de ziare și vreau să comand publicarea unui articol." +
+                    (propozitieSursa ? ` ${propozitieSursa}` : ""),
                 )}`}
                 target="_blank"
                 rel="noopener noreferrer"

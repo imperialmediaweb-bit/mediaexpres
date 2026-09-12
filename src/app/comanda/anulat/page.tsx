@@ -2,8 +2,10 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { XCircle, Landmark, MessageCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { cookies } from "next/headers";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
+import { SURSA_COOKIE, propozitieSursaWhatsApp } from "@/lib/sursa";
 
 export const metadata: Metadata = {
   title: "Plată anulată",
@@ -31,10 +33,14 @@ export default function AnulatPage({
   const abonament = searchParams.abonament === "1";
   const promo = pkg?.id.startsWith("promo-") ?? false;
   const inapoi = promo ? "/oferta-500#oferta" : "/pachete";
+  // Pagina e randata pe server, deci sursa vizitei (Google / Facebook) se
+  // citeste din cookie aici, nu prin hook — si intra in mesajul de WhatsApp.
+  const propozitieSursa = propozitieSursaWhatsApp(cookies().get(SURSA_COOKIE)?.value);
   const waText = encodeURIComponent(
-    pkg
+    (pkg
       ? `Bună ziua! Am vrut să comand ${pkg.name} (${pkg.price} lei), dar nu plătesc cu cardul. Cum pot plăti prin transfer bancar?`
-      : "Bună ziua! Am vrut să comand un articol, dar nu plătesc cu cardul. Cum pot plăti altfel?",
+      : "Bună ziua! Am vrut să comand un articol, dar nu plătesc cu cardul. Cum pot plăti altfel?") +
+      (propozitieSursa ? ` ${propozitieSursa}` : ""),
   );
 
   return (

@@ -1025,6 +1025,22 @@ console.log("\n########## S. RECENZII ##########");
     /etichetaSursa\(o\.source\)/.test(citesteFisier("src/app/admin/comenzi/page.tsx")) &&
     /etichetaSursa\(r\.source\)/.test(citesteFisier("src/app/admin/materiale/page.tsx")) &&
     /etichetaSursa\(r\.source\)/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+  // 12.09.2026 — un lead a venit din popup-ul de iesire fara propozitia cu
+  // sursa: era doar pe doua din cele cinci linkuri de WhatsApp. Acum fiecare
+  // fisier care construieste un link wa.me cu text trebuie sa o includa.
+  {
+    const cuWa = [
+      "src/app/oferta-500/PromoOffer.tsx",
+      "src/components/layout/WhatsAppButton.tsx",
+      "src/components/conversion/ExitIntentPopup.tsx",
+      "src/components/forms/RequestListForm.tsx",
+      "src/app/comanda/anulat/page.tsx",
+    ];
+    for (const f of cuWa) {
+      const src = citesteFisier(f);
+      t(`linkul de WhatsApp din ${f.split("/").pop()} poarta sursa`, /wa\.me\/\$\{SITE\.whatsapp\}\?text=/.test(src) && /propozitieSursa/.test(src));
+    }
+  }
   t("WhatsApp-ul de pe oferta si butonul flotant primesc propozitia",
     /useSursaWhatsApp\(\)/.test(citesteFisier("src/app/oferta-500/PromoOffer.tsx")) &&
     /useSursaWhatsApp\(\)/.test(citesteFisier("src/components/layout/WhatsAppButton.tsx")));
