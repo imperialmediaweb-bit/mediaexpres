@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Clock } from "lucide-react";
 import { ContactForm } from "@/components/forms/ContactForm";
 import { SITE } from "@/data/site";
 import { DateFirma } from "@/components/DateFirma";
+import { WhatsAppCta } from "@/components/WhatsAppCta";
 
 export const metadata: Metadata = {
   title: "Contact — MediaExpres",
@@ -19,7 +20,7 @@ export default function ContactPage() {
           <h1 className="h1 mt-3 text-white">Discutăm proiectul tău</h1>
           <p className="lead mx-auto mt-6 max-w-2xl text-white/85">
             Ai o întrebare, vrei o ofertă personalizată sau pur și simplu vrei să discuți înainte
-            de a comanda? Suntem la un email distanță.
+            de a comanda? Cel mai rapid ne găsești pe WhatsApp.
           </p>
         </div>
       </section>
@@ -28,7 +29,10 @@ export default function ContactPage() {
         <div className="container">
           <div className="grid gap-12 lg:grid-cols-[1fr_1.3fr]">
             <div>
-              <h2 className="h3">Date de contact</h2>
+              {/* WhatsApp primul: aici duce sitelinkul din Google Ads si aici vin
+                  cei mai multi dintre cei care chiar comanda. */}
+              <WhatsAppCta />
+              <h2 className="h3 mt-10">Date de contact</h2>
               <ul className="mt-6 space-y-5 text-base">
                 <InfoRow icon={Mail} label="Email">
                   <a href={`mailto:${SITE.email}`} className="text-brand-navy hover:text-brand-red">

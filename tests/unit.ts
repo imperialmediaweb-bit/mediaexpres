@@ -1035,6 +1035,7 @@ console.log("\n########## S. RECENZII ##########");
       "src/components/conversion/ExitIntentPopup.tsx",
       "src/components/forms/RequestListForm.tsx",
       "src/app/comanda/anulat/page.tsx",
+      "src/components/WhatsAppCta.tsx",
     ];
     for (const f of cuWa) {
       const src = citesteFisier(f);
