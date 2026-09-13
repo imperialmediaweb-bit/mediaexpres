@@ -25,6 +25,7 @@ import {
 import { PromoOffer } from "./PromoOffer";
 import { ButonComanda } from "@/components/comanda/comanda-promo";
 import { promoDeadlineLabel } from "@/data/packages";
+import { CIFRE, nr, milioane } from "@/data/cifre";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 const deadline = promoDeadlineLabel();
@@ -254,7 +255,7 @@ const FAQ = [
   },
   {
     q: "Sunt ziare reale sau site-uri fantomă?",
-    a: "Fiecare publică zilnic articole despre județul lui — circa 600 de articole pe zi în toată rețeaua — plus pagina de Facebook unde își postează articolele: 46 de pagini, cu 37.323 de urmăritori. Cel mai simplu e să verifici singur: lista completă e mai sus, deschide orice ziar, citește ce a apărut azi și intră și pe pagina lui de Facebook.",
+    a: `Fiecare publică zilnic articole despre județul lui — peste ${nr(CIFRE.articolePeLuna)} de articole pe lună în toată rețeaua, peste ${nr(CIFRE.articoleInArhiva)} în arhivă — plus pagina de Facebook unde își postează articolele: ${CIFRE.paginiFacebook} de pagini, cu ${nr(CIFRE.urmaritoriFacebook)} de urmăritori. Numai pagina Botoșani Expres a avut ${milioane(CIFRE.botosani.afisari)} de afișări și ${nr(CIFRE.botosani.interactiuni)} de interacțiuni în ${CIFRE.perioada} (la ${CIFRE.laData}). O fermă de linkuri nu are așa ceva. Cel mai simplu e să verifici singur: lista completă e mai sus, deschide orice ziar, citește ce a apărut azi și intră și pe pagina lui de Facebook.`,
   },
 
   {
@@ -495,26 +496,26 @@ export default function Oferta500Page() {
               Cel mai citit ziar din rețea, pe Facebook
             </p>
             <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Botoșani Expres: 2,4 milioane de afișări în 28 de zile
+              Botoșani Expres: {milioane(CIFRE.botosani.afisari)} de afișări în 28 de zile
             </h3>
             <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">2.430.444</div>
+                <div className="font-serif text-3xl font-bold text-brand-navy">{nr(CIFRE.botosani.afisari)}</div>
                 {/* „Afisari", nu „vizualizari" si nu „oameni": indicatorul Meta e
                     page_impressions si numara repetarile. */}
                 <div className="mt-1 text-sm text-slate-600">afișări pe Facebook</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-brand-navy">100.056</div>
+                <div className="font-serif text-3xl font-bold text-brand-navy">{nr(CIFRE.botosani.interactiuni)}</div>
                 <div className="mt-1 text-sm text-slate-600">interacțiuni</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-3xl font-bold text-emerald-600">+90%</div>
+                <div className="font-serif text-3xl font-bold text-emerald-600">{CIFRE.botosani.crestereFataDeLunaAnterioara}</div>
                 <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
               </div>
             </div>
             <p className="mt-5 text-center text-sm text-slate-600">
-              Sursa: statisticile Meta ale paginii, 4–31 august 2026. Aici e doar
+              Sursa: statisticile Meta ale paginii, {CIFRE.perioada}, la {CIFRE.laData}. Aici e doar
               cea mai citită pagină din rețea; articolul tău se distribuie pe{" "}
               <strong className="text-brand-navy">toate</strong>.{" "}
               <a
@@ -533,37 +534,39 @@ export default function Oferta500Page() {
               Rețeaua, în cifre măsurate
             </p>
             <h3 className="mt-2 text-center font-serif text-2xl font-bold text-brand-navy">
-              Ultimele 28 de zile, pe toate cele 50
+              Pe toate cele {CIFRE.publicatii} de publicații, la {CIFRE.laData}
             </h3>
-            <div className="mt-6 grid gap-4 text-center sm:grid-cols-4">
+            {/*
+              13.09.2026 — cifrele care arata o redactie vie, nu o arhiva:
+              volumul de articole, Facebook-ul, Google. Cititorii unici pe site
+              au iesit de aici: langa „50 de ziare" invitau la o socoteala care
+              nu ne avantajeaza (vezi data/cifre.ts).
+            */}
+            <div className="mt-6 grid gap-4 text-center sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">11.960</div>
-                <div className="mt-1 text-xs text-slate-600">cititori unici</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">peste {nr(CIFRE.articolePeLuna)}</div>
+                <div className="mt-1 text-xs text-slate-600">articole publicate pe lună</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">43.546</div>
-                <div className="mt-1 text-xs text-slate-600">vizualizări de pagină</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">peste {nr(CIFRE.articoleInArhiva)}</div>
+                <div className="mt-1 text-xs text-slate-600">articole în arhivă, toate online</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">55.737</div>
-                <div className="mt-1 text-xs text-slate-600">afișări în Google</div>
-              </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">1.978</div>
-                <div className="mt-1 text-xs text-slate-600">vizite din căutări</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">{nr(CIFRE.googleAfisari)}</div>
+                <div className="mt-1 text-xs text-slate-600">afișări în Google, {CIFRE.perioada}</div>
               </div>
             </div>
             <div className="mt-4 grid gap-4 text-center sm:grid-cols-3">
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">46</div>
-                <div className="mt-1 text-xs text-slate-600">pagini de Facebook, 37.323 urmăritori</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">{CIFRE.paginiFacebook}</div>
+                <div className="mt-1 text-xs text-slate-600">pagini de Facebook, {nr(CIFRE.urmaritoriFacebook)} urmăritori</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">~600</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">~{CIFRE.articolePeZi}</div>
                 <div className="mt-1 text-xs text-slate-600">articole noi pe zi în rețea</div>
               </div>
               <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">37 / 30</div>
+                <div className="font-serif text-2xl font-bold text-brand-navy">{CIFRE.domainAuthority} / {CIFRE.pageAuthority}</div>
                 <div className="mt-1 text-xs text-slate-600">Domain Authority / Page Authority (Moz)</div>
               </div>
             </div>

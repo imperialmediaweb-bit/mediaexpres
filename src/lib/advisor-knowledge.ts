@@ -73,7 +73,7 @@ export function buildAdvisorKnowledge(): string {
 
   return `RETEAUA:
 - ${CLAIMED_TOTAL} publicatii online proprii: ${CLAIMED_LOCAL} locale (cate 1 per judet) + ${CLAIMED_NATIONAL} nationale
-- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google, circa 600 de articole publicate zilnic in retea cu ajutorul jurnalistilor
+- Domenii .ro proprii, DA 37, trafic SEO real, indexare Google, circa 500 de articole publicate zilnic in retea cu ajutorul jurnalistilor
 - 46 de pagini de Facebook asociate, 37.323 de urmaritori (masurat 6 septembrie 2026)
 - Acoperim toate cele 41 de judete + Bucuresti
 
@@ -133,10 +133,10 @@ ${newspapersBlock()}
 SUNT ZIARE ADEVARATE (raspunsul la „retea fantoma"; cifre masurate, cu data — nu le umfla si nu inventa altele):
 - Fiecare publicatie scrie ZILNIC despre judetul ei — accidente, primarie, scoli, spital, sport — indiferent daca are clienti sau nu. Articolul clientului apare intre stiri reale.
 - CEL MAI BUN ARGUMENT impotriva acuzatiei de „retea fantoma" nu e numarul de articole, ci LANTUL pe care o retea falsa nu-l poate imita: ziarul publica zilnic → isi posteaza articolele pe pagina LUI de Facebook → oameni reali comenteaza si dau like (doar pe cea mai mare pagina, Botosani Expres, 100.056 de interactiuni intr-o luna). Un site fantoma nu publica duminica si nu are public care comenteaza. Invita-l sa intre pe orice ziar din lista SI pe pagina lui de Facebook.
-- Circa 600 de articole noi pe zi in toata reteaua.
-- 46 de pagini de Facebook, cu 37.323 de urmaritori IN TOTAL pe toata reteaua. ATENTIE: cifra de 100.056 de interactiuni e a UNEI SINGURE pagini (Botosani Expres, cea mai mare), nu a retelei — nu le amesteca in aceeasi propozitie.
-- Ultimele 28 de zile, pe toate cele 50: 11.960 cititori unici, 43.546 vizualizari de pagina, 55.737 afisari in Google, 1.978 vizite din cautari.
-- Botosani Expres (cea mai citita pagina din retea): 2.430.444 AFISARI pe Facebook si 100.056 interactiuni intr-o luna. Spune „afisari", nu „vizualizari" si nu „oameni" — indicatorul Meta numara repetarile.
+- Circa 500 de articole noi pe zi in toata reteaua.
+- 46 de pagini de Facebook, cu 37.323 de urmaritori IN TOTAL pe toata reteaua. ATENTIE: cifra de 107.428 de interactiuni e a UNEI SINGURE pagini (Botosani Expres, cea mai mare), nu a retelei — nu le amesteca in aceeasi propozitie.
+- Reteaua, la 13 septembrie 2026: peste 15.000 de articole publicate pe luna, peste 315.000 de articole in arhiva (toate online), 47.728 de afisari in Google in ultimele 28 de zile. Cititorii unici pe site (circa 13.800 pe luna, pe toate ziarele) NU se comunica din proprie initiativa — langa „50 de ziare" invita la o socoteala care nu ne avantajeaza; la intrebare directa, raspunzi cinstit cu cifra.
+- Botosani Expres (cea mai citita pagina din retea): 2.773.457 AFISARI pe Facebook si 107.428 interactiuni in ultimele 28 de zile (la 13 septembrie 2026, +106% fata de luna anterioara). Spune „afisari", nu „vizualizari" si nu „oameni" — indicatorul Meta numara repetarile.
 - Domain Authority 37 / Page Authority 30 (Moz) — scor public, verificabil de oricine. E un FAPT despre domenii, NU o promisiune ca articolul va urca site-ul clientului in Google.
 - Toate masurate la 6 septembrie 2026 (Google Search Console, statistici Meta, statistici proprii). Cand esti intrebat, spune si data.
 - Cifrele astea NU-i promit clientului nimic. Arata doar ca ziarele sunt reale, nu goale. Invita-l sa deschida oricare din lista si sa citeasca ce a aparut azi.
@@ -203,7 +203,7 @@ RASPUNSURI PREGATITE, PE TIPURI DE CLIENTI (baza ta; adapteaza la ce s-a intreba
 - „E ok pentru SEO?" → cinstit: NU vindem SEO. Vindem aparitii in presa care raman permanent si contin linkuri catre site-ul tau — permanente si fara atribute care le anuleaza. Nu promitem pozitii si nu promitem trafic: un link conteaza doar daca pagina de pe care vine e indexata, iar asta o decide Google. Daca ai nevoie de o campanie de link building, nu noi suntem raspunsul; daca ai nevoie sa poti arata ca s-a scris despre tine, da. Pentru cine cumpara totusi pentru linkuri, facem lucrurile cum se fac: ancorele variaza de la un ziar la altul (numele brandului, adresa, cateva ancore descriptive alese de client — nu acelasi text de 50 de ori), iar articolele pot aparea intinse pe 2 saptamani, alese la comanda, ca plasarile sa nu iasa toate in aceeasi zi.
 - „Ce DA/DR au?" → Domain Authority 37, Page Authority 30 (Moz, masurat 6 septembrie 2026), public si verificabil pentru orice domeniu din lista. DR (Ahrefs) nu comunicam — nu inventa o cifra. Precizeaza ca e un fapt despre domenii, nu o promisiune de rezultat.
 - „Cate linkuri si cu ce text?" → pana la 3 linkuri per articol, pe toate cele 50 de ziare; scrii tu cuvintele pe care sa stea linkul si adresele. Daca vrei ancore variate, trimiti 4-5 variante de text (numele brandului, adresa simpla, 2-3 descriptive) si le rotim pe ziare, ca sa nu apara acelasi text de 50 de ori. Adresa nu se schimba niciodata, doar textul linkului.
-- „E PBN? Nu penalizeaza Google?" → sunt publicatii reale, cu redactii: circa 600 de articole noi pe zi in retea, pagini de Facebook active, cate un ziar pe judet. Articolul e redactional, unic pe fiecare site, fara eticheta (P). Nu discuta cum s-a construit reteaua si nu specula despre linkurile ei — spune ca scorul Moz e public si verificabil.
+- „E PBN? Nu penalizeaza Google?" → sunt publicatii reale, cu redactii: circa 500 de articole noi pe zi in retea, pagini de Facebook active, cate un ziar pe judet. Articolul e redactional, unic pe fiecare site, fara eticheta (P). Nu discuta cum s-a construit reteaua si nu specula despre linkurile ei — spune ca scorul Moz e public si verificabil.
 - „Trimit eu 50 de texte diferite?" → nu e nevoie, rescriem noi; daca vrei, trimiti varianta ta si o folosim ca baza. Daca vrei textul identic peste tot, se poate, dar cu indexare mai slaba.
 - „Facturati pe agentie? Discount la volum?" → factura pe agentie, raportul il dai mai departe clientului tau. Abonamentul lunar e 400 lei/luna (un articol pe luna, mai ieftin decat plata unica). Pentru volume mari, scrie pe WhatsApp la ${SITE.phone}.
 - „Ce contine raportul?" → toate cele 50 de URL-uri, in PDF si Excel, cu click pe fiecare; il primesti pe email si ramane in contul tau pe site.
