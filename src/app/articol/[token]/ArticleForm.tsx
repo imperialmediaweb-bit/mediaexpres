@@ -11,10 +11,11 @@ import {
   MAX_UPLOAD_BYTES,
 } from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
-import { CONTENT_DECLARATION_ERROR, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, POZE_OBLIGATORII_MESAJ } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
+import { comprimaPoza } from "@/lib/comprima-poza";
 
 type Mode = "ai" | "write";
 
@@ -52,13 +53,10 @@ export function ArticleForm({
   const [contentDeclaration, setContentDeclaration] = useState(false);
 
   const [images, setImages] = useState<UploadedImage[]>([]);
-  // 13.09.2026 — a treia comanda la rand sosita „Imagini (0/3)". Nu s-au
-  // pierdut pe drum: sectiunea de poze era optionala si tacuta, iar omul
-  // trecea peste ea. Fara poza lui, articolul iese cu o poza de stoc pe 50
-  // de ziare si pe Facebook. Acum trimiterea fara poze cere o a doua apasare,
-  // cu explicatia pe ecran — nu blocam comanda, dar nu-l lasam sa treaca
-  // fara sa stie ce pierde.
-  const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
+  // 13.09.2026 — a treia comanda la rand sosita „Imagini (0/3)". Sectiunea
+  // de poze era optionala si tacuta, iar omul trecea peste ea. Decizia
+  // user: aici (dupa plata) pozele sunt OBLIGATORII, 3 — vezi
+  // POZE_OBLIGATORII in content-policy. Trimiterea e blocata pana le urca.
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
@@ -74,6 +72,9 @@ export function ArticleForm({
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // Eroarea de la poze se arata LANGA poze, nu doar jos langa „Trimite":
+  // pe telefon, jos nu se vede, iar omul crede ca poza a intrat.
+  const [pozeEroare, setPozeEroare] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
   async function generate() {
@@ -118,6 +119,7 @@ export function ArticleForm({
       return;
     }
     setError(null);
+    setPozeEroare(null);
     setUploading(true);
     try {
       const signRes = await fetch("/api/articol/upload-sign", {
@@ -131,23 +133,26 @@ export function ArticleForm({
       const picked = Array.from(files).slice(0, room);
       const uploaded: UploadedImage[] = [];
 
-      for (const file of picked) {
+      const probleme: string[] = [];
+      for (const ales of picked) {
         // NU sarim peste fisierele fara `type`: telefoanele trimit des un tip
         // gol sau neasteptat (HEIC de pe iPhone, unele galerii Android), iar
         // `continue` insemna ca poza dispare fara niciun mesaj — omul apasa,
         // nu se intampla nimic si crede ca site-ul e stricat. Lasam Cloudinary
         // sa refuze ce nu e imagine; el macar spune de ce.
-        if (file.type && !file.type.startsWith("image/")) {
-          setError(`„${file.name}" nu pare să fie o imagine.`);
+        if (ales.type && !ales.type.startsWith("image/")) {
+          probleme.push(`„${ales.name}" nu pare să fie o imagine.`);
           continue;
         }
-        // Pozele facute cu telefonul trec des de 10MB, iar Cloudinary le
-        // refuza cu un mesaj in engleza. Le oprim aici, cu o explicatie pe
-        // care omul o poate urma: sa o trimita altfel, nu sa se blocheze.
+        // Pozele de telefon trec des de 8MB. Pana pe 13.09.2026 le RESPINGEAM
+        // aici — si asa au sosit comenzi „fara poze" de la oameni care le
+        // pusesera. Acum le micsoram in browser (lib/comprima-poza.ts) si
+        // refuzam doar ce nu se poate micsora — cu alerta la noi.
+        const file = await comprimaPoza(ales);
         if (file.size > MAX_UPLOAD_BYTES) {
-          setError(
-            `„${file.name}" are ${(file.size / 1024 / 1024).toFixed(1)}MB, peste limita de 8MB. ${UPLOAD_FALLBACK_HINT}`,
-          );
+          const msg = `„${file.name}" are ${(file.size / 1024 / 1024).toFixed(1)}MB, peste limita de 8MB.`;
+          reportUploadError("articol/poze:marime", msg, { name: file.name, size: file.size, type: file.type });
+          probleme.push(msg);
           continue;
         }
         const form = new FormData();
@@ -168,14 +173,12 @@ export function ArticleForm({
         uploaded.push({ url: json.secure_url, publicId: json.public_id });
       }
 
-      if (uploaded.length) {
-        setImages((prev) => [...prev, ...uploaded]);
-        setFaraPozeConfirmat(false);
-      }
+      if (uploaded.length) setImages((prev) => [...prev, ...uploaded]);
+      if (probleme.length) setPozeEroare(`${probleme.join(" ")} ${UPLOAD_FALLBACK_HINT}`);
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Încărcarea a eșuat";
       reportUploadError("articol/poze", msg);
-      setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
+      setPozeEroare(`${msg} ${UPLOAD_FALLBACK_HINT}`);
     } finally {
       setUploading(false);
     }
@@ -199,10 +202,7 @@ export function ArticleForm({
       if (d.body) setBody(d.body);
       if (d.linkNotes) setLinkNotes((prev) => (prev.trim() ? `${prev.trim()}\n${d.linkNotes}` : d.linkNotes));
       const noi = d.images.slice(0, room).map((i) => ({ url: i.url, publicId: i.publicId }));
-      if (noi.length) {
-        setImages((prev) => [...prev, ...noi]);
-        setFaraPozeConfirmat(false);
-      }
+      if (noi.length) setImages((prev) => [...prev, ...noi]);
       setNotice(mesajImportDocx(d, room));
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Nu am putut citi documentul Word.";
@@ -238,9 +238,12 @@ export function ArticleForm({
       setError(CONTENT_DECLARATION_ERROR);
       return;
     }
-    if (images.length === 0 && !faraPozeConfirmat) {
-      setFaraPozeConfirmat(true);
-      setError(FARA_POZE_AVERTISMENT);
+    if (images.length < POZE_OBLIGATORII) {
+      setError(
+        images.length === 0
+          ? POZE_OBLIGATORII_MESAJ
+          : `Mai urcă ${POZE_OBLIGATORII - images.length} ${POZE_OBLIGATORII - images.length === 1 ? "poză" : "poze"} — sunt necesare ${POZE_OBLIGATORII} (ai ${images.length}).`,
+      );
       return;
     }
 
@@ -522,13 +525,13 @@ export function ArticleForm({
       {/* 3. Poze */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-serif text-lg font-bold text-brand-navy">
-          3. Poze <span className="text-sm font-normal text-slate-500">({images.length}/{MAX_IMAGES})</span>
+          3. Poze <span className="text-sm font-normal text-brand-red">— obligatoriu, {POZE_OBLIGATORII} poze</span>{" "}
+          <span className="text-sm font-normal text-slate-500">({images.length}/{MAX_IMAGES})</span>
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          <strong>Urcă măcar o poză</strong> (logo, sediu, produs, echipă). Alege
-          una ca <strong>imagine reprezentativă</strong> — aia apare pe prima
-          pagină și pe Facebook. Fără poza ta, articolul iese cu o imagine
-          generică de stoc.
+          <strong>Urcă {POZE_OBLIGATORII} poze</strong> cu firma ta: logo, sediu, produse,
+          echipă. Alege una ca <strong>imagine reprezentativă</strong> — aia apare pe
+          prima pagină și pe Facebook. Fără poze, articolul nu se poate trimite.
         </p>
 
         {images.length > 0 && (
@@ -571,6 +574,12 @@ export function ArticleForm({
               </div>
             ))}
           </div>
+        )}
+
+        {pozeEroare && (
+          <p role="alert" className="mt-3 rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            {pozeEroare}
+          </p>
         )}
 
         {images.length < MAX_IMAGES && (
@@ -703,8 +712,8 @@ export function ArticleForm({
             <Loader2 className="h-5 w-5 animate-spin" />
             Se trimite...
           </>
-        ) : images.length === 0 && faraPozeConfirmat ? (
-          "Trimite fără poze →"
+        ) : images.length < POZE_OBLIGATORII ? (
+          `Urcă ${POZE_OBLIGATORII - images.length === 1 ? "încă o poză" : `${POZE_OBLIGATORII - images.length} poze`} ca să trimiți`
         ) : (
           "Trimite materialele →"
         )}

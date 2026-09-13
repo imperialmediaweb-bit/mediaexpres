@@ -7,6 +7,8 @@
  * schimba limita sau folderul, se schimba intr-un singur loc.
  */
 
+import { comprimaPoza } from "@/lib/comprima-poza";
+
 export interface Uploaded {
   url: string;
   name: string;
@@ -15,9 +17,14 @@ export interface Uploaded {
 /** Cloudinary refuza oricum fisierele mari; taiem devreme, cu mesaj in romana. */
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
-export async function signAndUpload(file: File): Promise<Uploaded> {
+export async function signAndUpload(fisierOriginal: File): Promise<Uploaded> {
+  // Pozele de telefon se micsoreaza intai (lib/comprima-poza.ts); PDF-ul si
+  // ce nu se poate decoda trec neatinse.
+  const file = await comprimaPoza(fisierOriginal);
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new Error(`„${file.name}" depășește 8MB.`);
+    const msg = `„${file.name}" are ${(file.size / 1024 / 1024).toFixed(1)}MB, peste limita de 8MB.`;
+    reportUploadError("upload:marime", msg, { name: file.name, size: file.size, type: file.type });
+    throw new Error(msg);
   }
 
   const signRes = await fetch("/api/comanda/transfer/upload-sign", { method: "POST" });

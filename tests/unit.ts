@@ -1045,13 +1045,27 @@ console.log("\n########## S. RECENZII ##########");
   {
     const cp = citesteFisier("src/lib/content-policy.ts");
     t("avertismentul fara poze e unul singur, in content-policy", /FARA_POZE_AVERTISMENT/.test(cp) && /Trimite fără poze/.test(cp));
-    for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
-      const s = citesteFisier(f);
-      const nume = f.split("/").pop();
-      t(`${nume}: fara poze, prima apasare doar avertizeaza`, /images\.length === 0 && !faraPozeConfirmat/.test(s) && /setError\(FARA_POZE_AVERTISMENT\)/.test(s));
-      t(`${nume}: butonul spune „fara poze” la a doua apasare`, /Trimite fără poze/.test(s));
-      t(`${nume}: o poza urcata sterge confirmarea`, /setFaraPozeConfirmat\(false\)/.test(s));
-      t(`${nume}: cere linkurile dorite (ancora → adresa)`, /linkNotes/.test(s) && /Linkurile dorite/.test(s));
+    t("dupa plata, pozele sunt obligatorii: 3", /POZE_OBLIGATORII = 3/.test(cp));
+    {
+      // Formularul de DUPA PLATA: 3 poze obligatorii, butonul blocat pana atunci.
+      const s = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+      t("articol: sub 3 poze nu se poate trimite", /images\.length < POZE_OBLIGATORII/.test(s));
+      t("articol: butonul spune cate poze mai lipsesc", /Urcă \$\{POZE_OBLIGATORII - images\.length === 1/.test(s));
+      t("articol: eroarea de la poze se arata langa poze", /pozeEroare/.test(s) && /role="alert"/.test(s));
+      t("articol: pozele mari se micsoreaza, nu se refuza", /comprimaPoza\(ales\)/.test(s));
+      // Formularul OP (inainte de plata): avertisment, a doua apasare trimite.
+      const op = citesteFisier("src/app/comanda/transfer/TransferForm.tsx");
+      t("OP: fara poze, prima apasare doar avertizeaza", /images\.length === 0 && !faraPozeConfirmat/.test(op) && /setError\(FARA_POZE_AVERTISMENT\)/.test(op));
+      t("OP: butonul spune „fara poze” la a doua apasare", /Trimite fără poze/.test(op));
+      for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
+        const x = citesteFisier(f);
+        t(`${f.split("/").pop()}: cere linkurile dorite (ancora → adresa)`, /linkNotes/.test(x) && /Linkurile dorite/.test(x));
+      }
+      // Micsorarea in browser: pana pe 13.09 pozele de telefon erau RESPINSE.
+      const cpz = citesteFisier("src/lib/comprima-poza.ts");
+      t("pozele se micsoreaza la 2000px, rotite dupa EXIF", /LATURA_MAX = 2000/.test(cpz) && /imageOrientation: "from-image"/.test(cpz));
+      t("ce nu se poate micsora trece neatins, nu se pierde", (cpz.match(/return file;/g) || []).length >= 5);
+      t("calea comuna de upload micsoreaza si ea", /comprimaPoza\(fisierOriginal\)/.test(citesteFisier("src/lib/upload-client.ts")));
     }
     t("linkurile cerute se salveaza pe comanda (card si OP)", /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
     t("coloana link_notes e in schema, fix-db si plasa", /link_notes/.test(citesteFisier("src/db/schema.ts")) && /link_notes/.test(citesteFisier("src/app/api/admin/fix-db/route.ts")) && /link_notes/.test(citesteFisier("src/lib/ensure-columns.ts")));

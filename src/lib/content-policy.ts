@@ -46,6 +46,16 @@ export const CONTENT_DECLARATION_ERROR =
 export const FARA_POZE_AVERTISMENT =
   "Nu ai urcat nicio poză. Fără poza ta, articolul apare cu o imagine generică de stoc pe toate ziarele și pe Facebook — arată mult mai slab. Urcă măcar o poză (logo, sediu, produs, echipă). Dacă chiar nu ai, apasă din nou „Trimite fără poze”.";
 
+/**
+ * Pe formularul de dupa plata (articolul), pozele sunt OBLIGATORII: 3.
+ * Decizia user 13.09.2026 („trebuie sa trimita si 3 poze"), dupa a treia
+ * comanda sosita fara nicio poza. Avertismentul de mai sus ramane pe
+ * formularul OP (inainte de plata, unde un blocaj costa comanda).
+ */
+export const POZE_OBLIGATORII = 3;
+export const POZE_OBLIGATORII_MESAJ =
+  `Trimite ${POZE_OBLIGATORII} poze cu firma ta (logo, sediu, produse, echipă) — articolul se publică cu ele pe toate ziarele și pe Facebook. Fără poze nu se poate trimite.`;
+
 /** Consecinta, spusa scurt sub bifa. Aceeasi regula ca in Termeni, art. 4. */
 export const CONTENT_DECLARATION_WARNING =
   "Dacă declarația nu e adevărată, comanda se anulează, articolul se retrage și suma plătită nu se restituie.";
