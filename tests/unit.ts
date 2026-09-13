@@ -1012,7 +1012,12 @@ console.log("\n########## S. RECENZII ##########");
   const tr = citesteFisier("src/app/api/comanda/transfer/route.ts");
   t("comanda prin transfer isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(tr) && /source: sursa,/.test(tr));
   const sub = citesteFisier("src/app/api/articol/submit/route.ts");
-  t("articolul trimis dupa plata cu cardul isi ia sursa din cookie", /const sursa = sursaDinCerere\(req\)/.test(sub) && /source: sursa,/.test(sub));
+  // Dupa plata, sursa se ia de pe PLATA (orders.source, pus din metadata
+  // Stripe la checkout), nu din cererea de acum — omul se intoarce de la
+  // Stripe, deci referrerul de atunci e checkout.stripe.com. Cererea ramane
+  // doar plasa, cand plata nu se gaseste.
+  t("articolul trimis dupa plata isi ia sursa de pe plata, nu de la Stripe", /plata\?\.source\) sursa = plata\.source/.test(sub) && /source: sursa,/.test(sub));
+  t("cererea ramane doar plasa pentru sursa", /let sursa = sursaDinCerere\(req\)/.test(sub));
   {
     const cn = citesteFisier("src/app/api/admin/comanda-noua/route.ts");
     t("comanda manuala: sursa data explicit sau „manual”", /sursaComenzii/.test(cn) && /"manual"/.test(cn));
@@ -1077,6 +1082,13 @@ console.log("\n########## S. RECENZII ##########");
       t("dashboard: totalul aduna cardul si transferul", /const totalCents = cardCents \+ opCents/.test(dash));
       t("dashboard: suma pe luna curenta, separat", /Încasat în \$\{numeLuna\}/.test(dash) && /lunaCents/.test(dash));
       t("dashboard: numara doar comenzile OP incasate (fara dublura cu Stripe)", /eq\(orderSubmissions\.paymentMethod, "op"\)/.test(dash));
+      // „De unde vin oamenii astia?" — canalul, cu bani, pe toate comenzile.
+      t("comanda de pe WhatsApp: se alege canalul care a adus clientul", /De unde a venit clientul/.test(nof) && /facebook\|paid\|/.test(nof) && /google\|cpc\|/.test(nof));
+      const cz = citesteFisier("src/app/admin/comenzi/page.tsx");
+      t("comenzi: canalul se raporteaza in LEI, nu doar in numar", /De unde au venit banii/.test(cz) && /formatRON\(v\.cents\)/.test(cz));
+      t("comenzi: intra si comenzile de pe WhatsApp, nu doar Stripe", /orderSubmissions\.paymentMethod, "op"/.test(cz));
+      // Sursa platii cu cardul se ia de pe plata, nu de la intoarcerea din Stripe.
+      t("sursa comenzii vine din plata, nu din referrerul Stripe", /plata\?\.source\) sursa = plata\.source/.test(api) && /orders\.stripeSessionId, order\.sessionId/.test(api));
       // Formularul OP (inainte de plata): avertisment, a doua apasare trimite.
       const op = citesteFisier("src/app/comanda/transfer/TransferForm.tsx");
       t("OP: fara poze, prima apasare doar avertizeaza", /images\.length === 0 && !faraPozeConfirmat/.test(op) && /setError\(FARA_POZE_AVERTISMENT\)/.test(op));

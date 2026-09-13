@@ -5,7 +5,8 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/
 import { findPackageById } from "@/data/packages";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { orderSubmissions } from "@/db/schema";
+import { orderSubmissions, orders } from "@/db/schema";
+import { eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
@@ -88,7 +89,6 @@ export async function POST(req: NextRequest) {
   }
 
   const order = verifyOrderToken(d.token);
-  const sursa = sursaDinCerere(req);
   if (!order) {
     return NextResponse.json(
       { ok: false, error: "Link expirat sau invalid. Scrie-ne pe contact@mediaexpress.ro." },
@@ -98,6 +98,26 @@ export async function POST(req: NextRequest) {
 
   const pkg = findPackageById(order.packageId);
   const isCasino = order.packageId.includes("cazino");
+
+  // De unde a venit clientul: se ia de pe PLATA, nu din cererea asta.
+  //
+  // 13.09.2026 — in emailul comenzii scria „Link de pe checkout.stripe.com",
+  // adica exact nimic: omul ajunge aici intors de la Stripe, deci referrerul
+  // de acum e Stripe, iar cookie-ul de sursa poate lipsi (alt browser, alt
+  // telefon, link din email). Sursa adevarata a fost prinsa la checkout si
+  // dusa prin metadata sesiunii pana in `orders.source` (webhook). De acolo
+  // o citim. Cererea curenta ramane doar plasa, cand plata nu se gaseste.
+  let sursa = sursaDinCerere(req);
+  try {
+    const [plata] = await db
+      .select({ source: orders.source })
+      .from(orders)
+      .where(eq(orders.stripeSessionId, order.sessionId))
+      .limit(1);
+    if (plata?.source) sursa = plata.source;
+  } catch (err) {
+    console.error("[articol/submit] nu am putut citi sursa platii:", err);
+  }
 
   // featuredIndex vine din UI, dar poate depasi numarul real de poze.
   const featured = d.images[d.featuredIndex] ?? d.images[0];

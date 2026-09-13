@@ -41,8 +41,22 @@ export function NewOrderForm() {
     body: "",
     siteUrl: "",
     linkNotes: "",
+    // 13.09.2026 — „de unde vin totusi oamenii astia?". Comenzile luate pe
+    // WhatsApp intrau toate ca „adaugata manual", deci canalul care le-a
+    // adus (Facebook, Google) se pierdea — exact cifra dupa care decizi
+    // unde bagi banii de reclama. Il intrebi pe client o data, la telefon.
+    source: "whatsapp|direct|",
     paid: false,
   });
+
+  const SURSE: [string, string][] = [
+    ["whatsapp|direct|", "A scris pe WhatsApp (nu știu de unde ne-a găsit)"],
+    ["facebook|paid|", "A văzut reclama pe Facebook / Instagram"],
+    ["google|cpc|", "A venit din Google Ads"],
+    ["google|organic|", "Ne-a găsit în Google (căutare)"],
+    ["direct|recomandare|", "Recomandare de la alt client"],
+    ["manual", "Nu știu / altceva"],
+  ];
 
   const MAX_POZE = 3;
 
@@ -220,6 +234,16 @@ export function NewOrderForm() {
         <div className="sm:col-span-2">
           <label className={lab}>Site-ul firmei</label>
           <input value={f.siteUrl} onChange={(e) => set("siteUrl", e.target.value)} className={inp} placeholder="https://firma.ro" />
+        </div>
+        <div className="sm:col-span-2">
+          <label className={lab}>De unde a venit clientul</label>
+          <select value={f.source} onChange={(e) => set("source", e.target.value)} className={inp}>
+            {SURSE.map(([v, eticheta]) => (
+              <option key={v} value={v}>
+                {eticheta}
+              </option>
+            ))}
+          </select>
         </div>
         <div className="sm:col-span-2">
           <label className={lab}>Linkurile dorite (pe ce cuvinte → către ce adresă)</label>

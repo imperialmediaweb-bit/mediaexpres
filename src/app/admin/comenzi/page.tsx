@@ -2,9 +2,11 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { orders, users } from "@/db/schema";
-import { desc, eq } from "drizzle-orm";
+import { orders, users, orderSubmissions } from "@/db/schema";
+import { and, desc, eq, or } from "drizzle-orm";
 import { etichetaSursa } from "@/lib/sursa";
+import { findPackageById } from "@/data/packages";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 
 export const dynamic = "force-dynamic";
 
@@ -40,14 +42,35 @@ export default async function AdminComenziPage() {
 
   const totalCents = rows.filter((r) => r.status === "paid").reduce((sum, r) => sum + r.amount, 0);
 
-  // Cate plati a adus fiecare canal — raspunsul scurt la „merita reclama?".
-  const peSursa = new Map<string, number>();
-  for (const r of rows) {
-    if (r.status !== "paid") continue;
-    const k = etichetaSursa(r.source);
-    peSursa.set(k, (peSursa.get(k) || 0) + 1);
-  }
-  const sumarSurse = [...peSursa.entries()].sort((a, b) => b[1] - a[1]);
+  // Cati bani a adus fiecare canal — raspunsul scurt la „merita reclama?".
+  //
+  // 13.09.2026 — pana azi socoteala era doar pe platile cu cardul si doar in
+  // numar de comenzi. Comenzile luate pe WhatsApp sau prin transfer nu trec
+  // prin `orders`, deci canalul care le-a adus lipsea cu totul; iar „2
+  // comenzi" nu spune daca au fost de 500 sau de 2.500 de lei. Acum intra si
+  // ele, cu suma din pachet (`order_submission` n-are coloana de suma), si
+  // doar cele prin OP, ca sa nu se numere de doua ori cu Stripe.
+  await ensureOrderColumns();
+  const opRows = await db
+    .select({ packageId: orderSubmissions.packageId, source: orderSubmissions.source })
+    .from(orderSubmissions)
+    .where(
+      and(
+        eq(orderSubmissions.paymentMethod, "op"),
+        or(eq(orderSubmissions.status, "paid"), eq(orderSubmissions.status, "published")),
+      ),
+    );
+
+  const peSursa = new Map<string, { n: number; cents: number }>();
+  const adauga = (sursa: string | null, cents: number) => {
+    const k = etichetaSursa(sursa);
+    const cur = peSursa.get(k) || { n: 0, cents: 0 };
+    peSursa.set(k, { n: cur.n + 1, cents: cur.cents + cents });
+  };
+  for (const r of rows) if (r.status === "paid") adauga(r.source, r.amount);
+  for (const r of opRows) adauga(r.source, (findPackageById(r.packageId)?.price ?? 0) * 100);
+  const sumarSurse = [...peSursa.entries()].sort((a, b) => b[1].cents - a[1].cents);
+  const opCents = opRows.reduce((s, r) => s + (findPackageById(r.packageId)?.price ?? 0) * 100, 0);
 
   return (
     <div>
@@ -59,11 +82,31 @@ export default async function AdminComenziPage() {
       <div className="mt-4 rounded-md bg-brand-ivory p-4 text-sm">
         <strong>Total încasat (plăți reușite):</strong> {formatRON(totalCents)} din{" "}
         {rows.filter((r) => r.status === "paid").length} plăți.
-        {sumarSurse.length > 0 && (
-          <p className="mt-2 text-slate-600">
-            <strong>De unde au venit:</strong>{" "}
-            {sumarSurse.map(([k, v]) => `${k}: ${v}`).join(" · ")}
+        {opRows.length > 0 && (
+          <p className="mt-1 text-slate-600">
+            Plus <strong>{formatRON(opCents)}</strong> din {opRows.length}{" "}
+            {opRows.length === 1 ? "comandă" : "comenzi"} prin transfer bancar sau luate pe
+            WhatsApp (nu trec prin Stripe). Total:{" "}
+            <strong>{formatRON(totalCents + opCents)}</strong>.
           </p>
+        )}
+        {sumarSurse.length > 0 && (
+          <div className="mt-3 border-t border-slate-200 pt-3">
+            <strong>De unde au venit banii:</strong>
+            <ul className="mt-1 space-y-0.5 text-slate-600">
+              {sumarSurse.map(([k, v]) => (
+                <li key={k}>
+                  {k}: <strong>{formatRON(v.cents)}</strong> din {v.n}{" "}
+                  {v.n === 1 ? "comandă" : "comenzi"}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-slate-500">
+              &bdquo;Direct&rdquo; sau &bdquo;necunoscută&rdquo; înseamnă că nu am putut
+              urmări canalul: link tastat, alt telefon, sau comandă adăugată fără canal
+              ales. Nu înseamnă că nu a venit din reclamă.
+            </p>
+          </div>
         )}
       </div>
 
