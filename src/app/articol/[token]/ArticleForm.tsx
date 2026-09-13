@@ -14,6 +14,7 @@ import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { CONTENT_DECLARATION_ERROR, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
+import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
 
 type Mode = "ai" | "write";
 
@@ -69,6 +70,7 @@ export function ArticleForm({
 
   const [generating, setGenerating] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -176,6 +178,38 @@ export function ArticleForm({
       setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
     } finally {
       setUploading(false);
+    }
+  }
+
+  /**
+   * 13.09.2026 — clientul a scris articolul in Word, cu poze si cu linkuri pe
+   * cuvinte, si a lipit textul. Pozele si adresele au ramas in Word. Acum
+   * urca documentul, iar noi scoatem tot din el (lib/docx.ts).
+   */
+  async function importDocx(file: File) {
+    if (importing) return;
+    setError(null);
+    setNotice(null);
+    setImporting(true);
+    try {
+      const d = await importaDocx(file, token);
+      const room = Math.max(0, MAX_IMAGES - images.length);
+      setMode("write");
+      if (d.title && !title.trim()) setTitle(d.title);
+      if (d.body) setBody(d.body);
+      if (d.linkNotes) setLinkNotes((prev) => (prev.trim() ? `${prev.trim()}\n${d.linkNotes}` : d.linkNotes));
+      const noi = d.images.slice(0, room).map((i) => ({ url: i.url, publicId: i.publicId }));
+      if (noi.length) {
+        setImages((prev) => [...prev, ...noi]);
+        setFaraPozeConfirmat(false);
+      }
+      setNotice(mesajImportDocx(d, room));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Nu am putut citi documentul Word.";
+      reportUploadError("articol/docx", msg, { name: file.name, size: file.size, type: file.type });
+      setError(`${msg} Poți lipi textul în casetă și urca pozele separat, mai jos.`);
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -340,6 +374,37 @@ export function ArticleForm({
             </label>
           ))}
         </div>
+
+        <label
+          className={`mb-5 flex cursor-pointer items-center gap-3 rounded-xl border-2 border-dashed p-4 transition ${
+            importing ? "border-slate-300 bg-slate-50" : "border-brand-navy/40 bg-blue-50/40 hover:border-brand-navy hover:bg-blue-50"
+          }`}
+        >
+          <input
+            type="file"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            className="sr-only"
+            disabled={importing || uploading || generating}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void importDocx(f);
+              e.target.value = "";
+            }}
+          />
+          {importing ? (
+            <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand-navy" />
+          ) : (
+            <Upload className="h-5 w-5 shrink-0 text-brand-navy" />
+          )}
+          <span>
+            <span className="block text-sm font-semibold text-brand-navy">
+              {importing ? "Citim documentul…" : "Ai articolul în Word? Încarcă fișierul .docx"}
+            </span>
+            <span className="block text-xs text-slate-600">
+              Luăm din el textul, pozele și linkurile puse pe cuvinte — nu mai lipești nimic.
+            </span>
+          </span>
+        </label>
 
         {mode === "ai" && (
           <div className="mb-5 rounded-xl bg-slate-50 p-4">
@@ -625,7 +690,7 @@ export function ArticleForm({
         // lista goala, iar emailul a spus „Nicio poza incarcata". Omul avea
         // dreptate ca le-a pus. Formularul de OP era deja protejat asa; asta
         // nu era. Blocam si cat urca, si cat se genereaza textul.
-        disabled={submitting || uploading || generating}
+        disabled={submitting || uploading || generating || importing}
         className="flex w-full items-center justify-center gap-2 rounded-2xl bg-brand-red py-4 text-lg font-bold text-white shadow-lg transition hover:bg-brand-red/90 disabled:opacity-60"
       >
         {uploading ? (

@@ -18,6 +18,7 @@ import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
+import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
 
 export function TransferForm({
   packageId,
@@ -53,6 +54,8 @@ export function TransferForm({
   const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<"images" | "proof" | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [notice, setNotice] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [done, setDone] = useState(false);
 
@@ -89,6 +92,40 @@ export function TransferForm({
       setError(`${msg} ${UPLOAD_FALLBACK_HINT}`);
     } finally {
       setUploading(null);
+    }
+  }
+
+  /** Documentul Word, cu poze si linkuri pe cuvinte — vezi lib/docx.ts. */
+  async function importDocx(file: File) {
+    if (importing) return;
+    setError(null);
+    setNotice(null);
+    setImporting(true);
+    try {
+      const d = await importaDocx(file);
+      const room = Math.max(0, 3 - images.length);
+      setF((prev) => ({
+        ...prev,
+        title: prev.title.trim() ? prev.title : d.title,
+        body: d.body || prev.body,
+        linkNotes: d.linkNotes
+          ? prev.linkNotes.trim()
+            ? `${prev.linkNotes.trim()}\n${d.linkNotes}`
+            : d.linkNotes
+          : prev.linkNotes,
+      }));
+      const noi = d.images.slice(0, room).map((i) => ({ url: i.url, name: i.name }));
+      if (noi.length) {
+        setImages((prev) => [...prev, ...noi]);
+        setFaraPozeConfirmat(false);
+      }
+      setNotice(mesajImportDocx(d, room));
+    } catch (e) {
+      const msg = e instanceof Error ? e.message : "Nu am putut citi documentul Word.";
+      reportUploadError("comanda/transfer:docx", msg, { name: file.name, size: file.size, type: file.type });
+      setError(`${msg} Poți lipi textul în casetă și urca pozele separat.`);
+    } finally {
+      setImporting(false);
     }
   }
 
@@ -256,6 +293,33 @@ export function TransferForm({
           Nu ai articol scris? Trimite comanda cu o descriere scurtă a firmei și a ce vrei
           să comunici, iar noi îl redactăm și ți-l trimitem spre aprobare.
         </p>
+        <label
+          className={`mt-4 flex cursor-pointer items-center gap-3 rounded-lg border-2 border-dashed p-3 transition ${
+            importing ? "border-slate-300 bg-slate-50" : "border-brand-navy/40 bg-blue-50/40 hover:border-brand-navy hover:bg-blue-50"
+          }`}
+        >
+          <input
+            type="file"
+            accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+            className="hidden"
+            disabled={importing || uploading !== null}
+            onChange={(e) => {
+              const f = e.target.files?.[0];
+              if (f) void importDocx(f);
+              e.target.value = "";
+            }}
+          />
+          {importing ? <Loader2 className="h-5 w-5 shrink-0 animate-spin text-brand-navy" /> : <Upload className="h-5 w-5 shrink-0 text-brand-navy" />}
+          <span>
+            <span className="block text-sm font-semibold text-brand-navy">
+              {importing ? "Citim documentul…" : "Ai articolul în Word? Încarcă fișierul .docx"}
+            </span>
+            <span className="block text-xs text-slate-600">
+              Luăm din el textul, pozele și linkurile puse pe cuvinte — nu mai lipești nimic.
+            </span>
+          </span>
+        </label>
+        {notice && <p className="mt-3 rounded-lg bg-blue-50 p-3 text-sm text-blue-800">{notice}</p>}
         <div className="mt-4 space-y-4">
           <div>
             <label className={label}>
@@ -353,7 +417,7 @@ export function TransferForm({
       <button
         type="button"
         onClick={submit}
-        disabled={busy || uploading !== null}
+        disabled={busy || uploading !== null || importing}
         className="w-full rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-brand-red/90 disabled:opacity-60"
       >
         {busy

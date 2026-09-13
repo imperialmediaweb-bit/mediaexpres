@@ -38,6 +38,8 @@ import {
   CONTENT_DECLARATION,
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
+import { citesteDocx, linkuriCaNote, paraArataATitlu } from "@/lib/docx";
+import { zipSync } from "fflate";
 import zlib from "node:zlib";
 import fs from "node:fs";
 import path from "node:path";
@@ -1054,6 +1056,49 @@ console.log("\n########## S. RECENZII ##########");
     t("linkurile cerute se salveaza pe comanda (card si OP)", /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
     t("coloana link_notes e in schema, fix-db si plasa", /link_notes/.test(citesteFisier("src/db/schema.ts")) && /link_notes/.test(citesteFisier("src/app/api/admin/fix-db/route.ts")) && /link_notes/.test(citesteFisier("src/lib/ensure-columns.ts")));
     t("admin: linkurile cerute apar in caseta de linkuri", /r\.linkNotes/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+  }
+
+  // Word: clientul urca .docx-ul; scoatem textul, linkurile de pe cuvinte si pozele.
+  {
+    const relsXml =
+      '<?xml version="1.0" encoding="UTF-8"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">' +
+      '<Relationship Id="rId5" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="https://www.artjunkie.ro/?a=1&amp;b=2" TargetMode="External"/>' +
+      '<Relationship Id="rId7" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image1.jpeg"/>' +
+      '<Relationship Id="rId8" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/image2.emf"/>' +
+      "</Relationships>";
+    const docXml =
+      '<?xml version="1.0"?><w:document xmlns:w="w" xmlns:r="r" xmlns:a="a"><w:body>' +
+      "<w:p><w:r><w:t>ART JUNKIE – 17 ani de experiență în amenajarea ferestrelor</w:t></w:r></w:p>" +
+      "<w:p><w:r><w:t xml:space=\"preserve\">La Iași, </w:t></w:r><w:hyperlink r:id=\"rId5\"><w:r><w:t>showroomul ART JUNKIE</w:t></w:r></w:hyperlink><w:r><w:t xml:space=\"preserve\"> construiește proiecte &amp; soluții.</w:t></w:r></w:p>" +
+      '<w:p><w:r><w:drawing><a:blip r:embed="rId7"/></w:drawing></w:r></w:p>' +
+      '<w:p><w:r><w:drawing><a:blip r:embed="rId8"/></w:drawing></w:r></w:p>' +
+      "<w:p><w:r><w:t>Al doilea paragraf.</w:t><w:br/><w:t>Rând nou.</w:t></w:r></w:p>" +
+      "<w:p/>" +
+      "</w:body></w:document>";
+    const enc = (s: string) => new TextEncoder().encode(s);
+    const docx = zipSync({
+      "[Content_Types].xml": enc("<Types/>"),
+      "word/document.xml": enc(docXml),
+      "word/_rels/document.xml.rels": enc(relsXml),
+      "word/media/image1.jpeg": new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 1, 2, 3]),
+      "word/media/image2.emf": new Uint8Array([1, 2, 3]),
+    });
+    const d = citesteDocx(docx);
+    t("docx: primul paragraf scurt devine titlu", d.title === "ART JUNKIE – 17 ani de experiență în amenajarea ferestrelor");
+    t("docx: textul ancorei ramane in corp, paragrafele despartite de rand gol", d.body === "La Iași, showroomul ART JUNKIE construiește proiecte & soluții.\n\nAl doilea paragraf.\nRând nou.", d.body);
+    t("docx: linkul de pe cuvinte iese ca ancora → adresa, cu &amp; decodat", d.links.length === 1 && d.links[0].text === "showroomul ART JUNKIE" && d.links[0].url === "https://www.artjunkie.ro/?a=1&b=2");
+    t("docx: notele de linkuri au forma din formular", linkuriCaNote(d.links) === "showroomul ART JUNKIE → https://www.artjunkie.ro/?a=1&b=2");
+    t("docx: poza jpeg intra, emf-ul (nepublicabil) nu", d.images.length === 1 && d.images[0].name === "image1.jpeg" && d.images[0].mime === "image/jpeg" && d.images[0].data.byteLength === 7);
+    let eroare = "";
+    try { citesteDocx(enc("nu e zip")); } catch (e) { eroare = (e as Error).message; }
+    t("docx: un fisier care nu e .docx da mesaj in romana", /nu e un document Word/.test(eroare));
+    t("un paragraf cu punct final nu e titlu", !paraArataATitlu("Aceasta este o propoziție.") && paraArataATitlu("Titlu scurt fără punct"));
+    for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
+      const s = citesteFisier(f);
+      t(`${f.split("/").pop()}: are importul din Word si il trimite la /api/docx`, /importaDocx\(/.test(s) && /accept="\.docx/.test(s) && /importing/.test(s));
+    }
+    const rd = citesteFisier("src/app/api/docx/route.ts");
+    t("ruta /api/docx: maxim 3 poze, cele peste 8MB sarite, pozele grupate pe comanda", /MAX_IMAGES = 3/.test(rd) && /MAX_UPLOAD_BYTES/.test(rd) && /comenzi\/\$\{order\.sessionId\}/.test(rd));
   }
 
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
