@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ClientiStrip } from "@/components/ClientiStrip";
 import { DovadaRaport } from "@/components/DovadaRaport";
 import { VideoTutorial } from "@/components/VideoTutorial";
+import { StareRetea } from "@/components/StareRetea";
 import {
   Newspaper,
   Globe,
@@ -67,7 +68,7 @@ export const metadata: Metadata = {
 
 // Pagina se regenereaza din ora in ora ca mentiunea termenului limita sa
 // dispara singura dupa expirare, fara redeploy.
-export const revalidate = 3600;
+export const revalidate = 600;
 
 const INCLUDED = [
   {
@@ -494,6 +495,9 @@ export default async function Oferta500Page() {
           <div className="mt-10">
             <NewspaperDirectory />
           </div>
+
+          {/* Live: cate ziare au publicat azi, cu ultimul articol pe fiecare. */}
+          <StareRetea compact />
 
           {/*
             Cifrele rețelei, cu data si sursa langa ele. Nu promit clientului

@@ -6,6 +6,7 @@ import { RequestListModal } from "@/components/forms/RequestListModal";
 import { REGION_COUNTS } from "@/data/newspapers";
 import { CountyGrid } from "@/components/CountyGrid";
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
+import { StareRetea } from "@/components/StareRetea";
 
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
@@ -131,6 +132,9 @@ export default function ReteauaPage() {
             <div className="mt-10">
               <NewspaperDirectory />
             </div>
+
+            {/* Live: fiecare ziar, cu articolele din ultimele 24 h si ultimul publicat. */}
+            <StareRetea />
 
             {/*
               Momentul de maxima convingere: omul tocmai a parcurs toate cele 50

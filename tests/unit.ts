@@ -1050,6 +1050,12 @@ console.log("\n########## S. RECENZII ##########");
     t("fara raspuns de la retea raman cifrele statice, cu data lor", /return rezerva/.test(cl) && /sursa: "static"/.test(cl));
     t("o cifra suspect de mica nu inlocuieste una reala", /peLuna < 1000/.test(cl));
     t("oferta foloseste cifrele live", /await cifreLive\(\)/.test(citesteFisier("src/app/oferta-500/page.tsx")));
+    // Starea retelei, live: cate ziare au publicat azi, pe oferta si pe /reteaua-noastra.
+    const sr = citesteFisier("src/lib/stare-retea.ts");
+    t("starea retelei se citeste din /api/public/stare, la 10 minute", /\/api\/public\/stare/.test(sr) && /revalidate: 600/.test(sr));
+    t("fara raspuns, sectiunea nu apare (nu cifre vechi ca „acum”)", /return null/.test(sr) && /if \(!s\) return null/.test(citesteFisier("src/components/StareRetea.tsx")));
+    t("starea retelei e pe oferta si pe pagina retelei", /<StareRetea compact \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) && /<StareRetea \/>/.test(citesteFisier("src/app/reteaua-noastra/page.tsx")));
+    t("explicatia „de ce nu e retea de linkuri” e in componenta", /nu e o „rețea de linkuri”/.test(citesteFisier("src/components/StareRetea.tsx")));
   }
 
   // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
