@@ -523,6 +523,25 @@ export default async function Oferta500Page() {
                 <div className="mt-1 text-sm text-slate-600">față de luna anterioară</div>
               </div>
             </div>
+            {/*
+              13.09.2026 — captura din Meta Business Suite, ca sa nu fie doar
+              cifre scrise de noi. Caseta cu veniturile din reclame e acoperita
+              (nu e treaba clientului), restul e neatins.
+            */}
+            <figure className="mt-6">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src="/dovada/facebook-botosani-2026-09.jpg"
+                alt="Captură din Meta Business Suite: pagina Botoșani Expres, 2.773.457 vizualizări și 107.428 interacțiuni în 28 de zile, 16 august – 12 septembrie 2026"
+                width={1188}
+                height={391}
+                loading="lazy"
+                className="w-full rounded-xl border border-slate-200"
+              />
+              <figcaption className="mt-2 text-center text-xs text-slate-500">
+                Captură din Meta Business Suite, pagina Botoșani Expres, 16 august – 12 septembrie 2026.
+              </figcaption>
+            </figure>
             <p className="mt-5 text-center text-sm text-slate-600">
               Sursa: statisticile Meta ale paginii, {CIFRE.perioada}, la {CIFRE.laData}. Aici e doar
               cea mai citită pagină din rețea; articolul tău se distribuie pe{" "}
