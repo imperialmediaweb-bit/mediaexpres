@@ -55,13 +55,13 @@ function t(name: string, ok: boolean, extra = "") {
 const at = (iso: string) => new Date(iso).getTime();
 
 console.log("\n########## A. TERMENUL RULANT AL OFERTEI ##########");
-t("azi arata 14 septembrie", promoDeadlineLabel(at("2026-08-25T12:00:00+03:00")) === "14 septembrie");
-t("cu o zi inainte de termen ramane acelasi", promoDeadlineLabel(at("2026-09-13T23:00:00+03:00")) === "14 septembrie");
-t("dupa expirare se prelungeste la 28 septembrie", promoDeadlineLabel(at("2026-09-15T10:00:00+03:00")) === "28 septembrie");
-t("a doua prelungire: 12 octombrie", promoDeadlineLabel(at("2026-09-29T10:00:00+03:00")) === "12 octombrie");
+t("azi arata 1 octombrie", promoDeadlineLabel(at("2026-09-13T12:00:00+03:00")) === "1 octombrie");
+t("cu o zi inainte de termen ramane acelasi", promoDeadlineLabel(at("2026-09-30T23:00:00+03:00")) === "1 octombrie");
+t("dupa expirare se prelungeste la 15 octombrie", promoDeadlineLabel(at("2026-10-02T10:00:00+03:00")) === "15 octombrie");
+t("a doua prelungire: 29 octombrie", promoDeadlineLabel(at("2026-10-16T10:00:00+03:00")) === "29 octombrie");
 t("pasul e de exact 14 zile", (() => {
-  const a = currentPromoDeadline(at("2026-09-15T10:00:00+03:00"))!.getTime();
-  const b = currentPromoDeadline(at("2026-09-29T10:00:00+03:00"))!.getTime();
+  const a = currentPromoDeadline(at("2026-10-02T10:00:00+03:00"))!.getTime();
+  const b = currentPromoDeadline(at("2026-10-16T10:00:00+03:00"))!.getTime();
   return Math.round((b - a) / 86400000) === 14;
 })());
 t("nu depaseste 31 decembrie", (() => {
@@ -69,9 +69,9 @@ t("nu depaseste 31 decembrie", (() => {
   return d.getTime() <= new Date(PROMO_ROLLING.hardEndIso).getTime();
 })());
 t("dupa 31 decembrie nu mai exista termen", currentPromoDeadline(at("2027-01-02T10:00:00+02:00")) === null);
-t("isPromoDeadlineActive: adevarat azi", isPromoDeadlineActive(at("2026-08-25T12:00:00+03:00")) === true);
+t("isPromoDeadlineActive: adevarat azi", isPromoDeadlineActive(at("2026-09-13T12:00:00+03:00")) === true);
 t("isPromoDeadlineActive: fals in 2027", isPromoDeadlineActive(at("2027-01-02T10:00:00+02:00")) === false);
-t("eticheta e in romana", /septembrie|octombrie|noiembrie|decembrie/.test(promoDeadlineLabel(at("2026-08-25T12:00:00+03:00")) || ""));
+t("eticheta e in romana", /septembrie|octombrie|noiembrie|decembrie/.test(promoDeadlineLabel(at("2026-09-13T12:00:00+03:00")) || ""));
 t("termenul nu sare peste luni", (() => {
   let prev = 0, ok = true;
   for (let ts = at("2026-09-01T00:00:00+03:00"); ts < at("2026-12-31T00:00:00+02:00"); ts += 86400000) {
@@ -106,7 +106,7 @@ t("contine IBAN-ul real", mail.includes(SITE.billing.iban));
 t("contine beneficiarul", mail.includes(SITE.billing.company));
 t("contine banca", mail.includes(SITE.billing.bank));
 t("contine pretul de 500 lei", mail.includes("500 lei"));
-t("contine termenul ofertei", mail.includes("14 septembrie"));
+t("contine termenul ofertei", mail.includes("1 octombrie"));
 t("contine WhatsApp-ul", mail.includes(SITE.phone));
 t("contine linkul catre oferta", mail.includes("/oferta-500"));
 t("promite factura fiscala", /factur[aă] fiscal[aă]/i.test(mail));
@@ -133,7 +133,7 @@ console.log("\n########## E. CUNOSTINTELE CONSULTANTULUI ##########");
 const k = buildAdvisorKnowledge();
 t("stie IBAN-ul pentru OP", k.includes(SITE.billing.iban));
 t("stie firma de pe factura", k.includes(SITE.billing.company));
-t("stie termenul ofertei", k.includes("14 SEPTEMBRIE"));
+t("stie termenul ofertei", k.includes("1 OCTOMBRIE"));
 t("stie de publicarea in 12 ore", /12\s*(DE\s*)?ORE/i.test(k));
 // Chatul trebuie sa raspunda ca proprietarul pe WhatsApp: pe nume la ziare,
 // cu cifre la autoritate, cinstit la trafic, ferm la reguli, si sa stie
