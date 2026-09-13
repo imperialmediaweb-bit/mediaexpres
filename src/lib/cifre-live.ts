@@ -86,7 +86,9 @@ export async function cifreLive(): Promise<CifreRetea> {
       ...rezerva,
       laData: dataRo(r.actualizat_la),
       perioada: "ultimele 30 de zile",
-      publicatii: Number(r.ziare || rezerva.publicatii),
+      // Numarul de publicatii NU se ia din retea (acolo e 51, cu Sibiu fara
+      // domeniu); ramane cifra oficiala de pe site, 50.
+      publicatii: rezerva.publicatii,
       articolePeLuna: peLuna,
       articoleInArhiva: Number(r.articole_total || rezerva.articoleInArhiva),
       articolePeZi: Math.round(peLuna / 30),

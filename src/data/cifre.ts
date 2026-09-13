@@ -19,8 +19,9 @@ export const CIFRE = {
   laData: "13 septembrie 2026",
   perioada: "ultimele 28 de zile",
 
-  /** Reteaua. */
-  publicatii: 51,
+  /** Reteaua. Cifra OFICIALA e 50 (41 locale + 9 nationale); reteaua are 51
+   *  in baza pentru ca Sibiu Expres exista ca site, dar fara domeniu inca. */
+  publicatii: 50,
   judete: 41,
   articolePeLuna: 15_000,
   articoleInArhiva: 315_000,

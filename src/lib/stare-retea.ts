@@ -52,15 +52,18 @@ export async function stareRetea(): Promise<StareRetea | null> {
     if (!res.ok) return null;
     const r = (await res.json()) as Raspuns;
     if (!r.ok || !Array.isArray(r.ziare) || r.ziare.length < 40) return null;
+    // Sibiu Expres nu are domeniu inca (se cumpara in septembrie 2026) —
+    // nu-l aratam ca „ziar care publica" cand adresa lui nu se deschide.
+    // Cifra oficiala, de pe tot site-ul, e 50 (41 locale + 9 nationale);
+    // totalurile se calculeaza din lista ramasa, nu din ce spune reteaua.
+    const ziare = r.ziare.filter((z) => z.slug !== "sibiu-expres").sort((a, b) => b.articole_24h - a.articole_24h);
     return {
       actualizatLa: r.actualizat_la || new Date().toISOString(),
-      ziareTotal: Number(r.ziare_total || r.ziare.length),
-      ziareCarePublica: Number(r.ziare_care_publica || 0),
-      articole24h: Number(r.articole_24h || 0),
-      locale24h: Number(r.locale_24h || 0),
-      // Sibiu Expres nu are domeniu inca (se cumpara in septembrie 2026) —
-      // nu-l aratam ca „ziar care publica" cand adresa lui nu se deschide.
-      ziare: r.ziare.filter((z) => z.slug !== "sibiu-expres").sort((a, b) => b.articole_24h - a.articole_24h),
+      ziareTotal: ziare.length,
+      ziareCarePublica: ziare.filter((z) => z.articole_24h > 0).length,
+      articole24h: ziare.reduce((s, z) => s + Number(z.articole_24h || 0), 0),
+      locale24h: ziare.reduce((s, z) => s + Number(z.locale_24h || 0), 0),
+      ziare,
     };
   } catch {
     return null;
