@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { ExitIntentPopup } from "./ExitIntentPopup";
 import { StickyMobileCta } from "./StickyMobileCta";
 import { CountdownBanner } from "./CountdownBanner";
+import { ButonComanda } from "@/components/comanda/comanda-promo";
 
 const COMMERCIAL_PATHS = [
   "/",
@@ -55,12 +56,11 @@ export function ConversionWidgets() {
       <>
         <ExitIntentPopup />
         <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md lg:hidden">
-          <a
-            href="#oferta"
-            className="block w-full rounded-lg bg-brand-red px-4 py-3 text-center text-base font-bold text-white"
-          >
-            Comandă acum
-          </a>
+          {/* 13.09.2026 — era <a href="#oferta">: derula pagina inapoi sus, lin,
+              peste 11.000 de pixeli. Omul apasa „Comanda acum", pagina fugea in
+              alta parte si nu se intampla nimic — un client a scris pe WhatsApp
+              ca „nu functioneaza butonul de cumparare". Acum deschide plata. */}
+          <ButonComanda className="flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-4 py-3 text-center text-base font-bold text-white disabled:opacity-60" />
         </div>
       </>
     );

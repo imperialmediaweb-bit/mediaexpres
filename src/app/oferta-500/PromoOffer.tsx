@@ -1,100 +1,24 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
-import { CreditCard, RefreshCw, ChevronDown, Newspaper, MessageCircle, ShieldCheck } from "lucide-react";
+import { CreditCard, RefreshCw, ChevronDown, Newspaper, MessageCircle, ShieldCheck, Loader2 } from "lucide-react";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
 import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 import { FormError } from "@/components/forms/FormError";
+// Preturile, alegerea (cazino / lunar) si drumul spre Stripe stau intr-un
+// singur modul, folosit de toate butoanele de comanda din pagina si de bara
+// fixa de jos. Vezi comentariul din 13.09.2026 de acolo.
+import { setSelection, useComandaPromo } from "@/components/comanda/comanda-promo";
 
-// Oferta are 4 combinatii: (standard | cazino) x (o data | lunar).
-// Abonamentul lunar promo e mai ieftin decat plata unica: 400 lei/luna (cazino 800).
-const OFFERS = {
-  once: {
-    standard: { packageId: "promo-50", price: 500, listPrice: "1.500 lei", suffix: "" },
-    casino: { packageId: "promo-50-cazino", price: 1000, listPrice: "2.500 lei", suffix: "" },
-  },
-  monthly: {
-    standard: { packageId: "promo-lunar", price: 400, listPrice: "1.300 lei/lună", suffix: "/lună" },
-    casino: { packageId: "promo-lunar", price: 800, listPrice: "2.300 lei/lună", suffix: "/lună" },
-  },
-} as const;
-
-// Optiunile sunt afisate in DOUA locuri pe pagina (hero + CTA final).
-// Starea traieste la nivel de modul ca ambele instante sa o vada la fel —
-// altfel clientul alege sus si plateste jos pe alta varianta.
-type Selection = { isCasino: boolean; monthly: boolean };
-let selection: Selection = { isCasino: false, monthly: false };
-const listeners = new Set<() => void>();
-const serverSnapshot: Selection = { isCasino: false, monthly: false };
-function setSelection(patch: Partial<Selection>) {
-  selection = { ...selection, ...patch };
-  listeners.forEach((fn) => fn());
-}
-function subscribe(fn: () => void) {
-  listeners.add(fn);
-  return () => listeners.delete(fn);
-}
-function useSelection(): Selection {
-  return useSyncExternalStore(subscribe, () => selection, () => serverSnapshot);
-}
-
+// 12.09.2026 — direct la plata. Intre 8 si 12 septembrie, dupa click pe
+// „Comanda acum" aparea un pas cu email obligatoriu si declaratia de
+// continut in caseta galbena. Rezultatul: 27 de oameni au apasat butonul,
+// zero au platit, zero au scris pe WhatsApp — inainte era o comanda pe zi.
+// Emailul il cere Stripe oricum; declaratia se bifeaza la trimiterea
+// articolului (formularul de dupa plata o are), inainte de publicare.
 export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
-  const { isCasino, monthly } = useSelection();
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-
-  const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
-
-  function start() {
-    if (loading) return;
-    setError(null);
-    // Evenimentul de pixel pleaca la intentia reala de comanda, nu dupa email —
-    // altfel am pierde din masuratoare exact oamenii care ezita.
-    trackPixelEvent("InitiateCheckout", {
-      content_name: `Oferta 500 — ${isCasino ? "cazino" : "standard"}${monthly ? " lunar" : ""}`,
-      content_category: "promo",
-      value: offer.price,
-      currency: "RON",
-    });
-    // Oglinda in GA4 — fara ea, Analytics arata "Evenimente importante: 0"
-    // si rata de conversie a reclamei nu se poate citi nicaieri.
-    trackGaEvent("begin_checkout", { value: offer.price, currency: "RON" });
-    void go();
-  }
-
-  // 12.09.2026 — direct la plata. Intre 8 si 12 septembrie, dupa click pe
-  // „Comanda acum" aparea un pas cu email obligatoriu si declaratia de
-  // continut in caseta galbena. Rezultatul: 27 de oameni au apasat butonul,
-  // zero au platit, zero au scris pe WhatsApp — inainte era o comanda pe zi.
-  // Emailul il cere Stripe oricum; declaratia se bifeaza la trimiterea
-  // articolului (formularul de dupa plata o are), inainte de publicare.
-  async function go() {
-    if (loading) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch("/api/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          packageId: offer.packageId,
-          mode: monthly
-            ? isCasino
-              ? "subscription-casino"
-              : "subscription-standard"
-            : "package",
-        }),
-      });
-      const body = await res.json();
-      if (!res.ok || !body.ok || !body.url) throw new Error(body.error || "Eroare");
-      window.location.href = body.url;
-    } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : "Eroare necunoscută");
-      setLoading(false);
-    }
-  }
+  const { start, loading, error, offer, isCasino, monthly } = useComandaPromo();
 
   // Mesajul pre-scris E comanda: ii spune omului exact ce sa trimita, ca
   // prima lui interactiune pe WhatsApp sa fie o comanda completa, nu un
@@ -219,8 +143,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             disabled={loading}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto"
           >
-            <CreditCard className="h-5 w-5" />
-            {monthly ? "Abonează-te" : "Comandă acum"} — {offer.price.toLocaleString("ro")} lei{offer.suffix}
+            {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CreditCard className="h-5 w-5" />}
+            {loading
+              ? "Se deschide plata..."
+              : `${monthly ? "Abonează-te" : "Comandă acum"} — ${offer.price.toLocaleString("ro")} lei${offer.suffix}`}
           </button>
           {/* Singura promisiune cu bani inapoi de pe pagina — pana acum
               existau doar mentiuni negative ("fara rambursare"). Riscul e al

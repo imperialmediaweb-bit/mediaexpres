@@ -23,6 +23,7 @@ import {
   Check,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
+import { ButonComanda } from "@/components/comanda/comanda-promo";
 import { promoDeadlineLabel } from "@/data/packages";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
@@ -577,13 +578,7 @@ export default function Oferta500Page() {
               mare incredere din toata pagina. Fara buton aici, trebuia sa se
               intoarca singur sus. */}
           <div className="mt-10 text-center">
-            <a
-              href="#oferta"
-              className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
-            >
-              <CreditCard className="h-5 w-5" />
-              Comandă acum — 500 lei
-            </a>
+            <ButonComanda className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto" />
             <p className="mt-3 text-sm text-slate-500">
               Publicare în 12 ore lucrătoare · text diferit pe fiecare ziar · factură fiscală
             </p>
@@ -743,13 +738,7 @@ export default function Oferta500Page() {
                 Primești lista cu toate linkurile. Dacă nu publicăm la timp,
                 primești banii înapoi.
               </p>
-              <a
-                href="#oferta"
-                className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 sm:w-auto"
-              >
-                <CreditCard className="h-5 w-5" />
-                Comandă acum — 500 lei
-              </a>
+              <ButonComanda className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/20 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto" />
             </div>
           </div>
         </div>
