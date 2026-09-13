@@ -62,6 +62,27 @@ function sabloane(articleTitle: string) {
       ].join("\n"),
     },
     {
+      // 13.09.2026 — comenzile care sosesc fara nicio poza. Emailul asta se
+      // scria de mana la fiecare; acum casuta porneste cu el gata completat
+      // cand fisa n-are poze (vezi `hasImages`).
+      eticheta: "Cer pozele",
+      subiect: `Mai avem nevoie de poze — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        `Am primit articolul „${articleTitle}", mulțumim. Mai avem nevoie de un singur lucru ca să îl publicăm: 3 poze.`,
+        "",
+        "Merg: logo-ul, sediul sau showroomul, produsele, echipa la lucru. Una dintre ele apare ca imagine principală, pe prima pagină a ziarelor și pe Facebook.",
+        "",
+        "Le puteți trimite direct ca răspuns la acest email sau pe WhatsApp. Le punem noi în articol, nu mai trebuie să completați nimic.",
+        "",
+        "Publicăm în maximum 12 ore lucrătoare de la primirea lor.",
+        "",
+        "O zi bună,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
+    {
       eticheta: "Aștept plata",
       subiect: `Comanda ${articleTitle} — așteptăm confirmarea plății`.slice(0, 120),
       text: [
@@ -88,6 +109,7 @@ export function OrderActions({
   contactPhone,
   isPublished,
   awaitingPayment,
+  hasImages = true,
 }: {
   id: string;
   email: string;
@@ -96,6 +118,8 @@ export function OrderActions({
   articleTitle: string;
   isPublished: boolean;
   awaitingPayment: boolean;
+  /** false = comanda a sosit fara nicio poza; casuta porneste cu cererea de poze. */
+  hasImages?: boolean;
 }) {
   const router = useRouter();
   const [links, setLinks] = useState("");
@@ -109,8 +133,10 @@ export function OrderActions({
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
   const SABLOANE = sabloane(articleTitle);
-  // Sablonul potrivit momentului: publicata -> anuntul; neincasata -> factura.
-  const implicit = SABLOANE[isPublished ? 1 : 0];
+  // Sablonul potrivit momentului: publicata -> anuntul; fara poze -> cererea
+  // de poze (fara ele articolul nu poate fi publicat, deci e primul pas);
+  // altfel -> factura.
+  const implicit = SABLOANE[isPublished ? 1 : hasImages ? 0 : 2];
   const [mailSubject, setMailSubject] = useState(implicit.subiect);
   const [mailBody, setMailBody] = useState(implicit.text);
   // Gol = pleaca acum. Completat = ora Romaniei, oriunde ai fi.

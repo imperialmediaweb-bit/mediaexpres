@@ -272,9 +272,11 @@ export default async function MaterialDetailPage({
               Poze ({images.length}/3)
             </h2>
             {images.length === 0 ? (
-              <p className="mt-2 text-sm text-slate-500">
-                Clientul nu a urcat nicio poză — publici cu o imagine tematică sau i-o ceri
-                din secțiunea de mai jos.
+              <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+                <strong>Clientul nu a urcat nicio poză.</strong> Caseta de email de mai jos
+                e deja completată cu cererea de poze — apeși Trimite. Sau i le ceri pe
+                WhatsApp{r.contactPhone ? ` la ${r.contactPhone}` : ""}. Dacă nu răspunde,
+                publici cu o imagine tematică.
               </p>
             ) : (
               <div className="mt-3 flex flex-wrap gap-3">
@@ -311,6 +313,7 @@ export default async function MaterialDetailPage({
             contactPhone={r.contactPhone}
             isPublished={isPublished}
             awaitingPayment={awaitingPay}
+            hasImages={images.length > 0}
           />
         </div>
 

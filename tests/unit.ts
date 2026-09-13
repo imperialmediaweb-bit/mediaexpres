@@ -1053,6 +1053,16 @@ console.log("\n########## S. RECENZII ##########");
       t("articol: butonul spune cate poze mai lipsesc", /Urcă \$\{POZE_OBLIGATORII - images\.length === 1/.test(s));
       t("articol: eroarea de la poze se arata langa poze", /pozeEroare/.test(s) && /role="alert"/.test(s));
       t("articol: pozele mari se micsoreaza, nu se refuza", /comprimaPoza\(ales\)/.test(s));
+      // Garda de pe SERVER: o pagina deschisa inainte de deploy ruleaza codul
+      // vechi din browser, deci regula nu poate trai doar in formular.
+      const api = citesteFisier("src/app/api/articol/submit/route.ts");
+      t("serverul refuza trimiterea fara pozele cerute", /d\.images\.length < POZE_OBLIGATORII/.test(api) && /status: 400/.test(api));
+      t("refuzul nu pierde nimic: e inaintea oricarei scrieri", api.indexOf("POZE_OBLIGATORII)") < api.indexOf(".insert(orderSubmissions)"));
+      t("refuzul ii spune si calea prin WhatsApp", /WhatsApp la \$\{SITE\.phone\}/.test(api));
+      // Fisa fara poze porneste cu emailul de cerere deja scris.
+      const oa = citesteFisier("src/app/admin/materiale/[id]/OrderActions.tsx");
+      t("admin: sablon gata scris pentru cererea de poze", /eticheta: "Cer pozele"/.test(oa) && /hasImages \? 0 : 2/.test(oa));
+      t("admin: pagina spune fisei daca are poze", /hasImages=\{images\.length > 0\}/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
       // Formularul OP (inainte de plata): avertisment, a doua apasare trimite.
       const op = citesteFisier("src/app/comanda/transfer/TransferForm.tsx");
       t("OP: fara poze, prima apasare doar avertizeaza", /images\.length === 0 && !faraPozeConfirmat/.test(op) && /setError\(FARA_POZE_AVERTISMENT\)/.test(op));

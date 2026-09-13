@@ -7,7 +7,7 @@ import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
-import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
@@ -64,6 +64,28 @@ export async function POST(req: NextRequest) {
   // Aceeasi curatare ca la comanda prin OP — vezi lib/clean-text.ts.
   d.title = cleanTitle(d.title);
   d.body = cleanArticleText(d.body);
+
+  // Pozele, verificate PE SERVER, nu doar in formular.
+  //
+  // 13.09.2026 — a patra comanda sosita „Imagini (0/3)", la cateva minute
+  // dupa ce formularul incepuse sa ceara 3 poze. Motivul: paginile deschise
+  // INAINTE de deploy ruleaza mai departe codul vechi din browser. Un client
+  // care are formularul deschis de o ora nu afla niciodata de regula noua.
+  // Deci regula sta aici, unde ajunge orice trimitere, oricat de veche e
+  // pagina. Verificarea e inaintea oricarei scrieri: nimic nu se pierde,
+  // clientul adauga pozele si trimite din nou.
+  if (d.images.length < POZE_OBLIGATORII) {
+    return NextResponse.json(
+      {
+        ok: false,
+        error:
+          d.images.length === 0
+            ? `Articolul nu poate fi trimis fără poze. Urcă ${POZE_OBLIGATORII} poze cu firma ta (logo, sediu, produse, echipă) la pasul „Poze" și apasă din nou Trimite. Dacă poza nu se încarcă de pe telefon, trimite-o pe WhatsApp la ${SITE.phone} și o punem noi — textul tău e păstrat.`
+            : `Mai urcă ${POZE_OBLIGATORII - d.images.length} ${POZE_OBLIGATORII - d.images.length === 1 ? "poză" : "poze"} (ai ${d.images.length}, sunt necesare ${POZE_OBLIGATORII}) și apasă din nou Trimite.`,
+      },
+      { status: 400 },
+    );
+  }
 
   const order = verifyOrderToken(d.token);
   const sursa = sursaDinCerere(req);
