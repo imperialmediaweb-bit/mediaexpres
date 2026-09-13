@@ -1063,6 +1063,20 @@ console.log("\n########## S. RECENZII ##########");
       const oa = citesteFisier("src/app/admin/materiale/[id]/OrderActions.tsx");
       t("admin: sablon gata scris pentru cererea de poze", /eticheta: "Cer pozele"/.test(oa) && /hasImages \? 0 : 2/.test(oa));
       t("admin: pagina spune fisei daca are poze", /hasImages=\{images\.length > 0\}/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+      // Comenzile luate pe WhatsApp: pozele si documentul Word intra si ele.
+      const nof = citesteFisier("src/app/admin/materiale/NewOrderForm.tsx");
+      t("comanda de pe WhatsApp: poti urca pozele primite", /signAndUpload\(file\)/.test(nof) && /MAX_POZE/.test(nof));
+      t("comanda de pe WhatsApp: poti urca si documentul Word", /importaDocx\(file\)/.test(nof));
+      const cn = citesteFisier("src/app/api/admin/comanda-noua/route.ts");
+      // Codul, fara comentarii — altfel „images: "[]"" din explicatia de
+      // deasupra ar trece drept cod si testul n-ar prinde o revenire.
+      const cnCod = cn.replace(/\/\*[\s\S]*?\*\//g, "").replace(/^\s*\/\/.*$/gm, "");
+      t("comanda manuala salveaza pozele, nu un sir gol", /images: JSON\.stringify\(d\.images\)/.test(cnCod) && !/images: "\[\]"/.test(cnCod));
+      // Banii de pe WhatsApp, pe prima pagina: pana pe 13.09 lipseau complet.
+      const dash = citesteFisier("src/app/admin/page.tsx");
+      t("dashboard: totalul aduna cardul si transferul", /const totalCents = cardCents \+ opCents/.test(dash));
+      t("dashboard: suma pe luna curenta, separat", /Încasat în \$\{numeLuna\}/.test(dash) && /lunaCents/.test(dash));
+      t("dashboard: numara doar comenzile OP incasate (fara dublura cu Stripe)", /eq\(orderSubmissions\.paymentMethod, "op"\)/.test(dash));
       // Formularul OP (inainte de plata): avertisment, a doua apasare trimite.
       const op = citesteFisier("src/app/comanda/transfer/TransferForm.tsx");
       t("OP: fara poze, prima apasare doar avertizeaza", /images\.length === 0 && !faraPozeConfirmat/.test(op) && /setError\(FARA_POZE_AVERTISMENT\)/.test(op));

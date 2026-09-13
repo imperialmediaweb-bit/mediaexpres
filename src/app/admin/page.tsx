@@ -2,8 +2,10 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { users, orders, subscriptions, articles, publishers } from "@/db/schema";
-import { count, eq, sql, desc } from "drizzle-orm";
+import { users, orders, subscriptions, articles, publishers, orderSubmissions } from "@/db/schema";
+import { count, eq, sql, desc, and, or, gte } from "drizzle-orm";
+import { findPackageById } from "@/data/packages";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 
 export const dynamic = "force-dynamic";
 
@@ -46,7 +48,43 @@ export default async function AdminHome() {
         .where(eq(publishers.status, "pending")),
     ]);
 
-  const totalCents = Number(paidSum[0]?.total || 0);
+  // 13.09.2026 — pana azi cifra de aici era DOAR ce a intrat prin Stripe.
+  // Comenzile luate pe WhatsApp sau prin transfer nu trec niciodata prin
+  // tabela `orders`, deci vreo 3.500 de lei pe septembrie pur si simplu nu
+  // existau pe prima pagina. `order_submission` n-are coloana de suma —
+  // pretul vine din pachet — asa ca il adunam aici, din `packageId`.
+  await ensureOrderColumns();
+  const opRows = await db
+    .select({ packageId: orderSubmissions.packageId, createdAt: orderSubmissions.createdAt })
+    .from(orderSubmissions)
+    .where(
+      and(
+        eq(orderSubmissions.paymentMethod, "op"),
+        or(eq(orderSubmissions.status, "paid"), eq(orderSubmissions.status, "published")),
+      ),
+    );
+  const pretPachet = (id: string) => (findPackageById(id)?.price ?? 0) * 100;
+  const opCents = opRows.reduce((s, r) => s + pretPachet(r.packageId), 0);
+
+  // Luna curenta, ora Romaniei: cifra dupa care se decide cat bagi in reclama.
+  const acum = new Date();
+  const inceputLuna = new Date(
+    new Date(acum.toLocaleString("en-US", { timeZone: "Europe/Bucharest" })).getFullYear(),
+    new Date(acum.toLocaleString("en-US", { timeZone: "Europe/Bucharest" })).getMonth(),
+    1,
+  );
+  const [lunaCard] = await db
+    .select({ total: sql<number>`COALESCE(SUM(${orders.amount}), 0)` })
+    .from(orders)
+    .where(and(eq(orders.status, "paid"), gte(orders.createdAt, inceputLuna)));
+  const lunaOpCents = opRows
+    .filter((r) => r.createdAt && new Date(r.createdAt) >= inceputLuna)
+    .reduce((s, r) => s + pretPachet(r.packageId), 0);
+
+  const cardCents = Number(paidSum[0]?.total || 0);
+  const totalCents = cardCents + opCents;
+  const lunaCents = Number(lunaCard?.total || 0) + lunaOpCents;
+  const numeLuna = inceputLuna.toLocaleDateString("ro-RO", { month: "long", year: "numeric" });
 
   return (
     <div>
@@ -56,7 +94,8 @@ export default async function AdminHome() {
       </p>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Stat href="/admin/comenzi" label="Total încasat (plăți)" value={formatRON(totalCents)} tone="gold" />
+        <Stat href="/admin/comenzi" label="Total încasat (card + transfer)" value={formatRON(totalCents)} tone="gold" />
+        <Stat href="/admin/materiale" label={`Încasat în ${numeLuna}`} value={formatRON(lunaCents)} tone="gold" />
         <Stat href="/admin/clienti" label="Clienți (users)" value={u.n} />
         <Stat href="/admin/abonamente" label="Abonamente active" value={s.n} />
         <Stat href="/admin/comenzi" label="Comenzi plătite" value={o.n} />
@@ -74,6 +113,14 @@ export default async function AdminHome() {
           tone={pendingPublishers[0]?.n ? "red" : undefined}
         />
       </div>
+
+      <p className="mt-3 text-xs text-slate-500">
+        Din total: <strong>{formatRON(cardCents)}</strong> prin card (Stripe) și{" "}
+        <strong>{formatRON(opCents)}</strong> prin transfer bancar sau comenzi luate pe
+        WhatsApp, marcate încasate. Comenzile de pe WhatsApp intră în socoteală doar după
+        ce le adaugi din <Link href="/admin/materiale" className="underline">Materiale</Link>{" "}
+        și bifezi &bdquo;banii au intrat deja&rdquo;.
+      </p>
 
       <div className="mt-10 grid gap-6 lg:grid-cols-2">
         <RecentArticles />

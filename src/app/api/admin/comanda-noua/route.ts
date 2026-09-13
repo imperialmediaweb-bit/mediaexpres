@@ -33,6 +33,15 @@ const schema = z.object({
   body: z.string().min(20).max(30000),
   siteUrl: z.string().max(300).optional(),
   fbBoostPaper: z.string().max(120).optional(),
+  /** „ancoră → adresă", o linie pe link — vezi schema, link_notes. */
+  linkNotes: z.string().max(1000).optional(),
+  /**
+   * Pozele primite pe WhatsApp, urcate din admin. Pana pe 13.09.2026 aici
+   * scria `images: "[]"` — deci orice comanda luata pe WhatsApp ajungea pe
+   * ziare fara poza clientului, oricate trimisese el pe telefon.
+   */
+  images: z.array(z.object({ url: z.string().url().max(500) })).max(3).default([]),
+  featuredIndex: z.number().int().min(0).max(2).default(0),
   /** Incasata deja? Atunci publicarea e libera imediat. */
   paid: z.boolean().default(false),
   facebookOptIn: z.boolean().default(true),
@@ -107,8 +116,9 @@ export async function POST(req: NextRequest) {
           companyName: d.companyName.trim(),
           companyCui: d.companyCui?.trim() || null,
           companyAddress: d.companyAddress?.trim() || null,
-          images: "[]",
-          featuredIndex: 0,
+          images: JSON.stringify(d.images),
+          featuredIndex: Math.min(d.featuredIndex, Math.max(0, d.images.length - 1)),
+          linkNotes: d.linkNotes?.trim() || null,
           facebookOptIn: d.facebookOptIn,
           uniquePerSite: d.uniquePerSite,
           ritm: d.ritm,
