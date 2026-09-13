@@ -27,6 +27,8 @@ const schema = z.object({
   siteUrl: z.string().max(300).optional(),
   contactPhone: z.string().max(40).optional(),
   fbBoostPaper: z.string().max(120).optional(),
+  /** „ancoră → adresă", o linie pe link. Vezi schema, link_notes. */
+  linkNotes: z.string().max(1000).optional(),
   metaDescription: z.string().max(400).optional(),
   keywords: z.array(z.string().max(80)).max(20).optional(),
   images: z.array(imageSchema).max(3).default([]),
@@ -93,6 +95,7 @@ export async function POST(req: NextRequest) {
         stripeSessionId: order.sessionId,
         source: sursa,
         fbBoostPaper: d.fbBoostPaper?.trim() || null,
+        linkNotes: d.linkNotes?.trim() || null,
         email: order.email,
         packageId: order.packageId,
         title: d.title,
@@ -161,6 +164,7 @@ export async function POST(req: NextRequest) {
       ${kv("Referință comandă", order.sessionId)}
     </table>
 
+    ${d.linkNotes?.trim() ? `<p style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:10px;"><strong>Linkuri cerute de client (ancoră → adresă):</strong><br/><span style="white-space:pre-wrap;">${esc(d.linkNotes.trim())}</span></p>` : `<p style="color:#94a3b8;">Clientul nu a scris pe ce cuvinte vrea linkul — ancora implicită e numele firmei către site.</p>`}
     <h3 style="margin:24px 0 8px;font-family:Georgia,serif;color:#0B1F3A;">${esc(d.title)}</h3>
     ${d.metaDescription ? `<p style="color:#64748b;font-size:13px;"><strong>Meta:</strong> ${esc(d.metaDescription)}</p>` : ""}
     ${d.keywords?.length ? `<p style="color:#64748b;font-size:13px;"><strong>Cuvinte-cheie:</strong> ${esc(d.keywords.join(", "))}</p>` : ""}

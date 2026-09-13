@@ -101,6 +101,13 @@ export async function POST(req: NextRequest) {
       `,
     },
     {
+      step: "order_submission: linkurile cerute de client (ancora → adresa)",
+      query: sql`
+        ALTER TABLE "order_submission"
+          ADD COLUMN IF NOT EXISTS "link_notes" text
+      `,
+    },
+    {
       step: "order: cand au plecat reamintirea si alerta pentru materialul lipsa",
       query: sql`
         ALTER TABLE "order"

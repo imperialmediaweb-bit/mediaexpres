@@ -16,7 +16,7 @@ import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
-import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 
 export function TransferForm({
@@ -49,6 +49,8 @@ export function TransferForm({
   const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
+  // Vezi FARA_POZE_AVERTISMENT: fara poze, a doua apasare trimite.
+  const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState<"images" | "proof" | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +80,7 @@ export function TransferForm({
           next.push(await signAndUpload(file));
         }
         setImages(next);
+        if (next.length) setFaraPozeConfirmat(false);
       }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Eroare la încărcare";
@@ -116,6 +119,11 @@ export function TransferForm({
         setError(mesaj);
         return;
       }
+    }
+    if (images.length === 0 && !faraPozeConfirmat) {
+      setFaraPozeConfirmat(true);
+      setError(FARA_POZE_AVERTISMENT);
+      return;
     }
     setBusy(true);
     setError(null);
@@ -294,6 +302,10 @@ export function TransferForm({
 
         <div className="mt-5">
           <p className={label}>Poze (maximum 3)</p>
+          <p className="mb-2 text-xs text-slate-500">
+            Urcă măcar o poză (logo, sediu, produs, echipă). Fără poza ta, articolul
+            iese cu o imagine generică de stoc, pe toate ziarele și pe Facebook.
+          </p>
           <label className="inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-700 hover:border-brand-navy">
             {uploading === "images" ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
             {uploading === "images" ? "Se încarcă..." : "Adaugă poze"}
@@ -344,7 +356,11 @@ export function TransferForm({
         disabled={busy || uploading !== null}
         className="w-full rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-lg transition hover:bg-brand-red/90 disabled:opacity-60"
       >
-        {busy ? "Se trimite..." : `Trimite comanda — ${price.toLocaleString("ro")} lei`}
+        {busy
+          ? "Se trimite..."
+          : images.length === 0 && faraPozeConfirmat
+            ? `Trimite fără poze — ${price.toLocaleString("ro")} lei`
+            : `Trimite comanda — ${price.toLocaleString("ro")} lei`}
       </button>
     </div>
   );

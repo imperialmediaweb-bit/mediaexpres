@@ -103,6 +103,7 @@ export async function POST(req: NextRequest) {
       stripeSessionId: reference,
       source: sursa,
       fbBoostPaper: d.fbBoostPaper?.trim() || null,
+      linkNotes: d.linkNotes?.trim() || null,
       email,
       packageId: d.packageId,
       title: d.title,

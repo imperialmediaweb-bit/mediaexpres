@@ -11,7 +11,7 @@ import {
   MAX_UPLOAD_BYTES,
 } from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
-import { CONTENT_DECLARATION_ERROR } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 
@@ -39,6 +39,7 @@ export function ArticleForm({
 
   const [companyName, setCompanyName] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
+  const [linkNotes, setLinkNotes] = useState("");
   const [contactPhone, setContactPhone] = useState("");
   const [brief, setBrief] = useState("");
 
@@ -50,6 +51,13 @@ export function ArticleForm({
   const [contentDeclaration, setContentDeclaration] = useState(false);
 
   const [images, setImages] = useState<UploadedImage[]>([]);
+  // 13.09.2026 — a treia comanda la rand sosita „Imagini (0/3)". Nu s-au
+  // pierdut pe drum: sectiunea de poze era optionala si tacuta, iar omul
+  // trecea peste ea. Fara poza lui, articolul iese cu o poza de stoc pe 50
+  // de ziare si pe Facebook. Acum trimiterea fara poze cere o a doua apasare,
+  // cu explicatia pe ecran — nu blocam comanda, dar nu-l lasam sa treaca
+  // fara sa stie ce pierde.
+  const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
@@ -158,7 +166,10 @@ export function ArticleForm({
         uploaded.push({ url: json.secure_url, publicId: json.public_id });
       }
 
-      if (uploaded.length) setImages((prev) => [...prev, ...uploaded]);
+      if (uploaded.length) {
+        setImages((prev) => [...prev, ...uploaded]);
+        setFaraPozeConfirmat(false);
+      }
     } catch (e) {
       const msg = e instanceof Error ? e.message : "Încărcarea a eșuat";
       reportUploadError("articol/poze", msg);
@@ -193,6 +204,11 @@ export function ArticleForm({
       setError(CONTENT_DECLARATION_ERROR);
       return;
     }
+    if (images.length === 0 && !faraPozeConfirmat) {
+      setFaraPozeConfirmat(true);
+      setError(FARA_POZE_AVERTISMENT);
+      return;
+    }
 
     setSubmitting(true);
     try {
@@ -216,6 +232,7 @@ export function ArticleForm({
           contentDeclaration,
           generatedByAi,
           fbBoostPaper,
+          linkNotes,
         }),
       });
       const json = await res.json();
@@ -388,6 +405,33 @@ export function ArticleForm({
             <p className="mt-1 text-xs text-slate-500">
               {body.trim() ? `${body.trim().split(/\s+/).length} cuvinte` : "Minim 100 de caractere"}
             </p>
+            <p className="mt-1 text-xs text-amber-700">
+              Dacă ai copiat textul din Word, linkurile puse pe cuvinte se pierd — scrie
+              adresele direct în text sau trece-le mai jos.
+            </p>
+          </div>
+
+          {/*
+            13.09.2026 — „de unde știu eu pe ce cuvânt a vrut el linkul?"
+            Formularul OP avea campul asta; cel de dupa plata cu cardul, nu.
+            Aici e drumul principal, deci aici lipsea cel mai tare.
+          */}
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Linkurile dorite{" "}
+              <span className="font-normal text-slate-500">(până la 3 — pe ce cuvinte și către ce adresă)</span>
+            </label>
+            <textarea
+              rows={3}
+              value={linkNotes}
+              onChange={(e) => setLinkNotes(e.target.value)}
+              placeholder={"stație ITP Sector 5 → https://firma.ro\nprogramare online → https://firma.ro/contact"}
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Scrie ce cuvinte din articol să fie link și către ce adresă. Dacă lași gol,
+              punem numele firmei ca link către site.
+            </p>
           </div>
 
           {keywords.length > 0 && (
@@ -416,8 +460,10 @@ export function ArticleForm({
           3. Poze <span className="text-sm font-normal text-slate-500">({images.length}/{MAX_IMAGES})</span>
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          Alege una ca <strong>imagine reprezentativă</strong> — aia apare pe
-          prima pagină și pe Facebook.
+          <strong>Urcă măcar o poză</strong> (logo, sediu, produs, echipă). Alege
+          una ca <strong>imagine reprezentativă</strong> — aia apare pe prima
+          pagină și pe Facebook. Fără poza ta, articolul iese cu o imagine
+          generică de stoc.
         </p>
 
         {images.length > 0 && (
@@ -592,6 +638,8 @@ export function ArticleForm({
             <Loader2 className="h-5 w-5 animate-spin" />
             Se trimite...
           </>
+        ) : images.length === 0 && faraPozeConfirmat ? (
+          "Trimite fără poze →"
         ) : (
           "Trimite materialele →"
         )}

@@ -1038,6 +1038,24 @@ console.log("\n########## S. RECENZII ##########");
     t("coloana ritm e in fix-db si in plasa", /"ritm" text NOT NULL DEFAULT 'rapid'/.test(fixDb2) && /"ritm" text NOT NULL DEFAULT 'rapid'/.test(citesteFisier("src/lib/ensure-columns.ts")));
   }
 
+  // Poze: trimiterea fara nicio poza cere a doua apasare, cu avertisment.
+  // Linkuri: clientul scrie pe ce cuvinte vrea linkul, pe ambele formulare.
+  {
+    const cp = citesteFisier("src/lib/content-policy.ts");
+    t("avertismentul fara poze e unul singur, in content-policy", /FARA_POZE_AVERTISMENT/.test(cp) && /Trimite fără poze/.test(cp));
+    for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
+      const s = citesteFisier(f);
+      const nume = f.split("/").pop();
+      t(`${nume}: fara poze, prima apasare doar avertizeaza`, /images\.length === 0 && !faraPozeConfirmat/.test(s) && /setError\(FARA_POZE_AVERTISMENT\)/.test(s));
+      t(`${nume}: butonul spune „fara poze” la a doua apasare`, /Trimite fără poze/.test(s));
+      t(`${nume}: o poza urcata sterge confirmarea`, /setFaraPozeConfirmat\(false\)/.test(s));
+      t(`${nume}: cere linkurile dorite (ancora → adresa)`, /linkNotes/.test(s) && /Linkurile dorite/.test(s));
+    }
+    t("linkurile cerute se salveaza pe comanda (card si OP)", /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /linkNotes: d\.linkNotes/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
+    t("coloana link_notes e in schema, fix-db si plasa", /link_notes/.test(citesteFisier("src/db/schema.ts")) && /link_notes/.test(citesteFisier("src/app/api/admin/fix-db/route.ts")) && /link_notes/.test(citesteFisier("src/lib/ensure-columns.ts")));
+    t("admin: linkurile cerute apar in caseta de linkuri", /r\.linkNotes/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+  }
+
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
   {
     const llms = citesteFisier("public/llms.txt");

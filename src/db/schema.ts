@@ -221,6 +221,11 @@ export const orderSubmissions = pgTable("order_submission", {
   // in productie prin /api/admin/fix-db sau automat la prima comanda
   // (vezi lib/ensure-columns.ts).
   fbBoostPaper: text("fb_boost_paper"),
+  // 13.09.2026 — „pe ce cuvinte pun linkul?" Clientul scrie aici ancora si
+  // adresa („statie ITP Sector 5 → https://firma.ro"), o linie pe link.
+  // Inainte exista doar in emailul comenzii prin OP; la card nu se cerea
+  // deloc, iar cel care publica ghicea. Coloana: fix-db + ensure-columns.
+  linkNotes: text("link_notes"),
   // 07.09.2026 — comanda prin OP la care clientul a trimis materialul si a
   // primit factura, dar n-a platit. Publicarea sta blocata pana la incasare,
   // deci fara o impingere ramane acolo la nesfarsit. Numaram cate reamintiri

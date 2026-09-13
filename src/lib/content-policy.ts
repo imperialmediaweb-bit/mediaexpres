@@ -34,6 +34,18 @@ export const TITLU_DE_PROPUS = "(fără titlu — îl propunem noi)";
 export const CONTENT_DECLARATION_ERROR =
   "Bifează declarația de conținut ca să poți trimite comanda.";
 
+/**
+ * Trimiterea fara nicio poza cere o a doua apasare, cu mesajul asta pe ecran.
+ *
+ * 13.09.2026 — a treia comanda la rand sosita „Imagini (0/3)". Pozele nu se
+ * pierdeau pe drum: sectiunea era optionala si tacuta, iar omul trecea peste
+ * ea. Fara poza lui, articolul iese cu o poza de stoc pe 50 de ziare si pe
+ * Facebook. Nu blocam comanda (poate chiar nu are), dar nu-l lasam sa treaca
+ * fara sa stie ce pierde. Acelasi text pe formularul cu cardul si pe cel OP.
+ */
+export const FARA_POZE_AVERTISMENT =
+  "Nu ai urcat nicio poză. Fără poza ta, articolul apare cu o imagine generică de stoc pe toate ziarele și pe Facebook — arată mult mai slab. Urcă măcar o poză (logo, sediu, produs, echipă). Dacă chiar nu ai, apasă din nou „Trimite fără poze”.";
+
 /** Consecinta, spusa scurt sub bifa. Aceeasi regula ca in Termeni, art. 4. */
 export const CONTENT_DECLARATION_WARNING =
   "Dacă declarația nu e adevărată, comanda se anulează, articolul se retrage și suma plătită nu se restituie.";

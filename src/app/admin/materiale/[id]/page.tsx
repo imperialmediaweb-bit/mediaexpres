@@ -207,6 +207,18 @@ export default async function MaterialDetailPage({
               <p className="text-xs font-bold uppercase tracking-wide text-amber-900">
                 Linkuri de pus în articol
               </p>
+              {r.linkNotes?.trim() ? (
+                <div className="mt-2 rounded-md border border-amber-300 bg-white p-2">
+                  <p className="text-[11px] font-semibold text-amber-900">
+                    Clientul a scris pe ce cuvinte vrea linkul (ancoră → adresă):
+                  </p>
+                  <p className="mt-1 whitespace-pre-wrap font-mono text-xs text-slate-800">{r.linkNotes.trim()}</p>
+                </div>
+              ) : (
+                <p className="mt-1 text-[11px] text-amber-800">
+                  Clientul nu a scris pe ce cuvinte vrea linkul.
+                </p>
+              )}
               {(() => {
                 const found = Array.from(
                   new Set((r.body.match(/https?:\/\/[^\s<>")\]]+/gi) || []).map((u) =>
