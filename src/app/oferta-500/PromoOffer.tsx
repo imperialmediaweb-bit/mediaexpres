@@ -32,9 +32,13 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
     [
       `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
       "",
-      "Pentru comandă avem nevoie de:",
+      // 13.09.2026 — mesajul era scris din gura NOASTRA, dar il trimite
+      // CLIENTUL: „Pentru comandă avem nevoie de: 1. Datele firmei...".
+      // Adica omul iti trimitea pe WhatsApp propriul tau text de vanzare, ca
+      // si cum si-ar cere singur actele. Acum vorbeste el, despre ce trimite.
+      "Vă trimit:",
       "1. Datele firmei pentru factură: denumire, CUI, adresă",
-      "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi (inclus în preț)",
+      "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi",
       "3. Pozele (până la 3, opțional)",
       ...(propozitieSursa ? ["", propozitieSursa] : []),
     ].join("\n"),
