@@ -25,7 +25,8 @@ import {
 import { PromoOffer } from "./PromoOffer";
 import { ButonComanda } from "@/components/comanda/comanda-promo";
 import { promoDeadlineLabel } from "@/data/packages";
-import { CIFRE, nr, milioane } from "@/data/cifre";
+import { nr, milioane } from "@/data/cifre";
+import { cifreLive, type CifreRetea } from "@/lib/cifre-live";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 const deadline = promoDeadlineLabel();
@@ -236,7 +237,10 @@ const CONDITIONS = [
   },
 ];
 
-const FAQ = [
+// Intrebarile se construiesc cu cifrele LIVE ale retelei (vezi lib/cifre-live.ts),
+// de aceea sunt o functie, nu o constanta.
+function buildFaq(CIFRE: CifreRetea) {
+  return [
   {
     q: "De ce 500 lei și nu 1.500?",
     a: `Este o ofertă promoțională de intrare, pentru clienți noi care nu au lucrat încă cu noi${deadline ? `, valabilă până pe ${deadline}` : ""}. Pachetul Național 50 costă în mod normal 1.500 lei. Vrem să testezi rețeaua la risc minim — dacă îți place rezultatul, rămâi.`,
@@ -301,9 +305,14 @@ const FAQ = [
     q: "Articolele rămân online permanent?",
     a: "Da. Nu se șterg după o perioadă, nu expiră și nu plătești nimic ca să rămână. Linkurile din raport funcționează și peste ani.",
   },
-];
+  ];
+}
 
-export default function Oferta500Page() {
+export default async function Oferta500Page() {
+  // Cifrele retelei, citite din platforma de publicare (o data pe ora);
+  // daca nu raspunde, cele din data/cifre.ts, cu data lor.
+  const CIFRE = await cifreLive();
+  const FAQ = buildFaq(CIFRE);
   return (
     <div className="bg-white">
       {/* Hero — id-ul e tinta barei fixe de pe mobil ("Comanda acum") */}

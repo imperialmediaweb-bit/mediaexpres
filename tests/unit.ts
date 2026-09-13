@@ -1044,6 +1044,12 @@ console.log("\n########## S. RECENZII ##########");
     t("llms.txt exista si spune pretul, reteaua si ce NU promitem", /500 lei/.test(llms) && /50 de ziare/.test(llms) && /Nu promitem poziții/.test(llms));
     t("llms.txt trimite la paginile utile", /\/oferta-500/.test(llms) && /\/reteaua-noastra/.test(llms) && /\/exemple/.test(llms));
     t("oferta are schema FAQPage din aceleasi intrebari", /"@type": "FAQPage"/.test(citesteFisier("src/app/oferta-500/page.tsx")));
+    // Cifrele retelei: citite live din platforma, cu rezerva statica datata.
+    const cl = citesteFisier("src/lib/cifre-live.ts");
+    t("cifrele retelei se citesc live din /api/public/cifre, o data pe ora", /\/api\/public\/cifre/.test(cl) && /revalidate: 3600/.test(cl));
+    t("fara raspuns de la retea raman cifrele statice, cu data lor", /return rezerva/.test(cl) && /sursa: "static"/.test(cl));
+    t("o cifra suspect de mica nu inlocuieste una reala", /peLuna < 1000/.test(cl));
+    t("oferta foloseste cifrele live", /await cifreLive\(\)/.test(citesteFisier("src/app/oferta-500/page.tsx")));
   }
 
   // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
