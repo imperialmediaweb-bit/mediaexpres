@@ -36,9 +36,65 @@ export const NIVELURI: Nivel[] = [
   { id: "platina", nume: "Platină", daMin: 35, traficMin: 150_000, plata: 400 },
 ];
 
-/** Pretul catre client pentru o plasare pe nivelul dat. */
+/** Pretul catre client pentru o plasare pe nivelul dat, la bucata. */
 export function pretClient(plata: number): number {
   return plata + ADAOS_PLASARE;
+}
+
+/**
+ * Reducerea la volum iese DOAR din adaosul nostru, niciodata din tariful
+ * publicatiei: pe acela il datoram oricum, indiferent cate bucati ia clientul.
+ *
+ * 14.09.2026 — pragurile, nu procentele. „De la 5 publicatii, fiecare te
+ * costa cu 50 de lei mai putin" il impinge pe client sa mai adauge una ca sa
+ * prinda pragul; un procent nu face asta.
+ *
+ * Sub 175 nu se coboara: munca pe o plasare e aceeasi la 1 ca la 10 —
+ * trimiti articolul, urmaresti termenul, verifici linkul, il treci in raport,
+ * platesti factura publicatiei. Mai jos lucrezi ca sa faci volum, nu bani.
+ */
+export const PRAGURI_ADAOS: { deLa: number; adaos: number }[] = [
+  { deLa: 10, adaos: 175 },
+  { deLa: 5, adaos: 200 },
+  { deLa: 3, adaos: 225 },
+  { deLa: 1, adaos: ADAOS_PLASARE },
+];
+
+/** Adaosul pe bucata, pentru o comanda de `bucati` plasari. */
+export function adaosPentru(bucati: number): number {
+  const n = Math.max(1, Math.trunc(bucati));
+  return (PRAGURI_ADAOS.find((p) => n >= p.deLa) ?? PRAGURI_ADAOS[PRAGURI_ADAOS.length - 1]).adaos;
+}
+
+/**
+ * Cat plateste clientul pentru un set de plasari, cu reducerea la volum
+ * aplicata. `tarife` sunt tarifele publicatiilor alese, in lei.
+ */
+export function totalCatreClient(tarife: number[]): {
+  total: number;
+  adaos: number;
+  costPartener: number;
+  marja: number;
+  /** Cat economiseste fata de pretul la bucata — asta se arata clientului. */
+  economie: number;
+} {
+  const adaos = adaosPentru(tarife.length);
+  const costPartener = tarife.reduce((s, t) => s + t, 0);
+  const total = costPartener + adaos * tarife.length;
+  return {
+    total,
+    adaos,
+    costPartener,
+    marja: total - costPartener,
+    economie: (ADAOS_PLASARE - adaos) * tarife.length,
+  };
+}
+
+/** „De la 5 publicații, fiecare cu 50 de lei mai puțin." — textul de vanzare. */
+export function urmatorulPrag(bucati: number): { deLa: number; economiePeBucata: number } | null {
+  const acum = adaosPentru(bucati);
+  const urm = [...PRAGURI_ADAOS].reverse().find((p) => p.deLa > bucati && p.adaos < acum);
+  return urm ? { deLa: urm.deLa, economiePeBucata: acum - urm.adaos } : null;
 }
 
 /**

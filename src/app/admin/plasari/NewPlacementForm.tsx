@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { Loader2, Plus, X, Upload, Send } from "lucide-react";
 import { signAndUpload, type Uploaded } from "@/lib/upload-client";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
-import { ADAOS_PLASARE } from "@/lib/niveluri-publicatii";
+import { ADAOS_PLASARE, totalCatreClient, urmatorulPrag } from "@/lib/niveluri-publicatii";
 
 export interface PartenerRand {
   id: string;
@@ -40,8 +40,12 @@ export function NewPlacementForm({ parteneri }: { parteneri: PartenerRand[] }) {
   const [err, setErr] = useState<string | null>(null);
 
   const selectate = parteneri.filter((p) => alese.includes(p.id));
-  const platim = selectate.reduce((s, p) => s + p.tarif, 0);
-  const incasam = selectate.reduce((s, p) => s + p.tarif + ADAOS_PLASARE, 0);
+  // Reducerea la volum iese doar din adaosul nostru; tariful publicatiei se
+  // datoreaza oricum. Vezi PRAGURI_ADAOS.
+  const socoteala = totalCatreClient(selectate.map((p) => p.tarif));
+  const platim = socoteala.costPartener;
+  const incasam = socoteala.total;
+  const prag = urmatorulPrag(selectate.length);
 
   function comuta(id: string) {
     setAlese((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -131,7 +135,7 @@ export function NewPlacementForm({ parteneri }: { parteneri: PartenerRand[] }) {
                 <span className="block truncate font-medium text-brand-navy">{p.nume}</span>
                 <span className="block text-xs text-slate-500">
                   {p.judet ? `${p.judet} · ` : ""}
-                  {p.tier || "fără nivel"} · îi plătim {p.tarif} lei · vindem cu {p.tarif + ADAOS_PLASARE}
+                  {p.tier || "fără nivel"} · îi plătim {p.tarif} lei · vindem cu {p.tarif + ADAOS_PLASARE} la bucată
                   {p.dofollow === false ? " · nofollow" : ""}
                 </span>
               </span>
@@ -139,11 +143,24 @@ export function NewPlacementForm({ parteneri }: { parteneri: PartenerRand[] }) {
           ))}
         </div>
         {alese.length > 0 && (
-          <p className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
-            {alese.length} {alese.length === 1 ? "publicație" : "publicații"} — plătim{" "}
-            <strong>{platim} lei</strong>, încasăm <strong>{incasam} lei</strong>, ne rămân{" "}
-            <strong>{incasam - platim} lei</strong>.
-          </p>
+          <div className="mt-3 rounded-lg bg-slate-50 p-3 text-sm text-slate-700">
+            <p>
+              {alese.length} {alese.length === 1 ? "publicație" : "publicații"} — plătim{" "}
+              <strong>{platim} lei</strong>, încasăm <strong>{incasam} lei</strong>, ne rămân{" "}
+              <strong>{socoteala.marja} lei</strong> ({socoteala.adaos} lei pe bucată).
+            </p>
+            {socoteala.economie > 0 && (
+              <p className="mt-1 text-xs text-emerald-700">
+                Clientul economisește {socoteala.economie} lei față de prețul la bucată.
+              </p>
+            )}
+            {prag && (
+              <p className="mt-1 text-xs text-amber-700">
+                De la {prag.deLa} publicații, fiecare l-ar costa cu {prag.economiePeBucata} lei mai
+                puțin — merită spus la vânzare.
+              </p>
+            )}
+          </div>
         )}
       </div>
 

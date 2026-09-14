@@ -39,7 +39,14 @@ import {
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
 import { citesteDocx, linkuriCaNote, paraArataATitlu } from "@/lib/docx";
-import { ADAOS_PLASARE, nivelPropus, pretClient } from "@/lib/niveluri-publicatii";
+import {
+  ADAOS_PLASARE,
+  nivelPropus,
+  pretClient,
+  adaosPentru,
+  totalCatreClient,
+  urmatorulPrag,
+} from "@/lib/niveluri-publicatii";
 import { eZiLucratoare, adaugaZileLucratoare } from "@/lib/zile-lucratoare";
 import {
   tranzitiePermisa,
@@ -1162,7 +1169,22 @@ console.log("\n########## S. RECENZII ##########");
 
   // Publicatii partenere: niveluri, termene in zile lucratoare, plasari.
   {
-    t("adaosul pe plasare e fix, 250 lei", ADAOS_PLASARE === 250 && pretClient(80) === 330 && pretClient(400) === 650);
+    t("adaosul pe plasare e 250 lei la bucata", ADAOS_PLASARE === 250 && pretClient(80) === 330 && pretClient(400) === 650);
+    // Reducerea la volum iese DOAR din adaosul nostru: tariful publicatiei se
+    // datoreaza oricum, indiferent cate bucati ia clientul.
+    t("pragurile de volum: 3, 5, 10", adaosPentru(1) === 250 && adaosPentru(3) === 225 && adaosPentru(7) === 200 && adaosPentru(12) === 175);
+    t("nu se coboara sub 175", Math.min(...[1, 3, 5, 10, 50].map(adaosPentru)) === 175);
+    t("reducerea nu atinge tariful publicatiei", (() => {
+      const x = totalCatreClient([80, 150, 150, 250, 400]);
+      return x.costPartener === 1030 && x.adaos === 200 && x.total === 2030 && x.marja === 1000;
+    })());
+    t("clientul vede cat economiseste", totalCatreClient([80, 150, 150, 250, 400]).economie === 250);
+    t("la o bucata nu exista reducere", totalCatreClient([250]).total === 500 && totalCatreClient([250]).economie === 0);
+    t("pragul urmator se spune la vanzare", (() => {
+      const u = urmatorulPrag(4);
+      return u?.deLa === 5 && u.economiePeBucata === 25;
+    })());
+    t("peste ultimul prag nu mai e nimic de promis", urmatorulPrag(12) === null);
     // Nivelul cere SI autoritate SI trafic: un domeniu vechi fara cititori si
     // un site cu trafic cumparat arata amandoua bine pe un singur indicator.
     t("nivelul cere si autoritate, si trafic", nivelPropus(40, 500).id === "bronz" && nivelPropus(2, 900_000).id === "bronz");
@@ -1193,7 +1215,7 @@ console.log("\n########## S. RECENZII ##########");
     // clientului, iar publicatia nu are voie sa ajunga la ele printr-un join.
     const api = citesteFisier("src/app/api/admin/placements/route.ts");
     t("plasarea copiaza articolul, nu-l leaga de comanda", /articleTitle: d\.title/.test(api) && /articleBody: d\.body/.test(api));
-    t("preturile se ingheata la trimitere", /pricePartner: tarif/.test(api) && /priceClient: pretCatreClient\(tarif\)/.test(api));
+    t("preturile se ingheata la trimitere, cu adaosul de volum", /pricePartner: tarif/.test(api) && /priceClient: tarif \+ adaos/.test(api) && /adaosPentru\(alese\.length\)/.test(api));
     t("publicatia fara tarif sau suspendata nu primeste articole", /status !== "approved" \|\| !p\.pricePerArticle/.test(api));
     const pub = citesteFisier("src/app/api/placements/[token]/route.ts");
     t("refuzul dupa termen e respins pe server", /acum > new Date\(pl\.deadlineRefuz\)/.test(pub));

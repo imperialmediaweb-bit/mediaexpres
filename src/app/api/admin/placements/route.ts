@@ -8,7 +8,8 @@ import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns"
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 import { semneazaToken } from "@/lib/plasare-token";
-import { pretCatreClient, termenePlasare, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } from "@/lib/plasari";
+import { termenePlasare, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } from "@/lib/plasari";
+import { adaosPentru } from "@/lib/niveluri-publicatii";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -81,6 +82,9 @@ export async function POST(req: NextRequest) {
 
   const acum = new Date();
   const { deadlineRefuz, deadlinePublicare } = termenePlasare(acum);
+  // Adaosul depinde de CATE plasari are comanda asta: pragurile de volum
+  // (3/5/10) taie doar din partea noastra, nu din tariful publicatiei.
+  const adaos = adaosPentru(alese.length);
   const create: { id: string; publicatie: string; email: string }[] = [];
 
   for (const p of alese) {
@@ -98,7 +102,7 @@ export async function POST(req: NextRequest) {
         linkNotes: d.linkNotes?.trim() || null,
         tier: p.tier || null,
         pricePartner: tarif,
-        priceClient: pretCatreClient(tarif),
+        priceClient: tarif + adaos,
         dofollowExpected: p.dofollowLinks !== false,
         sentAt: acum,
         deadlineRefuz,
@@ -137,7 +141,7 @@ export async function POST(req: NextRequest) {
     await sendEmail({ to: p.contactEmail, subject: `Articol de publicat — ${p.siteName}`, html, replyTo: ADMIN_EMAIL });
   }
 
-  const totalNoua = alese.reduce((s, p) => s + pretCatreClient(p.pricePerArticle as number), 0);
+  const totalNoua = alese.reduce((s, p) => s + (p.pricePerArticle as number) + adaos, 0);
   const totalLor = alese.reduce((s, p) => s + (p.pricePerArticle as number), 0);
   await sendEmail({
     to: ADMIN_EMAIL,
