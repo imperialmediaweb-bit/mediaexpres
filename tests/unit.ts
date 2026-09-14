@@ -39,6 +39,15 @@ import {
   CONTENT_DECLARATION_WARNING,
 } from "@/lib/content-policy";
 import { citesteDocx, linkuriCaNote, paraArataATitlu } from "@/lib/docx";
+import { ADAOS_PLASARE, nivelPropus, pretClient } from "@/lib/niveluri-publicatii";
+import { eZiLucratoare, adaugaZileLucratoare } from "@/lib/zile-lucratoare";
+import {
+  tranzitiePermisa,
+  eStareFinala,
+  etichetaStare,
+  onlinePanaLa,
+  domeniulDinNote,
+} from "@/lib/plasari";
 import { zipSync } from "fflate";
 import zlib from "node:zlib";
 import fs from "node:fs";
@@ -1149,6 +1158,53 @@ console.log("\n########## S. RECENZII ##########");
     }
     const rd = citesteFisier("src/app/api/docx/route.ts");
     t("ruta /api/docx: maxim 3 poze, cele peste 8MB sarite, pozele grupate pe comanda", /MAX_IMAGES = 3/.test(rd) && /MAX_UPLOAD_BYTES/.test(rd) && /comenzi\/\$\{order\.sessionId\}/.test(rd));
+  }
+
+  // Publicatii partenere: niveluri, termene in zile lucratoare, plasari.
+  {
+    t("adaosul pe plasare e fix, 250 lei", ADAOS_PLASARE === 250 && pretClient(80) === 330 && pretClient(400) === 650);
+    // Nivelul cere SI autoritate SI trafic: un domeniu vechi fara cititori si
+    // un site cu trafic cumparat arata amandoua bine pe un singur indicator.
+    t("nivelul cere si autoritate, si trafic", nivelPropus(40, 500).id === "bronz" && nivelPropus(2, 900_000).id === "bronz");
+    t("cu amandoua, urca", nivelPropus(38, 200_000).id === "platina" && nivelPropus(20, 20_000).id === "argint");
+    t("fara cifre, nivelul de baza", nivelPropus(null, null).id === "bronz");
+    // Zile lucratoare: fara ele am expira parteneri peste Paste sau de 1 Mai.
+    t("sambata si duminica nu sunt lucratoare", !eZiLucratoare(new Date("2026-09-12T10:00:00+03:00")) && !eZiLucratoare(new Date("2026-09-13T10:00:00+03:00")));
+    t("1 decembrie nu e lucratoare", !eZiLucratoare(new Date("2026-12-01T10:00:00+02:00")));
+    t("vinerea + 3 zile lucratoare cade miercuri", (() => {
+      const d = adaugaZileLucratoare(new Date("2026-09-11T16:00:00+03:00"), 3);
+      return d.toISOString().slice(0, 10) === "2026-09-16";
+    })());
+    t("ziua de start nu se numara", (() => {
+      const d = adaugaZileLucratoare(new Date("2026-09-14T16:00:00+03:00"), 2);
+      return d.toISOString().slice(0, 10) === "2026-09-16";
+    })());
+    // Tranzitiile, verificate pe server: butonul poate fi de ieri.
+    t("drumul normal e permis", tranzitiePermisa("trimis", "acceptat") && tranzitiePermisa("acceptat", "publicat") && tranzitiePermisa("publicat", "finalizat"));
+    t("nu se sare peste acceptare", !tranzitiePermisa("trimis", "publicat"));
+    t("dintr-o stare finala nu se mai iese", !tranzitiePermisa("refuzat", "acceptat") && !tranzitiePermisa("expirat", "publicat") && eStareFinala("finalizat"));
+    t("„expirat” si „finalizat” sunt lucruri diferite", etichetaStare("expirat") !== etichetaStare("finalizat"));
+    t("garantia e de 12 luni de la publicare", (() => {
+      const d = onlinePanaLa(new Date("2026-09-14T10:00:00Z"));
+      return d.getUTCFullYear() === 2027 && d.getUTCMonth() === 8;
+    })());
+    t("domeniul clientului se scoate din notele de linkuri", domeniulDinNote("perdele Iași → https://www.artjunkie.ro/contact") === "artjunkie.ro");
+    // Materialul se COPIAZA pe plasare: pe comanda stau numele si telefonul
+    // clientului, iar publicatia nu are voie sa ajunga la ele printr-un join.
+    const api = citesteFisier("src/app/api/admin/placements/route.ts");
+    t("plasarea copiaza articolul, nu-l leaga de comanda", /articleTitle: d\.title/.test(api) && /articleBody: d\.body/.test(api));
+    t("preturile se ingheata la trimitere", /pricePartner: tarif/.test(api) && /priceClient: pretCatreClient\(tarif\)/.test(api));
+    t("publicatia fara tarif sau suspendata nu primeste articole", /status !== "approved" \|\| !p\.pricePerArticle/.test(api));
+    const pub = citesteFisier("src/app/api/placements/[token]/route.ts");
+    t("refuzul dupa termen e respins pe server", /acum > new Date\(pl\.deadlineRefuz\)/.test(pub));
+    t("tranzitia se verifica pe server, nu in pagina", /tranzitiePermisa\(pl\.status, tinta\)/.test(pub));
+    const pag = citesteFisier("src/app/plasare/[token]/page.tsx");
+    t("pagina partenerului nu se indexeaza", /robots: \{ index: false/.test(pag));
+    t("un link mort nu da 404, ci explica", /Link expirat/.test(pag) && !/notFound\(\)/.test(pag));
+    // Folderul de upload e dintr-o lista inchisa: semnarea unui folder liber
+    // ar insemna scriere oriunde in contul Cloudinary.
+    const semn = citesteFisier("src/app/api/comanda/transfer/upload-sign/route.ts");
+    t("folderul de upload vine dintr-o lista inchisa", /PERMISE = \["op", "parteneri", "deconturi"\]/.test(semn));
   }
 
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.

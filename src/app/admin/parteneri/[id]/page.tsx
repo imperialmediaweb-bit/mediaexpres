@@ -6,6 +6,9 @@ import { publishers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { PartnerActions } from "./PartnerActions";
+import { PartnerCommercial } from "./PartnerCommercial";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
+import { nivelPropus } from "@/lib/niveluri-publicatii";
 
 export const dynamic = "force-dynamic";
 
@@ -22,6 +25,7 @@ export default async function AdminPartnerDetail({
   const session = getSession();
   if (!session) redirect(`/admin/login?from=/admin/parteneri/${params.id}`);
 
+  await ensureOrderColumns();
   const [p] = await db
     .select()
     .from(publishers)
@@ -55,6 +59,20 @@ export default async function AdminPartnerDetail({
             <Row label="Facebook" value={p.facebookUrl} link />
             <Row label="Trafic lunar" value={p.monthlyTraffic ? `${p.monthlyTraffic.toLocaleString("ro-RO")} vizite/lună` : null} />
             <Row label="Articole / lună acceptă" value={p.articlesPerMonth ? String(p.articlesPerMonth) : null} />
+            <Row label="Urmăritori Facebook" value={p.facebookFollowers ? p.facebookFollowers.toLocaleString("ro-RO") : null} />
+            <Row
+              label="Dovada traficului"
+              value={p.analyticsProofUrl || null}
+              link
+            />
+            <Row
+              label="Linkuri dofollow"
+              value={p.dofollowLinks === true ? "Da" : p.dofollowLinks === false ? "Nu — doar vizibilitate" : null}
+            />
+            <Row
+              label="Declarație asumată"
+              value={p.declarationAccepted ? "Da" : "Nu — aplicație veche sau nebifată"}
+            />
           </Card>
           <Card title="Contact">
             <Row label="Nume" value={p.contactName} />
@@ -79,7 +97,17 @@ export default async function AdminPartnerDetail({
         </div>
 
         <aside>
+          <div className="space-y-5">
           <PartnerActions publisherId={p.id} currentStatus={p.status} />
+          <PartnerCommercial
+            publisherId={p.id}
+            status={p.status}
+            tier={p.tier}
+            pricePerArticle={p.pricePerArticle}
+            dofollowLinks={p.dofollowLinks}
+            nivelSugerat={nivelPropus(null, p.monthlyTraffic).id}
+          />
+        </div>
         </aside>
       </div>
     </div>

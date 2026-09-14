@@ -44,7 +44,22 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const folder = `${cfg.uploadFolder}/op`;
+  // 14.09.2026 — acelasi endpoint serveste acum si inscrierea publicatiilor
+  // partenere (captura din Analytics) si facturile lor. Folderul vine din
+  // cerere, dar DOAR dintr-o lista inchisa: semnarea unui folder trimis liber
+  // de browser ar insemna scriere oriunde in contul nostru Cloudinary.
+  // Lipsa lui inseamna „op", deci apelantii vechi raman neatinsi.
+  const PERMISE = ["op", "parteneri", "deconturi"] as const;
+  let cerut = "op";
+  try {
+    const body = (await req.json()) as { folder?: unknown };
+    if (typeof body?.folder === "string" && (PERMISE as readonly string[]).includes(body.folder)) {
+      cerut = body.folder;
+    }
+  } catch {
+    /* fara corp = folderul implicit, exact ca inainte */
+  }
+  const folder = `${cfg.uploadFolder}/${cerut}`;
   const timestamp = Math.floor(Date.now() / 1000);
   const signed = signUploadParams({ timestamp, folder });
   if (!signed) {

@@ -334,6 +334,33 @@ export const publishers = pgTable("publisher", {
   facebookUrl: text("facebook_url"),
   monthlyTraffic: integer("monthly_traffic"),
   articlesPerMonth: integer("articles_per_month"),
+  // 14.09.2026 — publicatiile partenere, cele pe care NU le detinem.
+  //
+  // Traficul declarat nu valoreaza nimic singur: oricine scrie 200.000. De
+  // aceea se cere captura din Google Analytics la inscriere (urcata pe
+  // Cloudinary) si se semneaza in contract ca cifrele sunt reale. Ce se
+  // poate verifica singur (vechime domeniu, cate articole publica, scor de
+  // autoritate) se verifica din admin, nu pe incredere.
+  analyticsProofUrl: text("analytics_proof_url"),
+  facebookFollowers: integer("facebook_followers"),
+  /**
+   * Linkurile din articol raman dofollow? Intrebarea care desparte plasarea
+   * vanduta unui client de SEO de una vanduta pe vizibilitate. Multe ziare
+   * pun automat nofollow pe tot ce e platit; daca afli asta de la un client
+   * suparat, e prea tarziu.
+   */
+  dofollowLinks: boolean("dofollow_links"),
+  /** Bronz / Argint / Aur / Platina — dupa cifre, nu dupa negociere. */
+  tier: text("tier"),
+  /** Cat ii platim pe articol publicat (lei). Vine din nivel, se poate ajusta. */
+  pricePerArticle: integer("price_per_article"),
+  /** A bifat ca cifrele declarate sunt reale si ca accepta verificarea. */
+  declarationAccepted: boolean("declaration_accepted").notNull().default(false),
+  /**
+   * Creste cu 1 ca sa taie toate linkurile trimise pana acum publicatiei.
+   * Asa se revoca un acces scurs fara sa tinem un tabel de sesiuni.
+   */
+  tokenVersion: integer("token_version").notNull().default(0),
   contactName: text("contact_name").notNull(),
   contactEmail: text("contact_email").notNull(),
   contactPhone: text("contact_phone"),
@@ -344,4 +371,70 @@ export const publishers = pgTable("publisher", {
   rejectionReason: text("rejection_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   decidedAt: timestamp("decided_at"),
+});
+
+/**
+ * O plasare = un articol trimis unei publicatii partenere, spre publicare.
+ *
+ * 14.09.2026 — produsul nou: clientul plateste doar la noi, noi platim
+ * publicatia, iar cele doua parti nu se cunosc. Diferenta ne ramane noua.
+ *
+ * MATERIALUL SE COPIAZA AICI, nu se citeste prin join din `order_submission`.
+ * Pe comanda stau numele firmei, telefonul si CUI-ul clientului; daca pagina
+ * partenerului ar face join, orice camp adaugat maine pe comanda ar deveni
+ * vizibil printr-o scapare de randare. Ce nu e copiat nu poate scapa. In plus,
+ * textul se poate curata inainte de trimitere fara sa atingem comanda.
+ *
+ * PRETURILE SE INGHEATA la trimitere: daca publicatia urca de nivel peste
+ * trei luni, plasarile vechi raman cu banii promisi atunci.
+ */
+export const placements = pgTable("placement", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  publisherId: text("publisher_id").notNull(),
+  /** Comanda din care vine, cand exista. Nullable: prima plasare se poate
+   *  vinde inainte sa existe un pachet Stripe pentru ea. */
+  orderSubmissionId: text("order_submission_id"),
+  /** Eticheta interna cand nu exista comanda („Toma Enache — turneu"). */
+  clientLabel: text("client_label"),
+  tokenVersion: integer("token_version").notNull().default(0),
+
+  // Materialul, copiat (vezi comentariul de mai sus).
+  articleTitle: text("article_title").notNull(),
+  articleBody: text("article_body").notNull(),
+  images: text("images").notNull().default("[]"),
+  featuredIndex: integer("featured_index").notNull().default(0),
+  linkNotes: text("link_notes"),
+
+  // Banii, inghetati la atribuire. In LEI, nu in bani: tarifele partenerilor
+  // sunt sume rotunde si se citesc in admin, nu trec prin Stripe.
+  tier: text("tier"),
+  pricePartner: integer("price_partner").notNull(),
+  priceClient: integer("price_client").notNull(),
+
+  /** trimis → acceptat → publicat → finalizat; sau refuzat / expirat / anulat. */
+  status: text("status").notNull().default("trimis"),
+  refusalReason: text("refusal_reason"),
+  publishedUrl: text("published_url"),
+  sentAt: timestamp("sent_at").defaultNow().notNull(),
+  /** Termenele, calculate O DATA, in zile lucratoare (lib/zile-lucratoare.ts). */
+  deadlineRefuz: timestamp("deadline_refuz").notNull(),
+  deadlinePublicare: timestamp("deadline_publicare").notNull(),
+  acceptedAt: timestamp("accepted_at"),
+  refusedAt: timestamp("refused_at"),
+  publishedAt: timestamp("published_at"),
+  /** publishedAt + 12 luni. Garantia din contract. */
+  onlineUntil: timestamp("online_until"),
+  expiredAt: timestamp("expired_at"),
+
+  /** Starea linkului, separata de ciclul plasarii: un link cazut nu sterge
+   *  faptul ca articolul a fost livrat si facturat. */
+  linkStatus: text("link_status"),
+  linkCheckedAt: timestamp("link_checked_at"),
+  dofollowExpected: boolean("dofollow_expected").notNull().default(true),
+
+  /** Decontul in care a intrat. Setarea lui E lacatul: o plasare rezervata
+   *  de un decont nu mai poate fi luata de al doilea. */
+  statementId: text("statement_id"),
+  adminNotes: text("admin_notes"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
 });

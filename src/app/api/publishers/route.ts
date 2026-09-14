@@ -3,6 +3,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 
 export const runtime = "nodejs";
 
@@ -14,6 +15,14 @@ const applySchema = z.object({
   facebookUrl: z.string().url().optional().or(z.literal("")),
   monthlyTraffic: z.number().int().nonnegative().optional(),
   articlesPerMonth: z.number().int().nonnegative().optional(),
+  // 14.09.2026 — cifra declarata singura nu valoreaza nimic: oricine scrie
+  // 200.000. Se cere captura din Google Analytics, iar bifa de declaratie
+  // face din cifre o afirmatie asumata, nu o parere.
+  analyticsProofUrl: z.string().url().max(500).optional().or(z.literal("")),
+  facebookFollowers: z.number().int().nonnegative().optional(),
+  /** Intrebarea care desparte plasarea de SEO de cea de vizibilitate. */
+  dofollowLinks: z.boolean().optional(),
+  declarationAccepted: z.boolean().optional(),
   contactName: z.string().min(2).max(150),
   contactEmail: z.string().email(),
   contactPhone: z.string().max(40).optional().or(z.literal("")),
@@ -63,6 +72,8 @@ export async function POST(req: NextRequest) {
   const d = parsed.data;
 
   const id = crypto.randomUUID();
+  // Coloanele noi (dovada, dofollow, declaratie) pot lipsi pana la fix-db.
+  await ensureOrderColumns();
   await db.insert(publishers).values({
     id,
     siteName: d.siteName,
@@ -72,6 +83,10 @@ export async function POST(req: NextRequest) {
     facebookUrl: d.facebookUrl || null,
     monthlyTraffic: d.monthlyTraffic ?? null,
     articlesPerMonth: d.articlesPerMonth ?? null,
+    analyticsProofUrl: d.analyticsProofUrl || null,
+    facebookFollowers: d.facebookFollowers ?? null,
+    dofollowLinks: d.dofollowLinks ?? null,
+    declarationAccepted: d.declarationAccepted === true,
     contactName: d.contactName,
     contactEmail: d.contactEmail,
     contactPhone: d.contactPhone || null,
@@ -91,6 +106,10 @@ export async function POST(req: NextRequest) {
       ${kv("Judet / Regiune", `${d.county || "—"} / ${d.region || "—"}`)}
       ${kv("Facebook", d.facebookUrl || "—")}
       ${kv("Trafic lunar", d.monthlyTraffic ? `${d.monthlyTraffic.toLocaleString()} vizite` : "—")}
+      ${kv("Dovada traficului", d.analyticsProofUrl ? `<a href="${d.analyticsProofUrl}">captura din Analytics</a>` : "⚠️ NU a urcat captura")}
+      ${kv("Urmaritori Facebook", d.facebookFollowers ? d.facebookFollowers.toLocaleString() : "—")}
+      ${kv("Linkuri dofollow", d.dofollowLinks === true ? "✅ Da" : d.dofollowLinks === false ? "❌ Nu (doar vizibilitate, nu SEO)" : "— nu a raspuns")}
+      ${kv("Declaratie asumata", d.declarationAccepted ? "✅ Da" : "⚠️ Nu")}
       ${kv("Articole / luna", d.articlesPerMonth ? String(d.articlesPerMonth) : "—")}
       ${kv("Contact", `${d.contactName} — ${d.contactEmail}${d.contactPhone ? " — " + d.contactPhone : ""}`)}
       ${kv("IBAN plata", d.payoutIban || "—")}

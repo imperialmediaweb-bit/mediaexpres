@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { CheckCircle2, Loader2, AlertCircle, Users } from "lucide-react";
+import { CheckCircle2, Loader2, AlertCircle, Users, Upload } from "lucide-react";
+import { signAndUpload } from "@/lib/upload-client";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
@@ -17,6 +18,9 @@ interface FormValues {
   facebookUrl: string;
   monthlyTraffic?: number;
   articlesPerMonth?: number;
+  facebookFollowers?: number;
+  dofollowLinks: string;
+  declarationAccepted: boolean;
   contactName: string;
   contactEmail: string;
   contactPhone: string;
@@ -35,6 +39,11 @@ export function PartnerApplyForm() {
   } = useForm<FormValues>();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
   const [error, setError] = useState<string | null>(null);
+  // 14.09.2026 — captura din Google Analytics. Traficul real nu se poate
+  // verifica gratuit si corect din afara, deci singura dovada serioasa e
+  // ecranul lor. Fara ea, „200.000 de vizitatori" e doar un numar tastat.
+  const [dovada, setDovada] = useState<{ url: string; name: string } | null>(null);
+  const [urcaDovada, setUrcaDovada] = useState(false);
 
   const onSubmit = async (data: FormValues) => {
     setStatus("submitting");
@@ -47,6 +56,10 @@ export function PartnerApplyForm() {
           ...data,
           monthlyTraffic: data.monthlyTraffic ? Number(data.monthlyTraffic) : undefined,
           articlesPerMonth: data.articlesPerMonth ? Number(data.articlesPerMonth) : undefined,
+          facebookFollowers: data.facebookFollowers ? Number(data.facebookFollowers) : undefined,
+          dofollowLinks: data.dofollowLinks === "" ? undefined : data.dofollowLinks === "da",
+          declarationAccepted: data.declarationAccepted === true,
+          analyticsProofUrl: dovada?.url,
         }),
       });
       const body = await res.json();
@@ -111,8 +124,72 @@ export function PartnerApplyForm() {
       </Field>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Trafic lunar estimativ">
+        <Field label="Trafic lunar (vizite)">
           <Input type="number" {...register("monthlyTraffic")} placeholder="50000" />
+        </Field>
+        <Field label="Urmăritori pe Facebook">
+          <Input type="number" {...register("facebookFollowers")} placeholder="12000" />
+        </Field>
+      </div>
+
+      {/*
+        Dovada traficului. Nu e neincredere gratuita: nivelul publicatiei —
+        si deci cat o platim — se stabileste din cifrele astea. Fara dovada,
+        aplicatia intra pe nivelul de jos.
+      */}
+      <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
+        <Label>Captură din Google Analytics (ultimele 30 de zile)</Label>
+        <p className="mt-1 text-xs text-slate-600">
+          Din ea stabilim nivelul și tariful pe articol. Fără captură, aplicația
+          intră pe nivelul de bază. Imagine sau PDF, maximum 8MB.
+        </p>
+        {dovada ? (
+          <div className="mt-3 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
+            <CheckCircle2 className="h-4 w-4 shrink-0" />
+            <span className="min-w-0 truncate">{dovada.name}</span>
+            <button type="button" onClick={() => setDovada(null)} className="ml-auto text-xs underline">
+              schimbă
+            </button>
+          </div>
+        ) : (
+          <label className="mt-3 inline-flex cursor-pointer items-center gap-2 rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:border-brand-navy">
+            {urcaDovada ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+            {urcaDovada ? "Se încarcă..." : "Încarcă captura"}
+            <input
+              type="file"
+              accept="image/*,.pdf"
+              className="hidden"
+              disabled={urcaDovada}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                e.target.value = "";
+                if (!f) return;
+                setUrcaDovada(true);
+                setError(null);
+                try {
+                  setDovada(await signAndUpload(f, "parteneri"));
+                } catch (err) {
+                  setError(err instanceof Error ? err.message : "Încărcarea a eșuat");
+                  setStatus("error");
+                } finally {
+                  setUrcaDovada(false);
+                }
+              }}
+            />
+          </label>
+        )}
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
+        <Field label="Linkurile din articol rămân dofollow? *" error={errors.dofollowLinks?.message}>
+          <select
+            {...register("dofollowLinks", { required: "Alege un răspuns" })}
+            className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+          >
+            <option value="">— alege —</option>
+            <option value="da">Da, rămân dofollow</option>
+            <option value="nu">Nu, punem nofollow pe articolele plătite</option>
+          </select>
         </Field>
         <Field label="Câți advertoriali acceptați / lună">
           <Input type="number" {...register("articlesPerMonth")} placeholder="20" />
@@ -147,6 +224,25 @@ export function PartnerApplyForm() {
         <Textarea rows={4} {...register("notes")} placeholder="Spune-ne ce face site-ul tău diferit, ce audiență aveți..." />
       </Field>
 
+      {/*
+        Declaratia. Cifrele devin o afirmatie asumata, nu o parere — iar daca
+        sunt false, nivelul se schimba sau colaborarea inceteaza, fara
+        discutie. Tot aici intra regulile care conteaza pentru client:
+        3 zile pana la publicare, 12 luni online, linkurile neatinse.
+      */}
+      <label className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-slate-800 cursor-pointer">
+        <Checkbox {...register("declarationAccepted", { required: true })} />
+        <span>
+          Declar că cifrele de mai sus sunt reale și sunt de acord să fie verificate.
+          Am înțeles condițiile: publicăm în maximum 3 zile lucrătoare de la primire
+          (sau refuzăm în 2, fără explicații), articolul rămâne online minimum 12 luni
+          și nu modificăm linkurile din el. *
+        </span>
+      </label>
+      {errors.declarationAccepted && (
+        <p className="text-sm text-red-600">Fără această declarație nu putem accepta aplicația</p>
+      )}
+
       <label className="flex items-start gap-3 text-sm text-slate-700 cursor-pointer">
         <Checkbox {...register("gdprConsent", { required: true })} />
         <span>
@@ -168,7 +264,7 @@ export function PartnerApplyForm() {
         </div>
       )}
 
-      <Button type="submit" variant="accent" size="lg" className="w-full" disabled={status === "submitting"}>
+      <Button type="submit" variant="accent" size="lg" className="w-full" disabled={status === "submitting" || urcaDovada}>
         {status === "submitting" ? (
           <><Loader2 className="h-4 w-4 animate-spin" /> Se trimite...</>
         ) : (

@@ -17,7 +17,10 @@ export interface Uploaded {
 /** Cloudinary refuza oricum fisierele mari; taiem devreme, cu mesaj in romana. */
 export const MAX_UPLOAD_BYTES = 8 * 1024 * 1024;
 
-export async function signAndUpload(fisierOriginal: File): Promise<Uploaded> {
+/** Folderele in care se poate urca; serverul le verifica din nou. */
+export type FolderUpload = "op" | "parteneri" | "deconturi";
+
+export async function signAndUpload(fisierOriginal: File, folder: FolderUpload = "op"): Promise<Uploaded> {
   // Pozele de telefon se micsoreaza intai (lib/comprima-poza.ts); PDF-ul si
   // ce nu se poate decoda trec neatinse.
   const file = await comprimaPoza(fisierOriginal);
@@ -27,7 +30,11 @@ export async function signAndUpload(fisierOriginal: File): Promise<Uploaded> {
     throw new Error(msg);
   }
 
-  const signRes = await fetch("/api/comanda/transfer/upload-sign", { method: "POST" });
+  const signRes = await fetch("/api/comanda/transfer/upload-sign", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ folder }),
+  });
   const sign = await signRes.json();
   if (!signRes.ok || !sign.ok) {
     throw new Error(sign.error || "Nu am putut pregăti încărcarea");

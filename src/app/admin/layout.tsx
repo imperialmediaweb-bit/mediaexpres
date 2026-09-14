@@ -18,6 +18,7 @@ import {
   ClipboardCheck,
   SendHorizonal,
   Star,
+  Handshake,
 } from "lucide-react";
 
 export const metadata: Metadata = {
@@ -41,6 +42,10 @@ const NAV = [
   { href: "/admin/emailuri", label: "Emailuri", icon: Mail },
   { href: "/admin/trimite-email", label: "Trimite email", icon: SendHorizonal },
   { href: "/admin/ziare", label: "Ziare", icon: Newspaper },
+  // 14.09.2026 — publicatiile partenere, cele pe care NU le detinem: aici se
+  // trimit articolele catre ele si se vede ce s-a publicat.
+  { href: "/admin/plasari", label: "Plasări partenere", icon: Handshake },
+  { href: "/admin/parteneri", label: "Parteneri (ziare)", icon: Newspaper },
   { href: "/admin/seo", label: "SEO & indexare", icon: Zap },
 ];
 

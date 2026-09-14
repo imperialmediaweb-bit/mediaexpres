@@ -101,6 +101,62 @@ export async function POST(req: NextRequest) {
       `,
     },
     {
+      step: "placement: plasarile pe publicatii partenere",
+      query: sql`
+        CREATE TABLE IF NOT EXISTS "placement" (
+          "id" text PRIMARY KEY NOT NULL,
+          "publisher_id" text NOT NULL,
+          "order_submission_id" text,
+          "client_label" text,
+          "token_version" integer NOT NULL DEFAULT 0,
+          "article_title" text NOT NULL,
+          "article_body" text NOT NULL,
+          "images" text NOT NULL DEFAULT '[]',
+          "featured_index" integer NOT NULL DEFAULT 0,
+          "link_notes" text,
+          "tier" text,
+          "price_partner" integer NOT NULL,
+          "price_client" integer NOT NULL,
+          "status" text NOT NULL DEFAULT 'trimis',
+          "refusal_reason" text,
+          "published_url" text,
+          "sent_at" timestamp DEFAULT now() NOT NULL,
+          "deadline_refuz" timestamp NOT NULL,
+          "deadline_publicare" timestamp NOT NULL,
+          "accepted_at" timestamp,
+          "refused_at" timestamp,
+          "published_at" timestamp,
+          "online_until" timestamp,
+          "expired_at" timestamp,
+          "link_status" text,
+          "link_checked_at" timestamp,
+          "dofollow_expected" boolean NOT NULL DEFAULT true,
+          "statement_id" text,
+          "admin_notes" text,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )
+      `,
+    },
+    {
+      step: "publisher: versiunea de token, ca sa poti taia un link scurs",
+      query: sql`
+        ALTER TABLE "publisher"
+          ADD COLUMN IF NOT EXISTS "token_version" integer NOT NULL DEFAULT 0
+      `,
+    },
+    {
+      step: "publisher: dovada de trafic, dofollow, nivel si tarif",
+      query: sql`
+        ALTER TABLE "publisher"
+          ADD COLUMN IF NOT EXISTS "analytics_proof_url" text,
+          ADD COLUMN IF NOT EXISTS "facebook_followers" integer,
+          ADD COLUMN IF NOT EXISTS "dofollow_links" boolean,
+          ADD COLUMN IF NOT EXISTS "tier" text,
+          ADD COLUMN IF NOT EXISTS "price_per_article" integer,
+          ADD COLUMN IF NOT EXISTS "declaration_accepted" boolean NOT NULL DEFAULT false
+      `,
+    },
+    {
       step: "order_submission: linkurile cerute de client (ancora → adresa)",
       query: sql`
         ALTER TABLE "order_submission"
