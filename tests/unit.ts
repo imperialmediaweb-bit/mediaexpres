@@ -1328,7 +1328,12 @@ console.log("\n########## S. RECENZII ##########");
   t("exemplul de raport exista pe disc", fs.existsSync("public" + EXEMPLU_RAPORT.url));
   t("un singur PDF de raport publicat", fs.readdirSync("public/rapoarte").filter((f) => f.endsWith(".pdf")).length === 1);
   t("oferta are clipurile „cum comanzi”, la cerere", /<VideoTutorial \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) && fs.existsSync("public/video/cum-comanzi-card.mp4") && fs.existsSync("public/video/cum-comanzi-op.mp4"));
-  t("in banda raman doar clientii cu logo", CLIENTI.every((c) => !!c.logo));
+  // 16.09.2026 — banda arata si clientii fara logo, ca nume. Cei cinci cu logo
+  // conving prin cine sunt; restul arata ca nu sunt trei clienti in total.
+  t("cei cinci cu logo raman primii", CLIENTI.slice(0, 5).every((c) => !!c.logo));
+  t("clientii adaugati dupa ei nu trimit oameni pe site-ul lor", CLIENTI.slice(5).every((c) => !c.site));
+  t("fiecare client spune ce a cumparat", CLIENTI.every((c) => (c.ce || "").trim().length > 5));
+  t("lista are toti clientii care au cumparat", CLIENTI.length >= 15);
   t("oferta arata raportul ca imagine, inainte de plata", /<DovadaRaport \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) && fs.existsSync("public/rapoarte/exemplu-raport-pagina-1.jpg"));
   t("portofoliul nu mai are linkuri interne (railway)", !/railway\.app/.test(citesteFisier("src/data/portfolio.ts")));
 }
