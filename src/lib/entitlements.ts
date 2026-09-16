@@ -49,6 +49,10 @@ export async function getUserOrders(userId: string) {
       status: orders.status,
       createdAt: orders.createdAt,
       paidAt: orders.paidAt,
+      // Referinta platii — cu ea se leaga comanda de campania din reteaua de
+      // publicare (vezi lib/retea.ts), ca sa-i putem arata clientului, in
+      // contul lui, cate ziare au publicat pana acum.
+      stripeSessionId: orders.stripeSessionId,
       articleTitle: articles.title,
     })
     .from(orders)

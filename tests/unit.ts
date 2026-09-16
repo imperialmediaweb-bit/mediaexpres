@@ -1229,6 +1229,20 @@ console.log("\n########## S. RECENZII ##########");
     t("folderul de upload vine dintr-o lista inchisa", /PERMISE = \["op", "parteneri", "deconturi"\]/.test(semn));
   }
 
+  // Contul clientului arata publicarile LIVE, nu doar dupa ce trimitem raportul.
+  {
+    const com = citesteFisier("src/app/cont/comenzi/page.tsx");
+    const rap = citesteFisier("src/app/cont/rapoarte/page.tsx");
+    t("comenzile din cont citesc starea din retea", /campaniaPentruComanda\(o\.stripeSessionId, o\.email\)/.test(com));
+    t("se intreaba doar pentru comenzile platite", /orders\.filter\(\(o\) => o\.status === "paid"\)/.test(com));
+    t("reteaua muta nu strica pagina clientului", /catch \{/.test(com) && /stari\.set/.test(com));
+    t("nu se citeste la fiecare reincarcare", /export const revalidate = 60/.test(com));
+    t("rapoartele arata campania in curs, cu linkul public", /Campania în curs/.test(rap) && /campanie\.raportUrl/.test(rap));
+    t("cand nu exista campanie, textul vechi ramane", /Încă nu ai niciun raport/.test(rap));
+    t("referinta platii ajunge in contul clientului", /stripeSessionId: orders\.stripeSessionId/.test(citesteFisier("src/lib/entitlements.ts")));
+    t("emailul de confirmare duce linkul publicarilor", /Urmărește publicările/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+  }
+
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
   {
     const llms = citesteFisier("public/llms.txt");

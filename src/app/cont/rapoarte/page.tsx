@@ -4,6 +4,7 @@ import { desc, eq } from "drizzle-orm";
 import { auth } from "@/auth";
 import { db } from "@/db";
 import { publicationReports } from "@/db/schema";
+import { campaniaPentruComanda } from "@/lib/retea";
 
 export const dynamic = "force-dynamic";
 export const metadata = {
@@ -29,6 +30,19 @@ export default async function RapoartePage() {
     .where(eq(publicationReports.email, email.toLowerCase()))
     .orderBy(desc(publicationReports.createdAt));
 
+  // 16.09.2026 — campania aflata IN CURS, luata din reteaua de publicare.
+  // Pana azi, pagina era goala pana cand trimiteam noi raportul: la ritmul de
+  // doua saptamani, clientul astepta doua saptamani fara nicio dovada. Aici
+  // potrivirea se face dupa email (in cont nu avem referinta platii), deci e
+  // cea mai recenta campanie a lui. Daca reteaua tace, caseta nu apare.
+  let inCurs: Awaited<ReturnType<typeof campaniaPentruComanda>> | null = null;
+  try {
+    inCurs = await campaniaPentruComanda(null, email);
+  } catch {
+    inCurs = null;
+  }
+  const campanie = inCurs?.stare === "gasita" ? inCurs.campanie : null;
+
   return (
     <section className="container py-12">
       <div className="max-w-4xl">
@@ -39,9 +53,37 @@ export default async function RapoartePage() {
           permanent — nu trebuie să cauți prin emailuri.
         </p>
 
+        {campanie && (
+          <div className="mt-8 rounded-2xl border-2 border-brand-red/25 bg-white p-6">
+            <p className="text-xs font-bold uppercase tracking-wider text-brand-red">
+              Campania în curs
+            </p>
+            <p className="mt-2 font-serif text-2xl font-bold text-brand-navy">
+              {campanie.articoleLive} din {campanie.articole || 50} publicații
+            </p>
+            <p className="mt-1 text-sm text-slate-600">
+              Se actualizează pe măsură ce apar articolele. Raportul complet, cu
+              toate linkurile în PDF și Excel, ajunge aici la final.
+            </p>
+            {campanie.raportUrl && (
+              <a
+                href={campanie.raportUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 rounded-lg bg-brand-red px-5 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90"
+              >
+                Vezi publicările de până acum
+                <ExternalLink className="h-4 w-4" />
+              </a>
+            )}
+          </div>
+        )}
+
         {rows.length === 0 ? (
           <div className="mt-8 rounded-2xl border border-slate-200 bg-white p-10 text-center text-slate-500">
-            Încă nu ai niciun raport. Apare aici automat după prima publicare.
+            {campanie
+              ? "Raportul complet apare aici când se încheie publicarea. Până atunci, urmărește linkul de mai sus."
+              : "Încă nu ai niciun raport. Apare aici automat după prima publicare."}
           </div>
         ) : (
           <div className="mt-8 space-y-6">

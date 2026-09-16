@@ -12,6 +12,7 @@ import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII } from "@/lib/content-polic
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
+import { campaniaPentruComanda } from "@/lib/retea";
 
 export const runtime = "nodejs";
 
@@ -233,6 +234,18 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // 16.09.2026 — linkul paginii publice a campaniei, cand exista deja una in
+  // retea. Clientul care a ales ritmul de doua saptamani nu mai asteapta doua
+  // saptamani fara nicio dovada: deschide pagina si vede cum se completeaza.
+  // Daca reteaua tace, emailul pleaca exact ca inainte.
+  let linkRaport: string | null = null;
+  try {
+    const r = await campaniaPentruComanda(order.sessionId, order.email);
+    if (r.stare === "gasita") linkRaport = r.campanie.raportUrl;
+  } catch (err) {
+    console.error("[articol/submit] nu am putut citi campania din retea:", err);
+  }
+
   // Confirmarea catre client nu trebuie sa blocheze raspunsul — materialele au ajuns deja.
   sendEmail({
     to: order.email,
@@ -253,6 +266,12 @@ export async function POST(req: NextRequest) {
             : `pe cele ${pkg.newspapers}${pkg.newspapers >= 20 ? " de" : ""} publicații din pachetul tău`
           : "în publicațiile din pachetul tău"
       } în maximum <strong>12 ore lucrătoare</strong>. Când e gata, primești pe email raportul cu toate linkurile.</p>
+      ${
+        linkRaport
+          ? `<p style="margin:20px 0;"><a href="${esc(linkRaport)}" style="display:inline-block;background:#c1121f;color:#ffffff;text-decoration:none;font-weight:700;font-size:14px;padding:12px 22px;border-radius:8px;">Urmărește publicările</a></p>
+             <p style="color:#64748b;font-size:13px;">Pagina se completează pe măsură ce apar articolele. La final primiți raportul complet, cu toate linkurile.</p>`
+          : ""
+      }
       ${featured ? `<p style="margin:16px 0;"><img src="${esc(featured.url)}" alt="" style="max-width:100%;border-radius:8px;" /></p>` : ""}
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,

@@ -4,11 +4,28 @@ import { auth } from "@/auth";
 import { getUserOrders } from "@/lib/entitlements";
 import { findPackageById } from "@/data/packages";
 import { Button } from "@/components/ui/button";
+import { campaniaPentruComanda, type CampanieRetea } from "@/lib/retea";
 
 export const metadata = {
   title: "Comenzile mele",
   robots: { index: false, follow: false },
 };
+
+/**
+ * 16.09.2026 — pana azi, clientul care platise si astepta publicarea nu vedea
+ * NIMIC aici: data, pachetul, suma, statusul. Cu ritmul de doua saptamani,
+ * asta inseamna doua saptamani in care nu are nicio dovada ca se intampla
+ * ceva — exact momentul in care suna suparat.
+ *
+ * Articolele se publica in alta aplicatie (Reteaua Expres), iar legatura
+ * exista deja si e folosita in admin: `campaniaPentruComanda`. O folosim si
+ * aici, ca omul sa vada „12 din 50 publicate" si sa aiba linkul paginii
+ * publice, care se completeaza singura.
+ *
+ * Se citeste o data pe minut, nu la fiecare reincarcare: altfel 50 de clienti
+ * care isi deschid contul lovesc reteaua in acelasi timp.
+ */
+export const revalidate = 60;
 
 function formatRON(cents: number) {
   return (cents / 100).toLocaleString("ro-RO", {
@@ -28,6 +45,22 @@ export default async function ComenziPage() {
   if (!session?.user?.id) redirect("/cont/login");
 
   const orders = await getUserOrders(session.user.id);
+
+  // Starea din retea, doar pentru comenzile platite. Daca reteaua nu raspunde
+  // sau cheia lipseste, ramane null si randul arata exact ca inainte — nu
+  // inventam cifre si nu cade pagina.
+  const platite = orders.filter((o) => o.status === "paid");
+  const stari = new Map<string, CampanieRetea>();
+  await Promise.all(
+    platite.map(async (o) => {
+      try {
+        const r = await campaniaPentruComanda(o.stripeSessionId, o.email);
+        if (r.stare === "gasita") stari.set(o.id, r.campanie);
+      } catch {
+        /* pagina clientului nu cade pentru ca reteaua a intarziat */
+      }
+    }),
+  );
 
   return (
     <section className="container py-12">
@@ -57,6 +90,7 @@ export default async function ComenziPage() {
                   <th className="px-4 py-3 font-semibold">Articol</th>
                   <th className="px-4 py-3 font-semibold">Suma</th>
                   <th className="px-4 py-3 font-semibold">Status</th>
+                  <th className="px-4 py-3 font-semibold">Publicare</th>
                 </tr>
               </thead>
               <tbody>
@@ -77,6 +111,9 @@ export default async function ComenziPage() {
                       <td className="px-4 py-3">
                         <StatusBadge status={o.status} />
                       </td>
+                      <td className="px-4 py-3">
+                        <Publicare campanie={stari.get(o.id)} status={o.status} />
+                      </td>
                     </tr>
                   );
                 })}
@@ -86,6 +123,40 @@ export default async function ComenziPage() {
         )}
       </div>
     </section>
+  );
+}
+
+/**
+ * Cate publicatii au iesit pana acum si linkul paginii publice.
+ *
+ * Nu aratam nimic din interiorul campaniei — ce ziare, la ce pret, ce stare
+ * interna. Doar „X din Y" si linkul pe care oricum il poate primi pe email.
+ */
+function Publicare({ campanie, status }: { campanie?: CampanieRetea; status: string }) {
+  if (status !== "paid") return <span className="text-slate-400">—</span>;
+  if (!campanie) {
+    return (
+      <span className="text-xs text-slate-500">
+        În pregătire. Îți trimitem raportul pe email.
+      </span>
+    );
+  }
+  return (
+    <div className="text-xs">
+      <p className="font-semibold text-brand-navy">
+        {campanie.articoleLive} din {campanie.articole || 50} publicate
+      </p>
+      {campanie.raportUrl && (
+        <a
+          href={campanie.raportUrl}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-0.5 inline-block font-medium text-brand-red hover:underline"
+        >
+          Vezi publicările →
+        </a>
+      )}
+    </div>
   );
 }
 
