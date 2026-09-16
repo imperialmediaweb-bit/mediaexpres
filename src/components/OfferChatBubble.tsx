@@ -60,6 +60,19 @@ type ReturnStep = "email" | "pick" | "proof" | "title" | "body" | "images" | "va
 
 export function OfferChatBubble() {
   const [open, setOpen] = useState(false);
+  /**
+   * 16.09.2026 — pe telefon, bula statea fix peste butonul rosu „Comanda
+   * acum" din pagina. Omul care a citit tot si a ajuns la buton gasea peste
+   * el alt element: ori apasa gresit si i se deschidea chatul in loc de
+   * plata, ori ezita. E cel mai scump loc din site in care poti pune un
+   * obstacol.
+   *
+   * Nu am mutat-o mai sus, fiindca orice pozitie fixa acopera, pe un ecran
+   * anume, altceva. Singura regula care tine la orice inaltime de ecran e
+   * „nu sta peste butonul de cumparare": cat timp un buton de comanda e in
+   * fereastra, bula se face invizibila si nu mai prinde atingeri.
+   */
+  const [acoperaCta, setAcoperaCta] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -91,6 +104,50 @@ export function OfferChatBubble() {
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading, open, step, images, proof]);
+
+  /**
+   * Bula se da la o parte cat timp un buton de comanda e pe ecran.
+   *
+   * Doar pe ecrane mici: pe desktop bula sta jos-stanga si nu acopera nimic,
+   * iar `lg:` din Tailwind taie exact la 1024px, deci folosim aceeasi limita.
+   * Cand chatul e DESCHIS nu se ascunde niciodata — omul scrie in el, nu i-l
+   * luam de sub degete.
+   *
+   * Butoanele sunt gasite dupa `data-comanda`, pus in ButonComanda. Observatorul
+   * se reface si la schimbarea paginii (butoanele sunt altele), de asta
+   * depinde de `open`: cand chatul se inchide, se recalculeaza.
+   */
+  useEffect(() => {
+    if (typeof window === "undefined" || typeof IntersectionObserver !== "function") return;
+    if (open) {
+      setAcoperaCta(false);
+      return;
+    }
+    const mic = window.matchMedia("(max-width: 1023px)");
+    if (!mic.matches) {
+      setAcoperaCta(false);
+      return;
+    }
+    const butoane = Array.from(document.querySelectorAll("[data-comanda]"));
+    if (butoane.length === 0) return;
+
+    const vizibile = new Set<Element>();
+    const obs = new IntersectionObserver(
+      (intrari) => {
+        for (const i of intrari) {
+          if (i.isIntersecting) vizibile.add(i.target);
+          else vizibile.delete(i.target);
+        }
+        setAcoperaCta(vizibile.size > 0);
+      },
+      // Marja de jos cat inaltimea bulei plus bara fixa: butonul „se apropie"
+      // de zona ei inainte sa fie complet pe ecran, si atunci trebuie sa fi
+      // disparut deja.
+      { rootMargin: "0px 0px -80px 0px", threshold: 0 },
+    );
+    butoane.forEach((b) => obs.observe(b));
+    return () => obs.disconnect();
+  }, [open]);
 
   function say(content: string) {
     setMessages((m) => [...m, { role: "assistant", content }]);
@@ -574,8 +631,14 @@ export function OfferChatBubble() {
       <button
         type="button"
         onClick={() => setOpen(true)}
+        aria-hidden={acoperaCta}
+        tabIndex={acoperaCta ? -1 : undefined}
         // Deasupra barei fixe de comanda pe mobil, la stanga butonului de WhatsApp.
-        className="fixed bottom-24 left-4 z-40 flex items-center gap-2 rounded-full bg-brand-navy px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-navy/90 lg:bottom-6"
+        // Cand un buton de comanda e pe ecran, dispare (vezi `acoperaCta`):
+        // ramane in DOM, deci nu sare nimic in pagina, dar nu mai ia atingeri.
+        className={`fixed bottom-24 left-4 z-40 flex items-center gap-2 rounded-full bg-brand-navy px-4 py-3 text-sm font-semibold text-white shadow-lg transition hover:bg-brand-navy/90 lg:bottom-6 ${
+          acoperaCta ? "pointer-events-none opacity-0" : "opacity-100"
+        }`}
       >
         <MessageCircle className="h-5 w-5 text-brand-gold" />
         Ai o întrebare?

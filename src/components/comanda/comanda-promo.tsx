@@ -107,7 +107,12 @@ export function ButonComanda({
   const text = eticheta ?? (monthly ? "Abonează-te" : "Comandă acum");
   return (
     <>
-      <button type="button" onClick={start} disabled={loading} className={className}>
+      {/*
+        16.09.2026 — `data-comanda` nu schimba nimic aici. E semnul dupa care
+        bula de chat stie sa se dea la o parte cat timp un buton de comanda e
+        pe ecran: pe telefon statea exact peste el (vezi OfferChatBubble).
+      */}
+      <button type="button" data-comanda="1" onClick={start} disabled={loading} className={className}>
         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CreditCard className="h-5 w-5" />}
         {loading
           ? "Se deschide plata..."

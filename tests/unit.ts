@@ -1243,6 +1243,17 @@ console.log("\n########## S. RECENZII ##########");
     t("emailul de confirmare duce linkul publicarilor", /Urmărește publicările/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   }
 
+  // Bula de chat nu are voie sa stea peste butonul de cumparare, pe telefon.
+  {
+    const bp = citesteFisier("src/components/comanda/comanda-promo.tsx");
+    const bula = citesteFisier("src/components/OfferChatBubble.tsx");
+    t("butonul de comanda e marcat, ca sa poata fi gasit", /data-comanda="1"/.test(bp));
+    t("bula se ascunde cand un buton de comanda e pe ecran", /IntersectionObserver/.test(bula) && /\[data-comanda\]/.test(bula));
+    t("ascunsa, bula nu mai prinde atingeri", /pointer-events-none opacity-0/.test(bula));
+    t("chatul deschis nu se ascunde niciodata", /if \(open\) \{\s*setAcoperaCta\(false\);/.test(bula));
+    t("doar pe ecrane mici (aceeasi limita ca „lg:”)", /max-width: 1023px/.test(bula));
+  }
+
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
   {
     const llms = citesteFisier("public/llms.txt");
