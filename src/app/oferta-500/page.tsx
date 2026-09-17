@@ -255,6 +255,18 @@ function buildFaq(CIFRE: CifreRetea) {
     a: "Nu e copiat. Fiecare ziar primește o variantă unică: alt titlu, altă formulare, altă adresă — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Deschide două linkuri din raport și compari. Dacă vrei textul tău identic peste tot (comunicat oficial, text aprobat juridic), spui la comandă și îl publicăm neschimbat.",
   },
   {
+    // 17.09.2026 — un prospect a ridicat obiectia „e facut cu AI". Pana acum
+    // pagina nu spunea nimic despre asta, deci intrebarea ramanea in capul
+    // omului si iesea abia pe WhatsApp, sau deloc: pleca si nu mai intreba.
+    // Raspundem cinstit, fara sa ne scuzam si fara sa conducem cu AI-ul:
+    // nu apare in titluri sau in textul de vanzare, doar aici, unde e cautat.
+    // Numele modelelor NU se scriu nicaieri — clientul cumpara aparitii in
+    // presa, nu tehnologie, iar „modele de top" muta discutia exact unde nu
+    // ne convine.
+    q: "Articolele sunt scrise cu AI?",
+    a: "Rescrierea se face cu ajutorul AI, sub coordonare umană — de aceea fiecare ziar primește altă variantă, nu aceeași copiată de 50 de ori. Google nu penalizează un text pentru că a fost scris cu AI; spune explicit că nu contează cum a fost făcut, ci ce este. Ce sancționează sunt paginile produse în masă doar ca să prindă poziții în căutări, indiferent dacă le-a scris un om sau o mașină. Publicațiile noastre nu sunt așa: fiecare publică zilnic știri locale proprii, primim poze, filmări și ponturi de la cititori, iar articolele plătite sunt sub 2% din tot ce apare. Și, ca să fie clar: nu promitem poziții în Google. Promitem plasări reale, pe care le verificați una câte una în raport.",
+  },
+  {
     q: "Sunt ziare tipărite sau site-uri online?",
     a: "Online — 50 de site-uri de știri, câte unul pentru fiecare județ, plus cele naționale. Avantajul față de tipărit: un articol din ziarul de hârtie se citește o zi și dispare, pe când al tău rămâne online permanent, la aceeași adresă, și poate fi arătat oricând.",
   },

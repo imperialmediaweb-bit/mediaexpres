@@ -1254,6 +1254,21 @@ console.log("\n########## S. RECENZII ##########");
     t("doar pe ecrane mici (aceeasi limita ca „lg:”)", /max-width: 1023px/.test(bula));
   }
 
+  // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
+  {
+    const of = citesteFisier("src/app/oferta-500/page.tsx");
+    const k2 = buildAdvisorKnowledge();
+    t("pagina raspunde la intrebarea despre AI", /Articolele sunt scrise cu AI\?/.test(of));
+    t("raspunsul spune ce sanctioneaza Google, nu neaga AI-ul", /nu penalizează un text pentru că a fost scris cu AI/.test(of));
+    t("si repeta ca nu promitem pozitii", /nu promitem poziții în Google/.test(of));
+    t("consultantul stie acelasi raspuns", /E scris cu AI\?/.test(k2));
+    // Numele modelelor nu apar in paginile publice: clientul cumpara aparitii
+    // in presa, nu tehnologie, iar „modele de top" muta discutia unde nu ne
+    // convine. (Se cauta doar in textul vizibil, nu in comentarii de cod.)
+    const publice = ["src/app/oferta-500/page.tsx", "src/app/despre/page.tsx", "src/app/reteaua-noastra/page.tsx", "public/llms.txt"];
+    t("nicio pagina publica nu da nume de modele", publice.every((f) => !/\b(GPT-4|gpt-4o|Claude|Gemini|Sonnet|Opus|Llama)\b/.test(citesteFisier(f))));
+  }
+
   // Pentru modelele AI: llms.txt cu serviciul, preturile si limitele; FAQ ca schema.
   {
     const llms = citesteFisier("public/llms.txt");
