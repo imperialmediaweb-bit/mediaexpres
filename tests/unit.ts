@@ -1271,23 +1271,6 @@ console.log("\n########## S. RECENZII ##########");
     );
   }
 
-  // Auditul de presa, pus pe pagina ofertei: omul isi vede propria cifra.
-  {
-    const w = citesteFisier("src/components/oferta/VerificaPresa.tsx");
-    const of = citesteFisier("src/app/oferta-500/page.tsx");
-
-    t("caseta e pe pagina de oferta", /<VerificaPresa \/>/.test(of) && /components\/oferta\/VerificaPresa/.test(of));
-    t("cifra se ia din auditul existent, nu dintr-o sursa noua", /\/api\/audit-mentiuni/.test(w));
-    t("butonul din caseta e butonul real de comanda", /ButonComanda/.test(w));
-    t(
-      "nu trimite la pachetele vechi de 150 sau 1.500 (pagina asta vinde 500)",
-      !/150 RON|1500 RON|1\.500 lei/.test(w),
-    );
-    t("cazul „apare des” nu se preface ca e o problema", /pe c[âa]te publica[țt]ii/i.test(w));
-    t("spune pe fata ca numele comune pot da rezultate straine", /nume comun/.test(w));
-    t("nu cere email ca sa arate cifra", /nu cerem email/.test(w));
-  }
-
   // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
   {
     const of = citesteFisier("src/app/oferta-500/page.tsx");

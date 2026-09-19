@@ -35,7 +35,6 @@ import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
 import { DateFirma } from "@/components/DateFirma";
-import { VerificaPresa } from "@/components/oferta/VerificaPresa";
 
 /*
   06.09.2026 — pagina vindea DOUA produse deodata.
@@ -470,25 +469,6 @@ export default async function Oferta500Page() {
                 </li>
               ))}
             </ul>
-          </div>
-        </div>
-      </section>
-
-      {/*
-        19.09.2026 — cifra LUI, nu a noastra. Pana aici pagina spune ce
-        vindem; aici omul isi vede propria prezenta in presa. „0 mentiuni in
-        30 de zile", scris despre firma lui, convinge mai mult decat orice
-        propozitie scrisa de noi despre noi. Stă inaintea listei de ziare:
-        intai afli ca iti lipseste ceva, apoi vezi de unde se ia.
-      */}
-      <section className="section bg-slate-50">
-        <div className="container">
-          <div className="mx-auto max-w-2xl text-center">
-            <p className="eyebrow">Vezi unde ești acum</p>
-            <h2 className="h2 mt-2">Verifică-ți firma în presă</h2>
-          </div>
-          <div className="mt-10">
-            <VerificaPresa />
           </div>
         </div>
       </section>
