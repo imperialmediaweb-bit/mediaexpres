@@ -6,6 +6,7 @@ import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { hasStickyMobileCta } from "@/components/conversion/ConversionWidgets";
 import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
+import { useZonaLibera } from "@/hooks/useZonaLibera";
 
 const PREFILL =
   "Bună ziua! Am o întrebare despre oferta de 500 lei — articol în 50 de ziare.";
@@ -33,6 +34,13 @@ function WhatsAppIcon({ className }: { className?: string }) {
 export function WhatsAppButton() {
   const pathname = usePathname();
   const propozitieSursa = useSursaWhatsApp();
+  /**
+   * 19.09.2026 — pe iPhone, cercul verde musca din „500 lei" pe pagina de
+   * oferta. Aceeasi regula ca la bula de chat: cat timp un buton de comanda
+   * sau caseta de pret e pe ecran, butonul se da la o parte. Nu dispare de
+   * tot — revine imediat ce omul a trecut de zona.
+   */
+  const acopera = useZonaLibera();
   if (!pathname || pathname.startsWith("/admin")) return null;
 
   // Pe ecrane mici, bara fixa de comanda ocupa banda de jos. Cand exista, urcam
@@ -50,7 +58,11 @@ export function WhatsAppButton() {
         trackGaEvent("contact", { method: "whatsapp_flotant" });
       }}
       aria-label={`Scrie-ne pe WhatsApp la ${SITE.phone}`}
-      className={`fixed right-4 ${bottom} z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/20 transition hover:scale-105 hover:bg-[#20BA5A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] lg:bottom-6`}
+      aria-hidden={acopera || undefined}
+      tabIndex={acopera ? -1 : undefined}
+      className={`fixed right-4 ${bottom} z-40 flex h-14 w-14 items-center justify-center rounded-full bg-[#25D366] text-white shadow-lg shadow-black/20 transition hover:scale-105 hover:bg-[#20BA5A] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#25D366] lg:bottom-6 ${
+        acopera ? "pointer-events-none opacity-0" : ""
+      }`}
     >
       <WhatsAppIcon className="h-7 w-7" />
     </a>

@@ -74,7 +74,11 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
       </div>
 
       {showPrice && (
-        <div className="mt-8 flex items-end justify-center gap-4">
+        // `data-nu-acoperi`: bulele plutitoare (chat, WhatsApp) se dau la o
+        // parte cat timp caseta asta e pe ecran. Pe iPhone stateau fix peste
+        // „1.500 lei" taiat si peste „500 lei" — pretul, al doilea lucru pe
+        // care il cauta omul dupa titlu. Vezi src/hooks/useZonaLibera.ts.
+        <div data-nu-acoperi="1" className="mt-8 flex items-end justify-center gap-4">
           <div className="text-right">
             <p className="text-sm uppercase tracking-wider text-white/50">
               Preț normal

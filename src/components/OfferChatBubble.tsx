@@ -23,6 +23,7 @@ import {
   type ReturnIntent,
 } from "@/components/chat/return-flows";
 import { SITE } from "@/data/site";
+import { useZonaLibera } from "@/hooks/useZonaLibera";
 import {
   STEPS,
   EMPTY_ORDER,
@@ -69,10 +70,15 @@ export function OfferChatBubble() {
    *
    * Nu am mutat-o mai sus, fiindca orice pozitie fixa acopera, pe un ecran
    * anume, altceva. Singura regula care tine la orice inaltime de ecran e
-   * „nu sta peste butonul de cumparare": cat timp un buton de comanda e in
-   * fereastra, bula se face invizibila si nu mai prinde atingeri.
+   * „nu sta peste ce vinde": cat timp un buton de comanda SAU caseta de pret
+   * e in fereastra, bula se face invizibila si nu mai prinde atingeri.
+   *
+   * 19.09.2026 — regula a iesit in `useZonaLibera`, fiindca butonul verde de
+   * WhatsApp facea acelasi lucru fara sa stie de ea (musca din „500 lei").
+   * Cand chatul e DESCHIS nu se ascunde niciodata — omul scrie in el, nu i-l
+   * luam de sub degete.
    */
-  const [acoperaCta, setAcoperaCta] = useState(false);
+  const acoperaCta = useZonaLibera(!open);
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
@@ -104,50 +110,6 @@ export function OfferChatBubble() {
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [messages, loading, open, step, images, proof]);
-
-  /**
-   * Bula se da la o parte cat timp un buton de comanda e pe ecran.
-   *
-   * Doar pe ecrane mici: pe desktop bula sta jos-stanga si nu acopera nimic,
-   * iar `lg:` din Tailwind taie exact la 1024px, deci folosim aceeasi limita.
-   * Cand chatul e DESCHIS nu se ascunde niciodata — omul scrie in el, nu i-l
-   * luam de sub degete.
-   *
-   * Butoanele sunt gasite dupa `data-comanda`, pus in ButonComanda. Observatorul
-   * se reface si la schimbarea paginii (butoanele sunt altele), de asta
-   * depinde de `open`: cand chatul se inchide, se recalculeaza.
-   */
-  useEffect(() => {
-    if (typeof window === "undefined" || typeof IntersectionObserver !== "function") return;
-    if (open) {
-      setAcoperaCta(false);
-      return;
-    }
-    const mic = window.matchMedia("(max-width: 1023px)");
-    if (!mic.matches) {
-      setAcoperaCta(false);
-      return;
-    }
-    const butoane = Array.from(document.querySelectorAll("[data-comanda]"));
-    if (butoane.length === 0) return;
-
-    const vizibile = new Set<Element>();
-    const obs = new IntersectionObserver(
-      (intrari) => {
-        for (const i of intrari) {
-          if (i.isIntersecting) vizibile.add(i.target);
-          else vizibile.delete(i.target);
-        }
-        setAcoperaCta(vizibile.size > 0);
-      },
-      // Marja de jos cat inaltimea bulei plus bara fixa: butonul „se apropie"
-      // de zona ei inainte sa fie complet pe ecran, si atunci trebuie sa fi
-      // disparut deja.
-      { rootMargin: "0px 0px -80px 0px", threshold: 0 },
-    );
-    butoane.forEach((b) => obs.observe(b));
-    return () => obs.disconnect();
-  }, [open]);
 
   function say(content: string) {
     setMessages((m) => [...m, { role: "assistant", content }]);

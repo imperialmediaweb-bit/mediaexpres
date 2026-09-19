@@ -1243,15 +1243,32 @@ console.log("\n########## S. RECENZII ##########");
     t("emailul de confirmare duce linkul publicarilor", /Urmărește publicările/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   }
 
-  // Bula de chat nu are voie sa stea peste butonul de cumparare, pe telefon.
+  // Elementele plutitoare nu au voie sa stea peste ce vinde: nici peste
+  // butonul de cumparare, nici peste caseta de pret. Regula e una singura
+  // (useZonaLibera) si o respecta AMANDOUA bulele — pe 19.09 cercul verde de
+  // WhatsApp musca din „500 lei" tocmai pentru ca avea logica lui.
   {
     const bp = citesteFisier("src/components/comanda/comanda-promo.tsx");
     const bula = citesteFisier("src/components/OfferChatBubble.tsx");
+    const wa = citesteFisier("src/components/layout/WhatsAppButton.tsx");
+    const zona = citesteFisier("src/hooks/useZonaLibera.ts");
+    const pret = citesteFisier("src/app/oferta-500/PromoOffer.tsx");
+
     t("butonul de comanda e marcat, ca sa poata fi gasit", /data-comanda="1"/.test(bp));
-    t("bula se ascunde cand un buton de comanda e pe ecran", /IntersectionObserver/.test(bula) && /\[data-comanda\]/.test(bula));
-    t("ascunsa, bula nu mai prinde atingeri", /pointer-events-none opacity-0/.test(bula));
-    t("chatul deschis nu se ascunde niciodata", /if \(open\) \{\s*setAcoperaCta\(false\);/.test(bula));
-    t("doar pe ecrane mici (aceeasi limita ca „lg:”)", /max-width: 1023px/.test(bula));
+    t("caseta de pret e marcata ca zona care nu se acopera", /data-nu-acoperi="1"/.test(pret));
+    t(
+      "regula se uita si la butoane, si la zonele marcate",
+      /IntersectionObserver/.test(zona) && /\[data-comanda\], \[data-nu-acoperi\]/.test(zona),
+    );
+    t("regula e una singura, folosita de amandoua bulele", /useZonaLibera/.test(bula) && /useZonaLibera/.test(wa));
+    t("ascunsa, bula de chat nu mai prinde atingeri", /pointer-events-none opacity-0/.test(bula));
+    t("ascuns, butonul de WhatsApp nu mai prinde atingeri", /pointer-events-none opacity-0/.test(wa));
+    t("chatul deschis nu se ascunde niciodata", /useZonaLibera\(!open\)/.test(bula));
+    t("doar pe ecrane mici (aceeasi limita ca „lg:”)", /max-width: 1023px/.test(zona));
+    t(
+      "zonele se recitesc dupa hidratare (caseta de pret apare tarziu)",
+      /setTimeout\(adunaZone/.test(zona),
+    );
   }
 
   // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
