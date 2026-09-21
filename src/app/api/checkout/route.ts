@@ -175,12 +175,32 @@ export async function POST(req: NextRequest) {
          * completeaza oricum ca sa-i apara articolul. Mai putine campuri
          * inainte de bani, aceleasi date dupa.
          *
-         * De aceea au disparut si `custom_fields` (nume firma, CUI, nr. reg.)
-         * si `tax_id_collection`: nu mai are rost sa ceri de doua ori acelasi
-         * lucru, iar fiecare rand in plus pe pagina de card costa o plata.
-         * Pe pagina de card raman: email, card, nume si ce cere banca.
+         * Numele firmei si CUI-ul RAMAN totusi aici, ca doua campuri
+         * OPTIONALE (decizia proprietarului, 21.09): contabila identifica
+         * dupa ele incasarile din Stripe, si le vrea pe tranzactie din
+         * secunda platii, nu peste cateva minute. Doua casute optionale sunt
+         * ieftine; adresa obligatorie si telefonul erau greul, alea raman
+         * scoase. Cine le sare le completeaza oricum in formularul de dupa
+         * plata, de unde se scriu inapoi pe tranzactie.
+         *
+         * `tax_id_collection` si nr. reg. comert au disparut de tot: firma nu
+         * e platitoare de TVA, iar numarul de registru nu-l cere nimeni.
          */
         billing_address_collection: "auto",
+        custom_fields: [
+          {
+            key: "company_name",
+            label: { type: "custom", custom: "Nume firma (optional)" },
+            type: "text",
+            optional: true,
+          },
+          {
+            key: "company_cui",
+            label: { type: "custom", custom: "CUI (optional)" },
+            type: "text",
+            optional: true,
+          },
+        ],
         success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
         // Pachetul merge in linkul de anulare: cine iese din Stripe fara sa
         // plateasca (firma fara card, sef care vrea OP) trebuie sa primeasca

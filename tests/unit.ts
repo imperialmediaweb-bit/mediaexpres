@@ -1298,10 +1298,9 @@ console.log("\n########## S. RECENZII ##########");
     // Contabila identifica incasarile dupa firma si CUI. Nu le mai CEREM
     // inainte de plata, dar le SCRIEM pe tranzactie dupa — altfel nu mai
     // poate lega plata de firma si i le trimite proprietarul de mana.
-    t(
-      "pagina de card nu mai cere de doua ori aceleasi date",
-      !/custom_fields:\s*\[/.test(ch) && !/tax_id_collection:\s*\{/.test(ch),
-    );
+    t("firma si CUI raman pe pagina de card, ca sa le aiba contabila", /key: "company_name"/.test(ch) && /key: "company_cui"/.test(ch));
+    t("dar sunt OPTIONALE, nu opresc plata", (ch.match(/optional: true/g) || []).length === 2);
+    t("nr. reg. comert si codul TVA au disparut", !/company_reg_no/.test(ch) && !/tax_id_collection:\s*\{/.test(ch));
     t("firma si CUI ajung pe plata din Stripe", /paymentIntents\.update/.test(api));
     t("apar in descrierea platii, nu doar in metadata", /description: \[firma, codFiscal/.test(api));
     t("o eroare la Stripe nu strica o comanda deja platita", /nu am putut scrie firma pe plata Stripe/.test(api));
