@@ -4,8 +4,9 @@ import { verifyOrderToken } from "@/lib/order-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { db } from "@/db";
+import { getStripe } from "@/lib/stripe";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { orderSubmissions, orders } from "@/db/schema";
+import { orderSubmissions, orders, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII } from "@/lib/content-policy";
@@ -166,6 +167,94 @@ export async function POST(req: NextRequest) {
     alreadySubmitted = inserted.length === 0;
   } catch (err) {
     console.error("[articol/submit] NU am putut salva in DB (continui pe email):", err);
+  }
+
+  /**
+   * 21.09.2026 — datele de firma ajung si pe profilul clientului.
+   *
+   * Pana acum veneau din `custom_fields` de pe pagina Stripe. Alea au fost
+   * scoase (cereau de doua ori acelasi lucru si costau plati), deci singura
+   * lor sursa e formularul asta. Completam DOAR ce lipseste: ce a scris omul
+   * in contul lui ramane al lui.
+   *
+   * Tacut si neblocant — un profil neactualizat nu are voie sa strice o
+   * comanda deja platita si trimisa.
+   */
+  try {
+    const patch: Record<string, string> = {};
+    if (d.companyName?.trim()) patch.companyName = d.companyName.trim();
+    if (d.cui?.trim()) patch.companyCui = d.cui.trim();
+    if (d.billingAddress?.trim()) patch.companyAddress = d.billingAddress.trim();
+    if (d.contactPhone?.trim()) patch.phone = d.contactPhone.trim();
+    if (Object.keys(patch).length) {
+      const [profil] = await db
+        .select({
+          id: users.id,
+          companyName: users.companyName,
+          companyCui: users.companyCui,
+          companyAddress: users.companyAddress,
+          phone: users.phone,
+        })
+        .from(users)
+        .where(eq(users.email, order.email))
+        .limit(1);
+      if (profil) {
+        const doarGoale: Record<string, string> = {};
+        for (const [k, v] of Object.entries(patch)) {
+          if (!profil[k as keyof typeof profil]) doarGoale[k] = v;
+        }
+        if (Object.keys(doarGoale).length) {
+          await db.update(users).set(doarGoale).where(eq(users.id, profil.id));
+        }
+      }
+    }
+  } catch (err) {
+    console.error("[articol/submit] profilul nu a putut fi completat:", err);
+  }
+
+  /**
+   * 21.09.2026 — numele firmei si CUI-ul se scriu INAPOI pe tranzactia din
+   * Stripe.
+   *
+   * Pana acum veneau din `custom_fields` de pe pagina de plata, iar contabila
+   * identifica dupa ele fiecare incasare. Campurile alea au fost scoase (opt
+   * lucruri cerute pentru 500 de lei, 40 din 45 de oameni se opreau acolo),
+   * dar nevoia ei a ramas: fara CUI pe tranzactie nu poate lega incasarea de
+   * firma si trebuie sa i le trimita proprietarul de mana.
+   *
+   * Deci nu le mai CEREM inainte de plata, le SCRIEM dupa: la doua minute,
+   * cand clientul completeaza formularul, punem numele firmei si CUI-ul in
+   * descrierea platii si in metadata ei. In lista de plati din Stripe apar
+   * exact ca inainte.
+   *
+   * Tacut si neblocant: comanda e deja platita si salvata, o eroare de
+   * scriere in Stripe nu are voie sa o atinga.
+   */
+  try {
+    const firma = d.companyName?.trim() || "";
+    const codFiscal = d.cui?.trim() || "";
+    if (firma || codFiscal) {
+      const [randComanda] = await db
+        .select({ pi: orders.stripePaymentIntentId })
+        .from(orders)
+        .where(eq(orders.stripeSessionId, order.sessionId))
+        .limit(1);
+      const stripe = getStripe();
+      if (stripe && randComanda?.pi) {
+        await stripe.paymentIntents.update(randComanda.pi, {
+          description: [firma, codFiscal ? `CUI ${codFiscal}` : ""]
+            .filter(Boolean)
+            .join(" · "),
+          metadata: {
+            ...(firma ? { company_name: firma } : {}),
+            ...(codFiscal ? { company_cui: codFiscal } : {}),
+            ...(d.billingAddress?.trim() ? { company_address: d.billingAddress.trim() } : {}),
+          },
+        });
+      }
+    }
+  } catch (err) {
+    console.error("[articol/submit] nu am putut scrie firma pe plata Stripe:", err);
   }
 
   if (alreadySubmitted) {

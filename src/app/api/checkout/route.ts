@@ -170,33 +170,17 @@ export async function POST(req: NextRequest) {
          * tara si codul postal), nu strada si orasul. Telefonul nu e necesar
          * ca sa incasezi.
          *
-         * Datele pentru FACTURA nu se pierd: adresa si CUI-ul se cer in
-         * formularul de dupa plata, unde omul e deja client si completeaza
-         * oricum ca sa-i apara articolul. Mai putine campuri inainte de bani,
-         * aceleasi date dupa.
+         * Datele pentru FACTURA nu se pierd: numele firmei, CUI-ul si adresa
+         * se cer in formularul de dupa plata, unde omul e deja client si
+         * completeaza oricum ca sa-i apara articolul. Mai putine campuri
+         * inainte de bani, aceleasi date dupa.
+         *
+         * De aceea au disparut si `custom_fields` (nume firma, CUI, nr. reg.)
+         * si `tax_id_collection`: nu mai are rost sa ceri de doua ori acelasi
+         * lucru, iar fiecare rand in plus pe pagina de card costa o plata.
+         * Pe pagina de card raman: email, card, nume si ce cere banca.
          */
         billing_address_collection: "auto",
-        tax_id_collection: { enabled: true },
-        custom_fields: [
-          {
-            key: "company_name",
-            label: { type: "custom", custom: "Nume firma (optional)" },
-            type: "text",
-            optional: true,
-          },
-          {
-            key: "company_cui",
-            label: { type: "custom", custom: "CUI (optional)" },
-            type: "text",
-            optional: true,
-          },
-          {
-            key: "company_reg_no",
-            label: { type: "custom", custom: "Nr. reg. comert (optional)" },
-            type: "text",
-            optional: true,
-          },
-        ],
         success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
         // Pachetul merge in linkul de anulare: cine iese din Stripe fara sa
         // plateasca (firma fara card, sef care vrea OP) trebuie sa primeasca
@@ -269,7 +253,6 @@ export async function POST(req: NextRequest) {
       client_reference_id: userId || undefined,
       // Acelasi motiv ca la plata unica (vezi comentariul de mai sus).
       billing_address_collection: "auto",
-      tax_id_collection: { enabled: true },
       success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE.url}/comanda/anulat?abonament=1`,
       locale: "ro",

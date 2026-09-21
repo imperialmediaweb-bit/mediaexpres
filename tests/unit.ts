@@ -1283,7 +1283,6 @@ console.log("\n########## S. RECENZII ##########");
     t("adresa nu mai e obligatorie la plata", !/billing_address_collection: "required"/.test(ch));
     t("Stripe cere doar ce-i trebuie cardului", (ch.match(/billing_address_collection: "auto"/g) || []).length === 2);
     t("telefonul nu se mai cere la plata", !/phone_number_collection/.test(ch));
-    t("codul TVA ramane, e optional si nu opreste pe nimeni", /tax_id_collection: \{ enabled: true \}/.test(ch));
     t("recuperarea cosului abandonat ramane pornita", /after_expiration/.test(ch) && /recovery: \{ enabled: true/.test(ch));
 
     t("formularul de dupa plata cere CUI si adresa", /CUI \(pentru factur/.test(form) && /Adresa firmei \(pentru factur/.test(form));
@@ -1295,6 +1294,18 @@ console.log("\n########## S. RECENZII ##########");
     t("apar in emailul catre admin, langa restul datelor", /kv\("CUI"/.test(api) && /kv\("Adresa facturare"/.test(api));
     t("exista in schema", /cui: text\("cui"\)/.test(sch) && /billingAddress: text\("billing_address"\)/.test(sch));
     t("coloanele se creeaza singure, nu asteapta fix-db", /"cui" text/.test(ens) && /"billing_address" text/.test(ens));
+
+    // Contabila identifica incasarile dupa firma si CUI. Nu le mai CEREM
+    // inainte de plata, dar le SCRIEM pe tranzactie dupa — altfel nu mai
+    // poate lega plata de firma si i le trimite proprietarul de mana.
+    t(
+      "pagina de card nu mai cere de doua ori aceleasi date",
+      !/custom_fields:\s*\[/.test(ch) && !/tax_id_collection:\s*\{/.test(ch),
+    );
+    t("firma si CUI ajung pe plata din Stripe", /paymentIntents\.update/.test(api));
+    t("apar in descrierea platii, nu doar in metadata", /description: \[firma, codFiscal/.test(api));
+    t("o eroare la Stripe nu strica o comanda deja platita", /nu am putut scrie firma pe plata Stripe/.test(api));
+    t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
   // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
