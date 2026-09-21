@@ -43,6 +43,8 @@ export function ArticleForm({
   const [siteUrl, setSiteUrl] = useState("");
   const [linkNotes, setLinkNotes] = useState("");
   const [contactPhone, setContactPhone] = useState("");
+  const [cui, setCui] = useState("");
+  const [billingAddress, setBillingAddress] = useState("");
   const [brief, setBrief] = useState("");
 
   const [title, setTitle] = useState("");
@@ -259,6 +261,8 @@ export function ArticleForm({
           companyName,
           siteUrl,
           contactPhone,
+          cui,
+          billingAddress,
           metaDescription,
           keywords,
           images,
@@ -342,6 +346,34 @@ export function ArticleForm({
             placeholder="07XX XXX XXX"
             type="tel"
           />
+          {/*
+            21.09.2026 — CUI-ul si adresa se cer AICI, nu pe pagina de plata.
+            Acolo erau opt campuri pentru 500 de lei si patruzeci din
+            patruzeci si cinci de oameni se opreau inainte sa plateasca. Aici
+            omul a platit deja si completeaza oricum ca sa-i apara articolul,
+            deci datele ajung la fel de sigur la factura.
+          */}
+          <Field
+            label="CUI (pentru factură)"
+            value={cui}
+            onChange={setCui}
+            placeholder="RO12345678 sau 12345678"
+          />
+          <div>
+            <label className="mb-1 block text-sm font-medium text-slate-700">
+              Adresa firmei (pentru factură)
+            </label>
+            <input
+              type="text"
+              value={billingAddress}
+              onChange={(e) => setBillingAddress(e.target.value)}
+              placeholder="Str. Exemplu nr. 10, București"
+              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
+            />
+            <p className="mt-1 text-xs text-slate-500">
+              Le folosim doar la factură. Dacă factura e pe persoană fizică, lasă CUI-ul gol.
+            </p>
+          </div>
         </div>
       </section>
 

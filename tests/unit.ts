@@ -1271,6 +1271,32 @@ console.log("\n########## S. RECENZII ##########");
     );
   }
 
+  // Pagina de plata cerea opt lucruri pentru 500 de lei; 40 din 45 de oameni
+  // se opreau acolo. Datele de facturare au trecut dupa plata.
+  {
+    const ch = citesteFisier("src/app/api/checkout/route.ts");
+    const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+    const api = citesteFisier("src/app/api/articol/submit/route.ts");
+    const sch = citesteFisier("src/db/schema.ts");
+    const ens = citesteFisier("src/lib/ensure-columns.ts");
+
+    t("adresa nu mai e obligatorie la plata", !/billing_address_collection: "required"/.test(ch));
+    t("Stripe cere doar ce-i trebuie cardului", (ch.match(/billing_address_collection: "auto"/g) || []).length === 2);
+    t("telefonul nu se mai cere la plata", !/phone_number_collection/.test(ch));
+    t("codul TVA ramane, e optional si nu opreste pe nimeni", /tax_id_collection: \{ enabled: true \}/.test(ch));
+    t("recuperarea cosului abandonat ramane pornita", /after_expiration/.test(ch) && /recovery: \{ enabled: true/.test(ch));
+
+    t("formularul de dupa plata cere CUI si adresa", /CUI \(pentru factur/.test(form) && /Adresa firmei \(pentru factur/.test(form));
+    t("spune pe fata ca sunt doar pentru factura", /Le folosim doar la factur/.test(form));
+    t("campurile pleaca spre server", /\n          cui,\n          billingAddress,/.test(form));
+
+    t("serverul le accepta", /cui: z\.string\(\)/.test(api) && /billingAddress: z\.string\(\)/.test(api));
+    t("serverul le salveaza pe comanda", /cui: d\.cui \|\| null/.test(api) && /billingAddress: d\.billingAddress \|\| null/.test(api));
+    t("apar in emailul catre admin, langa restul datelor", /kv\("CUI"/.test(api) && /kv\("Adresa facturare"/.test(api));
+    t("exista in schema", /cui: text\("cui"\)/.test(sch) && /billingAddress: text\("billing_address"\)/.test(sch));
+    t("coloanele se creeaza singure, nu asteapta fix-db", /"cui" text/.test(ens) && /"billing_address" text/.test(ens));
+  }
+
   // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
   {
     const of = citesteFisier("src/app/oferta-500/page.tsx");

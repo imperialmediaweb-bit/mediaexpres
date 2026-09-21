@@ -208,6 +208,9 @@ export const orderSubmissions = pgTable("order_submission", {
   companyName: text("company_name"),
   siteUrl: text("site_url"),
   contactPhone: text("contact_phone"),
+  // 21.09.2026 — datele de facturare se cer dupa plata, nu pe pagina Stripe.
+  cui: text("cui"),
+  billingAddress: text("billing_address"),
   // JSON: [{url, publicId}] — pozele din Cloudinary; featuredIndex arata reprezentativa.
   images: text("images").notNull().default("[]"),
   featuredIndex: integer("featured_index").notNull().default(0),

@@ -159,9 +159,24 @@ export async function POST(req: NextRequest) {
           ...fbMeta,
         },
         client_reference_id: userId || undefined,
-        billing_address_collection: "required",
+        /**
+         * 21.09.2026 — pagina de plata cerea OPT lucruri pentru 500 de lei:
+         * email, tara si telefon, card, nume, adresa completa obligatorie,
+         * cod TVA, nume firma, CUI. Masurat pe 29 de zile: 45 de oameni au
+         * ajuns la card, 5 au platit. Patruzeci s-au oprit acolo — adica fix
+         * oamenii care deja decisesera.
+         *
+         * „auto" lasa Stripe sa ceara doar ce-i trebuie cardului (de regula
+         * tara si codul postal), nu strada si orasul. Telefonul nu e necesar
+         * ca sa incasezi.
+         *
+         * Datele pentru FACTURA nu se pierd: adresa si CUI-ul se cer in
+         * formularul de dupa plata, unde omul e deja client si completeaza
+         * oricum ca sa-i apara articolul. Mai putine campuri inainte de bani,
+         * aceleasi date dupa.
+         */
+        billing_address_collection: "auto",
         tax_id_collection: { enabled: true },
-        phone_number_collection: { enabled: true },
         custom_fields: [
           {
             key: "company_name",
@@ -252,9 +267,9 @@ export async function POST(req: NextRequest) {
         },
       },
       client_reference_id: userId || undefined,
-      billing_address_collection: "required",
+      // Acelasi motiv ca la plata unica (vezi comentariul de mai sus).
+      billing_address_collection: "auto",
       tax_id_collection: { enabled: true },
-      phone_number_collection: { enabled: true },
       success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${SITE.url}/comanda/anulat?abonament=1`,
       locale: "ro",

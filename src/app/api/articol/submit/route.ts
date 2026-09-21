@@ -28,6 +28,9 @@ const schema = z.object({
   companyName: z.string().max(200).optional(),
   siteUrl: z.string().max(300).optional(),
   contactPhone: z.string().max(40).optional(),
+  // 21.09.2026 — CUI si adresa au trecut de pe pagina de plata aici.
+  cui: z.string().max(40).optional(),
+  billingAddress: z.string().max(300).optional(),
   fbBoostPaper: z.string().max(120).optional(),
   /** „ancoră → adresă", o linie pe link. Vezi schema, link_notes. */
   linkNotes: z.string().max(1000).optional(),
@@ -148,6 +151,8 @@ export async function POST(req: NextRequest) {
         companyName: d.companyName || null,
         siteUrl: d.siteUrl || null,
         contactPhone: d.contactPhone || null,
+        cui: d.cui || null,
+        billingAddress: d.billingAddress || null,
         images: JSON.stringify(d.images),
         featuredIndex: d.featuredIndex,
         facebookOptIn: d.facebookOptIn,
@@ -196,6 +201,8 @@ export async function POST(req: NextRequest) {
       ${kv("Categorie", isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
       ${kv("Email client", order.email)}
       ${kv("Telefon", d.contactPhone || "—")}
+      ${kv("CUI", d.cui || "—")}
+      ${kv("Adresa facturare", d.billingAddress || "—")}
       ${kv("Firmă", d.companyName || "—")}
       ${kv("Promovare Facebook (3 zile)", d.fbBoostPaper?.trim() || "alegem noi — ziarul din județul clientului")}
       ${kv("Site", d.siteUrl || "—")}
