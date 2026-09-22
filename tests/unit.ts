@@ -1349,6 +1349,12 @@ console.log("\n########## S. RECENZII ##########");
     t("numele sursei e cel din lib, nu scris de mana", /etichetaSursa\(r\.sursa/.test(adm));
     t("spune pe fata ce inseamna „necunoscuta”", /nainte de 13 septembrie/.test(adm));
 
+    // Incasarile pe luni: o cifra singura nu spune daca afacerea creste.
+    t("dashboardul are incasarile pe luni", /[ÎI]ncas[ăa]ri pe luni/.test(adm));
+    t("aduna card si transfer si aici", /for \(const r of cardSurse\) laLuna/.test(adm) && /for \(const r of opRows\) laLuna/.test(adm));
+    t("luna se ia dupa ora Romaniei, nu UTC", /laLuna[\s\S]{0,400}Europe\/Bucharest/.test(adm));
+    t("spune ca luna curenta e inca in desfasurare", /[îi]nc[ăa] [îi]n desf[ăa][șs]urare/.test(adm));
+
     // Si in lista de clienti: „clientii mari de unde apar?" e intrebarea care
     // decide unde pui banii de reclama.
     const cli = citesteFisier("src/app/admin/clienti/page.tsx");

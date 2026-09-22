@@ -129,6 +129,40 @@ export default async function AdminHome() {
     .map(([sursa, v]) => ({ sursa, ...v }))
     .sort((a, b) => b.total30 - a.total30 || b.total - a.total);
 
+  /**
+   * 22.09.2026 — incasarile pe luni.
+   *
+   * Cifra „total" si cea „pe luna curenta" nu spun daca afacerea creste sau
+   * scade: in 22 ale lunii, luna curenta arata mereu mai putin decat cea
+   * trecuta, si pare ca merge prost. Aici sunt una sub alta, cu numarul de
+   * comenzi langa fiecare, ca sa se vada linia.
+   *
+   * Luna se ia dupa ora Romaniei, nu dupa UTC — altfel o comanda de la 01:30
+   * dintr-un intai de luna cade in luna trecuta.
+   */
+  const peLuna = new Map<string, { total: number; comenzi: number; eticheta: string }>();
+  function laLuna(cand: Date | null, cents: number) {
+    if (!cand) return;
+    const d = new Date(new Date(cand).toLocaleString("en-US", { timeZone: "Europe/Bucharest" }));
+    const cheie = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+    const r = peLuna.get(cheie) || {
+      total: 0,
+      comenzi: 0,
+      eticheta: d.toLocaleDateString("ro-RO", { month: "long", year: "numeric" }),
+    };
+    r.total += cents;
+    r.comenzi += 1;
+    peLuna.set(cheie, r);
+  }
+  for (const r of cardSurse) laLuna(r.createdAt, Number(r.amount || 0));
+  for (const r of opRows) laLuna(r.createdAt, pretPachet(r.packageId));
+
+  const luni = [...peLuna.entries()]
+    .sort((a, b) => b[0].localeCompare(a[0]))
+    .slice(0, 12)
+    .map(([cheie, v]) => ({ cheie, ...v }));
+  const celMaiBun = Math.max(1, ...luni.map((l) => l.total));
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">Dashboard</h1>
@@ -164,6 +198,41 @@ export default async function AdminHome() {
         ce le adaugi din <Link href="/admin/materiale" className="underline">Materiale</Link>{" "}
         și bifezi &bdquo;banii au intrat deja&rdquo;.
       </p>
+
+      {/* Incasarile pe luni — linia afacerii, nu o cifra singura. */}
+      <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6">
+        <h2 className="font-serif text-xl font-bold text-brand-navy">Încasări pe luni</h2>
+        <p className="mt-1 text-sm text-slate-600">
+          Card și transfer la un loc. Luna curentă e încă în desfășurare, deci se compară
+          cu luna trecută abia la final.
+        </p>
+
+        {luni.length === 0 ? (
+          <p className="mt-4 text-sm text-slate-500">Încă nicio încasare.</p>
+        ) : (
+          <div className="mt-5 space-y-2.5">
+            {luni.map((l) => (
+              <div key={l.cheie} className="flex items-center gap-3">
+                <span className="w-32 shrink-0 text-sm capitalize text-slate-600">
+                  {l.eticheta}
+                </span>
+                <div className="h-6 flex-1 overflow-hidden rounded bg-slate-100">
+                  <div
+                    className="h-full rounded bg-brand-gold/70"
+                    style={{ width: `${Math.round((l.total / celMaiBun) * 100)}%` }}
+                  />
+                </div>
+                <span className="w-28 shrink-0 text-right text-sm font-semibold text-brand-navy">
+                  {formatRON(l.total)}
+                </span>
+                <span className="w-20 shrink-0 text-right text-xs text-slate-500">
+                  {l.comenzi} {l.comenzi === 1 ? "comandă" : "comenzi"}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
 
       {/* De unde vin banii — card si transfer adunate pe aceeasi sursa. */}
       <div className="mt-10 rounded-xl border border-slate-200 bg-white p-6">
