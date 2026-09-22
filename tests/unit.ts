@@ -1307,6 +1307,17 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // Raportul LIVE pe /exemple: un PDF poate fi pregatit pentru vanzare, un
+  // raport care se completeaza azi, nu.
+  {
+    const ex = citesteFisier("src/app/exemple/page.tsx");
+    const camp = citesteFisier("src/data/campanii.ts");
+    t("exista raportul live, pe langa PDF", /EXEMPLU_RAPORT_LIVE/.test(camp) && /EXEMPLU_RAPORT_LIVE/.test(ex));
+    t("duce la un raport real din retea", /botosaniexpres\.ro\/raport\//.test(camp));
+    t("spune ca e in curs, ca sa nu para incomplet", /n curs de publicare/.test(ex));
+    t("PDF-ul de exemplu ramane, nu l-am inlocuit", /EXEMPLU_RAPORT\.url/.test(ex));
+  }
+
   // „De unde vin banii" in admin: sursa se salva din 13.09, dar nu se vedea
   // nicaieri adunata — iar decizia de buget se lua din amintiri.
   {

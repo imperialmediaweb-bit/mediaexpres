@@ -3,7 +3,7 @@ import Link from "next/link";
 import { ArrowUpRight, Newspaper, CheckCircle2, CreditCard, FileText, Target } from "lucide-react";
 import { PORTOFOLIU } from "@/data/portfolio";
 import { ClientiStrip } from "@/components/ClientiStrip";
-import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
+import { CAMPANII, EXEMPLU_RAPORT, EXEMPLU_RAPORT_LIVE } from "@/data/campanii";
 import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
@@ -114,6 +114,36 @@ export default function ExemplePage() {
               className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-navy px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-navy/90"
             >
               Deschide raportul (PDF)
+            </a>
+          </div>
+
+          {/*
+            Raportul LIVE, langa PDF. Un document poate fi pregatit pentru
+            vanzare; un raport care se completeaza singur, azi, nu. Cifra din
+            el creste de la o zi la alta — de-aia scrie limpede ca e in curs,
+            ca nimeni sa nu se intrebe unde-s restul articolelor.
+          */}
+          <div className="mx-auto mt-4 flex max-w-5xl flex-col items-center justify-between gap-4 rounded-2xl border-2 border-brand-red/30 bg-brand-red/5 p-6 md:flex-row">
+            <div className="flex items-start gap-3">
+              <FileText className="mt-0.5 h-6 w-6 shrink-0 text-brand-red" />
+              <div>
+                <p className="font-serif text-lg font-bold text-brand-navy">
+                  Și un raport care se scrie chiar acum
+                </p>
+                <p className="mt-1 text-sm text-slate-600">
+                  Campania {EXEMPLU_RAPORT_LIVE.client}, în curs de publicare.{" "}
+                  {EXEMPLU_RAPORT_LIVE.descriere} Deschide-l azi și mâine — o să vezi alte
+                  cifre.
+                </p>
+              </div>
+            </div>
+            <a
+              href={EXEMPLU_RAPORT_LIVE.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex shrink-0 items-center gap-2 rounded-lg bg-brand-red px-5 py-3 text-sm font-bold text-white transition hover:bg-brand-red/90"
+            >
+              Vezi raportul live →
             </a>
           </div>
         </div>

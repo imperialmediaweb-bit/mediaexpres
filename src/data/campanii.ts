@@ -110,6 +110,23 @@ export const CAMPANII: Campanie[] = [
 ];
 
 /** Raportul aratat ca exemplu — unul singur, sa se vada cum arata. */
+/**
+ * 22.09.2026 — raportul LIVE, pe langa PDF-ul de exemplu.
+ *
+ * PDF-ul arata ce primeste omul la final, dar e un document: se poate
+ * banui ca e pregatit pentru vanzare. Linkul asta e raportul unui client
+ * care se completeaza chiar acum, articol cu articol, pe masura ce
+ * esalonarea le scoate. Cine il deschide azi vede o cifra, maine alta.
+ *
+ * Aia e dovada pe care n-o poate falsifica nimeni.
+ */
+export const EXEMPLU_RAPORT_LIVE = {
+  client: "Belle Art Photography",
+  url: "https://botosaniexpres.ro/raport/-_8BkF1L410hb2oFATe9uA4n06SppLAz",
+  descriere:
+    "Se completeaza singur, pe masura ce apar articolele. Fiecare rand are linkul catre articolul publicat si catre postarea de Facebook.",
+};
+
 export const EXEMPLU_RAPORT = {
   client: "Reparații acoperișuri montaj",
   url: "/rapoarte/exemplu-raport-publicare.pdf",
