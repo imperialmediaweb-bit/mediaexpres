@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users, orders, subscriptions, orderSubmissions } from "@/db/schema";
 import { and, desc, eq, or, sql } from "drizzle-orm";
 import { findPackageById } from "@/data/packages";
+import { etichetaSursa } from "@/lib/sursa";
 import { RecoverLeadsButton } from "./RecoverLeadsButton";
 import { ImportLeadsButton } from "./ImportLeadsButton";
 import { SendListButton } from "./SendListButton";
@@ -63,6 +64,43 @@ export default async function AdminClientiPage() {
     });
   }
 
+  /**
+   * 22.09.2026 — sursa, langa fiecare client.
+   *
+   * O aveam pe comanda din 13.09, dar in lista de clienti nu scria nimic:
+   * vedeai cine a platit si cat, niciodata de unde a venit. Asa nu poti
+   * raspunde la „clientii mari de unde apar?" — si tocmai aia e intrebarea
+   * care decide unde pui banii de reclama.
+   *
+   * Luam PRIMA sursa cunoscuta, nu ultima: pe noi ne intereseaza ce l-a adus
+   * prima data, nu pe unde a intrat a treia oara. Se cauta in amandoua
+   * drumurile — card si transfer — pentru ca un client poate avea doar unul
+   * dintre ele.
+   */
+  const [surseCard, surseOp] = await Promise.all([
+    db
+      .select({ email: orders.email, source: orders.source, createdAt: orders.createdAt })
+      .from(orders)
+      .where(sql`${orders.source} IS NOT NULL`),
+    db
+      .select({
+        email: orderSubmissions.email,
+        source: orderSubmissions.source,
+        createdAt: orderSubmissions.createdAt,
+      })
+      .from(orderSubmissions)
+      .where(sql`${orderSubmissions.source} IS NOT NULL`),
+  ]);
+
+  const sursaDupaEmail = new Map<string, { source: string; cand: number }>();
+  for (const r of [...surseCard, ...surseOp]) {
+    if (!r.source || !r.email) continue;
+    const key = r.email.toLowerCase();
+    const cand = r.createdAt ? new Date(r.createdAt).getTime() : Number.MAX_SAFE_INTEGER;
+    const cur = sursaDupaEmail.get(key);
+    if (!cur || cand < cur.cand) sursaDupaEmail.set(key, { source: r.source, cand });
+  }
+
   const rows = await db
     .select({
       id: users.id,
@@ -97,6 +135,7 @@ export default async function AdminClientiPage() {
     const op = opDupaEmail.get(u.email.toLowerCase());
     return {
       ...u,
+      sursa: sursaDupaEmail.get(u.email.toLowerCase())?.source ?? null,
       paidCount: (Number(u.paidCount) || 0) + (op?.count ?? 0),
       totalSpent: (Number(u.totalSpent) || 0) + (op?.total ?? 0),
     };
@@ -127,6 +166,7 @@ export default async function AdminClientiPage() {
             <tr>
               <th className="px-4 py-3">Client</th>
               <th className="px-4 py-3">Firma</th>
+              <th className="px-4 py-3">Venit din</th>
               <th className="px-4 py-3">Plăți</th>
               <th className="px-4 py-3">Total</th>
               <th className="px-4 py-3">Abonament</th>
@@ -137,7 +177,7 @@ export default async function AdminClientiPage() {
           <tbody>
             {clienti.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                   Niciun client.
                 </td>
               </tr>
@@ -153,6 +193,13 @@ export default async function AdminClientiPage() {
                     <td className="px-4 py-3 text-slate-600">
                       {u.companyName || <span className="text-slate-400">—</span>}
                       {u.companyCui && <p className="text-xs text-slate-400">{u.companyCui}</p>}
+                    </td>
+                    <td className="px-4 py-3 text-slate-600">
+                      {u.sursa ? (
+                        etichetaSursa(u.sursa)
+                      ) : (
+                        <span className="text-slate-400">—</span>
+                      )}
                     </td>
                     <td className="px-4 py-3 text-slate-600">{u.paidCount}</td>
                     <td className="px-4 py-3 font-semibold">

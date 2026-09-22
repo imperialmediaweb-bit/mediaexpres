@@ -1317,6 +1317,14 @@ console.log("\n########## S. RECENZII ##########");
     t("are si fereastra de 30 de zile, nu doar totalul", /total30/.test(adm) && /30 \* 24 \* 60 \* 60 \* 1000/.test(adm));
     t("numele sursei e cel din lib, nu scris de mana", /etichetaSursa\(r\.sursa/.test(adm));
     t("spune pe fata ce inseamna „necunoscuta”", /nainte de 13 septembrie/.test(adm));
+
+    // Si in lista de clienti: „clientii mari de unde apar?" e intrebarea care
+    // decide unde pui banii de reclama.
+    const cli = citesteFisier("src/app/admin/clienti/page.tsx");
+    t("lista de clienti are coloana de sursa", /Venit din/.test(cli));
+    t("cauta sursa si pe card, si pe transfer", /surseCard/.test(cli) && /surseOp/.test(cli));
+    t("retine PRIMA sursa, nu ultima", /if \(!cur \|\| cand < cur\.cand\)/.test(cli));
+    t("acelasi nume ca pe dashboard", /etichetaSursa\(u\.sursa\)/.test(cli));
   }
 
   // BUG-UL de o luna: pozele nu se urcau niciodata din formularul de articol,
