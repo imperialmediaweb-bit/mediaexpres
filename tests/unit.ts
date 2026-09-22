@@ -1307,6 +1307,18 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // „De unde vin banii" in admin: sursa se salva din 13.09, dar nu se vedea
+  // nicaieri adunata — iar decizia de buget se lua din amintiri.
+  {
+    const adm = citesteFisier("src/app/admin/page.tsx");
+    t("dashboardul arata banii pe sursa", /De unde vin banii/.test(adm));
+    t("aduna SI cardul, SI transferul, pe aceeasi sursa", /for \(const r of cardSurse\) adauga/.test(adm) && /for \(const r of opRows\) adauga/.test(adm));
+    t("comenzile prin transfer isi aduc sursa din baza", /source: orderSubmissions\.source/.test(adm));
+    t("are si fereastra de 30 de zile, nu doar totalul", /total30/.test(adm) && /30 \* 24 \* 60 \* 60 \* 1000/.test(adm));
+    t("numele sursei e cel din lib, nu scris de mana", /etichetaSursa\(r\.sursa/.test(adm));
+    t("spune pe fata ce inseamna „necunoscuta”", /nainte de 13 septembrie/.test(adm));
+  }
+
   // BUG-UL de o luna: pozele nu se urcau niciodata din formularul de articol,
   // si nici nu aparea vreo eroare. `e.target.value = ""` golea lista VIE de
   // fisiere inainte ca functia asincrona sa apuce s-o citeasca.
