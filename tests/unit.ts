@@ -1307,6 +1307,26 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // Pagina care raspunde la „e o retea de linkuri?" — cea mai scumpa obiectie
+  // pe care o avem. Raspunde prin cifre, nu prin negare.
+  {
+    const tr = citesteFisier("src/app/transparenta/page.tsx");
+    const sm = citesteFisier("src/app/sitemap.ts");
+
+    t("pagina exista si e in sitemap", /Transparen/.test(tr) && /\/transparenta/.test(sm));
+    t("cifrele vin live din retea, nu scrise de mana", /cifreLive/.test(tr) && /c\.publicatii/.test(tr));
+    t("are data langa cifre", /c\.laData/.test(tr));
+    t("arata starea retelei, nu doar o afirma", /<StareRetea \/>/.test(tr));
+    t("spune raportul advertorialelor fata de redactie", /sub 2%/.test(tr));
+    t("nu promite pozitii in Google", /Nu promitem pozi[țt]ii [îi]n Google/.test(tr));
+    t("nu repeta acuzatia in titlu", !/retea de linkuri|re\u021bea de linkuri/i.test(tr.split("export const metadata")[1] || ""));
+    t("nu publica cititori unici pe site", !/cititori unici/i.test(tr));
+    // Pentru clientul de SEO: esalonarea e dovada ca nu vindem linkuri la kilogram.
+    t("explica esalonarea, cu toate trei variantele", /12 ore lucr/.test(tr) && /pe 3 zile/.test(tr) && /pe 2 s[ăa]pt/.test(tr));
+    t("spune de ce conteaza, nu doar ca se poate", /o singur[ăa] achizi[țt]ie/.test(tr));
+    t("pomeneste si ancorele variate", /de cincizeci de ori/.test(tr));
+  }
+
   // Raportul LIVE pe /exemple: un PDF poate fi pregatit pentru vanzare, un
   // raport care se completeaza azi, nu.
   {
