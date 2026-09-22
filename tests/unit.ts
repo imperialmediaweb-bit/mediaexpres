@@ -1307,6 +1307,19 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // BUG-UL de o luna: pozele nu se urcau niciodata din formularul de articol,
+  // si nici nu aparea vreo eroare. `e.target.value = ""` golea lista VIE de
+  // fisiere inainte ca functia asincrona sa apuce s-o citeasca.
+  {
+    const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+    const op = citesteFisier("src/app/comanda/transfer/TransferForm.tsx");
+
+    t("lista se copiaza INAINTE de golirea campului", /const alese = Array\.from\(e\.target\.files \|\| \[\]\);\s*\n\s*e\.target\.value = "";/.test(form));
+    t("functia primeste o copie, nu lista vie a inputului", /async function uploadFiles\(alese: File\[\]\)/.test(form));
+    t("nu se mai citeste lista dupa await", !/Array\.from\(files\)/.test(form));
+    t("formularul de OP copia deja inainte de primul await", /Array\.from\(list\)/.test(op));
+  }
+
   // 22.09.2026 — un client care PLATISE a ramas blocat: incarcarea pozelor ii
   // pica in browser, iar cele 3 poze obligatorii nu-l lasau sa trimita nimic.
   {

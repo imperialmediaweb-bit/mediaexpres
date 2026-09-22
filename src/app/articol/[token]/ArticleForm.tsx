@@ -123,7 +123,23 @@ export function ArticleForm({
     }
   }
 
-  async function uploadFiles(files: FileList) {
+  /**
+   * 22.09.2026 — BUG-UL, gasit dupa o luna de reclamatii „nu ma lasa sa urc
+   * pozele, nici jpg nici png".
+   *
+   * Functia primea `FileList`-ul VIU al inputului, nu o copie. Ea cere intai
+   * semnatura de la server (`await`), si abia dupa aceea citea lista. Intre
+   * cele doua momente, `onChange` apucase sa execute `e.target.value = ""` —
+   * iar golirea campului goleste si lista. `picked` iesea gol, bucla nu
+   * rula, nicio poza nu se urca SI nu aparea nicio eroare, pentru ca nimic
+   * nu esuase: pur si simplu nu mai era nimic de urcat.
+   *
+   * De-aia formatul nu conta si de-aia nu se vedea niciun mesaj. Formularul
+   * de OP scapa pentru ca acolo lista se copiaza inainte de primul `await`.
+   *
+   * Acum primim un `File[]` copiat sincron in `onChange`, inainte de golire.
+   */
+  async function uploadFiles(alese: File[]) {
     const room = MAX_IMAGES - images.length;
     if (room <= 0) {
       setError(`Poți încărca maximum ${MAX_IMAGES} poze.`);
@@ -141,7 +157,7 @@ export function ArticleForm({
       const sign = await signRes.json();
       if (!signRes.ok || !sign.ok) throw new Error(sign.error || "Upload indisponibil");
 
-      const picked = Array.from(files).slice(0, room);
+      const picked = alese.slice(0, room);
       const uploaded: UploadedImage[] = [];
 
       const probleme: string[] = [];
@@ -644,8 +660,11 @@ export function ArticleForm({
               className="sr-only"
               disabled={uploading}
               onChange={(e) => {
-                if (e.target.files?.length) uploadFiles(e.target.files);
+                // Copiem lista INAINTE de a goli campul: `e.target.files` e o
+                // referinta vie, iar `value = ""` o goleste. Vezi uploadFiles.
+                const alese = Array.from(e.target.files || []);
                 e.target.value = "";
+                if (alese.length) void uploadFiles(alese);
               }}
             />
             {uploading ? (
