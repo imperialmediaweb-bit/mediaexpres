@@ -1307,6 +1307,20 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // Doua preturi pentru acelasi lucru, pe doua pagini: pe /pachete scria
+  // „National 50 — 1.500 lei", iar reclama spunea 500. Un om a intrebat de ce.
+  {
+    const pach = citesteFisier("src/app/pachete/page.tsx");
+    const promo = citesteFisier("src/app/oferta-500/PromoOffer.tsx");
+
+    t("pagina de pachete trimite la oferta de 500", /href="\/oferta-500"/.test(pach));
+    t("si spune de ce preturile de acolo sunt altele", /Pre\u021burile de mai jos sunt/.test(pach) && /de list\u0103/.test(pach));
+    t("caseta de pret explica cele doua cifre", /Pre\u021bul obi\u0219nuit al pachetului este/.test(promo));
+    t("spune si cat iese pe ziar", /lei pe ziar/.test(promo));
+    t("foloseste preturile reale, nu cifre scrise de mana", /offer\.listPrice/.test(promo) && /offer\.price \/ 50/.test(promo));
+    t("explicatia nu apare la abonament, unde n-are sens", /showPrice && !monthly/.test(promo));
+  }
+
   // Obiectia „e facut cu AI", raspunsa pe pagina inainte sa fie pusa.
   {
     const of = citesteFisier("src/app/oferta-500/page.tsx");

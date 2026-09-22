@@ -54,6 +54,28 @@ export default function PacheteTPage() {
         </div>
       </section>
 
+      {/*
+        22.09.2026 — un om a venit din reclama cu „500 de lei", a ajuns aici,
+        a vazut „National 50 — 1.500 lei" si a intrebat de ce scrie 1.500.
+        Doua preturi pentru acelasi lucru, pe doua pagini, fara nicio legatura
+        intre ele. Banda asta e legatura: preturile de mai jos sunt cele de
+        lista, iar oferta de intrare e alta pagina, pe care o arata aici.
+      */}
+      <div className="border-b-2 border-brand-red bg-brand-red/5">
+        <div className="container py-5">
+          <div className="flex flex-col items-center gap-3 text-center sm:flex-row sm:justify-center sm:text-left">
+            <p className="text-base text-brand-navy">
+              Ai venit pentru <strong>oferta de 500 de lei</strong>? Prețurile de mai jos sunt
+              cele de listă. Oferta de intrare pentru clienți noi — toate cele 50 de ziare cu{" "}
+              <strong>500 de lei</strong> în loc de 1.500 — e aici:
+            </p>
+            <Button variant="accent" asChild className="shrink-0">
+              <Link href="/oferta-500">Vezi oferta de 500 lei →</Link>
+            </Button>
+          </div>
+        </div>
+      </div>
+
       {/* Standard */}
       <div className="section bg-white">
         <div className="container space-y-24">

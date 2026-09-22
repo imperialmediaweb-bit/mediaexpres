@@ -103,6 +103,25 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         </div>
       )}
 
+      {/*
+        22.09.2026 — un om a intrat si nu a inteles de ce scrie si 1.500, si
+        500. Cele doua cifre stateau una langa alta cu „Pret normal" si „Acum"
+        scrise mic si gri, fara sa spuna nimeni ce inseamna. Aici e o singura
+        propozitie care raspunde: de ce 1.500, de ce 500, si cat iese pe ziar.
+      */}
+      {showPrice && !monthly && (
+        <p className="mx-auto mt-4 max-w-lg text-sm text-white/75">
+          Prețul obișnuit al pachetului este{" "}
+          <strong className="text-white">{offer.listPrice}</strong>. Cei{" "}
+          <strong className="text-brand-gold">{offer.price.toLocaleString("ro")} de lei</strong>{" "}
+          sunt o ofertă de intrare pentru clienți noi — adică{" "}
+          <strong className="text-white">
+            {Math.round(offer.price / 50)} lei pe ziar
+          </strong>
+          , pentru toate cele 50.
+        </p>
+      )}
+
       {monthly && (
         <p className="mx-auto mt-3 flex max-w-md items-center justify-center gap-2 text-sm text-white/70">
           <RefreshCw className="h-3.5 w-3.5" />
