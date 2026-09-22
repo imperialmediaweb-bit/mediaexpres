@@ -1307,6 +1307,22 @@ console.log("\n########## S. RECENZII ##########");
     t("datele completeaza si profilul clientului, doar unde e gol", /companyCui = d\.cui/.test(api) && /doarGoale/.test(api));
   }
 
+  // 22.09.2026 — un client care PLATISE a ramas blocat: incarcarea pozelor ii
+  // pica in browser, iar cele 3 poze obligatorii nu-l lasau sa trimita nimic.
+  {
+    const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+    const api = citesteFisier("src/app/api/articol/submit/route.ts");
+
+    t("zidul ramane pentru cine n-a incercat", /images\.length < POZE_OBLIGATORII && !\(pozeEroare && faraPozeConfirmat\)/.test(form));
+    t("portita se deschide DOAR dupa o incarcare esuata", /if \(pozeEroare\) \{\s*setFaraPozeConfirmat\(true\)/.test(form));
+    t("si doar la a doua apasare, ca sa fie o decizie", /faraPozeConfirmat/.test(form));
+    t("butonul spune limpede ce se intampla", /Trimite f\u0103r\u0103 poze — le dau pe WhatsApp/.test(form));
+    t("clientului i se spune unde sa trimita pozele", /pe WhatsApp la \$\{SITE\.phone\}/.test(form));
+    t("semnalul ajunge la server", /pozeEsuate: Boolean\(pozeEroare\)/.test(form));
+    t("serverul il accepta, dar numai cu semnalul", /pozeEsuate: z\.boolean\(\)\.optional\(\)/.test(api) && /images\.length < POZE_OBLIGATORII && !d\.pozeEsuate/.test(api));
+    t("emailul catre admin striga ca pozele au picat", /\u00ceNC\u0102RCAREA POZELOR I-A E\u0218UAT/.test(api));
+  }
+
   // Doua preturi pentru acelasi lucru, pe doua pagini: pe /pachete scria
   // „National 50 — 1.500 lei", iar reclama spunea 500. Un om a intrebat de ce.
   {

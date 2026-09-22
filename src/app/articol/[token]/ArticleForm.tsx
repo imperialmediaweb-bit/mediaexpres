@@ -16,6 +16,7 @@ import { FormError } from "@/components/forms/FormError";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
 import { comprimaPoza } from "@/lib/comprima-poza";
+import { SITE } from "@/data/site";
 
 type Mode = "ai" | "write";
 
@@ -77,6 +78,14 @@ export function ArticleForm({
   // Eroarea de la poze se arata LANGA poze, nu doar jos langa „Trimite":
   // pe telefon, jos nu se vede, iar omul crede ca poza a intrat.
   const [pozeEroare, setPozeEroare] = useState<string | null>(null);
+  /**
+   * 22.09.2026 — un client care PLATISE a ramas blocat: incarcarea pozelor
+   * ii pica in browser, iar cele 3 poze obligatorii nu-l lasau sa trimita
+   * nimic. Bani luati, om captiv. Zidul ramane pentru cine n-a incercat;
+   * se deschide doar dupa ce incarcarea a esuat MACAR o data (pozeEroare) si
+   * doar la a doua apasare, ca sa fie o decizie, nu o scapare.
+   */
+  const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
   const [done, setDone] = useState(false);
 
   async function generate() {
@@ -240,7 +249,18 @@ export function ArticleForm({
       setError(CONTENT_DECLARATION_ERROR);
       return;
     }
-    if (images.length < POZE_OBLIGATORII) {
+    if (images.length < POZE_OBLIGATORII && !(pozeEroare && faraPozeConfirmat)) {
+      // Daca incarcarea a picat, nu-l mai tinem captiv: a doua apasare trimite
+      // comanda, iar pozele vin pe WhatsApp. Vezi `faraPozeConfirmat`.
+      if (pozeEroare) {
+        setFaraPozeConfirmat(true);
+        setError(
+          `Încărcarea pozelor nu a reușit. Apasă din nou „Trimite" și comanda pleacă fără ele — ` +
+            `apoi trimite-ne cele ${POZE_OBLIGATORII} poze pe WhatsApp la ${SITE.phone} și le punem noi. ` +
+            `Publicarea nu se blochează.`,
+        );
+        return;
+      }
       setError(
         images.length === 0
           ? POZE_OBLIGATORII_MESAJ
@@ -263,6 +283,7 @@ export function ArticleForm({
           contactPhone,
           cui,
           billingAddress,
+          pozeEsuate: Boolean(pozeEroare) && images.length < POZE_OBLIGATORII,
           metaDescription,
           keywords,
           images,
@@ -744,6 +765,8 @@ export function ArticleForm({
             <Loader2 className="h-5 w-5 animate-spin" />
             Se trimite...
           </>
+        ) : images.length < POZE_OBLIGATORII && pozeEroare && faraPozeConfirmat ? (
+          "Trimite fără poze — le dau pe WhatsApp →"
         ) : images.length < POZE_OBLIGATORII ? (
           `Urcă ${POZE_OBLIGATORII - images.length === 1 ? "încă o poză" : `${POZE_OBLIGATORII - images.length} poze`} ca să trimiți`
         ) : (

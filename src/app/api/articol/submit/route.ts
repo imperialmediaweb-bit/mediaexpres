@@ -32,6 +32,10 @@ const schema = z.object({
   // 21.09.2026 — CUI si adresa au trecut de pe pagina de plata aici.
   cui: z.string().max(40).optional(),
   billingAddress: z.string().max(300).optional(),
+  // 22.09.2026 — clientul a incercat sa urce pozele si i-au picat in browser.
+  // Formularul ii deschide atunci portita, la a doua apasare; steagul asta
+  // ii spune serverului ca nu e cineva care a sarit peste pasul de poze.
+  pozeEsuate: z.boolean().optional(),
   fbBoostPaper: z.string().max(120).optional(),
   /** „ancoră → adresă", o linie pe link. Vezi schema, link_notes. */
   linkNotes: z.string().max(1000).optional(),
@@ -80,7 +84,11 @@ export async function POST(req: NextRequest) {
   // Deci regula sta aici, unde ajunge orice trimitere, oricat de veche e
   // pagina. Verificarea e inaintea oricarei scrieri: nimic nu se pierde,
   // clientul adauga pozele si trimite din nou.
-  if (d.images.length < POZE_OBLIGATORII) {
+  // 22.09.2026 — exceptia: clientul a INCERCAT si incarcarea i-a picat in
+  // browser. Un om care a platit nu are voie sa ramana captiv intre banii
+  // dati si un formular care nu-l lasa sa trimita. Comanda intra fara poze,
+  // marcata ca atare, iar pozele vin pe WhatsApp.
+  if (d.images.length < POZE_OBLIGATORII && !d.pozeEsuate) {
     return NextResponse.json(
       {
         ok: false,
@@ -279,7 +287,12 @@ export async function POST(req: NextRequest) {
             }</p>`,
         )
         .join("")
-    : '<p style="color:#94a3b8;">Nicio poză încărcată.</p>';
+    : d.pozeEsuate
+      // Nu e „a sarit peste poze": i-au PICAT. Scris rosu, ca sa stii ca
+      // trebuie sa i le ceri pe WhatsApp inainte de publicare — fara poza
+      // principala, articolul nu ajunge niciodata pe Facebook.
+      ? '<p style="color:#C8102E;font-weight:700;">⚠️ ÎNCĂRCAREA POZELOR I-A EȘUAT — cere-i pozele pe WhatsApp înainte de publicare.</p>'
+      : '<p style="color:#94a3b8;">Nicio poză încărcată.</p>';
 
   const adminHtml = wrapEmail(
     isCasino ? "⚠️ Articol nou — CAZINO" : "Articol nou de publicat",
