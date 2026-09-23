@@ -12,6 +12,7 @@ import { sendCapiEvent, splitName } from "@/lib/meta-capi";
 import { sendGaPurchase } from "@/lib/ga-mp";
 import { signOrderToken } from "@/lib/order-token";
 import { SITE } from "@/data/site";
+import { numeleZiarelor } from "@/lib/alacarte";
 
 export const runtime = "nodejs";
 
@@ -271,6 +272,10 @@ async function handleCheckoutCompleted(
       label: packageId,
       sessionId: session.id,
       source: (session.metadata?.sursa as string) || null,
+      // 23.09.2026 — publicatiile bifate pe /alege-ziarele. Fara randul asta
+      // in emailul de plata, o comanda „alege-3-ziare" nu spune NICAIERI care
+      // sunt cele trei, iar publicarea ramane pe ghicite.
+      publicatii: numeleZiarelor((session.metadata?.ziare as string) || ""),
     });
 
     // Facturarea nu trebuie sa poata darama webhookul — issueInvoiceForOrder
@@ -581,8 +586,11 @@ async function sendConfirmationEmails(args: {
   sessionId: string;
   /** De unde a venit clientul (lib/sursa.ts) — apare in emailul catre admin. */
   source?: string | null;
+  /** Publicatiile alese de client, cand si le-a ales singur (/alege-ziarele). */
+  publicatii?: string | null;
 }) {
-  const { kind, email, customerName, amount, label, sessionId, source } = args;
+  const { kind, email, customerName, amount, label, sessionId, source, publicatii } =
+    args;
   // Numele vine din formularul Stripe, deci e input de la client: escapat
   // inainte de a intra in HTML-ul emailului.
   const firstName = escapeHtml((customerName || "").split(" ")[0] || "");
@@ -593,6 +601,7 @@ async function sendConfirmationEmails(args: {
     <p>${kind === "payment" ? "O plata" : "Un abonament"} a fost procesat${kind === "payment" ? "a" : ""} cu succes prin Stripe.</p>
     <table style="width:100%;border-collapse:collapse;">
       ${kv(kind === "payment" ? "Pachet" : "Abonament", label)}
+      ${publicatii ? kv("Publicatii alese", publicatii) : ""}
       ${kv("Suma", `${amount.toFixed(2)} RON`)}
       ${kv("Email client", email || "—")}
       ${kv("Nume client", customerName || "—")}
@@ -630,6 +639,11 @@ async function sendConfirmationEmails(args: {
       <p>Multumim pentru plata! Am primit <strong>${amount.toFixed(2)} RON</strong>${
         kind === "subscription" ? " pentru primul ciclu al abonamentului" : ""
       }.</p>
+      ${
+        publicatii
+          ? `<p>Publicațiile alese de tine: <strong>${escapeHtml(publicatii)}</strong>.</p>`
+          : ""
+      }
       ${
         articleUrl
           ? `<p>Următorul pas: trimite-ne articolul și pozele. Durează 2 minute, iar dacă nu ai textul scris, îl redactăm noi din datele firmei tale.</p>

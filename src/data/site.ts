@@ -62,6 +62,7 @@ export const NAV_LINKS = [
 export const FOOTER_LINKS = {
   servicii: [
     { href: "/pachete#standard", label: "Pachete Standard" },
+    { href: "/alege-ziarele", label: "Alege singur ziarele" },
     { href: "/pachete#cazino", label: "Pachete Cazino" },
     { href: "/pachete#abonamente", label: "Abonamente lunare" },
     { href: "/generator-comunicat", label: "Generator AI gratuit" },

@@ -10,15 +10,25 @@ import { eq } from "drizzle-orm";
 import { extractRequestUserData } from "@/lib/meta-capi";
 import { sursaDinCerere } from "@/lib/sursa";
 import { extractGaClientId } from "@/lib/ga-mp";
+import {
+  ziareDinSluguri,
+  pretAlacarte,
+  etichetaZiare,
+  TOTAL_ZIARE,
+} from "@/lib/alacarte";
 
 export const runtime = "nodejs";
 
 const checkoutSchema = z.object({
   packageId: z.string().min(1).max(64),
   mode: z
-    .enum(["package", "subscription-standard", "subscription-casino"])
+    .enum(["package", "subscription-standard", "subscription-casino", "alacarte"])
     .default("package"),
   email: z.string().email().optional(),
+  // 23.09.2026 — publicatiile bifate pe /alege-ziarele. Lista e doar o
+  // CERERE: preturile si numele se iau din rețea pe server (lib/alacarte.ts),
+  // niciodata din ce trimite browserul.
+  ziare: z.array(z.string().min(1).max(80)).max(120).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -40,7 +50,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Date invalide" }, { status: 400 });
   }
-  const { packageId, mode, email } = parsed.data;
+  const { packageId, mode, email, ziare } = parsed.data;
 
   // Cookie-urile de atribuire Meta (_fbp si mai ales _fbc, care contine
   // fbclid-ul din linkul reclamei) exista DOAR in browserul clientului.
@@ -109,6 +119,105 @@ export async function POST(req: NextRequest) {
         .update(users)
         .set({ stripeCustomerId: customer.id })
         .where(eq(users.id, userId));
+    }
+  }
+
+  /**
+   * 23.09.2026 — „alege singur ziarele". Clientul bifeaza publicatiile pe
+   * /alege-ziarele si plateste exact cat a bifat.
+   *
+   * Pretul NU vine din browser. Vine din numarul de publicatii VALIDE, dupa
+   * ce lista trimisa e trecuta prin retea: altfel oricine putea deschide
+   * consola si cumpara 50 de ziare cu 1 leu.
+   */
+  if (mode === "alacarte") {
+    const alese = ziareDinSluguri(ziare || []);
+    if (alese.length === 0) {
+      return NextResponse.json(
+        { ok: false, error: "Alege cel putin o publicatie" },
+        { status: 400 }
+      );
+    }
+    const pret = pretAlacarte(alese.length);
+    const eticheta = etichetaZiare(alese);
+    const numeLista =
+      eticheta === "toate"
+        ? `toate cele ${TOTAL_ZIARE} de publicatii`
+        : alese.map((z) => z.name).join(", ");
+    // Pachetul e recunoscut peste tot dupa id; aici id-ul spune si cate sunt,
+    // ca sa apara citibil in emailul de plata, pe factura si in admin.
+    const idPachet = `alege-${alese.length}-ziare`;
+    try {
+      const checkout = await stripe.checkout.sessions.create({
+        mode: "payment",
+        payment_method_types: ["card"],
+        expires_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
+        after_expiration: {
+          recovery: { enabled: true, allow_promotion_codes: true },
+        },
+        ...(stripeCustomerId
+          ? { customer: stripeCustomerId }
+          : sessionEmail
+          ? { customer_email: sessionEmail }
+          : {}),
+        line_items: [
+          {
+            price_data: {
+              currency: "ron",
+              unit_amount: pret.total * 100,
+              product_data: {
+                name: `Articol în ${alese.length} ${
+                  alese.length === 1 ? "publicație" : "publicații"
+                }`,
+                // Stripe taie descrierea lunga, iar numele a 50 de ziare nu
+                // incap oricum — la toata reteaua se scrie asa.
+                description:
+                  numeLista.length > 380
+                    ? `${TOTAL_ZIARE} de publicații MediaExpres (rețeaua completă)`
+                    : numeLista,
+              },
+            },
+            quantity: 1,
+          },
+        ],
+        metadata: {
+          packageId: idPachet,
+          mode,
+          category: "standard",
+          // Publicatiile alese, pe drumul care supravietuieste pana la
+          // webhook: fara ele nu stim unde publicam ce tocmai s-a platit.
+          ziare: eticheta,
+          ...(userId ? { userId } : {}),
+          ...fbMeta,
+        },
+        client_reference_id: userId || undefined,
+        billing_address_collection: "auto",
+        custom_fields: [
+          {
+            key: "company_name",
+            label: { type: "custom", custom: "Nume firma (optional)" },
+            type: "text",
+            optional: true,
+          },
+          {
+            key: "company_cui",
+            label: { type: "custom", custom: "CUI (optional)" },
+            type: "text",
+            optional: true,
+          },
+        ],
+        success_url: `${SITE.url}/comanda/multumim?session_id={CHECKOUT_SESSION_ID}`,
+        cancel_url: `${SITE.url}/alege-ziarele?anulat=1`,
+        locale: "ro",
+        allow_promotion_codes: true,
+      });
+      return NextResponse.json({ ok: true, url: checkout.url });
+    } catch (err) {
+      console.error("[checkout] Stripe alacarte error:", err);
+      return NextResponse.json(
+        { ok: false, error: "Eroare la crearea sesiunii de plata" },
+        { status: 500 }
+      );
     }
   }
 

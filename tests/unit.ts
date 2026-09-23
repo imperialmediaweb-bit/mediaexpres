@@ -26,6 +26,18 @@ import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import {
+  pretAlacarte,
+  pretBucata,
+  urmatorulPrag as urmatorulPragZiare,
+  slugZiar,
+  ziareDinSluguri,
+  etichetaZiare,
+  numeleZiarelor,
+  ZIARE_ALEGIBILE,
+  TOTAL_ZIARE,
+  PRET_RETEA,
+} from "@/lib/alacarte";
+import {
   sursaDinUrl,
   serializeazaSursa,
   parseazaSursa,
@@ -1281,7 +1293,7 @@ console.log("\n########## S. RECENZII ##########");
     const ens = citesteFisier("src/lib/ensure-columns.ts");
 
     t("adresa nu mai e obligatorie la plata", !/billing_address_collection: "required"/.test(ch));
-    t("Stripe cere doar ce-i trebuie cardului", (ch.match(/billing_address_collection: "auto"/g) || []).length === 2);
+    t("Stripe cere doar ce-i trebuie cardului", (ch.match(/billing_address_collection: "auto"/g) || []).length === (ch.match(/billing_address_collection:/g) || []).length);
     t("telefonul nu se mai cere la plata", !/phone_number_collection/.test(ch));
     t("recuperarea cosului abandonat ramane pornita", /after_expiration/.test(ch) && /recovery: \{ enabled: true/.test(ch));
 
@@ -1299,7 +1311,7 @@ console.log("\n########## S. RECENZII ##########");
     // inainte de plata, dar le SCRIEM pe tranzactie dupa — altfel nu mai
     // poate lega plata de firma si i le trimite proprietarul de mana.
     t("firma si CUI raman pe pagina de card, ca sa le aiba contabila", /key: "company_name"/.test(ch) && /key: "company_cui"/.test(ch));
-    t("dar sunt OPTIONALE, nu opresc plata", (ch.match(/optional: true/g) || []).length === 2);
+    t("dar sunt OPTIONALE, nu opresc plata", (ch.match(/optional: true/g) || []).length === (ch.match(/key: "company_/g) || []).length && !/optional: false/.test(ch));
     t("nr. reg. comert si codul TVA au disparut", !/company_reg_no/.test(ch) && !/tax_id_collection:\s*\{/.test(ch));
     t("firma si CUI ajung pe plata din Stripe", /paymentIntents\.update/.test(api));
     t("apar in descrierea platii, nu doar in metadata", /description: \[firma, codFiscal/.test(api));
@@ -1515,6 +1527,59 @@ console.log("\n########## S. RECENZII ##########");
   t("lista are toti clientii care au cumparat", CLIENTI.length >= 15);
   t("oferta arata raportul ca imagine, inainte de plata", /<DovadaRaport \/>/.test(citesteFisier("src/app/oferta-500/page.tsx")) && fs.existsSync("public/rapoarte/exemplu-raport-pagina-1.jpg"));
   t("portofoliul nu mai are linkuri interne (railway)", !/railway\.app/.test(citesteFisier("src/data/portfolio.ts")));
+}
+
+
+// ---------------------------------------------------------------------------
+// „Alege singur ziarele" (23.09.2026)
+// ---------------------------------------------------------------------------
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+
+  t("o publicatie costa cat pachetul Local de azi", pretAlacarte(1).total === 150);
+  t("bucata scade cand alege mai multe", pretBucata(1) > pretBucata(3) && pretBucata(3) > pretBucata(5));
+  t("pretul nu trece niciodata peste pretul retelei",
+    [1, 2, 3, 5, 9, 20, TOTAL_ZIARE, 999].every((n) => pretAlacarte(n).total <= PRET_RETEA));
+  t("toata reteaua costa exact cat oferta", pretAlacarte(TOTAL_ZIARE).total === PRET_RETEA);
+  t("pretul nu scade cand adaugi publicatii",
+    Array.from({ length: TOTAL_ZIARE }, (_, i) => pretAlacarte(i + 1).total)
+      .every((v, i, a) => i === 0 || v >= a[i - 1]));
+  t("zero publicatii = zero lei", pretAlacarte(0).total === 0);
+  t("la plafon nu se mai promite nicio reducere",
+    urmatorulPragZiare(TOTAL_ZIARE) === null && (urmatorulPragZiare(1)?.economiePeBucata || 0) > 0);
+  t("pragul urmator e mereu inaintea lui", [1, 2, 3, 4].every((n) => (urmatorulPragZiare(n)?.deLa ?? 99) > n));
+
+  t("slugul scapa de diacritice", slugZiar("Iași Expres") === "iasi-expres" && slugZiar("Caraș-Severin Expres") === "caras-severin-expres");
+  t("fiecare publicatie are slug unic", new Set(ZIARE_ALEGIBILE.map((z) => z.slug)).size === TOTAL_ZIARE);
+  t("slugurile sunt curate", ZIARE_ALEGIBILE.every((z) => /^[a-z0-9-]+$/.test(z.slug)));
+  t("lista de ales e chiar reteaua", TOTAL_ZIARE === NEWSPAPERS.length);
+
+  // Pretul se calculeaza din ce EXISTA, nu din ce trimite browserul.
+  t("slugurile inventate sunt aruncate", ziareDinSluguri(["iasi-expres", "ziar-inventat"]).length === 1);
+  t("acelasi ziar bifat de doua ori se numara o data", ziareDinSluguri(["cluj-expres", "cluj-expres"]).length === 1);
+  t("lista goala nu poate cumpara nimic", ziareDinSluguri([]).length === 0);
+  t("toata reteaua se scrie scurt in metadata", etichetaZiare(ZIARE_ALEGIBILE) === "toate");
+  t("eticheta incape in metadata Stripe (500 caractere)", etichetaZiare(ZIARE_ALEGIBILE.slice(0, 4)).length < 500);
+  t("emailul spune numele publicatiilor alese", numeleZiarelor("iasi-expres,cluj-expres").includes("Iași Expres"));
+  t("la toata reteaua emailul nu insira 50 de nume", /toate cele/.test(numeleZiarelor("toate")));
+
+  const api = citesteFisier("src/app/api/checkout/route.ts");
+  t("checkoutul accepta modul alacarte", /"alacarte"/.test(api));
+  t("checkoutul refuza cosul gol", /Alege cel putin o publicatie/.test(api));
+  t("pretul se ia de pe server, din publicatiile valide", /pretAlacarte\(alese\.length\)/.test(api));
+  t("publicatiile alese ajung in metadata platii", /ziare: eticheta/.test(api));
+  t("webhookul le trece in emailuri", /numeleZiarelor/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")));
+
+  const pag = citesteFisier("src/app/alege-ziarele/page.tsx");
+  const comp = citesteFisier("src/app/alege-ziarele/AlegeZiare.tsx");
+  t("pagina exista si e in sitemap", pag.length > 500 && /alege-ziarele/.test(citesteFisier("src/app/sitemap.ts")));
+  t("pagina nu scrie preturile de mana", !/\b150 lei\b/.test(pag) && /pretBucata\(1\)/.test(pag));
+  t("se cumpara din pagina, prin checkout", /\/api\/checkout/.test(comp) && /mode: "alacarte"/.test(comp));
+  t("se poate bifa toata reteaua dintr-un buton", /Bifeaza toate|Bifează toate/.test(comp));
+  t("cazinourile nu trec pe aici", /Cazinouri/.test(pag));
+  t("drumul spre pagina exista din pachete si din retea",
+    /alege-ziarele/.test(citesteFisier("src/app/pachete/page.tsx")) &&
+    /alege-ziarele/.test(citesteFisier("src/app/reteaua-noastra/page.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

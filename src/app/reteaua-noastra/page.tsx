@@ -199,6 +199,28 @@ export default function ReteauaPage() {
           </div>
         </div>
       </section>
+
+      {/*
+        23.09.2026 — pana acum lista era doar de citit. Cine se uita aici stie
+        deja in ce oras vrea sa apara; de aici poate si cumpara, fara sa ne
+        mai scrie pe WhatsApp ca sa afle cat costa un singur ziar.
+      */}
+      <section className="bg-brand-navy py-14 text-white">
+        <div className="container text-center">
+          <h2 className="font-serif text-2xl font-bold md:text-3xl">
+            Nu le vrei pe toate? Alege-ți singur publicațiile
+          </h2>
+          <p className="mx-auto mt-3 max-w-xl text-white/75">
+            Bifezi doar ziarele care te interesează — orașul tău, o regiune sau toată
+            țara — și vezi prețul pe loc, înainte să plătești.
+          </p>
+          <div className="mt-7">
+            <Button asChild variant="accent" size="lg">
+              <Link href="/alege-ziarele">Alege ziarele →</Link>
+            </Button>
+          </div>
+        </div>
+      </section>
     </>
   );
 }

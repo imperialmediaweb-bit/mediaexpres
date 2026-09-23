@@ -87,6 +87,28 @@ export default function PacheteTPage() {
             description="Trei opțiuni simple, în funcție de acoperirea dorită: județean, regional sau național."
           />
 
+          {/*
+            23.09.2026 — pachetele de mai sus spun „1 ziar la alegere", dar
+            alegerea se facea DUPA plata, pe WhatsApp. Cine voia doar orasul
+            lui n-avea unde sa apese. De aici intra pe pagina unde bifeaza
+            singur si plateste exact cat a bifat.
+          */}
+          <div className="rounded-2xl border-2 border-brand-red/30 bg-red-50/60 p-8 text-center">
+            <h3 className="font-serif text-2xl font-bold text-brand-navy">
+              Vrei doar orașul tău? Alege-ți singur ziarele
+            </h3>
+            <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+              Bifezi publicațiile care te interesează — una singură, un județ, o regiune sau
+              toate — și vezi prețul pe loc. Cu cât alegi mai multe, cu atât bucata costă
+              mai puțin, iar peste 500 de lei nu plătești în niciun caz.
+            </p>
+            <div className="mt-6">
+              <Button variant="accent" size="lg" asChild>
+                <Link href="/alege-ziarele">Alege ziarele →</Link>
+              </Button>
+            </div>
+          </div>
+
           <PricingGroup
             packages={CASINO_PACKAGES}
             id="cazino"
