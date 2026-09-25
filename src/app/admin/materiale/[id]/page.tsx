@@ -352,8 +352,36 @@ export default async function MaterialDetailPage({
                   )
                 }
               />
-              {r.companyCui && <Row label="CUI" value={<strong>{r.companyCui}</strong>} />}
-              {r.companyAddress && <Row label="Adresă" value={r.companyAddress} />}
+              {/*
+                25.09.2026 — CUI-ul si adresa se citesc din AMBELE perechi de
+                coloane: `company_cui` (cea veche, pe care o afisa pagina) si
+                `cui` (adaugata pe 21.09, in care scria formularul). Comenzile
+                dintre 21 si 25.09 au datele doar in a doua. Randul apare
+                mereu, cu „—" cand lipseste, ca sa se vada dintr-o privire ca
+                trebuie cerut clientului, nu ascuns ca si cum n-ar exista.
+              */}
+              {(() => {
+                const cui = r.companyCui || r.cui || "";
+                const adresa = r.companyAddress || r.billingAddress || "";
+                return (
+                  <>
+                    <Row
+                      label="CUI"
+                      value={
+                        cui ? (
+                          <span className="flex items-center gap-2">
+                            <strong>{cui}</strong>
+                            <CopyButton text={cui} label="copiază" />
+                          </span>
+                        ) : (
+                          <span className="text-amber-700">— (nu l-a scris; cere-l pe WhatsApp înainte de factură)</span>
+                        )
+                      }
+                    />
+                    <Row label="Adresă" value={adresa || "—"} />
+                  </>
+                );
+              })()}
               <Row
                 label="Site"
                 value={

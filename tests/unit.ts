@@ -1307,6 +1307,17 @@ console.log("\n########## S. RECENZII ##########");
 
     t("serverul le accepta", /cui: z\.string\(\)/.test(api) && /billingAddress: z\.string\(\)/.test(api));
     t("serverul le salveaza pe comanda", /cui: d\.cui \|\| null/.test(api) && /billingAddress: d\.billingAddress \|\| null/.test(api));
+    // 25.09.2026 — tabela avea deja company_cui/company_address si pe alea le
+    // afiseaza admin-ul; pe 21.09 s-a scris doar in coloanele noi, iar CUI-ul
+    // „disparuse" din pagina comenzii. Se scrie in amandoua, se citeste din
+    // amandoua, iar randul apare si cand lipseste.
+    t("CUI-ul se scrie si in coloana pe care o citeste admin-ul", /companyCui: d\.cui \|\| null/.test(api) && /companyAddress: d\.billingAddress \|\| null/.test(api));
+    {
+      const adm = citesteFisier("src/app/admin/materiale/[id]/page.tsx");
+      t("admin-ul citeste CUI-ul din ambele coloane", /r\.companyCui \|\| r\.cui/.test(adm) && /r\.companyAddress \|\| r\.billingAddress/.test(adm));
+      t("randul de CUI apare si cand lipseste, cu indemn", /nu l-a scris; cere-l/.test(adm));
+    }
+    t("CUI-ul lipsa se ia de pe pagina Stripe", /checkout\.sessions\.retrieve\(order\.sessionId\)/.test(api) && /camp\("company_cui"\)/.test(api));
     t("apar in emailul catre admin, langa restul datelor", /kv\("CUI"/.test(api) && /kv\("Adresa facturare"/.test(api));
     t("exista in schema", /cui: text\("cui"\)/.test(sch) && /billingAddress: text\("billing_address"\)/.test(sch));
     t("coloanele se creeaza singure, nu asteapta fix-db", /"cui" text/.test(ens) && /"billing_address" text/.test(ens));

@@ -132,6 +132,28 @@ export async function POST(req: NextRequest) {
     console.error("[articol/submit] nu am putut citi sursa platii:", err);
   }
 
+  // 25.09.2026 — CUI-ul si numele firmei, luate si de pe pagina Stripe.
+  // Acolo au ramas doua casute OPTIONALE (decizia din 21.09, pentru
+  // contabila). Cine le-a completat acolo si le-a sarit aici nu le mai scrie
+  // a treia oara, iar adminul nu le mai cauta in Stripe. Formularul are
+  // prioritate; Stripe umple doar ce a ramas gol. Tacut si neblocant.
+  if (!d.cui?.trim() || !d.companyName?.trim()) {
+    try {
+      const stripe = getStripe();
+      if (stripe) {
+        const sesiune = await stripe.checkout.sessions.retrieve(order.sessionId);
+        const camp = (k: string) =>
+          sesiune.custom_fields?.find((f) => f.key === k)?.text?.value?.trim() || "";
+        if (!d.cui?.trim()) {
+          d.cui = camp("company_cui") || sesiune.customer_details?.tax_ids?.[0]?.value || d.cui;
+        }
+        if (!d.companyName?.trim()) d.companyName = camp("company_name") || d.companyName;
+      }
+    } catch (err) {
+      console.error("[articol/submit] nu am putut citi campurile de pe Stripe:", err);
+    }
+  }
+
   // featuredIndex vine din UI, dar poate depasi numarul real de poze.
   const featured = d.images[d.featuredIndex] ?? d.images[0];
 
@@ -162,6 +184,13 @@ export async function POST(req: NextRequest) {
         contactPhone: d.contactPhone || null,
         cui: d.cui || null,
         billingAddress: d.billingAddress || null,
+        // 25.09.2026 — tabela AVEA deja company_cui / company_address, si pe
+        // alea le afiseaza pagina comenzii din admin. Pe 21.09 am adaugat
+        // `cui` / `billing_address` si am scris doar in ele: CUI-ul ajungea
+        // in baza, dar in admin nu se vedea nicaieri („de ce ai scos CUI-ul?").
+        // Se scrie in amandoua, ca sa nu depinda de care coloana citeste cine.
+        companyCui: d.cui || null,
+        companyAddress: d.billingAddress || null,
         images: JSON.stringify(d.images),
         featuredIndex: d.featuredIndex,
         facebookOptIn: d.facebookOptIn,
