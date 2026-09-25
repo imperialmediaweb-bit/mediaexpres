@@ -1268,6 +1268,10 @@ console.log("\n########## S. RECENZII ##########");
 
     t("butonul de comanda e marcat, ca sa poata fi gasit", /data-comanda="1"/.test(bp));
     t("caseta de pret e marcata ca zona care nu se acopera", /data-nu-acoperi="1"/.test(pret));
+    // 25.09.2026 — pe telefon bula statea peste randul „Advertorialele sunt
+    // sub 2%", adica peste argumentul pentru care exista caseta.
+    t("caseta „de ce nu e o retea de linkuri” nu se acopera",
+      /data-nu-acoperi="1"/.test(citesteFisier("src/components/StareRetea.tsx")));
     t(
       "regula se uita si la butoane, si la zonele marcate",
       /IntersectionObserver/.test(zona) && /\[data-comanda\], \[data-nu-acoperi\]/.test(zona),

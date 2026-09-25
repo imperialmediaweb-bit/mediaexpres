@@ -102,7 +102,14 @@ export async function StareRetea({ compact = false }: { compact?: boolean }) {
         aparare. Un PBN se ascunde (WHOIS privat, IP-uri diferite,
         proprietar necunoscut); noi publicam cifrele.
       */}
-      <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
+      {/*
+        25.09.2026 — pe telefon, bula „Ai o întrebare?" stătea fix peste
+        rândul „Advertorialele sunt sub 2% din articole", adică peste singurul
+        argument pentru care există caseta asta. Aceeași regulă ca la butonul
+        de comandă și la preț (hooks/useZonaLibera): cât timp caseta e pe
+        ecran, elementele plutitoare se dau la o parte.
+      */}
+      <div data-nu-acoperi="1" className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
         <p className="font-serif text-lg font-bold text-brand-navy">De ce nu e o „rețea de linkuri”</p>
         <ul className="mt-3 space-y-2 text-sm text-slate-700">
           <li className="flex gap-2">
