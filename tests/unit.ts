@@ -1317,6 +1317,15 @@ console.log("\n########## S. RECENZII ##########");
       t("admin-ul citeste CUI-ul din ambele coloane", /r\.companyCui \|\| r\.cui/.test(adm) && /r\.companyAddress \|\| r\.billingAddress/.test(adm));
       t("randul de CUI apare si cand lipseste, cu indemn", /nu l-a scris; cere-l/.test(adm));
     }
+    // 25.09.2026 — emailurile de factura si de publicare trimit la pagina
+    // publica a campaniei („urmariti in timp real"), nu promit un raport separat.
+    {
+      const oa = citesteFisier("src/app/admin/materiale/[id]/OrderActions.tsx");
+      t("emailul de factura are linkul de urmarire in timp real", /urmări campania în timp real/.test(oa) && /raportUrl/.test(oa));
+      t("fara link inca, ramane un loc vizibil de completat", /\[LINK RAPORT/.test(oa));
+      t("emailul „am publicat” nu mai promite raport separat", !/Vă trimitem separat raportul/.test(oa));
+      t("pagina comenzii trimite linkul raportului in emailuri", /raportUrl=\{retea\.stare === "gasita"/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+    }
     t("CUI-ul lipsa se ia de pe pagina Stripe", /checkout\.sessions\.retrieve\(order\.sessionId\)/.test(api) && /camp\("company_cui"\)/.test(api));
     t("apar in emailul catre admin, langa restul datelor", /kv\("CUI"/.test(api) && /kv\("Adresa facturare"/.test(api));
     t("exista in schema", /cui: text\("cui"\)/.test(sch) && /billingAddress: text\("billing_address"\)/.test(sch));

@@ -29,7 +29,15 @@ import { waLink } from "@/lib/whatsapp";
  * anuntul de publicare dupa. Proprietarul apasa Trimite si gata; rescria
  * acelasi text la fiecare client, seara, de pe telefon.
  */
-function sabloane(articleTitle: string) {
+/**
+ * 25.09.2026 — linkul raportului public, in loc de „va trimitem raportul".
+ * Clientul urmareste publicarea in timp real, ziar cu ziar, pe pagina
+ * publica a campaniei din retea. Cand pagina nu exista inca (factura pleaca
+ * inainte de publicare), ramane un loc vizibil de completat, ca linkul sa
+ * nu fie uitat, nu o promisiune de raport separat.
+ */
+function sabloane(articleTitle: string, raportUrl?: string | null) {
+  const link = raportUrl || "[LINK RAPORT — din „Campania în rețea”, după ce începe publicarea]";
   return [
     {
       eticheta: "Factura",
@@ -41,7 +49,9 @@ function sabloane(articleTitle: string) {
         "",
         "Dacă ați efectuat deja transferul, nu mai aveți nimic de făcut — factura rămâne pentru evidența dumneavoastră contabilă.",
         "",
-        "Publicăm în maximum 12 ore lucrătoare, iar la final primiți pe email raportul complet cu toate linkurile.",
+        "Publicăm în maximum 12 ore lucrătoare. Puteți urmări campania în timp real, ziar cu ziar, aici:",
+        link,
+        "Pe măsură ce apar articolele, linkurile intră în listă — la final aveți acolo toate cele 50.",
         "",
         "O zi bună,",
         "Echipa MediaExpres",
@@ -55,7 +65,9 @@ function sabloane(articleTitle: string) {
         "",
         `Articolul „${articleTitle}" este publicat pe toate cele 50 de ziare din rețea.`,
         "",
-        "Vă trimitem separat raportul complet cu toate linkurile — puteți deschide și verifica fiecare publicare. Articolele rămân online permanent.",
+        "Toate linkurile sunt aici, le puteți deschide și verifica una câte una:",
+        link,
+        "Articolele rămân online permanent.",
         "",
         "Mulțumim pentru încredere!",
         "Echipa MediaExpres",
@@ -110,6 +122,7 @@ export function OrderActions({
   isPublished,
   awaitingPayment,
   hasImages = true,
+  raportUrl = null,
 }: {
   id: string;
   email: string;
@@ -120,6 +133,8 @@ export function OrderActions({
   awaitingPayment: boolean;
   /** false = comanda a sosit fara nicio poza; casuta porneste cu cererea de poze. */
   hasImages?: boolean;
+  /** Pagina publica a campaniei din retea, cand exista — intra in emailuri. */
+  raportUrl?: string | null;
 }) {
   const router = useRouter();
   const [links, setLinks] = useState("");
@@ -132,7 +147,7 @@ export function OrderActions({
   const mailFilesRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const SABLOANE = sabloane(articleTitle);
+  const SABLOANE = sabloane(articleTitle, raportUrl);
   // Sablonul potrivit momentului: publicata -> anuntul; fara poze -> cererea
   // de poze (fara ele articolul nu poate fi publicat, deci e primul pas);
   // altfel -> factura.

@@ -314,6 +314,7 @@ export default async function MaterialDetailPage({
             isPublished={isPublished}
             awaitingPayment={awaitingPay}
             hasImages={images.length > 0}
+            raportUrl={retea.stare === "gasita" ? retea.campanie.raportUrl : null}
           />
         </div>
 
