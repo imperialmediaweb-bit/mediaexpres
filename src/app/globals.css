@@ -172,3 +172,13 @@
   -ms-overflow-style: none;
   scrollbar-width: none;
 }
+
+/*
+  28.09.2026 — plasa de siguranta: niciun element (sertar, popup, bula) nu
+  mai are voie sa latasca pagina pe telefon. `clip`, nu `hidden`: nu creeaza
+  container de scroll, deci `position: sticky` merge in continuare.
+*/
+html,
+body {
+  overflow-x: clip;
+}

@@ -28,19 +28,27 @@ export function MobileNav() {
         aria-hidden={!open}
       />
       {/*
-        invisible cand e inchis, nu doar translatat: sertarul impins cu
-        translate-x-full ramane, pentru browser, parte din latimea paginii —
-        si TOT site-ul pe telefon capata un scroll orizontal de 384px spre
-        gol. `invisible` il scoate din calcul; tranzitia ramane vizibila
-        pentru ca visibility se schimba instant la deschidere si cu
-        intarziere la inchidere (delay-150), dupa ce alunecarea s-a terminat.
+        28.09.2026 — `invisible` NU era destul. Masurat pe telefon (390px):
+        sertarul inchis, impins cu translate-x-full, statea la x 390–774 si
+        latea pagina la 774px. Tot ce e `fixed left-0 right-0` se intindea
+        dupa ea: bara „Comanda acum" iesea de doua ori mai lata, cu butonul
+        decalat, iar butonul verde de WhatsApp (right-4) ajungea la x 702 —
+        in afara ecranului. visibility:hidden ascunde elementul, dar il lasa
+        in calculul latimii.
+
+        Acum sertarul sta intr-un container `fixed inset-0 overflow-hidden`,
+        care il taie la marginea ecranului indiferent unde e impins. Cat e
+        inchis, containerul nu prinde atingeri.
       */}
+      <div
+        className={cn("fixed inset-0 z-50 overflow-hidden", open ? "" : "pointer-events-none")}
+        aria-hidden={!open}
+      >
       <aside
         className={cn(
-          "fixed top-0 right-0 z-50 h-full w-full max-w-sm bg-white shadow-2xl transition-[transform,visibility] duration-300",
+          "absolute top-0 right-0 h-full w-full max-w-sm bg-white shadow-2xl transition-[transform,visibility] duration-300",
           open ? "translate-x-0" : "invisible translate-x-full delay-150"
         )}
-        aria-hidden={!open}
       >
         <div className="flex items-center justify-between border-b border-slate-200 p-4">
           <span className="font-serif text-xl font-bold text-brand-navy">Meniu</span>
@@ -75,6 +83,7 @@ export function MobileNav() {
           </Button>
         </div>
       </aside>
+      </div>
     </div>
   );
 }
