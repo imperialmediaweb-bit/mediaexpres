@@ -22,7 +22,14 @@ import { useEffect, useState } from "react";
  * orice pozitie fixa acopera, pe un ecran anume, altceva. Singura regula care
  * tine la orice inaltime de ecran e asta.
  */
-export function useZonaLibera(activ: boolean = true): boolean {
+export function useZonaLibera(
+  activ: boolean = true,
+  // 28.09.2026 — bara fixa de comanda foloseste aceeasi regula, dar urmareste
+  // DOAR pretul: ea insasi contine un buton `data-comanda`, deci cu selectorul
+  // implicit s-ar fi ascuns singura, pentru totdeauna.
+  selector: string = "[data-comanda], [data-nu-acoperi]",
+  marginea: string = "0px 0px -80px 0px",
+): boolean {
   const [acopera, setAcopera] = useState(false);
 
   useEffect(() => {
@@ -51,12 +58,12 @@ export function useZonaLibera(activ: boolean = true): boolean {
       // Marja de jos cat inaltimea bulei plus bara fixa: zona „se apropie"
       // inainte sa fie complet pe ecran, si atunci bula trebuie sa fi
       // disparut deja.
-      { rootMargin: "0px 0px -80px 0px", threshold: 0 },
+      { rootMargin: marginea, threshold: 0 },
     );
 
     const urmarite = new WeakSet<Element>();
     function adunaZone() {
-      for (const el of document.querySelectorAll("[data-comanda], [data-nu-acoperi]")) {
+      for (const el of document.querySelectorAll(selector)) {
         if (urmarite.has(el)) continue;
         urmarite.add(el);
         obs.observe(el);
@@ -75,7 +82,7 @@ export function useZonaLibera(activ: boolean = true): boolean {
       window.clearTimeout(t2);
       obs.disconnect();
     };
-  }, [activ]);
+  }, [activ, selector, marginea]);
 
   return acopera;
 }

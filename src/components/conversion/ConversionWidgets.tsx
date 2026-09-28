@@ -5,6 +5,7 @@ import { ExitIntentPopup } from "./ExitIntentPopup";
 import { StickyMobileCta } from "./StickyMobileCta";
 import { CountdownBanner } from "./CountdownBanner";
 import { ButonComanda } from "@/components/comanda/comanda-promo";
+import { useZonaLibera } from "@/hooks/useZonaLibera";
 
 const COMMERCIAL_PATHS = [
   "/",
@@ -41,6 +42,13 @@ export function ConversionBanner() {
 
 export function ConversionWidgets() {
   const pathname = usePathname();
+  // 28.09.2026 — pe telefoanele mici bara fixa statea fix peste „500 lei" din
+  // primul ecran: omul vedea titlul, iar pretul era sub bara. Bara urmareste
+  // doar fasia de jos a ecranului (ultimele ~14%, cat ocupa ea): cat pretul
+  // trece prin fasia aia, bara coboara din cadru; dupa o derulare scurta,
+  // pretul urca, bara revine, iar butonul de sub pret intra in ecran.
+  // Hook-ul sta inaintea oricarui `return`, cum cer regulile React.
+  const pretPeEcran = useZonaLibera(true, "[data-pret]", "-86% 0px 0px 0px");
   if (!pathname || pathname.startsWith("/admin")) return null;
   if (!matches(pathname, COMMERCIAL_PATHS)) return null;
 
@@ -55,7 +63,12 @@ export function ConversionWidgets() {
     return (
       <>
         <ExitIntentPopup />
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md lg:hidden">
+        <div
+          aria-hidden={pretPeEcran}
+          className={`fixed bottom-0 left-0 right-0 z-30 border-t border-slate-200 bg-white/95 p-3 shadow-lg backdrop-blur-md transition-transform duration-300 lg:hidden ${
+            pretPeEcran ? "pointer-events-none translate-y-full" : "translate-y-0"
+          }`}
+        >
           {/* 13.09.2026 — era <a href="#oferta">: derula pagina inapoi sus, lin,
               peste 11.000 de pixeli. Omul apasa „Comanda acum", pagina fugea in
               alta parte si nu se intampla nimic — un client a scris pe WhatsApp

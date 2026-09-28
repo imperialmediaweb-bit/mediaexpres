@@ -1277,6 +1277,13 @@ console.log("\n########## S. RECENZII ##########");
       t("sertarul meniului e taiat de un container fix, nu lateste pagina", /fixed inset-0 z-50 overflow-hidden/.test(nav) && /"absolute top-0 right-0 h-full/.test(nav));
       t("plasa: pagina nu are voie sa se lateasca pe telefon", /overflow-x:\s*clip/.test(citesteFisier("src/app/globals.css")));
     }
+    // 28.09.2026 — bara fixa de comanda statea peste „500 lei" pe telefoanele mici.
+    {
+      const cw = citesteFisier("src/components/conversion/ConversionWidgets.tsx");
+      t("bara fixa se da la o parte cat pretul trece pe sub ea", /useZonaLibera\(true, "\[data-pret\]"/.test(cw) && /translate-y-full/.test(cw));
+      t("caseta de pret are semnul pe care il urmareste bara", /data-pret="1"/.test(citesteFisier("src/app/oferta-500/PromoOffer.tsx")));
+      t("bara nu urmareste propriul buton (s-ar ascunde pentru totdeauna)", !/useZonaLibera\(true, "\[data-comanda\]/.test(cw));
+    }
     t("caseta „de ce nu e o retea de linkuri” nu se acopera",
       /data-nu-acoperi="1"/.test(citesteFisier("src/components/StareRetea.tsx")));
     t(
