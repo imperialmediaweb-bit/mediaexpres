@@ -27,6 +27,7 @@ import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import { domeniuDin } from "@/lib/autoritate";
 import { pretOptiuneClient, citesteOptiuni } from "@/lib/optiuni-partener";
+import { articolHtml, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-html";
 
 import {
   PRAG_RETRAGERE,
@@ -1713,6 +1714,24 @@ console.log("\n########## S. RECENZII ##########");
   const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
   t("formularul trimite tipul, cuvantul-cheie si linkurile", /tip, cuvantCheie, linkuri: linkNotes/.test(form));
   t("campul de linkuri apare o singura data pe ecran", /mode !== "ai" && campLinkuri/.test(form));
+}
+
+
+// Articolul gata de publicat la partener: copiat cu linkuri, HTML, Word, poze (29.09.2026)
+{
+  const l = parseazaLinkuri("curatenie birouri → https://a.ro\nprogramare online -> https://a.ro/c.\nhttps://doar.ro");
+  t("linkurile se citesc in orice forma (→, ->, doar adresa)", l.length === 3 && l[0].ancora === "curatenie birouri" && l[1].url === "https://a.ro/c" && l[2].ancora === null);
+  const r = articolHtml({
+    titlu: "T",
+    corp: "Intro despre curatenie birouri Cluj.\n\nSubtitlu scurt\n\nText cu <script>x</script> si programare online aici.",
+    linkNotes: "curatenie birouri Cluj → https://a.ro\nprogramare online → https://a.ro/c\nnu exista → https://a.ro/n",
+  });
+  t("linkul se pune pe cuvant, o singura data", (r.html.match(/href="https:\/\/a\.ro"/g) || []).length === 1 && /<a href="https:\/\/a\.ro">curatenie birouri Cluj<\/a>/.test(r.html));
+  t("textul clientului e escapat (fara script in pagina partenerului)", !/<script>/.test(r.html) && /&lt;script&gt;/.test(r.html));
+  t("linia scurta devine subtitlu", /<h2>Subtitlu scurt<\/h2>/.test(r.html));
+  t("linkurile negasite sunt aratate partenerului", r.negasite.length === 1 && r.negasite[0].url === "https://a.ro/n");
+  t("nofollow doar cand nu e dofollow", /rel="nofollow"/.test(articolHtml({ titlu: "", corp: "un cuvant aici", linkNotes: "cuvant → https://a.ro", dofollow: false }).html));
+  t("pozele Cloudinary se descarca, nu doar se deschid", linkDescarcarePoza("https://res.cloudinary.com/x/image/upload/v1/a.jpg").includes("/upload/fl_attachment/"));
 }
 
 console.log("\n" + "=".repeat(64));

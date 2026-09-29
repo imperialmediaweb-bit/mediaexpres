@@ -19,6 +19,8 @@ function citesteOptiuniComandate(json: string | null): string[] {
   }
 }
 import { PlacementActions } from "./PlacementActions";
+import { ArticolGata } from "./ArticolGata";
+import { articolHtml, linkDescarcarePoza } from "@/lib/articol-html";
 
 export const dynamic = "force-dynamic";
 // Pagina e a unui singur partener, cu un singur articol. Nu are ce cauta in
@@ -69,6 +71,13 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
     poze = [];
   }
 
+  const { html, negasite } = articolHtml({
+    titlu: pl.articleTitle,
+    corp: pl.articleBody,
+    linkNotes: pl.linkNotes,
+    dofollow: pl.dofollowExpected !== false,
+  });
+
   const acum = new Date();
   const deschis = pl.status === "trimis" || pl.status === "acceptat";
   const poateRefuza = pl.status === "trimis" && acum <= new Date(pl.deadlineRefuz);
@@ -113,28 +122,28 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
           <p className="text-xs font-bold uppercase tracking-wide text-amber-900">Linkuri de păstrat în articol</p>
           <p className="mt-1 whitespace-pre-wrap font-mono text-sm text-slate-800">{pl.linkNotes}</p>
           <p className="mt-2 text-xs text-amber-900">
-            Linkurile rămân exact așa. {pl.dofollowExpected ? "Fără nofollow." : ""}
+            Sunt deja puse pe cuvinte în articolul de mai jos. Linkurile rămân exact așa.{" "}
+            {pl.dofollowExpected ? "Fără nofollow." : ""}
           </p>
+          {negasite.length > 0 && (
+            <p className="mt-2 text-xs font-semibold text-red-700">
+              Nu le-am găsit în text, pune-le tu pe cuvintele potrivite:{" "}
+              {negasite.map((l) => (l.ancora ? `„${l.ancora}” → ${l.url}` : l.url)).join("; ")}
+            </p>
+          )}
         </div>
       )}
 
       <div className="mt-5 rounded-xl border border-slate-200 bg-white p-5">
         <h2 className="font-serif text-lg font-bold text-brand-navy">Articolul</h2>
-        <div className="mt-3 whitespace-pre-wrap text-sm leading-relaxed text-slate-700">{pl.articleBody}</div>
-        {poze.length > 0 && (
-          <div className="mt-4 flex flex-wrap gap-3">
-            {poze.map((p, i) => (
-              <a key={p.url} href={p.url} target="_blank" rel="noreferrer">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={p.url}
-                  alt=""
-                  className={`h-28 w-40 rounded-lg border-2 object-cover ${i === pl.featuredIndex ? "border-brand-red" : "border-slate-200"}`}
-                />
-              </a>
-            ))}
-          </div>
-        )}
+        <div className="mt-3">
+          <ArticolGata
+            titlu={pl.articleTitle}
+            html={html}
+            poze={poze.map((p) => ({ url: p.url, descarcare: linkDescarcarePoza(p.url) }))}
+            featuredIndex={pl.featuredIndex ?? 0}
+          />
+        </div>
         <p className="mt-3 text-xs text-slate-500">
           Textul e scris de noi și e original. Îl poți publica așa cum e; poți schimba forma
           (titlu, subtitluri, așezare), dar nu conținutul și nu linkurile.
