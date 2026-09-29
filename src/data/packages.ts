@@ -148,7 +148,7 @@ export const CASINO_PACKAGES: Package[] = [
 // cu lista si chatbotul il citesc de aici.
 //
 // Cum functioneaza: primul termen afisat e `anchorIso`. Cand trece, termenul
-// se PRELUNGESTE SINGUR cu `periodDays` zile (1 oct -> 15 oct -> 29 oct...),
+// se PRELUNGESTE SINGUR cu `periodDays` zile (1 oct -> 4 oct -> 7 oct...),
 // pana cel tarziu la `hardEndIso` — dupa care orice mentiune de termen dispare
 // de peste tot, iar oferta ramane functionala fara termen afisat. Nimic de
 // intretinut manual; anuntarea prelungirii pe email o face
@@ -157,7 +157,10 @@ export const PROMO_ROLLING = {
   // Termenul curent: 1 octombrie 2026, sfarsitul zilei, ora Romaniei
   // (decizia user 13.09.2026 — pretul ramane 500). Inainte: 14 septembrie.
   anchorIso: "2026-10-01T23:59:59+03:00",
-  periodDays: 14,
+  // 29.09.2026 — din 3 in 3 zile (decizia user). Pana pe 13.09 termenul era
+  // la o zi distanta si oamenii comandau pe loc; mutat la 18 zile, graba a
+  // disparut si comenzile au scazut pe toate canalele.
+  periodDays: 3,
   // Ultima prelungire posibila: 31 decembrie (ora de iarna, +02:00).
   hardEndIso: "2026-12-31T23:59:59+02:00",
 };

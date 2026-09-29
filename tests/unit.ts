@@ -103,13 +103,14 @@ const at = (iso: string) => new Date(iso).getTime();
 console.log("\n########## A. TERMENUL RULANT AL OFERTEI ##########");
 t("azi arata 1 octombrie", promoDeadlineLabel(at("2026-09-13T12:00:00+03:00")) === "1 octombrie");
 t("cu o zi inainte de termen ramane acelasi", promoDeadlineLabel(at("2026-09-30T23:00:00+03:00")) === "1 octombrie");
-t("dupa expirare se prelungeste la 15 octombrie", promoDeadlineLabel(at("2026-10-02T10:00:00+03:00")) === "15 octombrie");
-t("a doua prelungire: 29 octombrie", promoDeadlineLabel(at("2026-10-16T10:00:00+03:00")) === "29 octombrie");
-t("pasul e de exact 14 zile", (() => {
+t("dupa expirare se prelungeste la 4 octombrie", promoDeadlineLabel(at("2026-10-02T10:00:00+03:00")) === "4 octombrie");
+t("a doua prelungire: 7 octombrie", promoDeadlineLabel(at("2026-10-05T10:00:00+03:00")) === "7 octombrie");
+t("pasul e de exact 3 zile", (() => {
   const a = currentPromoDeadline(at("2026-10-02T10:00:00+03:00"))!.getTime();
-  const b = currentPromoDeadline(at("2026-10-16T10:00:00+03:00"))!.getTime();
-  return Math.round((b - a) / 86400000) === 14;
+  const b = currentPromoDeadline(at("2026-10-05T10:00:00+03:00"))!.getTime();
+  return Math.round((b - a) / 86400000) === 3;
 })());
+t("la prelungiri de 3 zile nu pleaca email la toata lista", /PROMO_ROLLING\.periodDays < 14/.test(fs.readFileSync("src/app/api/cron/promo-announce/route.ts", "utf8")));
 t("nu depaseste 31 decembrie", (() => {
   const d = currentPromoDeadline(at("2026-12-20T10:00:00+02:00"))!;
   return d.getTime() <= new Date(PROMO_ROLLING.hardEndIso).getTime();

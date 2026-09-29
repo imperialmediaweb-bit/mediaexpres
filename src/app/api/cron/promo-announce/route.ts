@@ -51,6 +51,13 @@ export async function POST(req: NextRequest) {
     if (!isExtension) {
       return NextResponse.json({ ok: true, skipped: `"${label}" e termenul initial — inregistrat fara email` });
     }
+    // 29.09.2026 — termenul se prelungeste acum din 3 in 3 zile. Un email
+    // „oferta a fost prelungita" la fiecare 3 zile catre toata lista ar arata
+    // a pacaleala si ar trimite domeniul in spam. Termenul se inregistreaza,
+    // dar emailul nu mai pleaca.
+    if (PROMO_ROLLING.periodDays < 14) {
+      return NextResponse.json({ ok: true, skipped: `"${label}" inregistrat fara email (prelungiri la ${PROMO_ROLLING.periodDays} zile)` });
+    }
 
     const rows = await db.select({ email: users.email, name: users.name }).from(users);
     const seen = new Set<string>();
