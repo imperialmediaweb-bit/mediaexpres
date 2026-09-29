@@ -441,3 +441,29 @@ export const placements = pgTable("placement", {
   adminNotes: text("admin_notes"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
+
+/**
+ * O cerere de plata a unei publicatii partenere (portofelul din /cont-partener).
+ *
+ * 29.09.2026 — partenerul cere banii singur cand ajunge la prag
+ * (lib/decont.ts). Plasarile incluse sunt cele care au `statement_id` = id-ul
+ * cererii; suma e scrisa aici o data, la cerere, din plasarile rezervate —
+ * niciodata din ce trimite browserul.
+ */
+export const partnerPayouts = pgTable("partner_payout", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  publisherId: text("publisher_id").notNull(),
+  amount: integer("amount").notNull().default(0),
+  placementsCount: integer("placements_count").notNull().default(0),
+  /** cerut → platit; sau anulat (plasarile se elibereaza si revin in sold). */
+  status: text("status").notNull().default("cerut"),
+  iban: text("iban").notNull(),
+  accountHolder: text("account_holder").notNull(),
+  company: text("company"),
+  cui: text("cui"),
+  invoiceNumber: text("invoice_number"),
+  requestedAt: timestamp("requested_at").defaultNow().notNull(),
+  paidAt: timestamp("paid_at"),
+  cancelledAt: timestamp("cancelled_at"),
+  adminNotes: text("admin_notes"),
+});

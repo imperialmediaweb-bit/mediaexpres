@@ -102,6 +102,27 @@ export function ensurePlacementTables(): Promise<void> {
           "created_at" timestamp DEFAULT now() NOT NULL
         )`,
       )
+      .then(() =>
+        // 29.09.2026 — cererile de plata ale partenerilor (lib/decont.ts).
+        db.execute(
+          sql`CREATE TABLE IF NOT EXISTS "partner_payout" (
+            "id" text PRIMARY KEY NOT NULL,
+            "publisher_id" text NOT NULL,
+            "amount" integer NOT NULL DEFAULT 0,
+            "placements_count" integer NOT NULL DEFAULT 0,
+            "status" text NOT NULL DEFAULT 'cerut',
+            "iban" text NOT NULL,
+            "account_holder" text NOT NULL,
+            "company" text,
+            "cui" text,
+            "invoice_number" text,
+            "requested_at" timestamp DEFAULT now() NOT NULL,
+            "paid_at" timestamp,
+            "cancelled_at" timestamp,
+            "admin_notes" text
+          )`,
+        ),
+      )
       .then(() => undefined)
       .catch((e) => {
         placementsDone = null;
