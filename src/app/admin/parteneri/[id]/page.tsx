@@ -6,6 +6,7 @@ import { publishers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { ReverificaAutoritate } from "./ReverificaAutoritate";
+import { citesteOptiuni, etichetaOptiune, pretOptiuneClient } from "@/lib/optiuni-partener";
 import { PartnerActions } from "./PartnerActions";
 import { PartnerCommercial } from "./PartnerCommercial";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
@@ -100,6 +101,21 @@ export default async function AdminPartnerDetail({
         <aside>
           <div className="space-y-5">
           <PartnerActions publisherId={p.id} currentStatus={p.status} />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm">
+            <h2 className="font-serif text-lg font-semibold text-brand-navy">Nișă și opțiuni</h2>
+            <p className="mt-2 text-slate-700">Nișă: <strong>{p.niche || "—"}</strong></p>
+            {citesteOptiuni(p.extraOptions).length ? (
+              <ul className="mt-2 space-y-1 text-slate-700">
+                {citesteOptiuni(p.extraOptions).map((o) => (
+                  <li key={o.key}>
+                    {etichetaOptiune(o.key)}: îi plătim <strong>{o.pret} lei</strong> · clientul plătește <strong>{pretOptiuneClient(o.pret)} lei</strong>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-slate-500">Nu oferă opțiuni pe lângă articol.</p>
+            )}
+          </div>
           {/* 29.09.2026 — autoritatea, citita de noi (lib/autoritate.ts). */}
           <div className="rounded-xl border border-slate-200 bg-white p-5">
             <h2 className="font-serif text-lg font-semibold text-brand-navy">Autoritate (verificată de noi)</h2>

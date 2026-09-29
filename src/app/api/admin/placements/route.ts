@@ -9,7 +9,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/
 import { SITE } from "@/data/site";
 import { semneazaToken } from "@/lib/plasare-token";
 import { termenePlasare, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } from "@/lib/plasari";
-import { adaosPentru } from "@/lib/niveluri-publicatii";
+import { trimitePlasari } from "@/lib/trimite-plasari";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -57,112 +57,18 @@ export async function POST(req: NextRequest) {
   }
   const d = parsed.data;
 
-  await Promise.all([ensureOrderColumns(), ensurePlacementTables()]);
-
-  const alese = await db
-    .select()
-    .from(publishers)
-    .where(inArray(publishers.id, d.publisherIds));
-
-  const fara = alese.filter((p) => p.status !== "approved" || !p.pricePerArticle);
-  if (fara.length) {
-    // Gard: o plasare fara tarif ar insemna sa nu stim cat datoram, iar o
-    // publicatie suspendata nu mai are voie sa primeasca articole.
-    return NextResponse.json(
-      {
-        ok: false,
-        error: `Nu au tarif sau nu sunt active: ${fara.map((p) => p.siteName).join(", ")}. Pune-le nivelul din pagina publicației.`,
-      },
-      { status: 409 },
-    );
-  }
-  if (alese.length !== d.publisherIds.length) {
-    return NextResponse.json({ ok: false, error: "O publicație nu există" }, { status: 404 });
-  }
-
-  const acum = new Date();
-  const { deadlineRefuz, deadlinePublicare } = termenePlasare(acum);
-  // Adaosul depinde de CATE plasari are comanda asta: pragurile de volum
-  // (3/5/10) taie doar din partea noastra, nu din tariful publicatiei.
-  const adaos = adaosPentru(alese.length);
-  const create: { id: string; publicatie: string; email: string }[] = [];
-
-  for (const p of alese) {
-    const tarif = p.pricePerArticle as number;
-    const [rand] = await db
-      .insert(placements)
-      .values({
-        publisherId: p.id,
-        orderSubmissionId: d.orderSubmissionId || null,
-        clientLabel: d.clientLabel || null,
-        articleTitle: d.title,
-        articleBody: d.body,
-        images: JSON.stringify(d.images),
-        featuredIndex: Math.min(d.featuredIndex, Math.max(0, d.images.length - 1)),
-        linkNotes: d.linkNotes?.trim() || null,
-        tier: p.tier || null,
-        pricePartner: tarif,
-        priceClient: tarif + adaos,
-        dofollowExpected: p.dofollowLinks !== false,
-        sentAt: acum,
-        deadlineRefuz,
-        deadlinePublicare,
-      })
-      .returning({ id: placements.id });
-
-    create.push({ id: rand.id, publicatie: p.siteName, email: p.contactEmail });
-
-    // Emailul catre partener. Ce NU contine, niciodata: numele clientului,
-    // contactul lui, pretul incasat de noi, ce pachet a cumparat.
-    const link = `${SITE.url}/plasare/${semneazaToken({ scope: "plasare", id: rand.id, v: 0 })}`;
-    const html = wrapEmail(
-      "Un articol nou pentru publicarea ta",
-      `
-      <p>Salut,</p>
-      <p>Ai un articol de publicat pe <strong>${esc(p.siteName)}</strong>.</p>
-      <table style="width:100%;border-collapse:collapse;margin:16px 0;">
-        ${kv("Titlu", esc(d.title))}
-        ${kv("Îți plătim", `${tarif} lei`)}
-        ${kv("Refuz până la", deadlineRefuz.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }))}
-        ${kv("Publicare până la", deadlinePublicare.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }))}
-      </table>
-      <p>Deschide articolul, citește-l și decide:</p>
-      <p style="margin:20px 0;">
-        <a href="${link}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi articolul</a>
-      </p>
-      <p style="color:#64748b;font-size:13px;">
-        Îl poți refuza în ${ZILE_REFUZ} zile lucrătoare, fără să explici de ce.
-        Dacă îl publici, lipești adresa articolului în aceeași pagină; el rămâne
-        online ${LUNI_ONLINE} luni, cu linkurile neatinse.
-        Ai ${ZILE_PUBLICARE} zile lucrătoare pentru publicare.
-      </p>
-      <p style="color:#64748b;font-size:13px;">
-        Toate articolele și banii tăi, într-un loc:
-        <a href="${SITE.url}/cont-partener/${semneazaToken({ scope: "panou", id: p.id, v: p.tokenVersion ?? 0 })}">contul de partener</a>.
-      </p>
-      `,
-    );
-    await sendEmail({ to: p.contactEmail, subject: `Articol de publicat — ${p.siteName}`, html, replyTo: ADMIN_EMAIL });
-  }
-
-  const totalNoua = alese.reduce((s, p) => s + (p.pricePerArticle as number) + adaos, 0);
-  const totalLor = alese.reduce((s, p) => s + (p.pricePerArticle as number), 0);
-  await sendEmail({
-    to: ADMIN_EMAIL,
-    subject: `Plasări trimise — ${alese.length} ${alese.length === 1 ? "publicație" : "publicații"}`,
-    html: wrapEmail(
-      "Plasări trimise",
-      `<p>${esc(d.title)}</p>
-       <table style="width:100%;border-collapse:collapse;">
-         ${kv("Publicații", alese.map((p) => esc(p.siteName)).join(", "))}
-         ${kv("Încasăm", `${totalNoua} lei`)}
-         ${kv("Plătim", `${totalLor} lei`)}
-         ${kv("Marjă", `${totalNoua - totalLor} lei`)}
-       </table>`,
-    ),
-  }).catch(() => {});
-
-  return NextResponse.json({ ok: true, plasari: create, totalNoua, totalLor });
+  const r = await trimitePlasari({
+    publisherIds: d.publisherIds,
+    title: d.title,
+    body: d.body,
+    images: d.images,
+    featuredIndex: d.featuredIndex,
+    linkNotes: d.linkNotes,
+    orderSubmissionId: d.orderSubmissionId,
+    clientLabel: d.clientLabel,
+  });
+  if (!r.ok) return NextResponse.json({ ok: false, error: r.error }, { status: r.status });
+  return NextResponse.json({ ok: true, plasari: r.plasari, totalNoua: r.totalNoua, totalLor: r.totalLor });
 }
 
 /** Lista plasarilor, pentru admin. `?comanda=` filtreaza pe o comanda. */

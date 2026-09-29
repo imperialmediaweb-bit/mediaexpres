@@ -16,6 +16,7 @@ import {
   etichetaZiare,
   TOTAL_ZIARE,
 } from "@/lib/alacarte";
+import { calculeazaParteneri, parseazaAlegeri, serializeazaAlegeri } from "@/lib/catalog-parteneri";
 
 export const runtime = "nodejs";
 
@@ -29,6 +30,9 @@ const checkoutSchema = z.object({
   // CERERE: preturile si numele se iau din rețea pe server (lib/alacarte.ts),
   // niciodata din ce trimite browserul.
   ziare: z.array(z.string().min(1).max(80)).max(120).optional(),
+  // 29.09.2026 — publicatiile partenere bifate: „id" sau „id+facebook+…".
+  // Maxim 10 pe comanda (id-urile trebuie sa incapa in metadata Stripe).
+  parteneri: z.array(z.string().min(8).max(120)).max(10).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -50,7 +54,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Date invalide" }, { status: 400 });
   }
-  const { packageId, mode, email, ziare } = parsed.data;
+  const { packageId, mode, email, ziare, parteneri } = parsed.data;
 
   // Cookie-urile de atribuire Meta (_fbp si mai ales _fbc, care contine
   // fbclid-ul din linkul reclamei) exista DOAR in browserul clientului.
@@ -132,21 +136,29 @@ export async function POST(req: NextRequest) {
    */
   if (mode === "alacarte") {
     const alese = ziareDinSluguri(ziare || []);
-    if (alese.length === 0) {
+    // Partenerii: pretul si optiunile se iau din baza (lib/catalog-parteneri.ts).
+    const cp = await calculeazaParteneri(parseazaAlegeri(parteneri || []));
+    if (alese.length === 0 && cp.linii.length === 0) {
       return NextResponse.json(
         { ok: false, error: "Alege cel putin o publicatie" },
         { status: 400 }
       );
     }
-    const pret = pretAlacarte(alese.length);
-    const eticheta = etichetaZiare(alese);
-    const numeLista =
+    const pret = alese.length ? pretAlacarte(alese.length) : { total: 0 };
+    const eticheta = alese.length ? etichetaZiare(alese) : "";
+    const numeRetea =
       eticheta === "toate"
-        ? `toate cele ${TOTAL_ZIARE} de publicatii`
+        ? `toate cele ${TOTAL_ZIARE} de publicatii MediaExpres`
         : alese.map((z) => z.name).join(", ");
+    const numeParteneri = cp.linii
+      .map((l) => l.nume + (l.optiuni.length ? ` (+${l.optiuni.map((o) => (o.key === "facebook" ? "Facebook" : "prima pagină")).join(", ")})` : ""))
+      .join(", ");
+    const numeLista = [numeRetea, numeParteneri].filter(Boolean).join(" · ");
+    const nrTotal = alese.length + cp.linii.length;
+    const totalLei = pret.total + cp.total;
     // Pachetul e recunoscut peste tot dupa id; aici id-ul spune si cate sunt,
     // ca sa apara citibil in emailul de plata, pe factura si in admin.
-    const idPachet = `alege-${alese.length}-ziare`;
+    const idPachet = `alege-${nrTotal}-ziare`;
     try {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -164,17 +176,13 @@ export async function POST(req: NextRequest) {
           {
             price_data: {
               currency: "ron",
-              unit_amount: pret.total * 100,
+              unit_amount: totalLei * 100,
               product_data: {
-                name: `Articol în ${alese.length} ${
-                  alese.length === 1 ? "publicație" : "publicații"
-                }`,
+                name: `Articol în ${nrTotal} ${nrTotal === 1 ? "publicație" : "publicații"}`,
                 // Stripe taie descrierea lunga, iar numele a 50 de ziare nu
                 // incap oricum — la toata reteaua se scrie asa.
                 description:
-                  numeLista.length > 380
-                    ? `${TOTAL_ZIARE} de publicații MediaExpres (rețeaua completă)`
-                    : numeLista,
+                  numeLista.length > 380 ? numeLista.slice(0, 377) + "…" : numeLista,
               },
             },
             quantity: 1,
@@ -186,7 +194,10 @@ export async function POST(req: NextRequest) {
           category: "standard",
           // Publicatiile alese, pe drumul care supravietuieste pana la
           // webhook: fara ele nu stim unde publicam ce tocmai s-a platit.
-          ziare: eticheta,
+          ...(eticheta ? { ziare: eticheta } : {}),
+          ...(cp.linii.length
+            ? { parteneri: serializeazaAlegeri(cp.linii.map((l) => ({ id: l.id, optiuni: l.optiuni.map((o) => o.key) }))) }
+            : {}),
           ...(userId ? { userId } : {}),
           ...fbMeta,
         },

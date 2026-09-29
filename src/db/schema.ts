@@ -366,6 +366,10 @@ export const publishers = pgTable("publisher", {
   spamScore: integer("spam_score"),
   openPageRank: real("open_page_rank"),
   authorityCheckedAt: timestamp("authority_checked_at"),
+  /** JSON [{key, pret}] — optiunile vandute pe langa articol (lib/optiuni-partener.ts). */
+  extraOptions: text("extra_options"),
+  /** Nisa publicatiei: stiri generale, auto, sanatate... Clientul filtreaza dupa ea. */
+  niche: text("niche"),
   /** Bronz / Argint / Aur / Platina — dupa cifre, nu dupa negociere. */
   tier: text("tier"),
   /** Cat ii platim pe articol publicat (lei). Vine din nivel, se poate ajusta. */
@@ -448,6 +452,8 @@ export const placements = pgTable("placement", {
   linkCheckedAt: timestamp("link_checked_at"),
   dofollowExpected: boolean("dofollow_expected").notNull().default(true),
 
+  /** JSON [{key, pret, pretClient}] — optiunile comandate odata cu articolul. */
+  options: text("options"),
   /** Decontul in care a intrat. Setarea lui E lacatul: o plasare rezervata
    *  de un decont nu mai poate fi luata de al doilea. */
   statementId: text("statement_id"),

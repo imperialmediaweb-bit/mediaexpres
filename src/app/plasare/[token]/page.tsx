@@ -7,6 +7,17 @@ import { verificaToken } from "@/lib/plasare-token";
 import { etichetaStare, timpRamas, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } from "@/lib/plasari";
 import { SITE } from "@/data/site";
 import { PRAG_RETRAGERE, ZILE_PLATA } from "@/lib/decont";
+import { etichetaOptiune } from "@/lib/optiuni-partener";
+
+/** Cheile optiunilor comandate pe plasare (coloana JSON `options`). */
+function citesteOptiuniComandate(json: string | null): string[] {
+  try {
+    const a = JSON.parse(json || "[]");
+    return Array.isArray(a) ? a.map((o) => String(o.key)) : [];
+  } catch {
+    return [];
+  }
+}
 import { PlacementActions } from "./PlacementActions";
 
 export const dynamic = "force-dynamic";
@@ -68,6 +79,14 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
         <dl className="grid gap-3 sm:grid-cols-2">
           <Camp eticheta="Starea" valoare={etichetaStare(pl.status)} />
           <Camp eticheta="Îți plătim" valoare={`${pl.pricePartner} lei`} />
+          {citesteOptiuniComandate(pl.options).length > 0 && (
+            <div className="sm:col-span-2">
+              <dt className="text-xs uppercase tracking-wider text-slate-500">Comandat în plus</dt>
+              <dd className="mt-0.5 text-sm font-medium text-brand-navy">
+                {citesteOptiuniComandate(pl.options).map((k) => etichetaOptiune(k)).join(" · ")}
+              </dd>
+            </div>
+          )}
           <Camp
             eticheta="Refuz până la"
             valoare={`${fmt(pl.deadlineRefuz)}${deschis ? ` (${timpRamas(new Date(pl.deadlineRefuz), acum)})` : ""}`}

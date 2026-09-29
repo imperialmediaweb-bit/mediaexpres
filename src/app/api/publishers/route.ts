@@ -29,6 +29,11 @@ const applySchema = z.object({
   contactEmail: z.string().email(),
   contactPhone: z.string().max(40).optional().or(z.literal("")),
   payoutIban: z.string().max(50).optional().or(z.literal("")),
+  niche: z.string().max(60).optional().or(z.literal("")),
+  extraOptions: z
+    .array(z.object({ key: z.enum(["facebook", "prima_pagina"]), pret: z.number().int().min(1).max(10000) }))
+    .max(5)
+    .optional(),
   payoutCompany: z.string().max(200).optional().or(z.literal("")),
   notes: z.string().max(2000).optional().or(z.literal("")),
   gdprConsent: z.literal(true),
@@ -93,6 +98,8 @@ export async function POST(req: NextRequest) {
     contactEmail: d.contactEmail,
     contactPhone: d.contactPhone || null,
     payoutIban: d.payoutIban || null,
+    niche: d.niche || null,
+    extraOptions: d.extraOptions?.length ? JSON.stringify(d.extraOptions) : null,
     payoutCompany: d.payoutCompany || null,
     notes: d.notes || null,
     status: "pending",
@@ -120,6 +127,8 @@ export async function POST(req: NextRequest) {
       ${kv("Judet / Regiune", `${d.county || "—"} / ${d.region || "—"}`)}
       ${kv("Facebook", d.facebookUrl || "—")}
       ${kv("Autoritate (verificată de noi)", aut ? `DA ${aut.domainAuthority ?? "—"} · PA ${aut.pageAuthority ?? "—"} · spam ${aut.spamScore ?? "—"}%${aut.openPageRank != null ? ` · OPR ${aut.openPageRank}/10` : ""}` : "neverificată (lipsește cheia Moz sau Moz nu a răspuns)")}
+      ${kv("Nișă", d.niche || "—")}
+      ${kv("Opțiuni oferite", d.extraOptions?.length ? d.extraOptions.map((o) => `${o.key === "facebook" ? "Facebook" : "prima pagină 7 zile"}: ${o.pret} lei`).join(", ") : "—")}
       ${kv("Trafic lunar", d.monthlyTraffic ? `${d.monthlyTraffic.toLocaleString()} vizite` : "—")}
       ${kv("Dovada traficului", d.analyticsProofUrl ? `<a href="${d.analyticsProofUrl}">captura din Analytics</a>` : "⚠️ NU a urcat captura")}
       ${kv("Urmaritori Facebook", d.facebookFollowers ? d.facebookFollowers.toLocaleString() : "—")}

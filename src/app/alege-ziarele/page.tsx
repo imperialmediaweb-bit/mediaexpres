@@ -2,6 +2,11 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { AlegeZiare } from "./AlegeZiare";
 import { TOTAL_ZIARE, PRET_RETEA, pretBucata } from "@/lib/alacarte";
+import { parteneriDisponibili, reduceriVolum, type PartenerCatalog } from "@/lib/catalog-parteneri";
+
+// Catalogul partenerilor se citeste din baza la fiecare vizita: un partener
+// aprobat azi trebuie sa apara azi, nu la urmatorul deploy.
+export const dynamic = "force-dynamic";
 
 /*
   23.09.2026 — cerută de proprietar: „vreau pe MediaExpres o pagină cu ziarele,
@@ -24,7 +29,14 @@ export const metadata: Metadata = {
   alternates: { canonical: "/alege-ziarele" },
 };
 
-export default function AlegeZiarelePage() {
+export default async function AlegeZiarelePage() {
+  // Daca baza nu raspunde, pagina merge mai departe cu ziarele retelei.
+  let parteneri: PartenerCatalog[] = [];
+  try {
+    parteneri = await parteneriDisponibili();
+  } catch (e) {
+    console.error("[alege-ziarele] parteneri:", e);
+  }
   return (
     <>
       <section className="bg-brand-navy py-14 text-white md:py-20">
@@ -68,7 +80,7 @@ export default function AlegeZiarelePage() {
             ))}
           </div>
 
-          <AlegeZiare />
+          <AlegeZiare parteneri={parteneri} reduceri={reduceriVolum()} />
         </div>
       </section>
 

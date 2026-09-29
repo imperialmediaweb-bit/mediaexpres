@@ -26,6 +26,7 @@ import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import { domeniuDin } from "@/lib/autoritate";
+import { pretOptiuneClient, citesteOptiuni } from "@/lib/optiuni-partener";
 
 import {
   PRAG_RETRAGERE,
@@ -1237,9 +1238,9 @@ console.log("\n########## S. RECENZII ##########");
     t("domeniul clientului se scoate din notele de linkuri", domeniulDinNote("perdele Iași → https://www.artjunkie.ro/contact") === "artjunkie.ro");
     // Materialul se COPIAZA pe plasare: pe comanda stau numele si telefonul
     // clientului, iar publicatia nu are voie sa ajunga la ele printr-un join.
-    const api = citesteFisier("src/app/api/admin/placements/route.ts");
+    const api = citesteFisier("src/lib/trimite-plasari.ts");
     t("plasarea copiaza articolul, nu-l leaga de comanda", /articleTitle: d\.title/.test(api) && /articleBody: d\.body/.test(api));
-    t("preturile se ingheata la trimitere, cu adaosul de volum", /pricePartner: tarif/.test(api) && /priceClient: tarif \+ adaos/.test(api) && /adaosPentru\(alese\.length\)/.test(api));
+    t("preturile se ingheata la trimitere, cu adaosul de volum", /pricePartner: pretPartener/.test(api) && /pretClient = tarif \+ adaos/.test(api) && /adaosPentru\(alese\.length\)/.test(api));
     t("publicatia fara tarif sau suspendata nu primeste articole", /status !== "approved" \|\| !p\.pricePerArticle/.test(api));
     const pub = citesteFisier("src/app/api/placements/[token]/route.ts");
     t("refuzul dupa termen e respins pe server", /acum > new Date\(pl\.deadlineRefuz\)/.test(pub));
@@ -1669,7 +1670,7 @@ console.log("\n########## S. RECENZII ##########");
   const link = citesteFisier("src/app/api/partener/link/route.ts");
   t("intrarea nu spune cine e partener si cine nu", /return NextResponse\.json\(\{ ok: true \}\)/.test(link) && /eq\(publishers\.status, "approved"\)/.test(link));
   t("regula veche de decontare a disparut peste tot", !/sfârșitul trimestrului/.test(citesteFisier("src/app/plasare/[token]/page.tsx") + citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
-  t("contul de partener e legat din emailurile de plasare si de aprobare", /cont-partener/.test(citesteFisier("src/app/api/admin/placements/route.ts")) && /cont-partener/.test(citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
+  t("contul de partener e legat din emailurile de plasare si de aprobare", /cont-partener/.test(citesteFisier("src/lib/trimite-plasari.ts")) && /cont-partener/.test(citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
 }
 
 
@@ -1683,6 +1684,22 @@ console.log("\n########## S. RECENZII ##########");
   t("nivelul propus foloseste si autoritatea, nu doar traficul", /nivelPropus\(p\.domainAuthority, p\.monthlyTraffic\)/.test(citesteFisier("src/app/admin/parteneri/[id]/page.tsx")));
   t("la inscriere, scorul se verifica singur", /verificaAutoritate\(d\.siteUrl\)/.test(citesteFisier("src/app/api/publishers/route.ts")));
   t("reverificarea cere login de admin", /getSession\(\)/.test(citesteFisier("src/app/api/admin/publishers/[id]/autoritate/route.ts")));
+}
+
+
+// Catalogul partenerilor pe /alege-ziarele (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("optiunea: +50%, minim 30 de lei", pretOptiuneClient(100) === 150 && pretOptiuneClient(40) === 70);
+  t("optiunile invalide din baza se arunca", citesteOptiuni('[{"key":"facebook","pret":80},{"key":"hack","pret":5},{"key":"prima_pagina","pret":0}]').length === 1 && citesteOptiuni("nu e json").length === 0);
+  const sub = citesteFisier("src/app/api/articol/submit/route.ts");
+  t("textul suspect sau cazino NU pleaca automat la parteneri", /screenContent\(/.test(sub) && /OPRITE/.test(sub) && /trimitePlasari\(/.test(sub));
+  const chk = citesteFisier("src/app/api/checkout/route.ts");
+  t("pretul partenerilor se calculeaza pe server", /calculeazaParteneri\(/.test(chk));
+  t("partenerul are 2 zile sa publice", /ZILE_PUBLICARE = 2\b/.test(citesteFisier("src/lib/plasari.ts")));
+  t("clientul primeste linkul de la noi cand partenerul publica", /a apărut pe/.test(citesteFisier("src/app/api/placements/[token]/route.ts")));
+  t("emailul catre partener nu contine clientul", !/customerEmail|clientEmail/.test(citesteFisier("src/lib/trimite-plasari.ts")));
+  t("butonul de plata e marcat (bulele nu-l acopera)", /data-comanda="1"/.test(citesteFisier("src/app/alege-ziarele/AlegeZiare.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

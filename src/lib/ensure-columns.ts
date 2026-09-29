@@ -51,7 +51,9 @@ export function ensureOrderColumns(): Promise<void> {
           ADD COLUMN IF NOT EXISTS "page_authority" integer,
           ADD COLUMN IF NOT EXISTS "spam_score" integer,
           ADD COLUMN IF NOT EXISTS "open_page_rank" real,
-          ADD COLUMN IF NOT EXISTS "authority_checked_at" timestamp`,
+          ADD COLUMN IF NOT EXISTS "authority_checked_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "extra_options" text,
+          ADD COLUMN IF NOT EXISTS "niche" text`,
       ),
     ])
       .then(() => undefined)
@@ -106,10 +108,12 @@ export function ensurePlacementTables(): Promise<void> {
           "link_checked_at" timestamp,
           "dofollow_expected" boolean NOT NULL DEFAULT true,
           "statement_id" text,
+          "options" text,
           "admin_notes" text,
           "created_at" timestamp DEFAULT now() NOT NULL
         )`,
       )
+      .then(() => db.execute(sql`ALTER TABLE "placement" ADD COLUMN IF NOT EXISTS "options" text`))
       .then(() =>
         // 29.09.2026 — cererile de plata ale partenerilor (lib/decont.ts).
         db.execute(

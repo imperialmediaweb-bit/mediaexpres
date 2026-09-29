@@ -20,6 +20,11 @@ interface FormValues {
   articlesPerMonth?: number;
   facebookFollowers?: number;
   dofollowLinks: string;
+  niche: string;
+  optFacebook: boolean;
+  optFacebookPret?: number;
+  optPrimaPagina: boolean;
+  optPrimaPaginaPret?: number;
   declarationAccepted: boolean;
   contactName: string;
   contactEmail: string;
@@ -58,6 +63,11 @@ export function PartnerApplyForm() {
           articlesPerMonth: data.articlesPerMonth ? Number(data.articlesPerMonth) : undefined,
           facebookFollowers: data.facebookFollowers ? Number(data.facebookFollowers) : undefined,
           dofollowLinks: data.dofollowLinks === "" ? undefined : data.dofollowLinks === "da",
+          // 29.09.2026 — optiunile vandute pe langa articol, cu pretul lor.
+          extraOptions: [
+            ...(data.optFacebook && Number(data.optFacebookPret) > 0 ? [{ key: "facebook", pret: Number(data.optFacebookPret) }] : []),
+            ...(data.optPrimaPagina && Number(data.optPrimaPaginaPret) > 0 ? [{ key: "prima_pagina", pret: Number(data.optPrimaPaginaPret) }] : []),
+          ],
           declarationAccepted: data.declarationAccepted === true,
           analyticsProofUrl: dovada?.url,
         }),
@@ -194,6 +204,38 @@ export function PartnerApplyForm() {
         <Field label="Câți advertoriali acceptați / lună">
           <Input type="number" {...register("articlesPerMonth")} placeholder="20" />
         </Field>
+      </div>
+
+      <Field label="Nișa publicației">
+        <select {...register("niche")} className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
+          <option value="">— alege —</option>
+          {["Știri generale", "Știri locale", "Business și finanțe", "Auto", "Sănătate", "Imobiliare", "Tech", "Lifestyle", "Sport", "Turism", "Agricultură", "Altele"].map((n) => (
+            <option key={n} value={n}>{n}</option>
+          ))}
+        </select>
+      </Field>
+
+      {/*
+        29.09.2026 — optiunile pe care publicatia le vinde pe langa articol.
+        Clientul le bifeaza in catalog; pretul lui include adaosul nostru.
+      */}
+      <div className="rounded-lg border border-slate-200 p-4">
+        <p className="text-sm font-semibold text-brand-navy">Opțiuni pe care le oferiți pe lângă articol (opțional)</p>
+        <p className="mt-1 text-xs text-slate-500">Scrie cât vrei să primești pentru fiecare. Clientul le poate adăuga la comandă.</p>
+        <div className="mt-3 space-y-3">
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" {...register("optFacebook")} className="h-4 w-4" /> Postare pe pagina de Facebook
+            </label>
+            <Input type="number" min={1} {...register("optFacebookPret")} placeholder="lei" className="w-28" />
+          </div>
+          <div className="flex flex-wrap items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-slate-700">
+              <input type="checkbox" {...register("optPrimaPagina")} className="h-4 w-4" /> Fixat pe prima pagină 7 zile
+            </label>
+            <Input type="number" min={1} {...register("optPrimaPaginaPret")} placeholder="lei" className="w-28" />
+          </div>
+        </div>
       </div>
 
       <div className="pt-4 border-t border-slate-200">

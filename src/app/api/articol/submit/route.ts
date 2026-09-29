@@ -9,7 +9,9 @@ import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, orders, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
-import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, screenContent } from "@/lib/content-policy";
+import { parseazaAlegeri } from "@/lib/catalog-parteneri";
+import { trimitePlasari } from "@/lib/trimite-plasari";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
@@ -164,6 +166,7 @@ export async function POST(req: NextRequest) {
   // O plata = o singura trimitere. Insertul e si garda: indexul unic pe
   // stripeSessionId respinge a doua trimitere pe aceeasi comanda.
   let alreadySubmitted = false;
+  let submissionId: string | null = null;
   try {
     await ensureOrderColumns();
     const inserted = await db
@@ -202,8 +205,65 @@ export async function POST(req: NextRequest) {
       .onConflictDoNothing({ target: orderSubmissions.stripeSessionId })
       .returning({ id: orderSubmissions.id });
     alreadySubmitted = inserted.length === 0;
+    submissionId = inserted[0]?.id ?? null;
   } catch (err) {
     console.error("[articol/submit] NU am putut salva in DB (continui pe email):", err);
+  }
+
+  /**
+   * 29.09.2026 — publicatiile PARTENERE bifate la plata primesc articolul
+   * automat, acum, cu acelasi drum ca butonul din admin (lib/trimite-plasari).
+   *
+   * Plasa: textul trece intai prin verificarea de continut (content-policy).
+   * Daca e suspect sau e cazino, NU pleaca la ziarele altora — ramane la
+   * admin, cu un email care spune de ce. Pe reteaua noastra un om citeste
+   * inainte de publicare; la parteneri, verificarea asta e omul.
+   */
+  if (submissionId && !alreadySubmitted) {
+    try {
+      const [plata] = await db
+        .select({ partnerIds: orders.partnerIds })
+        .from(orders)
+        .where(eq(orders.stripeSessionId, order.sessionId))
+        .limit(1);
+      const alegeri = parseazaAlegeri(plata?.partnerIds || "");
+      if (alegeri.length) {
+        const verificare = screenContent(d.title, d.body);
+        if (verificare.flagged || isCasino) {
+          await sendEmail({
+            to: ADMIN_EMAIL,
+            subject: `⚠️ Plasări la parteneri OPRITE — de verificat`,
+            html: wrapEmail(
+              "Articolul n-a plecat automat la parteneri",
+              `<p>Comanda are ${alegeri.length} publicații partenere, dar textul ${isCasino ? "e de cazino" : `a fost semnalat: ${esc(verificare.reason || "")}`}.</p>
+               <p>Citește-l în admin și, dacă e în regulă, trimite plasările manual din <a href="${SITE.url}/admin/plasari">Admin → Plasări</a>.</p>`,
+            ),
+          }).catch(() => {});
+        } else {
+          const featured = Math.max(0, Math.min(d.featuredIndex, d.images.length - 1));
+          const r = await trimitePlasari({
+            publisherIds: alegeri.map((a) => a.id),
+            optiuni: Object.fromEntries(alegeri.map((a) => [a.id, a.optiuni])),
+            title: d.title,
+            body: d.body,
+            images: d.images.map((i) => ({ url: i.url })),
+            featuredIndex: featured,
+            linkNotes: d.linkNotes || null,
+            orderSubmissionId: submissionId,
+          });
+          if (!r.ok) {
+            await sendEmail({
+              to: ADMIN_EMAIL,
+              subject: `⚠️ Plasările automate la parteneri n-au plecat`,
+              html: wrapEmail("Plasări neplecate", `<p>${esc(r.error)}</p><p>Trimite-le manual din <a href="${SITE.url}/admin/plasari">Admin → Plasări</a>.</p>`),
+            }).catch(() => {});
+          }
+        }
+      }
+    } catch (err) {
+      // Articolul e salvat oricum; plasarile se pot trimite manual din admin.
+      console.error("[articol/submit] plasari automate:", err);
+    }
   }
 
   /**

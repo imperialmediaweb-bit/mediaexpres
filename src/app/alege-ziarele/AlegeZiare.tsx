@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, Search, X, Newspaper, Loader2 } from "lucide-react";
+import { Check, Search, X, Newspaper, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import {
@@ -12,6 +12,7 @@ import {
   urmatorulPrag,
   type ZiarAles,
 } from "@/lib/alacarte";
+import type { PartenerCatalog } from "@/lib/catalog-parteneri";
 
 const REGIUNI = ["Național", "Moldova", "Transilvania", "Muntenia", "Banat"] as const;
 type Regiune = (typeof REGIUNI)[number];
@@ -33,8 +34,16 @@ function faraDiacritice(s: string) {
     .toLowerCase();
 }
 
-export function AlegeZiare() {
+export function AlegeZiare({
+  parteneri = [],
+  reduceri = [],
+}: {
+  parteneri?: PartenerCatalog[];
+  reduceri?: { deLa: number; reducere: number }[];
+}) {
   const [alese, setAlese] = useState<string[]>([]);
+  // Partenerii bifati, cu optiunile lor (id -> chei de optiuni).
+  const [aleseP, setAleseP] = useState<Record<string, string[]>>({});
   const [cautare, setCautare] = useState("");
   const [seTrimite, setSeTrimite] = useState(false);
   const [eroare, setEroare] = useState<string | null>(null);
@@ -50,6 +59,35 @@ export function AlegeZiare() {
   const pret = pretAlacarte(alese.length);
   const prag = urmatorulPrag(alese.length);
   const toateAlese = alese.length >= TOTAL_ZIARE;
+
+  // Partenerii: reducerea la volum vine de pe server ca tabel (fara adaos).
+  const parteneriFiltrati = useMemo(() => {
+    if (!q) return parteneri;
+    return parteneri.filter((p) => faraDiacritice(`${p.nume} ${p.judet || ""} ${p.regiune || ""} ${p.nisa || ""}`).includes(q));
+  }, [q, parteneri]);
+  const idsP = Object.keys(aleseP);
+  const reducere = reduceri.filter((r) => idsP.length >= r.deLa).reduce((m, r) => Math.max(m, r.reducere), 0);
+  const totalP = parteneri
+    .filter((p) => aleseP[p.id])
+    .reduce((s, p) => s + p.pret - reducere + p.optiuni.filter((o) => aleseP[p.id].includes(o.key)).reduce((x, o) => x + o.pret, 0), 0);
+  const totalGeneral = pret.total + totalP;
+  const nrGeneral = alese.length + idsP.length;
+  const urmReducereP = reduceri.find((r) => r.deLa > idsP.length && r.reducere > reducere);
+
+  function comutaP(id: string) {
+    setAleseP((prev) => {
+      const n = { ...prev };
+      if (n[id]) delete n[id];
+      else n[id] = [];
+      return n;
+    });
+  }
+  function comutaOptiune(id: string, key: string) {
+    setAleseP((prev) => {
+      const cur = prev[id] || [];
+      return { ...prev, [id]: cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key] };
+    });
+  }
 
   function comuta(z: ZiarAles) {
     setAlese((prev) =>
@@ -68,7 +106,7 @@ export function AlegeZiare() {
   }
 
   async function cumpara() {
-    if (alese.length === 0 || seTrimite) return;
+    if (nrGeneral === 0 || seTrimite) return;
     setSeTrimite(true);
     setEroare(null);
     try {
@@ -79,6 +117,7 @@ export function AlegeZiare() {
           packageId: "alacarte",
           mode: "alacarte",
           ziare: alese,
+          parteneri: idsP.map((id) => [id, ...aleseP[id]].join("+")),
         }),
       });
       const data = await res.json();
@@ -199,7 +238,81 @@ export function AlegeZiare() {
           );
         })}
 
-        {filtrate.length === 0 && (
+        {/*
+          29.09.2026 — publicatiile partenere: separat de retea, in acelasi cos.
+          Ale noastre au promisiuni pe care partenerii nu le au (12 ore, Facebook
+          pe toate paginile, text rescris unic); amestecate, clientul ar crede ca
+          primeste la fel peste tot.
+        */}
+        {parteneriFiltrati.length > 0 && (
+          <div>
+            <h2 className="font-serif text-lg font-bold text-brand-navy">
+              Publicații partenere
+              <span className="ml-2 text-sm font-normal text-slate-500">({parteneriFiltrati.length})</span>
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              Site-uri independente, verificate de noi. Articolul apare în maximum 2 zile lucrătoare și
+              rămâne online 12 luni. Primești linkul de la noi, în același raport.
+              {reduceri.length > 0 && ` De la ${reduceri[0].deLa} publicații partenere, fiecare costă mai puțin.`}
+            </p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
+              {parteneriFiltrati.map((p) => {
+                const bifat = !!aleseP[p.id];
+                return (
+                  <li key={p.id} className={cn("rounded-xl border p-3 transition", bifat ? "border-brand-red bg-red-50" : "border-slate-200 bg-white")}>
+                    <button type="button" onClick={() => comutaP(p.id)} aria-pressed={bifat} className="flex w-full items-start gap-3 text-left">
+                      <span
+                        className={cn(
+                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+                          bifat ? "border-brand-red bg-brand-red text-white" : "border-slate-300 bg-white",
+                        )}
+                        aria-hidden
+                      >
+                        {bifat && <Check className="h-3.5 w-3.5" />}
+                      </span>
+                      <span className="min-w-0 flex-1">
+                        <span className="flex items-baseline justify-between gap-2">
+                          <span className="truncate text-sm font-semibold text-brand-navy">{p.nume}</span>
+                          <span className="shrink-0 text-sm font-bold text-brand-navy">{p.pret - (bifat ? reducere : 0)} lei</span>
+                        </span>
+                        <span className="block text-xs text-slate-500">
+                          {[p.judet || p.regiune, p.nisa, p.da != null ? `DA ${p.da}` : null, p.trafic ? `${p.trafic.toLocaleString("ro-RO")} vizitatori/lună` : null, p.dofollow ? "dofollow" : null]
+                            .filter(Boolean)
+                            .join(" · ")}
+                        </span>
+                      </span>
+                    </button>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 pl-8">
+                      <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-red">
+                        vezi site-ul <ExternalLink className="h-3 w-3" />
+                      </a>
+                      {bifat &&
+                        p.optiuni.map((o) => {
+                          const on = aleseP[p.id].includes(o.key);
+                          return (
+                            <button
+                              key={o.key}
+                              type="button"
+                              onClick={() => comutaOptiune(p.id, o.key)}
+                              className={cn(
+                                "rounded-full border px-2.5 py-1 text-xs transition",
+                                on ? "border-brand-red bg-brand-red text-white" : "border-slate-300 text-slate-700 hover:border-brand-red",
+                              )}
+                            >
+                              {on ? "✓ " : "+ "}
+                              {o.eticheta} · {o.pret} lei
+                            </button>
+                          );
+                        })}
+                    </div>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+
+        {filtrate.length === 0 && parteneriFiltrati.length === 0 && (
           <p className="rounded-xl bg-slate-50 p-6 text-center text-slate-600">
             Nu avem publicație pentru „{cautare}&rdquo;. Caută după județ — pentru Pitești, de
             exemplu, publicația se numește Argeș Expres.
@@ -218,13 +331,19 @@ export function AlegeZiare() {
             <div className="min-w-0">
               <p className="flex items-center gap-2 text-sm text-slate-600">
                 <Newspaper className="h-4 w-4 shrink-0 text-brand-red" />
-                {alese.length === 0 ? (
+                {nrGeneral === 0 ? (
                   <span>Nu ai bifat nicio publicație.</span>
                 ) : (
                   <span>
-                    <strong className="text-brand-navy">{alese.length}</strong>{" "}
-                    {alese.length === 1 ? "publicație" : "publicații"}
-                    {toateAlese ? " — toată rețeaua" : ` · ${pret.peBucata} lei bucata`}
+                    <strong className="text-brand-navy">{nrGeneral}</strong>{" "}
+                    {nrGeneral === 1 ? "publicație" : "publicații"}
+                    {alese.length > 0 && idsP.length > 0
+                      ? ` (${alese.length} din rețea + ${idsP.length} partenere)`
+                      : toateAlese
+                        ? " — toată rețeaua"
+                        : alese.length > 0
+                          ? ` · ${pret.peBucata} lei bucata`
+                          : ""}
                   </span>
                 )}
               </p>
@@ -249,25 +368,33 @@ export function AlegeZiare() {
                   ) : null}
                 </p>
               )}
+              {idsP.length > 0 && urmReducereP && (
+                <p className="mt-1 text-xs text-slate-500">
+                  De la {urmReducereP.deLa} publicații partenere, fiecare te costă cu{" "}
+                  {urmReducereP.reducere - reducere} de lei mai puțin.
+                </p>
+              )}
               {eroare && <p className="mt-1 text-xs font-medium text-brand-red">{eroare}</p>}
             </div>
 
             <div className="flex items-center gap-4">
               <div className="text-right">
                 <p className="font-serif text-2xl font-bold text-brand-navy">
-                  {pret.total} lei
+                  {totalGeneral} lei
                 </p>
-                {pret.total > 0 && pret.faraReducere > pret.total && (
+                {idsP.length === 0 && pret.total > 0 && pret.faraReducere > pret.total && (
                   <p className="text-xs text-slate-400 line-through">
                     {pret.faraReducere} lei
                   </p>
                 )}
               </div>
+              {/* data-comanda: bula de chat si WhatsApp se dau la o parte (useZonaLibera). */}
               <Button
+                data-comanda="1"
                 variant="accent"
                 size="lg"
                 onClick={cumpara}
-                disabled={alese.length === 0 || seTrimite}
+                disabled={nrGeneral === 0 || seTrimite}
               >
                 {seTrimite ? (
                   <>

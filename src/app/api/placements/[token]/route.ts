@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
-import { placements, publishers } from "@/db/schema";
+import { orderSubmissions, placements, publishers } from "@/db/schema";
+import { SITE } from "@/data/site";
 import { ensurePlacementTables } from "@/lib/ensure-columns";
 import { verificaToken } from "@/lib/plasare-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
@@ -111,6 +112,35 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
       </table>`,
     ),
   }).catch(() => {});
+
+  // 29.09.2026 — clientul primeste linkul DE LA NOI, pe emailul MediaExpres,
+  // nu de la partener: cei doi nu intra niciodata in contact direct.
+  if (d.action === "publicat" && pl.orderSubmissionId && d.url) {
+    try {
+      const [cmd] = await db
+        .select({ email: orderSubmissions.email, title: orderSubmissions.title })
+        .from(orderSubmissions)
+        .where(eq(orderSubmissions.id, pl.orderSubmissionId))
+        .limit(1);
+      if (cmd?.email) {
+        await sendEmail({
+          to: cmd.email,
+          subject: `Articolul tău a apărut pe ${nume}`,
+          html: wrapEmail(
+            "Articolul tău a apărut",
+            `<p>Bună ziua,</p>
+             <p>Articolul <strong>„${esc(cmd.title)}"</strong> a fost publicat pe <strong>${esc(nume)}</strong>:</p>
+             <p style="margin:18px 0;"><a href="${esc(d.url)}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi articolul</a></p>
+             <p style="color:#64748b;font-size:13px;">Rămâne online cel puțin 12 luni. La final primești raportul complet, cu toate linkurile.</p>
+             <p style="margin-top:20px;">Cu respect,<br/><strong>Echipa ${SITE.name}</strong></p>`,
+          ),
+          replyTo: ADMIN_EMAIL,
+        });
+      }
+    } catch (e) {
+      console.error("[placements] email client:", e);
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
