@@ -11,7 +11,9 @@ import { adaugaZileLucratoare } from "@/lib/zile-lucratoare";
  */
 
 export const ZILE_REFUZ = 2;
-export const ZILE_PUBLICARE = 3;
+// 29.09.2026 — 2 zile (decizia proprietarului): clientul a platit si
+// asteapta linkul; 3 zile lucratoare insemnau, cu un weekend, aproape o saptamana.
+export const ZILE_PUBLICARE = 2;
 /** Garantia din contract: articolul ramane online un an. */
 export const LUNI_ONLINE = 12;
 

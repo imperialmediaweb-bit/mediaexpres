@@ -13,6 +13,7 @@ import { sendGaPurchase } from "@/lib/ga-mp";
 import { signOrderToken } from "@/lib/order-token";
 import { SITE } from "@/data/site";
 import { numeleZiarelor } from "@/lib/alacarte";
+import { ensureOrderColumns } from "@/lib/ensure-columns";
 
 export const runtime = "nodejs";
 
@@ -211,6 +212,8 @@ async function handleCheckoutCompleted(
         ? session.payment_intent
         : session.payment_intent?.id || null;
 
+    // Coloanele noi (newspapers, partner_ids) pot lipsi pana la fix-db.
+    await ensureOrderColumns();
     // onConflictDoNothing + indexul unic inchid si cursa dintre doua livrari
     // concurente: doar una reuseste insertul, cealalta se opreste aici.
     const inserted = await db
@@ -226,6 +229,10 @@ async function handleCheckoutCompleted(
         stripePaymentIntentId: paymentIntentId,
         paidAt: new Date(),
         source: (session.metadata?.sursa as string) || null,
+        // 29.09.2026 — ce a bifat pe /alege-ziarele, pastrat pe comanda: de
+        // aici pleaca plasarile catre parteneri cand vine articolul.
+        newspapers: (session.metadata?.ziare as string) || null,
+        partnerIds: (session.metadata?.parteneri as string) || null,
       })
       .onConflictDoNothing({ target: orders.stripeSessionId })
       .returning({ id: orders.id });
