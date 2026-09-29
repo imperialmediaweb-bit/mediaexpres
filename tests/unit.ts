@@ -1835,6 +1835,18 @@ console.log("\n########## S. RECENZII ##########");
   t("partenerul suspendat isi vede si isi cere banii", /\["approved", "suspended"\]\.includes\(pub\.status\)/.test(citesteFisier("src/app/api/partener/retragere/route.ts")));
 }
 
+
+// Abonamentul: comanda in admin, formular direct, reamintire, link lunar (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const wh = citesteFisier("src/app/api/webhook/stripe/route.ts");
+  t("abonamentul se salveaza si ca o comanda (apare in admin, primeste reamintire)", /inregistreazaComandaAbonament\(session, email, userId\)/.test(wh));
+  t("in fiecare luna noua clientul primeste linkul direct catre formular", /billing_reason === "subscription_cycle"/.test(wh) && /Trimite articolul lunii/.test(wh));
+  t("dupa plata abonamentului clientul ajunge direct la formular", /kind: "article"/.test(citesteFisier("src/app/comanda/multumim/page.tsx").split('session.mode === "subscription"')[1] || ""));
+  t("abonamentele platite fara comanda se recupereaza din cron", /recupereazaAbonamente\(\)/.test(citesteFisier("src/app/api/cron/materiale-lipsa/route.ts")));
+  t("fisierul de rute nu exporta altceva decat handlerele", !/export async function inregistreaza/.test(wh));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

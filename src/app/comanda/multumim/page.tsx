@@ -22,7 +22,7 @@ type Outcome =
 /**
  * Dupa plata, clientul nu trebuie sa astepte sa-l sunam:
  *  - plata unica -> direct la formularul de trimis articolul si pozele
- *  - abonament  -> spre cont, unde isi creeaza articolul lunar
+ *  - abonament  -> tot la formular, pentru articolul primei luni
  */
 async function resolveOutcome(sessionId: string): Promise<Outcome> {
   const stripe = getStripe();
@@ -50,8 +50,17 @@ async function resolveOutcome(sessionId: string): Promise<Outcome> {
       };
     }
 
+    // 29.09.2026 — si abonamentul merge direct la formularul de articol,
+    // pentru articolul primei luni. Inainte ajungea la „Intra in cont": link
+    // de logare pe email, apoi cautat unde se scrie articolul — un client
+    // care platise a ramas acolo, fara sa trimita nimic.
     if (session.mode === "subscription") {
-      return { kind: "subscription", email };
+      if (!email) return { kind: "subscription", email };
+      const packageId = (session.metadata?.planId as string) || "promo-lunar";
+      return {
+        kind: "article",
+        url: `/articol/${signOrderToken({ sessionId: session.id, email, packageId })}`,
+      };
     }
 
     return { kind: "generic" };

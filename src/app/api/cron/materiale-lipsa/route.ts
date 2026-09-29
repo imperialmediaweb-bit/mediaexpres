@@ -17,6 +17,7 @@ import { findPackageById } from "@/data/packages";
 import { waLink } from "@/lib/whatsapp";
 import { ruleazaPazaLinkuri } from "@/lib/ruleaza-paza";
 import { ruleazaTermene } from "@/lib/termene-parteneri";
+import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -124,6 +125,15 @@ export async function POST(req: NextRequest) {
   let reamintiri = 0;
   let alerte = 0;
   const erori: string[] = [];
+
+  // 29.09.2026 — abonamentele platite fara comanda primesc comanda intai,
+  // ca reamintirea de mai jos sa le prinda chiar in trecerea asta.
+  let abonamenteRecuperate = 0;
+  try {
+    abonamenteRecuperate = await recupereazaAbonamente();
+  } catch (e) {
+    erori.push(`abonamente: ${e instanceof Error ? e.message : e}`);
+  }
 
   // ——— 1. Reamintirea catre client, la 10 minute ———
   for (const o of await faraMaterial(PRAG_REAMINTIRE, "reminder")) {
@@ -331,6 +341,7 @@ export async function POST(req: NextRequest) {
     alertePlata,
     pazaLinkuri,
     termene,
+    abonamenteRecuperate,
     erori,
   });
 }

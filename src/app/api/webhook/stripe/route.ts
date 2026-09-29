@@ -11,6 +11,7 @@ import { findSubscriptionPlanById } from "@/data/packages";
 import { sendCapiEvent, splitName } from "@/lib/meta-capi";
 import { sendGaPurchase } from "@/lib/ga-mp";
 import { signOrderToken } from "@/lib/order-token";
+import { inregistreazaComandaAbonament } from "@/lib/abonamente-comenzi";
 import { SITE } from "@/data/site";
 import { numeleZiarelor } from "@/lib/alacarte";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
@@ -357,6 +358,11 @@ async function handleCheckoutCompleted(
     const sub = await stripe.subscriptions.retrieve(subId);
     await upsertSubscription(sub, userId);
 
+    // 29.09.2026 — abonamentul intra si in `orders`, ca plata unica: altfel
+    // nu aparea in admin la Comenzi / Materiale si nu primea reamintirea
+    // automata cu formularul (cron materiale-lipsa). Idempotent pe sesiune.
+    await inregistreazaComandaAbonament(session, email, userId);
+
     if (subAlready) {
       console.log("[stripe-webhook] abonament deja procesat, sar emailurile:", subId);
       return;
@@ -488,6 +494,30 @@ async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
   if (!subId) return;
 
   const sub = await stripe.subscriptions.retrieve(subId);
+
+  // 29.09.2026 — luna noua de abonament: clientul primeste pe email linkul
+  // direct catre formularul de articol, ca la plata unica. Cheia comenzii e
+  // factura lunii (in_…), deci fiecare luna are exact o trimitere.
+  // Prima luna are link din emailul de confirmare (subscription_create).
+  if (invoice.billing_reason === "subscription_cycle") {
+    const email = invoice.customer_email;
+    if (email) {
+      const planIdLuna = (sub.metadata?.planId as string) || "promo-lunar";
+      const link = `${SITE.url}/articol/${signOrderToken({ sessionId: invoice.id, email, packageId: planIdLuna })}`;
+      await sendEmail({
+        to: email,
+        subject: "Luna nouă a abonamentului — trimite articolul",
+        html: wrapEmail(
+          "Articolul acestei luni",
+          `<p>Bună ziua,</p>
+           <p>Abonamentul MediaExpres s-a reînnoit, iar articolul acestei luni te așteaptă. Trimite-ne textul și pozele (sau doar tema și site-ul, îl scriem noi):</p>
+           <p style="margin:16px 0;"><a href="${link}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimite articolul lunii →</a></p>
+           <p style="color:#64748b;font-size:13px;">Publicăm în maximum 12 ore lucrătoare de la primire, pe toate cele 50 de ziare, și îți trimitem raportul cu linkurile.</p>
+           <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>`,
+        ),
+      }).catch((e) => console.error("[stripe-webhook] email luna noua:", e));
+    }
+  }
   const planId = (sub.metadata?.planId as string) || "";
   const plan = findSubscriptionPlanById(planId);
   const included = plan?.distributionsPerMonth ?? 0;
@@ -634,10 +664,13 @@ async function sendConfirmationEmails(args: {
     // emitea DOAR pe pagina de multumire — cine inchidea tabul dupa plata sau
     // prindea o eroare de retea ramanea fara nicio cale spre trimiterea
     // materialelor, desi platise.
-    const articleUrl =
-      kind === "payment"
-        ? `${SITE.url}/articol/${signOrderToken({ sessionId, email, packageId: label })}`
-        : null;
+    // 29.09.2026 — si la abonament: linkul direct pentru articolul primei
+    // luni (lunile urmatoare il primesc din handleInvoicePaid).
+    const articleUrl = `${SITE.url}/articol/${signOrderToken({
+      sessionId,
+      email,
+      packageId: kind === "payment" ? label : label && label !== "abonament" ? label : "promo-lunar",
+    })}`;
 
     const customerHtml = wrapEmail(
       kind === "payment" ? "Plata confirmata — MediaExpres" : "Abonament activ — MediaExpres",
