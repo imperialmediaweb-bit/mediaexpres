@@ -8,6 +8,7 @@ import { orderSubmissions, orders } from "@/db/schema";
 import { etichetaSursa } from "@/lib/sursa";
 import { etichetaRitm } from "@/lib/ritm";
 import { findPackageById } from "@/data/packages";
+import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
 import { MarkPublishedButton } from "./MarkPublishedButton";
 import { NewOrderForm } from "./NewOrderForm";
 
@@ -43,6 +44,11 @@ export default async function MaterialePage() {
   // trimis niciunul: pana acum se vedea doar daca te uitai in Clienti, comanda
   // cu comanda. Reamintirea automata pleaca oricum la 10 minute (cron
   // materiale-lipsa), dar cine plateste 500 de lei merita si un om.
+  // 29.09.2026 — abonamentele platite fara comanda se recupereaza si la
+  // deschiderea paginii (nu doar din cron): comanda apare pe loc, iar
+  // clientul primeste formularul pe email in aceeasi clipa.
+  await recupereazaAbonamente().catch((e) => console.error("[admin/materiale] abonamente:", e));
+
   const platiteFaraMaterial = await db
     .select({
       id: orders.id,
