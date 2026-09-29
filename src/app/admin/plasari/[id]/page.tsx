@@ -1,6 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
-import { eq } from "drizzle-orm";
+import { and, eq, ne } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { orderSubmissions, placements, publishers } from "@/db/schema";
@@ -10,6 +10,8 @@ import { ChatPlasare } from "@/components/ChatPlasare";
 import { SITE } from "@/data/site";
 import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
 import { VerificaLink } from "./VerificaLink";
+import { RezolvaPlasare } from "./RezolvaPlasare";
+import { NEWSPAPERS } from "@/data/newspapers";
 
 export const dynamic = "force-dynamic";
 
@@ -79,6 +81,49 @@ export default async function AdminPlasare({ params }: { params: { id: string } 
           )}
         </Camp>
       </dl>
+
+      {["expirat", "refuzat", "anulat"].includes(pl.status) && !pl.replacedById && (
+        <RezolvaPlasare
+          id={pl.id}
+          suma={pl.priceClient}
+          parteneri={(
+            await db.select().from(publishers).where(and(eq(publishers.status, "approved"), ne(publishers.id, pl.publisherId)))
+          )
+            .filter((x) => x.pricePerArticle && (x.kind || "presa") === (pub?.kind || "presa"))
+            .map((x) => ({ id: x.id, nume: x.siteName, tarif: x.pricePerArticle as number }))}
+          ziare={NEWSPAPERS.map((n) => n.name)}
+        />
+      )}
+      {pl.replacedById && (
+        <p className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-700">
+          {pl.replacedById === "ramburs" ? (
+            <>Rezolvat: banii înapoi ({pl.priceClient} lei).</>
+          ) : pl.replacedById.startsWith("retea|") ? (
+            <>
+              Rezolvat în rețeaua noastră: {pl.replacedById.split("|")[1]} —{" "}
+              <a href={pl.replacedById.split("|").slice(2).join("|")} className="text-brand-red underline" target="_blank" rel="noreferrer">
+                articolul
+              </a>
+            </>
+          ) : (
+            <>
+              Mutat pe altă publicație:{" "}
+              <Link href={`/admin/plasari/${pl.replacedById}`} className="text-brand-red underline">
+                vezi plasarea nouă
+              </Link>
+            </>
+          )}
+        </p>
+      )}
+      {pl.replacesId && (
+        <p className="mt-3 text-xs text-slate-500">
+          Înlocuiește{" "}
+          <Link href={`/admin/plasari/${pl.replacesId}`} className="underline">
+            plasarea căzută
+          </Link>
+          .{pl.refundRequestedAt && " Clientul a cerut banii înapoi — fă returnarea din Stripe."}
+        </p>
+      )}
 
       <h2 className="mb-2 mt-8 font-serif text-lg font-bold text-brand-navy">Discuția client–publicație</h2>
       <p className="mb-3 text-xs text-slate-500">

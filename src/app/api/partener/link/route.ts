@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { and, eq, sql } from "drizzle-orm";
+import { and, eq, sql, inArray } from "drizzle-orm";
 import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
   const gasite = await db
     .select()
     .from(publishers)
-    .where(and(sql`lower(${publishers.contactEmail}) = ${email}`, eq(publishers.status, "approved")));
+    .where(and(sql`lower(${publishers.contactEmail}) = ${email}`, inArray(publishers.status, ["approved", "suspended"])));
 
   // Un email poate avea mai multe publicatii: primeste cate un link pentru fiecare.
   if (gasite.length > 0) {

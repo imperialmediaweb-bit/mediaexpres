@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { OPTIUNI_PE_TIP, etichetaOptiune } from "@/lib/optiuni-partener";
+import { TERMENI_VERSIUNE } from "@/lib/termene-parteneri";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { eq } from "drizzle-orm";
 import { verificaAutoritate } from "@/lib/autoritate";
@@ -25,7 +26,8 @@ const applySchema = z.object({
   facebookFollowers: z.number().int().nonnegative().optional(),
   /** Intrebarea care desparte plasarea de SEO de cea de vizibilitate. */
   dofollowLinks: z.boolean().optional(),
-  declarationAccepted: z.boolean().optional(),
+  // 29.09.2026 — obligatoriu: bifa e acceptarea acordului (/termeni-parteneri).
+  declarationAccepted: z.literal(true, { errorMap: () => ({ message: "Trebuie să accepți acordul de colaborare." }) }),
   contactName: z.string().min(2).max(150),
   contactEmail: z.string().email(),
   contactPhone: z.string().max(40).optional().or(z.literal("")),
@@ -125,6 +127,10 @@ export async function POST(req: NextRequest) {
     avgViews: influencer ? d.avgViews ?? null : null,
     // La presa tariful vine din nivel (admin); la influencer, din ce cere el.
     pricePerArticle: influencer ? d.pretCerut ?? null : null,
+    // Acordul de colaborare (/termeni-parteneri): ce versiune, cand, de unde.
+    ...(d.declarationAccepted
+      ? { termsVersion: TERMENI_VERSIUNE, termsAcceptedAt: new Date(), termsIp: ip.slice(0, 60) }
+      : {}),
     payoutCompany: d.payoutCompany || null,
     notes: d.notes || null,
     status: "pending",

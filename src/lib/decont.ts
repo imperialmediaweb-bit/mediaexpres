@@ -55,6 +55,8 @@ export interface Sold {
   inLucru: number;
   /** Publicate, dar cu linkul stricat: se pot cere dupa reparare. */
   blocat: number;
+  /** Articole platite si apoi sterse: se scad din urmatoarea plata. */
+  deRecuperat: number;
 }
 
 /**
@@ -64,6 +66,8 @@ export interface Sold {
 export function calculeazaSold(
   plasari: PlasarePentruSold[],
   cereriPlatite: Set<string> = new Set(),
+  /** Suma recuperarilor care nu au intrat inca intr-o cerere de plata. */
+  deduceriDeschise = 0,
 ): Sold {
   let deIncasat = 0;
   let inPlata = 0;
@@ -79,7 +83,8 @@ export function calculeazaSold(
       inLucru += pret;
     }
   }
-  return { deIncasat, inPlata, inLucru, blocat };
+  const deRecuperat = Math.max(0, Math.trunc(deduceriDeschise));
+  return { deIncasat: deIncasat - deRecuperat, inPlata, inLucru, blocat, deRecuperat };
 }
 
 export function poateCerePlata(sold: Sold, areCerereDeschisa: boolean): boolean {

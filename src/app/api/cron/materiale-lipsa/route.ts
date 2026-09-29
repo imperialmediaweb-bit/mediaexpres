@@ -16,6 +16,7 @@ import { SITE } from "@/data/site";
 import { findPackageById } from "@/data/packages";
 import { waLink } from "@/lib/whatsapp";
 import { ruleazaPazaLinkuri } from "@/lib/ruleaza-paza";
+import { ruleazaTermene } from "@/lib/termene-parteneri";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -313,6 +314,15 @@ export async function POST(req: NextRequest) {
     erori.push(`paza linkuri: ${e instanceof Error ? e.message : e}`);
   }
 
+  // Termenele partenerilor: reamintiri, expirari cu mutare automata,
+  // suspendari incheiate (lib/termene-parteneri.ts).
+  let termene: Awaited<ReturnType<typeof ruleazaTermene>> | null = null;
+  try {
+    termene = await ruleazaTermene();
+  } catch (e) {
+    erori.push(`termene parteneri: ${e instanceof Error ? e.message : e}`);
+  }
+
   return NextResponse.json({
     ok: true,
     reamintiri,
@@ -320,6 +330,7 @@ export async function POST(req: NextRequest) {
     reamintiriPlata,
     alertePlata,
     pazaLinkuri,
+    termene,
     erori,
   });
 }

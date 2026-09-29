@@ -57,7 +57,11 @@ export function ensureOrderColumns(): Promise<void> {
           ADD COLUMN IF NOT EXISTS "kind" text NOT NULL DEFAULT 'presa',
           ADD COLUMN IF NOT EXISTS "platform" text,
           ADD COLUMN IF NOT EXISTS "followers" integer,
-          ADD COLUMN IF NOT EXISTS "avg_views" integer`,
+          ADD COLUMN IF NOT EXISTS "avg_views" integer,
+          ADD COLUMN IF NOT EXISTS "suspended_until" timestamp,
+          ADD COLUMN IF NOT EXISTS "terms_version" text,
+          ADD COLUMN IF NOT EXISTS "terms_accepted_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "terms_ip" text`,
       ),
     ])
       .then(() => undefined)
@@ -123,7 +127,32 @@ export function ensurePlacementTables(): Promise<void> {
           ADD COLUMN IF NOT EXISTS "link_fail_count" integer NOT NULL DEFAULT 0,
           ADD COLUMN IF NOT EXISTS "link_detail" text,
           ADD COLUMN IF NOT EXISTS "link_alert_at" timestamp,
-          ADD COLUMN IF NOT EXISTS "link_escalated_at" timestamp`),
+          ADD COLUMN IF NOT EXISTS "link_escalated_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "reminder_sent_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "replaces_id" text,
+          ADD COLUMN IF NOT EXISTS "replaced_by_id" text,
+          ADD COLUMN IF NOT EXISTS "refund_requested_at" timestamp`),
+      )
+      .then(() =>
+        // 29.09.2026 — abaterile partenerilor si sumele de recuperat.
+        db.execute(sql`CREATE TABLE IF NOT EXISTS "partner_strike" (
+          "id" text PRIMARY KEY NOT NULL,
+          "publisher_id" text NOT NULL,
+          "placement_id" text,
+          "reason" text NOT NULL,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )`),
+      )
+      .then(() =>
+        db.execute(sql`CREATE TABLE IF NOT EXISTS "partner_deduction" (
+          "id" text PRIMARY KEY NOT NULL,
+          "publisher_id" text NOT NULL,
+          "placement_id" text,
+          "amount" integer NOT NULL,
+          "reason" text NOT NULL,
+          "statement_id" text,
+          "created_at" timestamp DEFAULT now() NOT NULL
+        )`),
       )
       .then(() =>
         // 29.09.2026 — cererile de plata ale partenerilor (lib/decont.ts).

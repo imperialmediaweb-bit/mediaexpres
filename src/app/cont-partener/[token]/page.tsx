@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
+import { and, desc, eq, isNull } from "drizzle-orm";
 import { db } from "@/db";
-import { partnerPayouts, placements, publishers } from "@/db/schema";
+import { partnerDeductions, partnerPayouts, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { semneazaToken, verificaToken } from "@/lib/plasare-token";
 import { etichetaStare } from "@/lib/plasari";
@@ -40,7 +40,7 @@ export default async function PanouPartener({ params }: { params: { token: strin
   await ensureOrderColumns();
   await ensurePlacementTables();
   const [pub] = await db.select().from(publishers).where(eq(publishers.id, t.id)).limit(1);
-  if (!pub || (pub.tokenVersion ?? 0) !== t.v || pub.status !== "approved") {
+  if (!pub || (pub.tokenVersion ?? 0) !== t.v || !["approved", "suspended"].includes(pub.status)) {
     return <Mesaj titlu="Link invalid" />;
   }
 
@@ -56,7 +56,11 @@ export default async function PanouPartener({ params }: { params: { token: strin
     .orderBy(desc(partnerPayouts.requestedAt));
 
   const platite = new Set(cereri.filter((c) => c.status === "platit").map((c) => c.id));
-  const sold = calculeazaSold(plasari, platite);
+  const deduceri = await db
+    .select()
+    .from(partnerDeductions)
+    .where(and(eq(partnerDeductions.publisherId, pub.id), isNull(partnerDeductions.statementId)));
+  const sold = calculeazaSold(plasari, platite, deduceri.reduce((s, d) => s + d.amount, 0));
   const deschisa = cereri.find((c) => c.status === "cerut");
   const incasatTotal = cereri.filter((c) => c.status === "platit").reduce((s, c) => s + c.amount, 0);
   const poate = poateCerePlata(sold, !!deschisa);
@@ -69,12 +73,26 @@ export default async function PanouPartener({ params }: { params: { token: strin
         Tariful tău: <strong className="text-brand-navy">{pub.pricePerArticle ?? "—"} lei</strong> pe articol publicat
       </p>
 
+      {pub.status === "suspended" && (
+        <p className="mt-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+          {pub.suspendedUntil
+            ? `Publicația e suspendată până pe ${new Date(pub.suspendedUntil).toLocaleDateString("ro-RO")} și nu primește articole noi.`
+            : "Publicația nu mai primește articole noi."}{" "}
+          Articolele deja publicate și păstrate conform acordului se plătesc în continuare.
+        </p>
+      )}
       {/* Portofelul */}
       <section className="mt-6 grid gap-3 sm:grid-cols-3">
         <Cifra eticheta="De încasat" valoare={sold.deIncasat} accent />
         <Cifra eticheta="În plată" valoare={sold.inPlata} />
         <Cifra eticheta="Încasat până acum" valoare={incasatTotal} />
       </section>
+      {sold.deRecuperat > 0 && (
+        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+          Din sold se scad {sold.deRecuperat} lei: articole plătite și apoi șterse sau cu linkul scos
+          înainte de 12 luni ({deduceri.map((d) => d.reason).join("; ")}). Vezi termenii pentru parteneri.
+        </p>
+      )}
       {sold.blocat > 0 && (
         <p className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
           {sold.blocat} lei sunt opriți: la verificarea automată, un articol publicat nu mai are pagina, linkul

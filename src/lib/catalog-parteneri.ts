@@ -1,7 +1,8 @@
 import { and, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
 import { publishers } from "@/db/schema";
-import { ensureOrderColumns } from "@/lib/ensure-columns";
+import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
+import { seriozitatePeParteneri, procentLaTimp } from "@/lib/termene-parteneri";
 import { ADAOS_PLASARE, PRAGURI_ADAOS, adaosPentru } from "@/lib/niveluri-publicatii";
 import { citesteOptiuni, pretOptiuneClient, etichetaOptiune, CHEI_OPTIUNI, OPTIUNI_PE_TIP, type CheieOptiune } from "@/lib/optiuni-partener";
 
@@ -37,6 +38,9 @@ export interface PartenerCatalog {
   platforma: string | null;
   urmaritori: number | null;
   vizualizari: number | null;
+  /** „livreaza la timp": procent din comenzile incheiate; null sub 3 comenzi. */
+  laTimp: number | null;
+  comenzi: number;
   /** Pretul unui articol pentru client, la bucata (fara reducerea de volum). */
   pret: number;
   optiuni: OptiuneCatalog[];
@@ -59,11 +63,14 @@ export function reducerePentru(bucati: number): number {
 }
 
 export async function parteneriDisponibili(): Promise<PartenerCatalog[]> {
-  await ensureOrderColumns();
-  const rows = await db
-    .select()
-    .from(publishers)
-    .where(and(eq(publishers.status, "approved"), isNotNull(publishers.pricePerArticle)));
+  await Promise.all([ensureOrderColumns(), ensurePlacementTables()]);
+  const [rows, seriozitate] = await Promise.all([
+    db
+      .select()
+      .from(publishers)
+      .where(and(eq(publishers.status, "approved"), isNotNull(publishers.pricePerArticle))),
+    seriozitatePeParteneri().catch(() => new Map<string, { laTimp: number; total: number }>()),
+  ]);
   return rows
     .filter((p) => (p.pricePerArticle ?? 0) > 0)
     .map((p) => ({
@@ -81,6 +88,8 @@ export async function parteneriDisponibili(): Promise<PartenerCatalog[]> {
       platforma: p.platform,
       urmaritori: p.followers,
       vizualizari: p.avgViews,
+      laTimp: procentLaTimp(seriozitate.get(p.id)),
+      comenzi: seriozitate.get(p.id)?.total ?? 0,
       pret: (p.pricePerArticle as number) + ADAOS_PLASARE,
       optiuni: citesteOptiuni(p.extraOptions)
         .filter((o) => (OPTIUNI_PE_TIP[p.kind === "influencer" ? "influencer" : "presa"] as string[]).includes(o.key))

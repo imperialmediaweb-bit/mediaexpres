@@ -20,6 +20,7 @@ import {
 import { semneazaToken } from "@/lib/plasare-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { inchidePlasareStricata } from "@/lib/termene-parteneri";
 
 const ZI = 24 * 60 * 60 * 1000;
 
@@ -224,6 +225,12 @@ async function aplicaRezultat(pl: Plasare, pub: Publicatie | undefined, r: Rezul
 
   if (!pl.linkEscalatedAt && acum.getTime() - new Date(pl.linkAlertAt).getTime() > ZILE_REPARARE * ZI) {
     await db.update(placements).set({ linkEscalatedAt: acum }).where(eq(placements.id, pl.id));
+    if (eBlocant(r.stare)) {
+      // 29.09.2026 — nereparat in termen: articolul se inchide la partenerul
+      // asta (abatere, recuperare daca era platit) si se muta automat.
+      await inchidePlasareStricata(pl, r.stare === "pagina_lipsa" ? "sters" : "link");
+      return;
+    }
     await sendEmail({
       to: ADMIN_EMAIL,
       subject: `⚠️ Link NEREPARAT după ${ZILE_REPARARE} zile — ${nume}`,

@@ -10,6 +10,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/
 import { onlinePanaLa, tranzitiePermisa, type StarePlasare } from "@/lib/plasari";
 import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
 import { verificaPlasare } from "@/lib/ruleaza-paza";
+import { inlocuiestePlasare } from "@/lib/termene-parteneri";
 
 export const runtime = "nodejs";
 
@@ -112,10 +113,14 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
   } else if (d.action === "accept") {
     await db.update(placements).set({ status: "acceptat", acceptedAt: acum }).where(eq(placements.id, pl.id));
   } else {
-    await db
+    const [refuzat] = await db
       .update(placements)
       .set({ status: "refuzat", refusedAt: acum, refusalReason: d.reason?.trim() || null })
-      .where(eq(placements.id, pl.id));
+      .where(eq(placements.id, pl.id))
+      .returning();
+    // Refuzul in termen e dreptul partenerului (fara abatere), dar clientul
+    // nu are voie sa ramana fara articol: il mutam automat.
+    if (refuzat) await inlocuiestePlasare(refuzat, "refuzat de publicație").catch((e) => console.error("[placements] inlocuire:", e));
   }
 
   const [pub] = await db.select().from(publishers).where(eq(publishers.id, pl.publisherId)).limit(1);

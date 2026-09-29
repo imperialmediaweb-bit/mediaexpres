@@ -377,6 +377,12 @@ export const publishers = pgTable("publisher", {
    * postari/unui video, iar „articolul" e brief-ul clientului.
    */
   kind: text("kind").notNull().default("presa"),
+  /** Suspendare automata pentru intarzieri (null = fara termen / manuala). */
+  suspendedUntil: timestamp("suspended_until"),
+  /** Acordul de colaborare acceptat la inscriere (/termeni-parteneri). */
+  termsVersion: text("terms_version"),
+  termsAcceptedAt: timestamp("terms_accepted_at"),
+  termsIp: text("terms_ip"),
   /** youtube | instagram | tiktok | facebook — doar la influenceri. */
   platform: text("platform"),
   followers: integer("followers"),
@@ -467,6 +473,15 @@ export const placements = pgTable("placement", {
   linkDetail: text("link_detail"),
   linkAlertAt: timestamp("link_alert_at"),
   linkEscalatedAt: timestamp("link_escalated_at"),
+  /**
+   * 29.09.2026 — termene si inlocuiri (lib/termene-parteneri.ts): reamintirea
+   * dinainte de termen, legatura intre plasarea cazuta si cea care o
+   * inlocuieste, si cererea clientului de a primi banii in loc de inlocuitor.
+   */
+  reminderSentAt: timestamp("reminder_sent_at"),
+  replacesId: text("replaces_id"),
+  replacedById: text("replaced_by_id"),
+  refundRequestedAt: timestamp("refund_requested_at"),
   dofollowExpected: boolean("dofollow_expected").notNull().default(true),
 
   /** JSON [{key, pret, pretClient}] — optiunile comandate odata cu articolul. */
@@ -498,6 +513,34 @@ export const placementMessages = pgTable("placement_message", {
   sender: text("sender").notNull(),
   body: text("body").notNull(),
   blocked: text("blocked"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/**
+ * Abaterile unui partener (29.09.2026): nu a publicat la timp, a sters un
+ * articol, a scos linkul. Se numara pe 90 de zile: 1 = avertisment,
+ * 2 = suspendat 30 de zile, 3 = scos din catalog.
+ */
+export const partnerStrikes = pgTable("partner_strike", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  publisherId: text("publisher_id").notNull(),
+  placementId: text("placement_id"),
+  /** intarziere | sters | link */
+  reason: text("reason").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/**
+ * Sume de recuperat de la un partener: articol platit si apoi sters. Se scad
+ * din urmatoarea cerere de plata (statement_id = cererea care le-a inclus).
+ */
+export const partnerDeductions = pgTable("partner_deduction", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  publisherId: text("publisher_id").notNull(),
+  placementId: text("placement_id"),
+  amount: integer("amount").notNull(),
+  reason: text("reason").notNull(),
+  statementId: text("statement_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 

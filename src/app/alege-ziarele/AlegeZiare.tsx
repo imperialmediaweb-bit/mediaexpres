@@ -163,6 +163,7 @@ export function AlegeZiare({
               {(p.tip === "influencer"
                 ? [PLATFORME[p.platforma || ""] || p.platforma, p.urmaritori ? `${p.urmaritori.toLocaleString("ro-RO")} urmăritori` : null, p.vizualizari ? `~${p.vizualizari.toLocaleString("ro-RO")} vizualizări/postare` : null, p.nisa]
                 : [p.judet || p.regiune, p.nisa, p.da != null ? `DA ${p.da}` : null, p.trafic ? `${p.trafic.toLocaleString("ro-RO")} vizitatori/lună` : null, p.dofollow ? "dofollow" : null])
+                .concat(p.laTimp != null ? [`livrează la timp ${p.laTimp}% (${p.comenzi} comenzi)`] : [])
                 .filter(Boolean)
                 .join(" · ")}
             </span>

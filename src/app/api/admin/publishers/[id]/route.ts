@@ -89,6 +89,8 @@ export async function PATCH(
       .update(publishers)
       .set({
         status: act === "suspend" ? "suspended" : "approved",
+        // Manual = fara termen; reactivarea sterge si suspendarea automata.
+        suspendedUntil: null,
         rejectionReason: act === "suspend" ? parsed.data.reason || null : null,
       })
       .where(eq(publishers.id, params.id));

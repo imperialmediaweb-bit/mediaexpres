@@ -193,7 +193,9 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
         <strong>Regulile, pe scurt:</strong> refuzi în {ZILE_REFUZ} zile lucrătoare, fără să explici
         de ce. Dacă publici, ai {ZILE_PUBLICARE} zile lucrătoare și lipești aici adresa articolului.
         Articolul rămâne online {LUNI_ONLINE} luni, cu linkurile neatinse — îl verificăm automat
-        săptămânal, iar un link stricat oprește plata până la reparare. După publicare, suma intră în
+        săptămânal, iar un link stricat oprește plata până la reparare. După termenul de publicare,
+        articolul trece automat la altă publicație, fără plată. Totul, în{" "}
+        <a href="/termeni-parteneri" className="underline">acordul de colaborare</a>. După publicare, suma intră în
         soldul tău; de la {PRAG_RETRAGERE} de lei ceri plata din{" "}
         <a href="/cont-partener" className="underline">contul de partener</a>, emiți factura și plătim în{" "}
         {ZILE_PLATA} zile lucrătoare.

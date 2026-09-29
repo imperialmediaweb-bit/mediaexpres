@@ -32,6 +32,14 @@ export interface CererePlasari {
   linkNotes?: string | null;
   orderSubmissionId?: string | null;
   clientLabel?: string | null;
+  /**
+   * Inlocuire (lib/termene-parteneri.ts): clientul a platit deja, deci pretul
+   * lui ramane cel initial, iar plasarea noua tine minte pe cine inlocuieste.
+   */
+  pretClientFix?: number;
+  replacesId?: string;
+  /** Fara emailul de rezumat catre admin (inlocuirea trimite unul propriu). */
+  faraRezumat?: boolean;
 }
 
 export type RezultatPlasari =
@@ -72,7 +80,7 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
       .filter((k) => oferite.has(k))
       .map((k) => ({ key: k, pret: oferite.get(k)!, pretClient: pretOptiuneClient(oferite.get(k)!) }));
     const pretPartener = tarif + opt.reduce((s, o) => s + o.pret, 0);
-    const pretClient = tarif + adaos + opt.reduce((s, o) => s + o.pretClient, 0);
+    const pretClient = d.pretClientFix ?? tarif + adaos + opt.reduce((s, o) => s + o.pretClient, 0);
     totalNoua += pretClient;
     totalLor += pretPartener;
 
@@ -91,6 +99,7 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
         pricePartner: pretPartener,
         priceClient: pretClient,
         options: opt.length ? JSON.stringify(opt) : null,
+        replacesId: d.replacesId || null,
         dofollowExpected: p.dofollowLinks !== false,
         sentAt: acum,
         deadlineRefuz,
@@ -123,7 +132,8 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
         Îl poți refuza în ${ZILE_REFUZ} zile lucrătoare, fără să explici de ce.
         Dacă îl publici, lipești adresa articolului în aceeași pagină; el rămâne
         online ${LUNI_ONLINE} luni, cu linkurile neatinse.
-        Ai ${ZILE_PUBLICARE} zile lucrătoare pentru publicare.
+        Ai ${ZILE_PUBLICARE} zile lucrătoare pentru publicare; după termen, articolul trece automat
+        la altă publicație, fără plată (<a href="${SITE.url}/termeni-parteneri">acordul de colaborare</a>).
       </p>
       <p style="color:#64748b;font-size:13px;">
         Toate articolele și banii tăi, într-un loc: <a href="${panou}">contul de partener</a>.
@@ -135,7 +145,7 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
     );
   }
 
-  await sendEmail({
+  if (!d.faraRezumat) await sendEmail({
     to: ADMIN_EMAIL,
     subject: `Plasări trimise — ${alese.length} ${alese.length === 1 ? "publicație" : "publicații"}`,
     html: wrapEmail(

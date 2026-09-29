@@ -3,7 +3,7 @@ import { z } from "zod";
 import { and, eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { partnerPayouts, placements, publishers } from "@/db/schema";
+import { partnerDeductions, partnerPayouts, placements, publishers } from "@/db/schema";
 import { ensurePlacementTables } from "@/lib/ensure-columns";
 import { sendEmail, wrapEmail, escapeHtml as esc } from "@/lib/email";
 
@@ -42,6 +42,7 @@ export async function POST(req: NextRequest, { params }: { params: { id: string 
 
   if (parsed.data.action === "anulat") {
     await db.update(placements).set({ statementId: null }).where(eq(placements.statementId, c.id));
+    await db.update(partnerDeductions).set({ statementId: null }).where(eq(partnerDeductions.statementId, c.id));
     return NextResponse.json({ ok: true });
   }
 

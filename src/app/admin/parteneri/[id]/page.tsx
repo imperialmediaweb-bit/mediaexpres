@@ -2,14 +2,15 @@ import { notFound, redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { publishers } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { partnerStrikes, publishers } from "@/db/schema";
+import { desc, eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
 import { ReverificaAutoritate } from "./ReverificaAutoritate";
 import { citesteOptiuni, etichetaOptiune, pretOptiuneClient } from "@/lib/optiuni-partener";
 import { PartnerActions } from "./PartnerActions";
 import { PartnerCommercial } from "./PartnerCommercial";
-import { ensureOrderColumns } from "@/lib/ensure-columns";
+import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
+import { seriozitatePeParteneri } from "@/lib/termene-parteneri";
 import { nivelPropus } from "@/lib/niveluri-publicatii";
 
 export const dynamic = "force-dynamic";
@@ -34,6 +35,12 @@ export default async function AdminPartnerDetail({
     .where(eq(publishers.id, params.id))
     .limit(1);
   if (!p) notFound();
+
+  await ensurePlacementTables();
+  const [abateri, seriozitate] = await Promise.all([
+    db.select().from(partnerStrikes).where(eq(partnerStrikes.publisherId, p.id)).orderBy(desc(partnerStrikes.createdAt)),
+    seriozitatePeParteneri().then((m) => m.get(p.id)),
+  ]);
 
   return (
     <div>
@@ -101,6 +108,33 @@ export default async function AdminPartnerDetail({
         <aside>
           <div className="space-y-5">
           <PartnerActions publisherId={p.id} currentStatus={p.status} />
+          <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm">
+            <h2 className="font-serif text-lg font-semibold text-brand-navy">Seriozitate</h2>
+            <p className="mt-2 text-slate-700">
+              La timp:{" "}
+              <strong>
+                {seriozitate?.total ? `${Math.round((seriozitate.laTimp / seriozitate.total) * 100)}% (${seriozitate.laTimp}/${seriozitate.total})` : "încă nicio comandă încheiată"}
+              </strong>
+            </p>
+            {p.suspendedUntil && (
+              <p className="mt-1 text-amber-700">Suspendat automat până pe {new Date(p.suspendedUntil).toLocaleDateString("ro-RO")}.</p>
+            )}
+            {abateri.length ? (
+              <ul className="mt-2 space-y-1 text-slate-700">
+                {abateri.map((a) => (
+                  <li key={a.id}>
+                    {new Date(a.createdAt).toLocaleDateString("ro-RO")} —{" "}
+                    {a.reason === "intarziere" ? "nepublicat în termen" : a.reason === "sters" ? "articol șters" : "link scos"}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="mt-1 text-slate-500">Nicio abatere.</p>
+            )}
+            <p className="mt-2 text-xs text-slate-500">
+              Acord acceptat: {p.termsAcceptedAt ? `${new Date(p.termsAcceptedAt).toLocaleString("ro-RO")} · versiunea ${p.termsVersion} · IP ${p.termsIp || "—"}` : "nu (înscris înainte de acord)"}
+            </p>
+          </div>
           {p.kind === "influencer" && (
             <div className="rounded-xl border-2 border-brand-red/30 bg-white p-5 text-sm">
               <h2 className="font-serif text-lg font-semibold text-brand-navy">🎥 Influencer</h2>

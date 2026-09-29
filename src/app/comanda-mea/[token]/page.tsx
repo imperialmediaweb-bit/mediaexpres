@@ -6,13 +6,17 @@ import { verificaToken } from "@/lib/plasare-token";
 import { plasarileComenzii } from "@/lib/mesaje-plasare";
 import { ChatPlasare } from "@/components/ChatPlasare";
 import { SITE } from "@/data/site";
+import { CerereRamburs } from "./CerereRamburs";
 import { eBlocant, ETICHETE_CLIENT, type StareLink } from "@/lib/paza-linkuri";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Comanda ta", robots: { index: false, follow: false } };
 
 /** Ce vede clientul: refuzul sau intarzierea partenerului sunt treaba noastra. */
-function stareClient(s: string): string {
+function stareClient(s: string, inlocuit?: string | null, ramburs?: Date | null): string {
+  if (ramburs || inlocuit === "ramburs") return "Bani returnați";
+  if (inlocuit?.startsWith("retea|")) return "Rezolvat";
+  if (inlocuit) return "Mutat";
   switch (s) {
     case "trimis":
       return "În lucru la publicație";
@@ -59,6 +63,8 @@ export default async function ComandaMea({ params }: { params: { token: string }
     plasarileComenzii(t.id),
   ]);
 
+  const numeDupaId = new Map(plasari.map((x) => [x.id, x.nume]));
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-10">
       <p className="text-xs font-bold uppercase tracking-wider text-brand-red">Publicații partenere</p>
@@ -80,7 +86,7 @@ export default async function ComandaMea({ params }: { params: { token: string }
             <div className="mb-3 flex flex-wrap items-baseline justify-between gap-2">
               <h2 className="font-serif text-lg font-bold text-brand-navy">{pl.nume}</h2>
               <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-700">
-                {stareClient(pl.status)}
+                {stareClient(pl.status, pl.replacedById, pl.refundRequestedAt)}
               </span>
             </div>
             {pl.publishedUrl ? (
@@ -105,7 +111,47 @@ export default async function ComandaMea({ params }: { params: { token: string }
                 </p>
               )
             )}
-            {INCHISE.includes(pl.status) ? (
+            {pl.replacesId && numeDupaId.get(pl.replacesId) && (
+              <p className="mb-3 text-xs text-slate-500">
+                Înlocuiește {numeDupaId.get(pl.replacesId)}, fără cost pentru tine.
+              </p>
+            )}
+            {pl.replacesId && !pl.publishedUrl && !INCHISE.includes(pl.status) && (
+              <div className="mb-3">
+                {pl.refundRequestedAt ? (
+                  <p className="text-xs font-medium text-amber-700">
+                    Ai cerut banii înapoi ({pl.priceClient} lei) — te contactăm în cel mult o zi lucrătoare.
+                  </p>
+                ) : (
+                  <CerereRamburs token={params.token} placementId={pl.id} suma={pl.priceClient} />
+                )}
+              </div>
+            )}
+            {INCHISE.includes(pl.status) && pl.refundRequestedAt ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                Ai cerut banii înapoi: îți returnăm {pl.priceClient} lei pe card, în câteva zile lucrătoare.
+              </p>
+            ) : INCHISE.includes(pl.status) && pl.replacedById === "ramburs" ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                Publicația nu a putut prelua articolul; îți returnăm {pl.priceClient} lei pe card.
+              </p>
+            ) : INCHISE.includes(pl.status) && pl.replacedById?.startsWith("retea|") ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                Publicația nu a putut prelua articolul, așa că a apărut pe{" "}
+                <a href={pl.replacedById.split("|").slice(2).join("|")} target="_blank" rel="noreferrer" className="font-semibold text-brand-red underline">
+                  {pl.replacedById.split("|")[1]}
+                </a>
+                , din rețeaua noastră, fără cost pentru tine.
+              </p>
+            ) : INCHISE.includes(pl.status) && pl.replacedById ? (
+              <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
+                Publicația nu a putut prelua articolul, așa că l-am mutat pe{" "}
+                <a href={`#${pl.replacedById}`} className="font-semibold text-brand-red underline">
+                  {numeDupaId.get(pl.replacedById) || "altă publicație"}
+                </a>
+                , fără cost pentru tine.
+              </p>
+            ) : INCHISE.includes(pl.status) ? (
               <p className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
                 Publicația nu a putut prelua articolul. Îl mutăm pe altă publicație sau îți returnăm banii
                 pentru ea — îți scriem pe email. Întrebări:{" "}

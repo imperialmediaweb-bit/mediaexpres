@@ -31,6 +31,7 @@ import { articolHtml, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-
 import { verificaContact } from "@/lib/filtru-contact";
 import { analizeazaPagina } from "@/lib/paza-linkuri";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
+import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
 
 import {
   PRAG_RETRAGERE,
@@ -1244,7 +1245,7 @@ console.log("\n########## S. RECENZII ##########");
     // clientului, iar publicatia nu are voie sa ajunga la ele printr-un join.
     const api = citesteFisier("src/lib/trimite-plasari.ts");
     t("plasarea copiaza articolul, nu-l leaga de comanda", /articleTitle: d\.title/.test(api) && /articleBody: d\.body/.test(api));
-    t("preturile se ingheata la trimitere, cu adaosul de volum", /pricePartner: pretPartener/.test(api) && /pretClient = tarif \+ adaos/.test(api) && /adaosPentru\(alese\.length\)/.test(api));
+    t("preturile se ingheata la trimitere, cu adaosul de volum", /pricePartner: pretPartener/.test(api) && /pretClient = d\.pretClientFix \?\? tarif \+ adaos/.test(api) && /adaosPentru\(alese\.length\)/.test(api));
     t("publicatia fara tarif sau suspendata nu primeste articole", /status !== "approved" \|\| !p\.pricePerArticle/.test(api));
     const pub = citesteFisier("src/app/api/placements/[token]/route.ts");
     t("refuzul dupa termen e respins pe server", /acum > new Date\(pl\.deadlineRefuz\)/.test(pub));
@@ -1652,9 +1653,9 @@ console.log("\n########## S. RECENZII ##########");
   const s2 = calculeazaSold([pl("publicat", 150, "c1"), pl("publicat", 150, "c2"), pl("publicat", 80)], new Set(["c2"]));
   t("o plasare dintr-o cerere deschisa e „in plata”, nu „de incasat”", s2.deIncasat === 80 && s2.inPlata === 150);
   t("o plasare dintr-o cerere platita nu mai apare nicaieri", s2.inPlata + s2.deIncasat === 230);
-  t("sub prag nu poate cere plata", !poateCerePlata({ deIncasat: PRAG_RETRAGERE - 1, inPlata: 0, inLucru: 0, blocat: 0 }, false));
-  t("la prag poate cere plata", poateCerePlata({ deIncasat: PRAG_RETRAGERE, inPlata: 0, inLucru: 0, blocat: 0 }, false));
-  t("cu o cerere deschisa nu mai poate cere a doua", !poateCerePlata({ deIncasat: 900, inPlata: 0, inLucru: 0, blocat: 0 }, true));
+  t("sub prag nu poate cere plata", !poateCerePlata({ deIncasat: PRAG_RETRAGERE - 1, inPlata: 0, inLucru: 0, blocat: 0, deRecuperat: 0 }, false));
+  t("la prag poate cere plata", poateCerePlata({ deIncasat: PRAG_RETRAGERE, inPlata: 0, inLucru: 0, blocat: 0, deRecuperat: 0 }, false));
+  t("cu o cerere deschisa nu mai poate cere a doua", !poateCerePlata({ deIncasat: 900, inPlata: 0, inLucru: 0, blocat: 0, deRecuperat: 0 }, true));
   t("„cat mai ai” nu coboara sub zero", catMaiAi(PRAG_RETRAGERE + 50) === 0 && catMaiAi(50) === PRAG_RETRAGERE - 50);
   t("IBAN valid trece (cu spatii)", ibanValid("RO49 AAAA 1B31 0075 9384 0000"));
   t("IBAN cu o cifra gresita e prins", !ibanValid("RO49AAAA1B31007593840001"));
@@ -1672,7 +1673,7 @@ console.log("\n########## S. RECENZII ##########");
   t("anularea elibereaza plasarile", /statementId: null/.test(adm));
   t("adminul trebuie sa fie logat", /getSession\(\)/.test(adm));
   const link = citesteFisier("src/app/api/partener/link/route.ts");
-  t("intrarea nu spune cine e partener si cine nu", /return NextResponse\.json\(\{ ok: true \}\)/.test(link) && /eq\(publishers\.status, "approved"\)/.test(link));
+  t("intrarea nu spune cine e partener si cine nu", /return NextResponse\.json\(\{ ok: true \}\)/.test(link) && /inArray\(publishers\.status, \["approved", "suspended"\]\)/.test(link));
   t("regula veche de decontare a disparut peste tot", !/sfârșitul trimestrului/.test(citesteFisier("src/app/plasare/[token]/page.tsx") + citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
   t("contul de partener e legat din emailurile de plasare si de aprobare", /cont-partener/.test(citesteFisier("src/lib/trimite-plasari.ts")) && /cont-partener/.test(citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
 }
@@ -1807,6 +1808,29 @@ console.log("\n########## S. RECENZII ##########");
   t("publicatia afla si cand site-ul nu raspunde, fara oprirea platii", /nu răspunde la verificarea noastră/.test(paza));
   t("pagina clientului spune exact ce s-a intamplat", /ETICHETE_CLIENT\[pl\.linkStatus/.test(citesteFisier("src/app/comanda-mea/[token]/page.tsx")));
   t("sectiunea „pazite 12 luni” apare doar cand exista parteneri", /parteneri\.length > 0 && \(/.test(citesteFisier("src/app/alege-ziarele/page.tsx")));
+}
+
+
+// Termenele partenerilor: expirare, inlocuire, abateri, recuperare (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("1 abatere = avertisment, 2 = suspendare, 3 = scos", consecinta(1) === "avertisment" && consecinta(2) === "suspendare" && consecinta(3) === "excludere" && consecinta(5) === "excludere");
+  t("„livreaza la timp” nu se arata sub 3 comenzi", procentLaTimp({ laTimp: 2, total: 2 }) === null && procentLaTimp({ laTimp: 9, total: 10 }) === 90);
+  const sold = calculeazaSold([{ status: "publicat", pricePartner: 300, statementId: null }], new Set(), 250);
+  t("recuperarea se scade din soldul de incasat", sold.deIncasat === 50 && sold.deRecuperat === 250);
+  const ter = citesteFisier("src/lib/termene-parteneri.ts");
+  t("expirarea e conditionata (nu se dubleaza la doua rulari)", /inArray\(placements\.status, \["trimis", "acceptat"\]\)\)\)\s*\.returning\(\)/.test(ter));
+  t("inlocuitorul nu costa mai mult decat cel cazut", /p\.pricePerArticle > tarifVechi/.test(ter));
+  t("inlocuitorul nu e deja in comanda si nu are abateri", /dejaInComanda/.test(ter) && /cuAbateri/.test(ter));
+  t("clientul plateste la inlocuire exact cat a platit", /pretClientFix: pl\.priceClient/.test(ter));
+  t("articol platit si sters = recuperare din plata urmatoare", /if \(pl\.statementId && pub\)/.test(ter) && /partnerDeductions/.test(ter));
+  t("refuzul in termen muta articolul, fara abatere", /inlocuiestePlasare\(refuzat, "refuzat de publicație"\)/.test(citesteFisier("src/app/api/placements/[token]/route.ts")));
+  t("termenele ruleaza pe cronul de 5 minute", /ruleazaTermene\(\)/.test(citesteFisier("src/app/api/cron/materiale-lipsa/route.ts")));
+  t("recuperarile intra in cererea de plata si se elibereaza la anulare", /partnerDeductions/.test(citesteFisier("src/app/api/partener/retragere/route.ts")) && /partnerDeductions/.test(citesteFisier("src/app/api/admin/payouts/[id]/route.ts")));
+  const r = citesteFisier("src/app/api/comanda-mea/ramburs/route.ts");
+  t("„banii inapoi” doar pe inlocuitor nepublicat, din comanda lui", /isNotNull\(placements\.replacesId\)/.test(r) && /eq\(placements\.orderSubmissionId, t\.id\)/.test(r) && /inArray\(placements\.status, \["trimis", "acceptat"\]\)/.test(r));
+  t("acordul e obligatoriu si se salveaza versiunea, data, IP-ul", /declarationAccepted: z\.literal\(true/.test(citesteFisier("src/app/api/publishers/route.ts")) && /termsVersion: TERMENI_VERSIUNE/.test(citesteFisier("src/app/api/publishers/route.ts")));
+  t("partenerul suspendat isi vede si isi cere banii", /\["approved", "suspended"\]\.includes\(pub\.status\)/.test(citesteFisier("src/app/api/partener/retragere/route.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

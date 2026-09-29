@@ -368,10 +368,14 @@ export function PartnerApplyForm() {
       <label className="flex items-start gap-3 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-slate-800 cursor-pointer">
         <Checkbox {...register("declarationAccepted", { required: true })} />
         <span>
-          Declar că cifrele de mai sus sunt reale și sunt de acord să fie verificate.
+          Am citit și accept{" "}
+          <a href="/termeni-parteneri" target="_blank" className="font-medium text-brand-red hover:underline">
+            acordul de colaborare pentru parteneri
+          </a>
+          . Declar că cifrele de mai sus sunt reale și sunt de acord să fie verificate.
           {influencer
-            ? " Am înțeles condițiile: public în maximum 2 zile lucrătoare de la primire (sau refuz în 2, fără explicații), postarea rămâne online minimum 12 luni, iar colaborarea e marcată ca publicitate, conform regulilor platformei. *"
-            : " Am înțeles condițiile: publicăm în maximum 2 zile lucrătoare de la primire (sau refuzăm în 2, fără explicații), articolul rămâne online minimum 12 luni și nu modificăm linkurile din el. *"}
+            ? " Pe scurt: public în maximum 2 zile lucrătoare de la primire (sau refuz în 2, fără explicații), postarea rămâne online minimum 12 luni, marcată ca publicitate. La termen depășit, materialul trece la altcineva, fără plată; 2 abateri în 90 de zile = suspendare 30 de zile, 3 = scos din catalog. *"
+            : " Pe scurt: publicăm în maximum 2 zile lucrătoare de la primire (sau refuzăm în 2, fără explicații), articolul rămâne online minimum 12 luni cu linkurile neatinse. La termen depășit, articolul trece la altcineva, fără plată; un articol plătit și apoi șters se recuperează din plățile următoare; 2 abateri în 90 de zile = suspendare 30 de zile, 3 = scos din catalog. *"}
         </span>
       </label>
       {errors.declarationAccepted && (

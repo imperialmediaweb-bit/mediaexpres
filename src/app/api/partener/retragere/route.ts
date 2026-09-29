@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { and, eq, inArray, isNull, notInArray, or } from "drizzle-orm";
 import { db } from "@/db";
-import { partnerPayouts, placements, publishers } from "@/db/schema";
+import { partnerDeductions, partnerPayouts, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { verificaToken } from "@/lib/plasare-token";
 import { PRAG_RETRAGERE, STARI_PLATIBILE, LINK_BLOCHEAZA_PLATA, ZILE_PLATA, ibanValid, normalizeazaIban } from "@/lib/decont";
@@ -54,7 +54,7 @@ export async function POST(req: NextRequest) {
   await ensureOrderColumns();
   await ensurePlacementTables();
   const [pub] = await db.select().from(publishers).where(eq(publishers.id, t.id)).limit(1);
-  if (!pub || (pub.tokenVersion ?? 0) !== t.v || pub.status !== "approved") {
+  if (!pub || (pub.tokenVersion ?? 0) !== t.v || !["approved", "suspended"].includes(pub.status)) {
     return NextResponse.json({ ok: false, error: "Link invalid." }, { status: 403 });
   }
 
@@ -93,7 +93,16 @@ export async function POST(req: NextRequest) {
       )
       .returning({ pret: placements.pricePartner });
 
-    const suma = rezervate.reduce((s, r) => s + (r.pret || 0), 0);
+    // Recuperarile (articole platite si apoi sterse) intra in aceeasi cerere
+    // si se scad din ea.
+    const deduse = await tx
+      .update(partnerDeductions)
+      .set({ statementId: cerere.id })
+      .where(and(eq(partnerDeductions.publisherId, pub.id), isNull(partnerDeductions.statementId)))
+      .returning({ suma: partnerDeductions.amount });
+
+    const suma =
+      rezervate.reduce((s, r) => s + (r.pret || 0), 0) - deduse.reduce((s, r) => s + (r.suma || 0), 0);
     if (suma < PRAG_RETRAGERE) {
       // Aruncam ca tranzactia sa se anuleze cu totul: nicio plasare rezervata,
       // nicio cerere goala ramasa in baza.

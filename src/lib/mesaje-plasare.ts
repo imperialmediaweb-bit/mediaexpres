@@ -195,6 +195,10 @@ export async function plasarileComenzii(orderSubmissionId: string) {
       deadlinePublicare: placements.deadlinePublicare,
       linkStatus: placements.linkStatus,
       linkCheckedAt: placements.linkCheckedAt,
+      replacesId: placements.replacesId,
+      replacedById: placements.replacedById,
+      refundRequestedAt: placements.refundRequestedAt,
+      priceClient: placements.priceClient,
       nume: publishers.siteName,
       site: publishers.siteUrl,
     })
