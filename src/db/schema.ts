@@ -99,6 +99,8 @@ export const orders = pgTable("order", {
   // lib/sursa.ts. Vine din cookie-ul me_src prin metadata sesiunii Stripe.
   source: text("source"),
   materialAlertAt: timestamp("material_alert_at"),
+  /** 29.09.2026 — materialul a venit pe alta cale (WhatsApp, email): butonul din admin. */
+  materialExternAt: timestamp("material_extern_at"),
   // 29.09.2026 — ce a bifat clientul pe /alege-ziarele: sluguri de ziare ale
   // retelei („toate" = toata reteaua) si id-uri de publicatii partenere,
   // separate prin virgula. Pana acum ajungeau doar in emailul de plata.

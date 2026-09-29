@@ -99,6 +99,7 @@ async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
   const conditii = [
     eq(orders.status, "paid"),
     isNotNull(orders.stripeSessionId),
+    isNull(orders.materialExternAt),
     lt(orders.createdAt, inainteDe),
     // Nu ne intoarcem in trecut: vezi VECHIME_MAXIMA.
     gt(orders.createdAt, new Date(Date.now() - (campGol === "reminder" ? VECHIME_COMANDA : VECHIME_ALERTA))),

@@ -1,6 +1,6 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { and, desc, eq, isNotNull, notInArray } from "drizzle-orm";
+import { and, desc, eq, isNotNull, notInArray , isNull } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
@@ -9,6 +9,7 @@ import { etichetaSursa } from "@/lib/sursa";
 import { etichetaRitm } from "@/lib/ritm";
 import { findPackageById } from "@/data/packages";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
+import { PrimitExtern } from "./PrimitExtern";
 import { MarkPublishedButton } from "./MarkPublishedButton";
 import { NewOrderForm } from "./NewOrderForm";
 
@@ -70,6 +71,7 @@ export default async function MaterialePage() {
       and(
         eq(orders.status, "paid"),
         isNotNull(orders.stripeSessionId),
+        isNull(orders.materialExternAt),
         rows.length
           ? notInArray(
               orders.stripeSessionId,
@@ -137,12 +139,15 @@ export default async function MaterialePage() {
                 <span className={o.reminderAt ? "text-emerald-700" : "text-slate-400"}>
                   {o.reminderAt ? `reamintire trimisă ${fmt(o.reminderAt)}` : "reamintirea n-a plecat încă"}
                 </span>
-                <a
-                  href={`/admin/trimite-email?to=${encodeURIComponent(o.email)}&sablon=material`}
-                  className="ml-auto rounded-lg bg-brand-red px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-red/90"
-                >
-                  Cere articolul
-                </a>
+                <span className="ml-auto flex gap-2">
+                  <PrimitExtern orderId={o.id} />
+                  <a
+                    href={`/admin/trimite-email?to=${encodeURIComponent(o.email)}&sablon=material`}
+                    className="rounded-lg bg-brand-red px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-red/90"
+                  >
+                    Cere articolul
+                  </a>
+                </span>
               </li>
             ))}
           </ul>

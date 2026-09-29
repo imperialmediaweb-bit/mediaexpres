@@ -15,7 +15,7 @@ export function ensureOrderColumns(): Promise<void> {
     done = Promise.all([
       db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "fb_boost_paper" text`),
       db.execute(
-        sql`ALTER TABLE "order" ADD COLUMN IF NOT EXISTS "material_reminder_at" timestamp, ADD COLUMN IF NOT EXISTS "material_alert_at" timestamp`,
+        sql`ALTER TABLE "order" ADD COLUMN IF NOT EXISTS "material_reminder_at" timestamp, ADD COLUMN IF NOT EXISTS "material_alert_at" timestamp, ADD COLUMN IF NOT EXISTS "material_extern_at" timestamp`,
       ),
       db.execute(
         sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "payment_reminders_sent" integer NOT NULL DEFAULT 0, ADD COLUMN IF NOT EXISTS "payment_reminder_at" timestamp`,
