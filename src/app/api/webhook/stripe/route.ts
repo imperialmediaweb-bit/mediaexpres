@@ -516,6 +516,25 @@ async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
            <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>`,
         ),
       }).catch((e) => console.error("[stripe-webhook] email luna noua:", e));
+
+      // Luna noua apare si in Admin → Materiale (casuta rosie) pana vine
+      // articolul. Reamintirea e emailul de mai sus, deci o marcam trimisa;
+      // daca in 3 zile nu vine nimic, proprietarul primeste alerta (cron).
+      await ensureOrderColumns();
+      await db
+        .insert(orders)
+        .values({
+          email,
+          packageId: planIdLuna,
+          amount: invoice.amount_paid || 0,
+          currency: (invoice.currency || "ron").toLowerCase(),
+          status: "paid",
+          stripeSessionId: invoice.id,
+          paidAt: new Date(),
+          materialReminderAt: new Date(),
+        })
+        .onConflictDoNothing({ target: orders.stripeSessionId })
+        .catch((e) => console.error("[stripe-webhook] comanda luna noua:", e));
     }
   }
   const planId = (sub.metadata?.planId as string) || "";
