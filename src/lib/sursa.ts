@@ -205,7 +205,9 @@ export function etichetaSursa(v: string | null | undefined): string {
  */
 export function propozitieSursaWhatsApp(v: string | null | undefined): string {
   const s = parseazaSursa(v);
-  if (!s) return "";
+  // 29.09.2026 — si fara sursa (a scris adresa, link din chat) proprietarul
+  // vrea sa stie de unde vine omul.
+  if (!s) return "Am intrat direct pe site.";
   switch (s.source) {
     case "google":
       return "Am văzut oferta pe Google.";
@@ -217,8 +219,14 @@ export function propozitieSursaWhatsApp(v: string | null | undefined): string {
       return "Am găsit oferta prin ChatGPT.";
     case "bing":
       return "Am văzut oferta pe Bing.";
+    case "tiktok":
+      return "Am văzut oferta pe TikTok.";
+    case "linkedin":
+      return "Am văzut oferta pe LinkedIn.";
     default:
-      return "";
+      if (s.medium === "email") return "Am primit oferta pe email.";
+      if (s.medium === "referral" && s.source) return `Am găsit oferta pe ${s.source}.`;
+      return "Am intrat direct pe site.";
   }
 }
 

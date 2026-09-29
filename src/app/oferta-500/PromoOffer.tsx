@@ -28,18 +28,14 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
   // Ultima linie spune de unde a venit omul (Google, Facebook) — asa aflam
   // si pentru leadurile de pe WhatsApp care reclama a adus comanda.
   const propozitieSursa = useSursaWhatsApp();
+  // 29.09.2026 — mesajul era o lista („Vă trimit: 1. CUI, adresă 2. Articolul
+  // 3. Pozele"): cine voia doar sa intrebe nu avea datele la indemana si
+  // inchidea WhatsApp fara sa trimita. Pixelul vedea 9 apasari pe saptamana,
+  // proprietarul primea zero mesaje. Acum e o intrebare pe care o trimite
+  // oricine; datele le cerem noi in discutie. Sursa ramane la final.
   const waOrderHref = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(
     [
-      `Bună ziua! Vreau să comand articolul în cele 50 de ziare (${offer.price} lei${offer.suffix}).`,
-      "",
-      // 13.09.2026 — mesajul era scris din gura NOASTRA, dar il trimite
-      // CLIENTUL: „Pentru comandă avem nevoie de: 1. Datele firmei...".
-      // Adica omul iti trimitea pe WhatsApp propriul tau text de vanzare, ca
-      // si cum si-ar cere singur actele. Acum vorbeste el, despre ce trimite.
-      "Vă trimit:",
-      "1. Datele firmei pentru factură: denumire, CUI, adresă",
-      "2. Articolul, cu linkurile în text — sau tema și site-ul, dacă îl scrieți voi",
-      "3. Pozele (până la 3, opțional)",
+      `Bună ziua! Aș vrea să public un articol în cele 50 de ziare (${offer.price} lei${offer.suffix}). Cum procedăm?`,
       ...(propozitieSursa ? ["", propozitieSursa] : []),
     ].join("\n"),
   )}`;

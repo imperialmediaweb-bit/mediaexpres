@@ -1050,7 +1050,8 @@ console.log("\n########## S. RECENZII ##########");
   t("eticheta necunoscuta pentru null", etichetaSursa(null) === "necunoscută");
   t("propozitia WhatsApp pentru Google", propozitieSursaWhatsApp("google|cpc|") === "Am văzut oferta pe Google.");
   t("propozitia WhatsApp pentru Facebook", propozitieSursaWhatsApp("facebook|paid|x") === "Am văzut oferta pe Facebook.");
-  t("fara propozitie cand e direct", propozitieSursaWhatsApp("direct|none|") === "");
+  t("si cine intra direct spune de unde vine", propozitieSursaWhatsApp("direct|none|") === "Am intrat direct pe site." && propozitieSursaWhatsApp(null) === "Am intrat direct pe site.");
+  t("mesajul de WhatsApp din oferta e o intrebare scurta, nu o lista de acte", /Cum procedăm\?/.test(fs.readFileSync("src/app/oferta-500/PromoOffer.tsx", "utf8")) && !/Vă trimit:/.test(fs.readFileSync("src/app/oferta-500/PromoOffer.tsx", "utf8")));
 
   // Drumul pana in baza: cookie → checkout → metadata Stripe → webhook → order.source
   t("checkout pune sursa in metadata Stripe", /sursaDinCerere\(req\)/.test(citesteFisier("src/app/api/checkout/route.ts")) && /\.\.\.\(sursa \? \{ sursa \}/.test(citesteFisier("src/app/api/checkout/route.ts")));
