@@ -14,6 +14,8 @@ import {
 } from "@/lib/alacarte";
 import type { PartenerCatalog } from "@/lib/catalog-parteneri";
 
+const PLATFORME: Record<string, string> = { youtube: "YouTube", instagram: "Instagram", tiktok: "TikTok", facebook: "Facebook" };
+
 const REGIUNI = ["Național", "Moldova", "Transilvania", "Muntenia", "Banat"] as const;
 type Regiune = (typeof REGIUNI)[number];
 
@@ -63,7 +65,9 @@ export function AlegeZiare({
   // Partenerii: reducerea la volum vine de pe server ca tabel (fara adaos).
   const parteneriFiltrati = useMemo(() => {
     if (!q) return parteneri;
-    return parteneri.filter((p) => faraDiacritice(`${p.nume} ${p.judet || ""} ${p.regiune || ""} ${p.nisa || ""}`).includes(q));
+    return parteneri.filter((p) =>
+      faraDiacritice(`${p.nume} ${p.judet || ""} ${p.regiune || ""} ${p.nisa || ""} ${p.platforma || ""} ${p.tip === "influencer" ? "influencer" : ""}`).includes(q),
+    );
   }, [q, parteneri]);
   const idsP = Object.keys(aleseP);
   const reducere = reduceri.filter((r) => idsP.length >= r.deLa).reduce((m, r) => Math.max(m, r.reducere), 0);
@@ -131,6 +135,65 @@ export function AlegeZiare({
     }
     setSeTrimite(false);
   }
+
+  const presaFiltrata = parteneriFiltrati.filter((p) => p.tip !== "influencer");
+  const influenceriFiltrati = parteneriFiltrati.filter((p) => p.tip === "influencer");
+
+  // Un card de partener (presa sau influencer), bifabil, cu optiunile lui.
+  const cardPartener = (p: PartenerCatalog) => {
+    const bifat = !!aleseP[p.id];
+    return (
+      <li key={p.id} className={cn("rounded-xl border p-3 transition", bifat ? "border-brand-red bg-red-50" : "border-slate-200 bg-white")}>
+        <button type="button" onClick={() => comutaP(p.id)} aria-pressed={bifat} className="flex w-full items-start gap-3 text-left">
+          <span
+            className={cn(
+              "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
+              bifat ? "border-brand-red bg-brand-red text-white" : "border-slate-300 bg-white",
+            )}
+            aria-hidden
+          >
+            {bifat && <Check className="h-3.5 w-3.5" />}
+          </span>
+          <span className="min-w-0 flex-1">
+            <span className="flex items-baseline justify-between gap-2">
+              <span className="truncate text-sm font-semibold text-brand-navy">{p.nume}</span>
+              <span className="shrink-0 text-sm font-bold text-brand-navy">{p.pret - (bifat ? reducere : 0)} lei</span>
+            </span>
+            <span className="block text-xs text-slate-500">
+              {(p.tip === "influencer"
+                ? [PLATFORME[p.platforma || ""] || p.platforma, p.urmaritori ? `${p.urmaritori.toLocaleString("ro-RO")} urmăritori` : null, p.vizualizari ? `~${p.vizualizari.toLocaleString("ro-RO")} vizualizări/postare` : null, p.nisa]
+                : [p.judet || p.regiune, p.nisa, p.da != null ? `DA ${p.da}` : null, p.trafic ? `${p.trafic.toLocaleString("ro-RO")} vizitatori/lună` : null, p.dofollow ? "dofollow" : null])
+                .filter(Boolean)
+                .join(" · ")}
+            </span>
+          </span>
+        </button>
+        <div className="mt-2 flex flex-wrap items-center gap-2 pl-8">
+          <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-red">
+            {p.tip === "influencer" ? "vezi canalul" : "vezi site-ul"} <ExternalLink className="h-3 w-3" />
+          </a>
+          {bifat &&
+            p.optiuni.map((o) => {
+              const on = aleseP[p.id].includes(o.key);
+              return (
+                <button
+                  key={o.key}
+                  type="button"
+                  onClick={() => comutaOptiune(p.id, o.key)}
+                  className={cn(
+                    "rounded-full border px-2.5 py-1 text-xs transition",
+                    on ? "border-brand-red bg-brand-red text-white" : "border-slate-300 text-slate-700 hover:border-brand-red",
+                  )}
+                >
+                  {on ? "✓ " : "+ "}
+                  {o.eticheta} · {o.pret} lei
+                </button>
+              );
+            })}
+        </div>
+      </li>
+    );
+  };
 
   return (
     <div className="relative">
@@ -244,71 +307,38 @@ export function AlegeZiare({
           pe toate paginile, text rescris unic); amestecate, clientul ar crede ca
           primeste la fel peste tot.
         */}
-        {parteneriFiltrati.length > 0 && (
+        {presaFiltrata.length > 0 && (
           <div>
             <h2 className="font-serif text-lg font-bold text-brand-navy">
               Publicații partenere
-              <span className="ml-2 text-sm font-normal text-slate-500">({parteneriFiltrati.length})</span>
+              <span className="ml-2 text-sm font-normal text-slate-500">({presaFiltrata.length})</span>
             </h2>
             <p className="mt-1 text-sm text-slate-500">
               Site-uri independente, verificate de noi. Articolul apare în maximum 2 zile lucrătoare și
-              rămâne online 12 luni. Primești linkul de la noi, în același raport.
+              rămâne online 12 luni — îl verificăm automat în fiecare săptămână. Primești linkul de la noi.
               {reduceri.length > 0 && ` De la ${reduceri[0].deLa} publicații partenere, fiecare costă mai puțin.`}
             </p>
-            <ul className="mt-3 grid gap-2 sm:grid-cols-2">
-              {parteneriFiltrati.map((p) => {
-                const bifat = !!aleseP[p.id];
-                return (
-                  <li key={p.id} className={cn("rounded-xl border p-3 transition", bifat ? "border-brand-red bg-red-50" : "border-slate-200 bg-white")}>
-                    <button type="button" onClick={() => comutaP(p.id)} aria-pressed={bifat} className="flex w-full items-start gap-3 text-left">
-                      <span
-                        className={cn(
-                          "mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded border",
-                          bifat ? "border-brand-red bg-brand-red text-white" : "border-slate-300 bg-white",
-                        )}
-                        aria-hidden
-                      >
-                        {bifat && <Check className="h-3.5 w-3.5" />}
-                      </span>
-                      <span className="min-w-0 flex-1">
-                        <span className="flex items-baseline justify-between gap-2">
-                          <span className="truncate text-sm font-semibold text-brand-navy">{p.nume}</span>
-                          <span className="shrink-0 text-sm font-bold text-brand-navy">{p.pret - (bifat ? reducere : 0)} lei</span>
-                        </span>
-                        <span className="block text-xs text-slate-500">
-                          {[p.judet || p.regiune, p.nisa, p.da != null ? `DA ${p.da}` : null, p.trafic ? `${p.trafic.toLocaleString("ro-RO")} vizitatori/lună` : null, p.dofollow ? "dofollow" : null]
-                            .filter(Boolean)
-                            .join(" · ")}
-                        </span>
-                      </span>
-                    </button>
-                    <div className="mt-2 flex flex-wrap items-center gap-2 pl-8">
-                      <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-red">
-                        vezi site-ul <ExternalLink className="h-3 w-3" />
-                      </a>
-                      {bifat &&
-                        p.optiuni.map((o) => {
-                          const on = aleseP[p.id].includes(o.key);
-                          return (
-                            <button
-                              key={o.key}
-                              type="button"
-                              onClick={() => comutaOptiune(p.id, o.key)}
-                              className={cn(
-                                "rounded-full border px-2.5 py-1 text-xs transition",
-                                on ? "border-brand-red bg-brand-red text-white" : "border-slate-300 text-slate-700 hover:border-brand-red",
-                              )}
-                            >
-                              {on ? "✓ " : "+ "}
-                              {o.eticheta} · {o.pret} lei
-                            </button>
-                          );
-                        })}
-                    </div>
-                  </li>
-                );
-              })}
-            </ul>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">{presaFiltrata.map(cardPartener)}</ul>
+          </div>
+        )}
+
+        {/*
+          29.09.2026 — influencerii: acelasi cos si acelasi drum (brief-ul e
+          articolul trimis dupa plata), dar alta sectiune — clientul trebuie sa
+          stie ca primeste o postare/un video, nu un articol.
+        */}
+        {influenceriFiltrati.length > 0 && (
+          <div>
+            <h2 className="font-serif text-lg font-bold text-brand-navy">
+              Influenceri
+              <span className="ml-2 text-sm font-normal text-slate-500">({influenceriFiltrati.length})</span>
+            </h2>
+            <p className="mt-1 text-sm text-slate-500">
+              YouTube, Instagram, TikTok, Facebook. După plată ne trimiți ce vrei să comunici (brief, poze,
+              linkuri); influencerul face postarea sau videoul în maximum 2 zile lucrătoare, marcat ca
+              publicitate, iar tu primești linkul de la noi.
+            </p>
+            <ul className="mt-3 grid gap-2 sm:grid-cols-2">{influenceriFiltrati.map(cardPartener)}</ul>
           </div>
         )}
 

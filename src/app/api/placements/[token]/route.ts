@@ -8,6 +8,8 @@ import { ensurePlacementTables } from "@/lib/ensure-columns";
 import { verificaToken, semneazaToken } from "@/lib/plasare-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { onlinePanaLa, tranzitiePermisa, type StarePlasare } from "@/lib/plasari";
+import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
+import { verificaPlasare } from "@/lib/ruleaza-paza";
 
 export const runtime = "nodejs";
 
@@ -69,9 +71,30 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
     );
   }
 
+  let verificare: { stare: string; detalii: string } | null = null;
   if (d.action === "publicat") {
     if (!d.url) {
       return NextResponse.json({ ok: false, error: "Lipsește adresa articolului." }, { status: 400 });
+    }
+    /**
+     * 29.09.2026 — verificam pagina pe loc, inainte sa anuntam clientul:
+     * exista, are linkul catre el, nu e nofollow/noindex. Daca nu, partenerul
+     * afla ACUM ce lipseste. Daca insista cu aceeasi adresa (verificarea
+     * noastra poate gresi — site cu JavaScript, bot blocat), o primim si o
+     * verifica un om: paza linkurilor o prinde oricum la urmatoarea trecere.
+     */
+    const [pubV] = await db.select().from(publishers).where(eq(publishers.id, pl.publisherId)).limit(1);
+    verificare = await verificaPlasare(pl, pubV, d.url);
+    const respinsInainte = pl.linkDetail === `respins:${d.url}`;
+    if (eBlocant(verificare.stare) && !respinsInainte) {
+      await db.update(placements).set({ linkDetail: `respins:${d.url}` }).where(eq(placements.id, pl.id));
+      return NextResponse.json(
+        {
+          ok: false,
+          error: `${ETICHETE_LINK[verificare.stare as StareLink]} (${verificare.detalii}). Repară și trimite din nou. Dacă ești sigur că e corect, trimite din nou aceeași adresă și o verificăm noi.`,
+        },
+        { status: 422 },
+      );
     }
     await db
       .update(placements)
@@ -80,6 +103,10 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
         publishedUrl: d.url,
         publishedAt: acum,
         onlineUntil: onlinePanaLa(acum),
+        linkStatus: verificare.stare,
+        linkDetail: verificare.detalii,
+        linkCheckedAt: acum,
+        linkFailCount: verificare.stare === "ok" ? 0 : 1,
       })
       .where(eq(placements.id, pl.id));
   } else if (d.action === "accept") {
@@ -107,6 +134,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
         ${kv("Publicație", esc(nume))}
         ${kv("Titlu", esc(pl.articleTitle))}
         ${d.action === "publicat" ? kv("Adresă", `<a href="${esc(d.url || "")}">${esc(d.url || "")}</a>`) : ""}
+        ${verificare ? kv("Verificare link", `${verificare.stare === "ok" ? "✅" : "⚠️"} ${esc(ETICHETE_LINK[verificare.stare as StareLink] || verificare.stare)} — ${esc(verificare.detalii)}`) : ""}
         ${d.action === "refuz" ? kv("Motiv", esc(d.reason || "nu a dat")) : ""}
         ${kv("Îi plătim", `${pl.pricePartner} lei`)}
       </table>`,
@@ -115,7 +143,9 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
 
   // 29.09.2026 — clientul primeste linkul DE LA NOI, pe emailul MediaExpres,
   // nu de la partener: cei doi nu intra niciodata in contact direct.
-  if (d.action === "publicat" && pl.orderSubmissionId && d.url) {
+  // Cu linkul inca stricat (partenerul a insistat), clientul NU e anuntat
+  // pana nu confirma un om din admin sau pana nu trece paza linkurilor.
+  if (d.action === "publicat" && pl.orderSubmissionId && d.url && !(verificare && eBlocant(verificare.stare))) {
     try {
       const [cmd] = await db
         .select({ id: orderSubmissions.id, email: orderSubmissions.email, title: orderSubmissions.title })

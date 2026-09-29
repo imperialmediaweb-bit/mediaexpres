@@ -25,6 +25,14 @@ interface FormValues {
   optFacebookPret?: number;
   optPrimaPagina: boolean;
   optPrimaPaginaPret?: number;
+  platform: string;
+  followers?: number;
+  avgViews?: number;
+  pretCerut?: number;
+  optStory: boolean;
+  optStoryPret?: number;
+  optLinkBio: boolean;
+  optLinkBioPret?: number;
   declarationAccepted: boolean;
   contactName: string;
   contactEmail: string;
@@ -43,6 +51,10 @@ export function PartnerApplyForm() {
     formState: { errors },
   } = useForm<FormValues>();
   const [status, setStatus] = useState<"idle" | "submitting" | "success" | "error">("idle");
+  // 29.09.2026 — acelasi formular si pentru influenceri (YouTube, Instagram,
+  // TikTok, Facebook): alte campuri, acelasi drum de aprobare si plata.
+  const [tip, setTip] = useState<"presa" | "influencer">("presa");
+  const influencer = tip === "influencer";
   const [error, setError] = useState<string | null>(null);
   // 14.09.2026 — captura din Google Analytics. Traficul real nu se poate
   // verifica gratuit si corect din afara, deci singura dovada serioasa e
@@ -59,12 +71,20 @@ export function PartnerApplyForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...data,
+          kind: tip,
+          platform: influencer ? data.platform : undefined,
+          followers: influencer && data.followers ? Number(data.followers) : undefined,
+          avgViews: influencer && data.avgViews ? Number(data.avgViews) : undefined,
+          pretCerut: influencer && data.pretCerut ? Number(data.pretCerut) : undefined,
           monthlyTraffic: data.monthlyTraffic ? Number(data.monthlyTraffic) : undefined,
           articlesPerMonth: data.articlesPerMonth ? Number(data.articlesPerMonth) : undefined,
           facebookFollowers: data.facebookFollowers ? Number(data.facebookFollowers) : undefined,
-          dofollowLinks: data.dofollowLinks === "" ? undefined : data.dofollowLinks === "da",
+          dofollowLinks: influencer || !data.dofollowLinks ? undefined : data.dofollowLinks === "da",
           // 29.09.2026 — optiunile vandute pe langa articol, cu pretul lor.
-          extraOptions: [
+          extraOptions: influencer ? [
+            ...(data.optStory && Number(data.optStoryPret) > 0 ? [{ key: "story", pret: Number(data.optStoryPret) }] : []),
+            ...(data.optLinkBio && Number(data.optLinkBioPret) > 0 ? [{ key: "link_bio", pret: Number(data.optLinkBioPret) }] : []),
+          ] : [
             ...(data.optFacebook && Number(data.optFacebookPret) > 0 ? [{ key: "facebook", pret: Number(data.optFacebookPret) }] : []),
             ...(data.optPrimaPagina && Number(data.optPrimaPaginaPret) > 0 ? [{ key: "prima_pagina", pret: Number(data.optPrimaPaginaPret) }] : []),
           ],
@@ -102,19 +122,86 @@ export function PartnerApplyForm() {
       <div className="flex items-center gap-2 text-brand-red">
         <Users className="h-5 w-5" />
         <span className="text-xs font-bold uppercase tracking-wider">
-          Aplicație ziar partener
+          {influencer ? "Aplicație influencer" : "Aplicație ziar partener"}
         </span>
       </div>
 
+      <div className="grid grid-cols-2 gap-2">
+        {(
+          [
+            ["presa", "📰 Am un site de știri", "ziar, portal, blog"],
+            ["influencer", "🎥 Sunt influencer", "YouTube, Instagram, TikTok, Facebook"],
+          ] as const
+        ).map(([k, nume, desc]) => (
+          <button
+            key={k}
+            type="button"
+            onClick={() => setTip(k)}
+            className={`rounded-xl border-2 p-3 text-left text-sm transition ${tip === k ? "border-brand-red bg-red-50" : "border-slate-200 hover:border-slate-300"}`}
+          >
+            <span className={`block font-semibold ${tip === k ? "text-brand-red" : "text-slate-800"}`}>{nume}</span>
+            <span className="block text-xs text-slate-500">{desc}</span>
+          </button>
+        ))}
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
-        <Field label="Numele site-ului *" error={errors.siteName?.message}>
-          <Input {...register("siteName", { required: "Obligatoriu", minLength: 2 })} placeholder="Ziarul de Cluj" />
+        <Field label={influencer ? "Numele canalului / contului *" : "Numele site-ului *"} error={errors.siteName?.message}>
+          <Input {...register("siteName", { required: "Obligatoriu", minLength: 2 })} placeholder={influencer ? "Ion Vlogger" : "Ziarul de Cluj"} />
         </Field>
-        <Field label="URL site *" error={errors.siteUrl?.message}>
-          <Input type="url" {...register("siteUrl", { required: "Obligatoriu" })} placeholder="https://ziaruldecluj.ro" />
+        <Field label={influencer ? "Link către canal / profil *" : "URL site *"} error={errors.siteUrl?.message}>
+          <Input type="url" {...register("siteUrl", { required: "Obligatoriu" })} placeholder={influencer ? "https://youtube.com/@canal" : "https://ziaruldecluj.ro"} />
         </Field>
       </div>
 
+      {influencer && (
+        <div className="space-y-4 rounded-lg border border-slate-200 bg-slate-50 p-4">
+          <div className="grid gap-4 sm:grid-cols-2">
+            <Field label="Platforma principală *" error={errors.platform?.message}>
+              <select
+                {...register("platform", { required: influencer ? "Alege platforma" : false })}
+                className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
+              >
+                <option value="">— alege —</option>
+                <option value="youtube">YouTube</option>
+                <option value="instagram">Instagram</option>
+                <option value="tiktok">TikTok</option>
+                <option value="facebook">Facebook</option>
+              </select>
+            </Field>
+            <Field label="Urmăritori / abonați *" error={errors.followers?.message}>
+              <Input type="number" {...register("followers", { required: influencer ? "Obligatoriu" : false })} placeholder="25000" />
+            </Field>
+            <Field label="Vizualizări medii pe postare / video">
+              <Input type="number" {...register("avgViews")} placeholder="8000" />
+            </Field>
+            <Field label="Prețul tău pe o postare / un video (lei) *" error={errors.pretCerut?.message}>
+              <Input type="number" {...register("pretCerut", { required: influencer ? "Obligatoriu" : false })} placeholder="400" />
+            </Field>
+          </div>
+          <p className="text-xs text-slate-500">
+            Primești exact prețul tău. Ce vede clientul include comisionul nostru. Captura cu statisticile
+            (ultimele 30 de zile) o poți urca mai jos — o cerem la aprobare.
+          </p>
+          <div className="space-y-3">
+            <p className="text-sm font-semibold text-brand-navy">Opțiuni în plus (opțional)</p>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" {...register("optStory")} className="h-4 w-4" /> Story / Short în plus
+              </label>
+              <Input type="number" min={1} {...register("optStoryPret")} placeholder="lei" className="w-28" />
+            </div>
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="flex items-center gap-2 text-sm text-slate-700">
+                <input type="checkbox" {...register("optLinkBio")} className="h-4 w-4" /> Link în bio / descriere 30 de zile
+              </label>
+              <Input type="number" min={1} {...register("optLinkBioPret")} placeholder="lei" className="w-28" />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {!influencer && (<>
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Județ"><Input {...register("county")} placeholder="Cluj" /></Field>
         <Field label="Regiune">
@@ -141,6 +228,7 @@ export function PartnerApplyForm() {
           <Input type="number" {...register("facebookFollowers")} placeholder="12000" />
         </Field>
       </div>
+      </>)}
 
       {/*
         Dovada traficului. Nu e neincredere gratuita: nivelul publicatiei —
@@ -148,10 +236,11 @@ export function PartnerApplyForm() {
         aplicatia intra pe nivelul de jos.
       */}
       <div className="rounded-lg border border-slate-200 bg-slate-50 p-4">
-        <Label>Captură din Google Analytics (ultimele 30 de zile)</Label>
+        <Label>{influencer ? "Captură cu statisticile contului (ultimele 30 de zile)" : "Captură din Google Analytics (ultimele 30 de zile)"}</Label>
         <p className="mt-1 text-xs text-slate-600">
-          Din ea stabilim nivelul și tariful pe articol. Fără captură, aplicația
-          intră pe nivelul de bază. Imagine sau PDF, maximum 8MB.
+          {influencer
+            ? "Din YouTube Studio / Instagram Insights / TikTok Analytics: urmăritori, vizualizări, publicul. Imagine sau PDF, maximum 8MB."
+            : "Din ea stabilim nivelul și tariful pe articol. Fără captură, aplicația intră pe nivelul de bază. Imagine sau PDF, maximum 8MB."}
         </p>
         {dovada ? (
           <div className="mt-3 flex items-center gap-2 rounded-md bg-emerald-50 px-3 py-2 text-sm text-emerald-800">
@@ -190,10 +279,11 @@ export function PartnerApplyForm() {
         )}
       </div>
 
+      {!influencer && (
       <div className="grid gap-4 sm:grid-cols-2">
         <Field label="Linkurile din articol rămân dofollow? *" error={errors.dofollowLinks?.message}>
           <select
-            {...register("dofollowLinks", { required: "Alege un răspuns" })}
+            {...register("dofollowLinks", { required: influencer ? false : "Alege un răspuns" })}
             className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm"
           >
             <option value="">— alege —</option>
@@ -205,8 +295,9 @@ export function PartnerApplyForm() {
           <Input type="number" {...register("articlesPerMonth")} placeholder="20" />
         </Field>
       </div>
+      )}
 
-      <Field label="Nișa publicației">
+      <Field label={influencer ? "Nișa canalului" : "Nișa publicației"}>
         <select {...register("niche")} className="flex h-11 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm">
           <option value="">— alege —</option>
           {["Știri generale", "Știri locale", "Business și finanțe", "Auto", "Sănătate", "Imobiliare", "Tech", "Lifestyle", "Sport", "Turism", "Agricultură", "Altele"].map((n) => (
@@ -219,6 +310,7 @@ export function PartnerApplyForm() {
         29.09.2026 — optiunile pe care publicatia le vinde pe langa articol.
         Clientul le bifeaza in catalog; pretul lui include adaosul nostru.
       */}
+      {!influencer && (
       <div className="rounded-lg border border-slate-200 p-4">
         <p className="text-sm font-semibold text-brand-navy">Opțiuni pe care le oferiți pe lângă articol (opțional)</p>
         <p className="mt-1 text-xs text-slate-500">Scrie cât vrei să primești pentru fiecare. Clientul le poate adăuga la comandă.</p>
@@ -237,6 +329,7 @@ export function PartnerApplyForm() {
           </div>
         </div>
       </div>
+      )}
 
       <div className="pt-4 border-t border-slate-200">
         <h3 className="font-serif text-lg font-semibold text-brand-navy">Persoană de contact</h3>
@@ -276,9 +369,9 @@ export function PartnerApplyForm() {
         <Checkbox {...register("declarationAccepted", { required: true })} />
         <span>
           Declar că cifrele de mai sus sunt reale și sunt de acord să fie verificate.
-          Am înțeles condițiile: publicăm în maximum 3 zile lucrătoare de la primire
-          (sau refuzăm în 2, fără explicații), articolul rămâne online minimum 12 luni
-          și nu modificăm linkurile din el. *
+          {influencer
+            ? " Am înțeles condițiile: public în maximum 2 zile lucrătoare de la primire (sau refuz în 2, fără explicații), postarea rămâne online minimum 12 luni, iar colaborarea e marcată ca publicitate, conform regulilor platformei. *"
+            : " Am înțeles condițiile: publicăm în maximum 2 zile lucrătoare de la primire (sau refuzăm în 2, fără explicații), articolul rămâne online minimum 12 luni și nu modificăm linkurile din el. *"}
         </span>
       </label>
       {errors.declarationAccepted && (

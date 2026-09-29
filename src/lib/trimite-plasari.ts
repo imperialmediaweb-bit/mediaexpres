@@ -102,11 +102,12 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
 
     const link = `${SITE.url}/plasare/${semneazaToken({ scope: "plasare", id: rand.id, v: 0 })}`;
     const panou = `${SITE.url}/cont-partener/${semneazaToken({ scope: "panou", id: p.id, v: p.tokenVersion ?? 0 })}`;
+    const inf = p.kind === "influencer";
     const html = wrapEmail(
-      "Un articol nou pentru publicarea ta",
+      inf ? "O colaborare nouă pentru tine" : "Un articol nou pentru publicarea ta",
       `
       <p>Salut,</p>
-      <p>Ai un articol de publicat pe <strong>${esc(p.siteName)}</strong>.</p>
+      <p>${inf ? `Ai o colaborare plătită pentru <strong>${esc(p.siteName)}</strong>: materialul clientului (brief, poze, linkuri) e în pagina de mai jos. Postarea se marchează ca publicitate.` : `Ai un articol de publicat pe <strong>${esc(p.siteName)}</strong>.`}</p>
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         ${kv("Titlu", esc(d.title))}
         ${opt.length ? kv("Plus", opt.map((o) => esc(etichetaOptiune(o.key))).join(", ")) : ""}
@@ -114,9 +115,9 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
         ${kv("Refuz până la", deadlineRefuz.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }))}
         ${kv("Publicare până la", deadlinePublicare.toLocaleString("ro-RO", { dateStyle: "long", timeStyle: "short" }))}
       </table>
-      <p>Deschide articolul, citește-l și decide:</p>
+      <p>${inf ? "Deschide materialul, citește-l și decide:" : "Deschide articolul, citește-l și decide:"}</p>
       <p style="margin:20px 0;">
-        <a href="${link}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi articolul</a>
+        <a href="${link}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">${inf ? "Vezi materialul" : "Vezi articolul"}</a>
       </p>
       <p style="color:#64748b;font-size:13px;">
         Îl poți refuza în ${ZILE_REFUZ} zile lucrătoare, fără să explici de ce.
@@ -129,7 +130,7 @@ export async function trimitePlasari(d: CererePlasari): Promise<RezultatPlasari>
       </p>
       `,
     );
-    await sendEmail({ to: p.contactEmail, subject: `Articol de publicat — ${p.siteName}`, html, replyTo: ADMIN_EMAIL }).catch(
+    await sendEmail({ to: p.contactEmail, subject: inf ? `Colaborare nouă — ${p.siteName}` : `Articol de publicat — ${p.siteName}`, html, replyTo: ADMIN_EMAIL }).catch(
       (e) => console.error("[trimite-plasari] email partener:", e),
     );
   }

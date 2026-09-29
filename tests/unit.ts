@@ -29,6 +29,8 @@ import { domeniuDin } from "@/lib/autoritate";
 import { pretOptiuneClient, citesteOptiuni } from "@/lib/optiuni-partener";
 import { articolHtml, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-html";
 import { verificaContact } from "@/lib/filtru-contact";
+import { analizeazaPagina } from "@/lib/paza-linkuri";
+import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 
 import {
   PRAG_RETRAGERE,
@@ -1650,9 +1652,9 @@ console.log("\n########## S. RECENZII ##########");
   const s2 = calculeazaSold([pl("publicat", 150, "c1"), pl("publicat", 150, "c2"), pl("publicat", 80)], new Set(["c2"]));
   t("o plasare dintr-o cerere deschisa e „in plata”, nu „de incasat”", s2.deIncasat === 80 && s2.inPlata === 150);
   t("o plasare dintr-o cerere platita nu mai apare nicaieri", s2.inPlata + s2.deIncasat === 230);
-  t("sub prag nu poate cere plata", !poateCerePlata({ deIncasat: PRAG_RETRAGERE - 1, inPlata: 0, inLucru: 0 }, false));
-  t("la prag poate cere plata", poateCerePlata({ deIncasat: PRAG_RETRAGERE, inPlata: 0, inLucru: 0 }, false));
-  t("cu o cerere deschisa nu mai poate cere a doua", !poateCerePlata({ deIncasat: 900, inPlata: 0, inLucru: 0 }, true));
+  t("sub prag nu poate cere plata", !poateCerePlata({ deIncasat: PRAG_RETRAGERE - 1, inPlata: 0, inLucru: 0, blocat: 0 }, false));
+  t("la prag poate cere plata", poateCerePlata({ deIncasat: PRAG_RETRAGERE, inPlata: 0, inLucru: 0, blocat: 0 }, false));
+  t("cu o cerere deschisa nu mai poate cere a doua", !poateCerePlata({ deIncasat: 900, inPlata: 0, inLucru: 0, blocat: 0 }, true));
   t("„cat mai ai” nu coboara sub zero", catMaiAi(PRAG_RETRAGERE + 50) === 0 && catMaiAi(50) === PRAG_RETRAGERE - 50);
   t("IBAN valid trece (cu spatii)", ibanValid("RO49 AAAA 1B31 0075 9384 0000"));
   t("IBAN cu o cifra gresita e prins", !ibanValid("RO49AAAA1B31007593840001"));
@@ -1759,6 +1761,39 @@ console.log("\n########## S. RECENZII ##########");
   t("mesajul oprit nu ajunge la celalalt", /isNull\(placementMessages\.blocked\)/.test(lib));
   t("la mesaj oprit, adminul primeste alerta", /Încercare de schimb de contact/.test(lib));
   t("raspunsul pe email ajunge la noi, nu la celalalt", /replyTo: ADMIN_EMAIL/.test(lib));
+}
+
+
+// Paza linkurilor 12 luni si influencerii (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const pag = (corp: string, head = "") => `<html><head>${head}</head><body>${corp}</body></html>`;
+  t("link dofollow catre client = ok", analizeazaPagina(pag('<a href="https://www.firma.ro/x">firma</a>'), null, ["firma.ro"], true).stare === "ok");
+  t("fara link catre client = link_lipsa", analizeazaPagina(pag('<a href="https://alta.ro">x</a>'), null, ["firma.ro"], true).stare === "link_lipsa");
+  t("link nofollow cand s-a promis dofollow = nofollow", analizeazaPagina(pag('<a rel="nofollow" href="https://firma.ro">x</a>'), null, ["firma.ro"], true).stare === "nofollow");
+  t("sponsored conteaza tot ca nofollow", analizeazaPagina(pag('<a href="https://firma.ro" rel="sponsored noopener">x</a>'), null, ["firma.ro"], true).stare === "nofollow");
+  t("nofollow e acceptat cand partenerul a spus de la inceput ca nu e dofollow", analizeazaPagina(pag('<a rel="nofollow" href="https://firma.ro">x</a>'), null, ["firma.ro"], false).stare === "ok");
+  t("un singur link curat e de ajuns", analizeazaPagina(pag('<a rel="nofollow" href="https://firma.ro">x</a><a href="https://firma.ro/c">y</a>'), null, ["firma.ro"], true).stare === "ok");
+  t("noindex in meta e prins", analizeazaPagina(pag('<a href="https://firma.ro">x</a>', '<meta name="robots" content="noindex, follow">'), null, ["firma.ro"], true).stare === "noindex");
+  t("noindex in antet e prins", analizeazaPagina(pag('<a href="https://firma.ro">x</a>'), "noindex", ["firma.ro"], true).stare === "noindex");
+  t("alt domeniu care doar CONTINE numele clientului nu conteaza", analizeazaPagina(pag('<a href="https://notfirma.ro">x</a>'), null, ["firma.ro"], true).stare === "link_lipsa");
+
+  const sold = calculeazaSold([
+    { status: "publicat", pricePartner: 200, statementId: null, linkStatus: "link_lipsa" },
+    { status: "publicat", pricePartner: 150, statementId: null, linkStatus: "ok" },
+    { status: "publicat", pricePartner: 100, statementId: null, linkStatus: "eroare" },
+  ]);
+  t("linkul stricat opreste plata, eroarea de retea nu", sold.blocat === 200 && sold.deIncasat === 250);
+  t("cererea de plata nu rezerva plasarile cu link stricat", /notInArray\(placements\.linkStatus, \[\.\.\.LINK_BLOCHEAZA_PLATA\]\)/.test(citesteFisier("src/app/api/partener/retragere/route.ts")));
+  t("paza merge pe cronul de 5 minute existent", /ruleazaPazaLinkuri\(\)/.test(citesteFisier("src/app/api/cron/materiale-lipsa/route.ts")));
+  const pub = citesteFisier("src/app/api/placements/[token]/route.ts");
+  t("la publicare, linkul se verifica pe loc", /verificaPlasare\(pl, pubV, d\.url\)/.test(pub));
+  t("cu link stricat, clientul nu e anuntat", /!\(verificare && eBlocant\(verificare\.stare\)\)/.test(pub));
+
+  t("optiunile de influencer trec prin cos", parseazaAlegeri(["abcdefgh-1+story+link_bio+hack"])[0].optiuni.join() === "story,link_bio");
+  const api = citesteFisier("src/app/api/publishers/route.ts");
+  t("influencerul nu primeste optiuni de presa (si invers)", /OPTIUNI_PE_TIP\[influencer \? "influencer" : "presa"\]/.test(api));
+  t("la influencer nu se cere scor Moz", /influencer \? null : await verificaAutoritate/.test(api));
 }
 
 console.log("\n" + "=".repeat(64));

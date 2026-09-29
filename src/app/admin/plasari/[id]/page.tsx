@@ -8,6 +8,8 @@ import { ensurePlacementTables } from "@/lib/ensure-columns";
 import { etichetaStare } from "@/lib/plasari";
 import { ChatPlasare } from "@/components/ChatPlasare";
 import { SITE } from "@/data/site";
+import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
+import { VerificaLink } from "./VerificaLink";
 
 export const dynamic = "force-dynamic";
 
@@ -57,6 +59,23 @@ export default async function AdminPlasare({ params }: { params: { id: string } 
             </a>
           ) : (
             "—"
+          )}
+        </Camp>
+        <Camp e="Paza linkului">
+          {pl.linkCheckedAt ? (
+            <span className={eBlocant(pl.linkStatus) ? "text-red-700" : ""}>
+              {ETICHETE_LINK[pl.linkStatus as StareLink] || pl.linkStatus} · {new Date(pl.linkCheckedAt).toLocaleDateString("ro-RO")}
+              {pl.linkDetail && !pl.linkDetail.startsWith("respins:") && (
+                <span className="block text-xs font-normal text-slate-500">{pl.linkDetail}</span>
+              )}
+            </span>
+          ) : (
+            "neverificat încă"
+          )}
+          {pl.publishedUrl && (
+            <span className="block">
+              <VerificaLink id={pl.id} />
+            </span>
           )}
         </Camp>
       </dl>

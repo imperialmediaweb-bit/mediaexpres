@@ -3,7 +3,7 @@ import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { ADAOS_PLASARE, PRAGURI_ADAOS, adaosPentru } from "@/lib/niveluri-publicatii";
-import { citesteOptiuni, pretOptiuneClient, etichetaOptiune, type CheieOptiune } from "@/lib/optiuni-partener";
+import { citesteOptiuni, pretOptiuneClient, etichetaOptiune, CHEI_OPTIUNI, OPTIUNI_PE_TIP, type CheieOptiune } from "@/lib/optiuni-partener";
 
 /**
  * Catalogul publicatiilor partenere de pe /alege-ziarele.
@@ -32,6 +32,11 @@ export interface PartenerCatalog {
   trafic: number | null;
   urmaritoriFacebook: number | null;
   dofollow: boolean | null;
+  /** presa | influencer */
+  tip: string;
+  platforma: string | null;
+  urmaritori: number | null;
+  vizualizari: number | null;
   /** Pretul unui articol pentru client, la bucata (fara reducerea de volum). */
   pret: number;
   optiuni: OptiuneCatalog[];
@@ -72,14 +77,21 @@ export async function parteneriDisponibili(): Promise<PartenerCatalog[]> {
       trafic: p.monthlyTraffic,
       urmaritoriFacebook: p.facebookFollowers,
       dofollow: p.dofollowLinks,
+      tip: p.kind || "presa",
+      platforma: p.platform,
+      urmaritori: p.followers,
+      vizualizari: p.avgViews,
       pret: (p.pricePerArticle as number) + ADAOS_PLASARE,
-      optiuni: citesteOptiuni(p.extraOptions).map((o) => ({
+      optiuni: citesteOptiuni(p.extraOptions)
+        .filter((o) => (OPTIUNI_PE_TIP[p.kind === "influencer" ? "influencer" : "presa"] as string[]).includes(o.key))
+        .map((o) => ({
         key: o.key,
         eticheta: etichetaOptiune(o.key),
         pret: pretOptiuneClient(o.pret),
       })),
     }))
-    .sort((a, b) => (b.da ?? 0) - (a.da ?? 0));
+    // Presa dupa DA, influencerii dupa urmaritori.
+    .sort((a, b) => (b.da ?? 0) - (a.da ?? 0) || (b.urmaritori ?? 0) - (a.urmaritori ?? 0));
 }
 
 /** Ce a ales clientul: „id" sau „id+facebook+prima_pagina". */
@@ -96,7 +108,7 @@ export function parseazaAlegeri(v: string[] | string | null | undefined): Aleger
     const [id, ...opt] = String(bucata).trim().split("+");
     if (!id || vazute.has(id) || !/^[a-zA-Z0-9-]{8,64}$/.test(id)) continue;
     vazute.add(id);
-    out.push({ id, optiuni: Array.from(new Set(opt)).filter((o) => o === "facebook" || o === "prima_pagina") as CheieOptiune[] });
+    out.push({ id, optiuni: Array.from(new Set(opt)).filter((o) => CHEI_OPTIUNI.includes(o)) as CheieOptiune[] });
   }
   return out;
 }

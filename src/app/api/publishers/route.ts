@@ -2,7 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { db } from "@/db";
 import { publishers } from "@/db/schema";
-import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
+import { OPTIUNI_PE_TIP, etichetaOptiune } from "@/lib/optiuni-partener";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { eq } from "drizzle-orm";
 import { verificaAutoritate } from "@/lib/autoritate";
@@ -31,12 +32,19 @@ const applySchema = z.object({
   payoutIban: z.string().max(50).optional().or(z.literal("")),
   niche: z.string().max(60).optional().or(z.literal("")),
   extraOptions: z
-    .array(z.object({ key: z.enum(["facebook", "prima_pagina"]), pret: z.number().int().min(1).max(10000) }))
+    .array(z.object({ key: z.enum(["facebook", "prima_pagina", "story", "link_bio"]), pret: z.number().int().min(1).max(10000) }))
     .max(5)
     .optional(),
   payoutCompany: z.string().max(200).optional().or(z.literal("")),
   notes: z.string().max(2000).optional().or(z.literal("")),
   gdprConsent: z.literal(true),
+  // 29.09.2026 — influenceri: canal YouTube, cont Instagram / TikTok / Facebook.
+  kind: z.enum(["presa", "influencer"]).optional(),
+  platform: z.enum(["youtube", "instagram", "tiktok", "facebook"]).optional(),
+  followers: z.number().int().nonnegative().optional(),
+  avgViews: z.number().int().nonnegative().optional(),
+  /** Influencerul isi spune pretul pe postare; adminul il poate schimba la aprobare. */
+  pretCerut: z.number().int().min(1).max(50000).optional(),
 });
 
 const RATE_LIMIT_MAX = 3;
@@ -77,6 +85,17 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  const influencer = d.kind === "influencer";
+  if (influencer && (!d.platform || !d.followers || !d.pretCerut)) {
+    return NextResponse.json(
+      { ok: false, error: "Completează platforma, numărul de urmăritori și prețul pe postare." },
+      { status: 400 },
+    );
+  }
+  // Optiunile se primesc doar pe tipul lor (Facebook la presa, story la influencer).
+  const optiuni = (d.extraOptions || []).filter((o) =>
+    (OPTIUNI_PE_TIP[influencer ? "influencer" : "presa"] as string[]).includes(o.key),
+  );
 
   const id = crypto.randomUUID();
   // Coloanele noi (dovada, dofollow, declaratie) pot lipsi pana la fix-db.
@@ -99,7 +118,13 @@ export async function POST(req: NextRequest) {
     contactPhone: d.contactPhone || null,
     payoutIban: d.payoutIban || null,
     niche: d.niche || null,
-    extraOptions: d.extraOptions?.length ? JSON.stringify(d.extraOptions) : null,
+    extraOptions: optiuni.length ? JSON.stringify(optiuni) : null,
+    kind: influencer ? "influencer" : "presa",
+    platform: influencer ? d.platform : null,
+    followers: influencer ? d.followers ?? null : null,
+    avgViews: influencer ? d.avgViews ?? null : null,
+    // La presa tariful vine din nivel (admin); la influencer, din ce cere el.
+    pricePerArticle: influencer ? d.pretCerut ?? null : null,
     payoutCompany: d.payoutCompany || null,
     notes: d.notes || null,
     status: "pending",
@@ -108,7 +133,8 @@ export async function POST(req: NextRequest) {
   // 29.09.2026 — autoritatea o citim noi, din Moz (lib/autoritate.ts), cat
   // timp omul inca asteapta raspunsul formularului. Daca Moz nu raspunde,
   // inscrierea merge mai departe: scorul se poate reverifica din admin.
-  const aut = await verificaAutoritate(d.siteUrl).catch(() => null);
+  // Scorul de domeniu n-are sens pentru un canal de YouTube.
+  const aut = influencer ? null : await verificaAutoritate(d.siteUrl).catch(() => null);
   if (aut) {
     await db
       .update(publishers)
@@ -118,17 +144,18 @@ export async function POST(req: NextRequest) {
   }
 
   const html = wrapEmail(
-    "Aplicație ziar nou — MediaExpres",
+    influencer ? "Aplicație influencer — MediaExpres" : "Aplicație ziar nou — MediaExpres",
     `
-    <p>Un ziar dorește să intre în rețeaua MediaExpres.</p>
+    <p>${influencer ? "Un influencer vrea să intre în catalog." : "Un ziar dorește să intre în rețeaua MediaExpres."}</p>
     <table style="width:100%;border-collapse:collapse;">
+      ${influencer ? kv("Influencer", `${esc(d.platform || "")} · ${(d.followers || 0).toLocaleString("ro-RO")} urmăritori · ${d.avgViews ? d.avgViews.toLocaleString("ro-RO") + " vizualizări medii" : "vizualizări nedeclarate"} · cere ${d.pretCerut} lei / postare`) : ""}
       ${kv("Site", d.siteName)}
       ${kv("URL", d.siteUrl)}
       ${kv("Judet / Regiune", `${d.county || "—"} / ${d.region || "—"}`)}
       ${kv("Facebook", d.facebookUrl || "—")}
       ${kv("Autoritate (verificată de noi)", aut ? `DA ${aut.domainAuthority ?? "—"} · PA ${aut.pageAuthority ?? "—"} · spam ${aut.spamScore ?? "—"}%${aut.openPageRank != null ? ` · OPR ${aut.openPageRank}/10` : ""}` : "neverificată (lipsește cheia Moz sau Moz nu a răspuns)")}
       ${kv("Nișă", d.niche || "—")}
-      ${kv("Opțiuni oferite", d.extraOptions?.length ? d.extraOptions.map((o) => `${o.key === "facebook" ? "Facebook" : "prima pagină 7 zile"}: ${o.pret} lei`).join(", ") : "—")}
+      ${kv("Opțiuni oferite", optiuni.length ? optiuni.map((o) => `${esc(etichetaOptiune(o.key))}: ${o.pret} lei`).join(", ") : "—")}
       ${kv("Trafic lunar", d.monthlyTraffic ? `${d.monthlyTraffic.toLocaleString()} vizite` : "—")}
       ${kv("Dovada traficului", d.analyticsProofUrl ? `<a href="${d.analyticsProofUrl}">captura din Analytics</a>` : "⚠️ NU a urcat captura")}
       ${kv("Urmaritori Facebook", d.facebookFollowers ? d.facebookFollowers.toLocaleString() : "—")}
@@ -146,7 +173,7 @@ export async function POST(req: NextRequest) {
 
   await sendEmail({
     to: ADMIN_EMAIL,
-    subject: `[Ziar nou] ${d.siteName}`,
+    subject: `${influencer ? "[Influencer nou]" : "[Ziar nou]"} ${d.siteName}`,
     html,
     replyTo: d.contactEmail,
   });

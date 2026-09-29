@@ -35,7 +35,16 @@ export interface PlasarePentruSold {
   status: string;
   pricePartner: number;
   statementId: string | null;
+  /** Rezultatul pazei linkurilor (lib/paza-linkuri.ts). */
+  linkStatus?: string | null;
 }
+
+/**
+ * Link stricat = articolul nu mai e ce a platit clientul: suma sta pe loc
+ * pana il repara. Lista e dublata din lib/paza-linkuri (STARI_BLOCANTE) ca
+ * decontul sa ramana fara importuri de server.
+ */
+export const LINK_BLOCHEAZA_PLATA = ["pagina_lipsa", "link_lipsa", "nofollow", "noindex"] as const;
 
 export interface Sold {
   /** Publicate si neintrate inca in nicio cerere: se pot cere acum. */
@@ -44,6 +53,8 @@ export interface Sold {
   inPlata: number;
   /** Acceptate, inca nepublicate: vor intra in sold dupa publicare. */
   inLucru: number;
+  /** Publicate, dar cu linkul stricat: se pot cere dupa reparare. */
+  blocat: number;
 }
 
 /**
@@ -57,16 +68,18 @@ export function calculeazaSold(
   let deIncasat = 0;
   let inPlata = 0;
   let inLucru = 0;
+  let blocat = 0;
   for (const p of plasari) {
     const pret = Math.max(0, Math.trunc(p.pricePartner || 0));
     if (ePlatibila(p.status)) {
-      if (!p.statementId) deIncasat += pret;
+      if (!p.statementId && (LINK_BLOCHEAZA_PLATA as readonly string[]).includes(p.linkStatus || "")) blocat += pret;
+      else if (!p.statementId) deIncasat += pret;
       else if (!cereriPlatite.has(p.statementId)) inPlata += pret;
     } else if (p.status === "trimis" || p.status === "acceptat") {
       inLucru += pret;
     }
   }
-  return { deIncasat, inPlata, inLucru };
+  return { deIncasat, inPlata, inLucru, blocat };
 }
 
 export function poateCerePlata(sold: Sold, areCerereDeschisa: boolean): boolean {

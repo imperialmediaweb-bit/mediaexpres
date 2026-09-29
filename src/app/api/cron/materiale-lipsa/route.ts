@@ -15,6 +15,7 @@ import {
 import { SITE } from "@/data/site";
 import { findPackageById } from "@/data/packages";
 import { waLink } from "@/lib/whatsapp";
+import { ruleazaPazaLinkuri } from "@/lib/ruleaza-paza";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -302,12 +303,23 @@ export async function POST(req: NextRequest) {
     }
   }
 
+  // 29.09.2026 — paza linkurilor la parteneri merge pe acelasi cron de 5
+  // minute (lib/ruleaza-paza.ts), cateva plasari pe rand: n-a trebuit
+  // configurat inca un apel extern.
+  let pazaLinkuri: { verificate: number; probleme: number } | null = null;
+  try {
+    pazaLinkuri = await ruleazaPazaLinkuri();
+  } catch (e) {
+    erori.push(`paza linkuri: ${e instanceof Error ? e.message : e}`);
+  }
+
   return NextResponse.json({
     ok: true,
     reamintiri,
     alerte,
     reamintiriPlata,
     alertePlata,
+    pazaLinkuri,
     erori,
   });
 }

@@ -3,9 +3,9 @@ import { CheckCircle2, Users, Banknote, Zap } from "lucide-react";
 import { PartnerApplyForm } from "./PartnerApplyForm";
 
 export const metadata: Metadata = {
-  title: "Parteneriat ziare — MediaExpres",
+  title: "Parteneriat ziare și influenceri — MediaExpres",
   description:
-    "Ești owner de site de știri? Aplică să intri în rețeaua MediaExpres și primește articole remunerate constant.",
+    "Ai un site de știri sau un canal de YouTube, Instagram ori TikTok? Aplică în catalogul MediaExpres și primește colaborări plătite, cu plata garantată de noi.",
   alternates: { canonical: "/parteneriat" },
 };
 
@@ -50,6 +50,11 @@ export default function ParteneriatPage() {
             și conținut editorial serios, poți aplica să intri în rețeaua
             noastră de distribuție și să primești articole remunerate lunar.
           </p>
+          <p className="mt-3 text-sm text-slate-700">
+            <strong>Ești influencer?</strong> Canal de YouTube, cont de Instagram, TikTok sau pagină de Facebook —
+            alege „Sunt influencer” în formular. Firmele te găsesc în catalog, plătesc la noi, iar tu primești
+            brief-ul și prețul tău întreg.
+          </p>
 
           <div className="mt-8 grid gap-5 sm:grid-cols-2">
             {BENEFITS.map((b) => (
@@ -69,7 +74,8 @@ export default function ParteneriatPage() {
               <li>✓ Site de știri activ (postări regulate, conținut editorial)</li>
               <li>✓ Trafic minim 5.000 vizite/lună (ideal 20k+)</li>
               <li>✓ Domeniu propriu, nu subdomeniu gratuit</li>
-              <li>✓ Posibilitate de publicare în maximum 12 ore lucrătoare de la primire</li>
+              <li>✓ Posibilitate de publicare în maximum 2 zile lucrătoare de la primire</li>
+              <li>✓ Influenceri: minim 3.000 de urmăritori reali, cu statisticile la vedere</li>
               <li>✓ Pagină de contact cu date firmă vizibile</li>
             </ul>
           </div>

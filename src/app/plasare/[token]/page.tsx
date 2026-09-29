@@ -8,6 +8,7 @@ import { etichetaStare, timpRamas, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } fro
 import { SITE } from "@/data/site";
 import { PRAG_RETRAGERE, ZILE_PLATA } from "@/lib/decont";
 import { etichetaOptiune } from "@/lib/optiuni-partener";
+import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
 
 /** Cheile optiunilor comandate pe plasare (coloana JSON `options`). */
 function citesteOptiuniComandate(json: string | null): string[] {
@@ -112,6 +113,13 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
                 <a href={pl.publishedUrl} target="_blank" rel="noreferrer" className="break-all text-brand-red underline">
                   {pl.publishedUrl}
                 </a>
+                {pl.linkCheckedAt && pl.linkStatus && (
+                  <span className={`mt-1 block text-xs ${eBlocant(pl.linkStatus) ? "font-semibold text-red-700" : "text-green-700"}`}>
+                    Verificare automată {new Date(pl.linkCheckedAt).toLocaleDateString("ro-RO")}:{" "}
+                    {ETICHETE_LINK[pl.linkStatus as StareLink] || pl.linkStatus}
+                    {eBlocant(pl.linkStatus) && " — plata pentru articol e oprită până la reparare."}
+                  </span>
+                )}
               </dd>
             </div>
           )}
@@ -136,7 +144,15 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
       )}
 
       <div className="mt-5 rounded-xl border border-slate-200 bg-white p-5">
-        <h2 className="font-serif text-lg font-bold text-brand-navy">Articolul</h2>
+        <h2 className="font-serif text-lg font-bold text-brand-navy">
+          {pub?.kind === "influencer" ? "Materialul clientului" : "Articolul"}
+        </h2>
+        {pub?.kind === "influencer" && (
+          <p className="mt-1 text-xs text-slate-500">
+            Ce vrea clientul să comunice. Faci postarea / videoul în stilul tău, cu informațiile și linkurile de
+            aici, marcat ca publicitate. Apoi lipești mai jos linkul postării.
+          </p>
+        )}
         <div className="mt-3">
           <ArticolGata
             titlu={pl.articleTitle}
@@ -176,7 +192,8 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
       <div className="mt-6 rounded-xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
         <strong>Regulile, pe scurt:</strong> refuzi în {ZILE_REFUZ} zile lucrătoare, fără să explici
         de ce. Dacă publici, ai {ZILE_PUBLICARE} zile lucrătoare și lipești aici adresa articolului.
-        Articolul rămâne online {LUNI_ONLINE} luni, cu linkurile neatinse. După publicare, suma intră în
+        Articolul rămâne online {LUNI_ONLINE} luni, cu linkurile neatinse — îl verificăm automat
+        săptămânal, iar un link stricat oprește plata până la reparare. După publicare, suma intră în
         soldul tău; de la {PRAG_RETRAGERE} de lei ceri plata din{" "}
         <a href="/cont-partener" className="underline">contul de partener</a>, emiți factura și plătim în{" "}
         {ZILE_PLATA} zile lucrătoare.

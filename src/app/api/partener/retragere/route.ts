@@ -1,11 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { and, eq, inArray, isNull } from "drizzle-orm";
+import { and, eq, inArray, isNull, notInArray, or } from "drizzle-orm";
 import { db } from "@/db";
 import { partnerPayouts, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { verificaToken } from "@/lib/plasare-token";
-import { PRAG_RETRAGERE, STARI_PLATIBILE, ZILE_PLATA, ibanValid, normalizeazaIban } from "@/lib/decont";
+import { PRAG_RETRAGERE, STARI_PLATIBILE, LINK_BLOCHEAZA_PLATA, ZILE_PLATA, ibanValid, normalizeazaIban } from "@/lib/decont";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
 
@@ -87,6 +87,8 @@ export async function POST(req: NextRequest) {
           eq(placements.publisherId, pub.id),
           isNull(placements.statementId),
           inArray(placements.status, [...STARI_PLATIBILE]),
+          // Linkul stricat nu intra la plata pana nu e reparat.
+          or(isNull(placements.linkStatus), notInArray(placements.linkStatus, [...LINK_BLOCHEAZA_PLATA])),
         ),
       )
       .returning({ pret: placements.pricePartner });

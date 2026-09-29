@@ -101,6 +101,21 @@ export default async function AdminPartnerDetail({
         <aside>
           <div className="space-y-5">
           <PartnerActions publisherId={p.id} currentStatus={p.status} />
+          {p.kind === "influencer" && (
+            <div className="rounded-xl border-2 border-brand-red/30 bg-white p-5 text-sm">
+              <h2 className="font-serif text-lg font-semibold text-brand-navy">🎥 Influencer</h2>
+              <dl className="mt-3 grid grid-cols-2 gap-2">
+                <div><dt className="text-slate-500">Platformă</dt><dd className="font-semibold text-brand-navy">{p.platform || "—"}</dd></div>
+                <div><dt className="text-slate-500">Urmăritori</dt><dd className="font-semibold text-brand-navy">{p.followers?.toLocaleString("ro-RO") ?? "—"}</dd></div>
+                <div><dt className="text-slate-500">Vizualizări medii</dt><dd className="font-semibold text-brand-navy">{p.avgViews?.toLocaleString("ro-RO") ?? "—"}</dd></div>
+                <div><dt className="text-slate-500">Cere pe postare</dt><dd className="font-semibold text-brand-navy">{p.pricePerArticle ? `${p.pricePerArticle} lei` : "—"}</dd></div>
+              </dl>
+              <p className="mt-3 text-xs text-slate-500">
+                Verifică statisticile din captură și contul înainte să aprobi. Prețul lui e deja pus; dacă
+                negociați altul, schimbă-l din nivel (câmpul de tarif). Autoritatea Moz nu se aplică.
+              </p>
+            </div>
+          )}
           <div className="rounded-xl border border-slate-200 bg-white p-5 text-sm">
             <h2 className="font-serif text-lg font-semibold text-brand-navy">Nișă și opțiuni</h2>
             <p className="mt-2 text-slate-700">Nișă: <strong>{p.niche || "—"}</strong></p>

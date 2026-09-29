@@ -53,7 +53,11 @@ export function ensureOrderColumns(): Promise<void> {
           ADD COLUMN IF NOT EXISTS "open_page_rank" real,
           ADD COLUMN IF NOT EXISTS "authority_checked_at" timestamp,
           ADD COLUMN IF NOT EXISTS "extra_options" text,
-          ADD COLUMN IF NOT EXISTS "niche" text`,
+          ADD COLUMN IF NOT EXISTS "niche" text,
+          ADD COLUMN IF NOT EXISTS "kind" text NOT NULL DEFAULT 'presa',
+          ADD COLUMN IF NOT EXISTS "platform" text,
+          ADD COLUMN IF NOT EXISTS "followers" integer,
+          ADD COLUMN IF NOT EXISTS "avg_views" integer`,
       ),
     ])
       .then(() => undefined)
@@ -114,6 +118,13 @@ export function ensurePlacementTables(): Promise<void> {
         )`,
       )
       .then(() => db.execute(sql`ALTER TABLE "placement" ADD COLUMN IF NOT EXISTS "options" text`))
+      .then(() =>
+        db.execute(sql`ALTER TABLE "placement"
+          ADD COLUMN IF NOT EXISTS "link_fail_count" integer NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS "link_detail" text,
+          ADD COLUMN IF NOT EXISTS "link_alert_at" timestamp,
+          ADD COLUMN IF NOT EXISTS "link_escalated_at" timestamp`),
+      )
       .then(() =>
         // 29.09.2026 — cererile de plata ale partenerilor (lib/decont.ts).
         db.execute(

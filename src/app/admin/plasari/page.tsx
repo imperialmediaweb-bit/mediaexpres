@@ -6,6 +6,7 @@ import { db } from "@/db";
 import { placementMessages, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { etichetaStare } from "@/lib/plasari";
+import { eBlocant } from "@/lib/paza-linkuri";
 import { ADAOS_PLASARE } from "@/lib/niveluri-publicatii";
 import { NewPlacementForm } from "./NewPlacementForm";
 
@@ -145,9 +146,16 @@ export default async function AdminPlasari() {
                 <td className="px-4 py-3">{r.priceClient} lei</td>
                 <td className="px-4 py-3">
                   {r.publishedUrl ? (
-                    <a href={r.publishedUrl} target="_blank" rel="noreferrer" className="text-brand-red underline">
-                      deschide
-                    </a>
+                    <>
+                      <a href={r.publishedUrl} target="_blank" rel="noreferrer" className="text-brand-red underline">
+                        deschide
+                      </a>
+                      {eBlocant(r.linkStatus) && (
+                        <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 text-xs font-semibold text-red-700" title={r.linkDetail || ""}>
+                          ⚠ link
+                        </span>
+                      )}
+                    </>
                   ) : (
                     "—"
                   )}

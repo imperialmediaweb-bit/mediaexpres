@@ -6,6 +6,7 @@ import { verificaToken } from "@/lib/plasare-token";
 import { plasarileComenzii } from "@/lib/mesaje-plasare";
 import { ChatPlasare } from "@/components/ChatPlasare";
 import { SITE } from "@/data/site";
+import { eBlocant } from "@/lib/paza-linkuri";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = { title: "Comanda ta", robots: { index: false, follow: false } };
@@ -88,6 +89,13 @@ export default async function ComandaMea({ params }: { params: { token: string }
                 <a href={pl.publishedUrl} target="_blank" rel="noreferrer" className="break-all text-brand-red underline">
                   {pl.publishedUrl}
                 </a>
+                {pl.linkCheckedAt && (
+                  <span className={`mt-1 block text-xs ${eBlocant(pl.linkStatus) ? "text-amber-700" : "text-green-700"}`}>
+                    {eBlocant(pl.linkStatus)
+                      ? "🛡 Am găsit o problemă la verificare și o rezolvăm cu publicația — nu trebuie să faci nimic."
+                      : `🛡 Verificat automat pe ${new Date(pl.linkCheckedAt).toLocaleDateString("ro-RO")}: online, cu linkul tău activ. Verificăm săptămânal, 12 luni.`}
+                  </span>
+                )}
               </p>
             ) : (
               !INCHISE.includes(pl.status) && (

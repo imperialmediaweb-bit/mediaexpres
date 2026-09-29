@@ -370,6 +370,18 @@ export const publishers = pgTable("publisher", {
   extraOptions: text("extra_options"),
   /** Nisa publicatiei: stiri generale, auto, sanatate... Clientul filtreaza dupa ea. */
   niche: text("niche"),
+  /**
+   * 29.09.2026 — „presa" (site de stiri) sau „influencer" (canal YouTube,
+   * cont Instagram / TikTok / Facebook). Acelasi flux de plasare; la
+   * influencer, siteUrl = adresa canalului, pricePerArticle = pretul unei
+   * postari/unui video, iar „articolul" e brief-ul clientului.
+   */
+  kind: text("kind").notNull().default("presa"),
+  /** youtube | instagram | tiktok | facebook — doar la influenceri. */
+  platform: text("platform"),
+  followers: integer("followers"),
+  /** Vizualizari medii pe postare/video, declarate si verificate de noi. */
+  avgViews: integer("avg_views"),
   /** Bronz / Argint / Aur / Platina — dupa cifre, nu dupa negociere. */
   tier: text("tier"),
   /** Cat ii platim pe articol publicat (lei). Vine din nivel, se poate ajusta. */
@@ -450,6 +462,11 @@ export const placements = pgTable("placement", {
    *  faptul ca articolul a fost livrat si facturat. */
   linkStatus: text("link_status"),
   linkCheckedAt: timestamp("link_checked_at"),
+  /** 29.09.2026 — paza linkurilor (lib/paza-linkuri.ts). */
+  linkFailCount: integer("link_fail_count").notNull().default(0),
+  linkDetail: text("link_detail"),
+  linkAlertAt: timestamp("link_alert_at"),
+  linkEscalatedAt: timestamp("link_escalated_at"),
   dofollowExpected: boolean("dofollow_expected").notNull().default(true),
 
   /** JSON [{key, pret, pretClient}] — optiunile comandate odata cu articolul. */

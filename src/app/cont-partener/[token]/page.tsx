@@ -6,6 +6,7 @@ import { partnerPayouts, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { semneazaToken, verificaToken } from "@/lib/plasare-token";
 import { etichetaStare } from "@/lib/plasari";
+import { eBlocant, ETICHETE_LINK, type StareLink } from "@/lib/paza-linkuri";
 import {
   PRAG_RETRAGERE,
   ZILE_PLATA,
@@ -74,6 +75,13 @@ export default async function PanouPartener({ params }: { params: { token: strin
         <Cifra eticheta="În plată" valoare={sold.inPlata} />
         <Cifra eticheta="Încasat până acum" valoare={incasatTotal} />
       </section>
+      {sold.blocat > 0 && (
+        <p className="mt-2 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+          {sold.blocat} lei sunt opriți: la verificarea automată, un articol publicat nu mai are pagina, linkul
+          către client sau e marcat nofollow/noindex. Deschide articolul din lista de mai jos, repară-l, iar
+          suma revine singură în sold la următoarea verificare.
+        </p>
+      )}
       {sold.inLucru > 0 && (
         <p className="mt-2 text-xs text-slate-500">
           Încă {sold.inLucru} lei din articole acceptate, care intră în sold după ce le publici.
@@ -130,6 +138,11 @@ export default async function PanouPartener({ params }: { params: { token: strin
                       </>
                     )}
                   </p>
+                  {eBlocant(pl.linkStatus) && (
+                    <p className="mt-0.5 text-xs font-semibold text-red-700">
+                      ⚠ {ETICHETE_LINK[pl.linkStatus as StareLink]} — plata e oprită până la reparare
+                    </p>
+                  )}
                 </div>
                 {/* Refuzate, expirate, anulate: nu se platesc, deci nu arata suma. */}
                 <span className={`font-semibold ${["refuzat", "expirat", "anulat"].includes(pl.status) ? "text-slate-400" : "text-brand-navy"}`}>

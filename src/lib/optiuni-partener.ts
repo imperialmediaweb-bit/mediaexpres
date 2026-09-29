@@ -17,7 +17,18 @@ export const ADAOS_OPTIUNE_MINIM = 30;
 export const OPTIUNI_POSIBILE = [
   { key: "facebook", eticheta: "Postare pe pagina de Facebook a publicației" },
   { key: "prima_pagina", eticheta: "Fixat pe prima pagină 7 zile" },
+  // 29.09.2026 — influenceri (publishers.kind = "influencer").
+  { key: "story", eticheta: "Story / Short în plus" },
+  { key: "link_bio", eticheta: "Link în bio / descriere 30 de zile" },
 ] as const;
+
+/** Ce optiuni are voie sa ofere fiecare tip de partener. */
+export const OPTIUNI_PE_TIP: Record<"presa" | "influencer", readonly string[]> = {
+  presa: ["facebook", "prima_pagina"],
+  influencer: ["story", "link_bio"],
+};
+
+export const CHEI_OPTIUNI: readonly string[] = OPTIUNI_POSIBILE.map((o) => o.key);
 
 export type CheieOptiune = (typeof OPTIUNI_POSIBILE)[number]["key"];
 
