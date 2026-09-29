@@ -76,6 +76,16 @@ const MAX_REAMINTIRI_PLATA = 2;
  * treaba unui om, daca mai merita.
  */
 const VECHIME_MAXIMA = 30 * ZI;
+/**
+ * 29.09.2026 — cronul extern nu mai rula de cel putin o saptamana, iar acum
+ * porneste din server. Cu 30 de zile, prima trecere ar fi trimis reamintiri
+ * si alerte pentru comenzi pe care proprietarul le-a rezolvat deja manual
+ * (ex. pasarelu, 22.09). Reamintirea si alerta prind doar comenzile din
+ * ultimele zile; ce e mai vechi e treaba unui om, din admin.
+ */
+const VECHIME_COMANDA = 2 * ZI;
+const VECHIME_ALERTA = 5 * ZI;
+const VECHIME_OP = 7 * ZI;
 
 /** Comenzile platite, fara material, mai vechi decat pragul dat. */
 async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
@@ -91,7 +101,7 @@ async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
     isNotNull(orders.stripeSessionId),
     lt(orders.createdAt, inainteDe),
     // Nu ne intoarcem in trecut: vezi VECHIME_MAXIMA.
-    gt(orders.createdAt, new Date(Date.now() - VECHIME_MAXIMA)),
+    gt(orders.createdAt, new Date(Date.now() - (campGol === "reminder" ? VECHIME_COMANDA : VECHIME_ALERTA))),
     campGol === "reminder"
       ? isNull(orders.materialReminderAt)
       : isNull(orders.materialAlertAt),
@@ -238,7 +248,7 @@ export async function POST(req: NextRequest) {
         eq(orderSubmissions.paymentMethod, "op"),
         lt(orderSubmissions.paymentRemindersSent, MAX_REAMINTIRI_PLATA + 1),
         // Nu ne intoarcem in trecut: vezi VECHIME_MAXIMA.
-        gt(orderSubmissions.createdAt, new Date(Date.now() - VECHIME_MAXIMA)),
+        gt(orderSubmissions.createdAt, new Date(Date.now() - VECHIME_OP)),
       ),
     )
     // Cel mult 20 pe rulare: chiar si in fereastra de 30 de zile, un val de
