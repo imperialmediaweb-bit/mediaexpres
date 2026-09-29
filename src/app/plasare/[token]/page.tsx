@@ -20,6 +20,7 @@ function citesteOptiuniComandate(json: string | null): string[] {
 }
 import { PlacementActions } from "./PlacementActions";
 import { ArticolGata } from "./ArticolGata";
+import { ChatPlasare } from "@/components/ChatPlasare";
 import { articolHtml, linkDescarcarePoza } from "@/lib/articol-html";
 
 export const dynamic = "force-dynamic";
@@ -156,6 +157,20 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
         <div className="mt-5 rounded-xl border border-slate-200 bg-slate-50 p-5 text-sm text-slate-600">
           {etichetaStare(pl.status)}. Nu mai e nimic de făcut aici.
         </div>
+      )}
+
+      {pl.orderSubmissionId && (
+        <section id="mesaje" className="mt-6 scroll-mt-6">
+          <h2 className="mb-2 font-serif text-lg font-bold text-brand-navy">Mesaje cu clientul</h2>
+          <p className="mb-3 text-xs text-slate-500">
+            Întrebări despre articol, modificări, confirmări — totul aici. Primești email când ai mesaj nou.
+          </p>
+          <ChatPlasare
+            t={params.token}
+            eu="partener"
+            nume={{ client: "Clientul", partener: pub?.siteName || "Tu", admin: SITE.name }}
+          />
+        </section>
       )}
 
       <div className="mt-6 rounded-xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">

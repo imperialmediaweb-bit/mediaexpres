@@ -28,6 +28,7 @@ import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import { domeniuDin } from "@/lib/autoritate";
 import { pretOptiuneClient, citesteOptiuni } from "@/lib/optiuni-partener";
 import { articolHtml, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-html";
+import { verificaContact } from "@/lib/filtru-contact";
 
 import {
   PRAG_RETRAGERE,
@@ -1732,6 +1733,32 @@ console.log("\n########## S. RECENZII ##########");
   t("linkurile negasite sunt aratate partenerului", r.negasite.length === 1 && r.negasite[0].url === "https://a.ro/n");
   t("nofollow doar cand nu e dofollow", /rel="nofollow"/.test(articolHtml({ titlu: "", corp: "un cuvant aici", linkNotes: "cuvant → https://a.ro", dofollow: false }).html));
   t("pozele Cloudinary se descarca, nu doar se deschid", linkDescarcarePoza("https://res.cloudinary.com/x/image/upload/v1/a.jpg").includes("/upload/fl_attachment/"));
+}
+
+
+// Chatul client–partener: datele de contact sunt oprite (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const prinse: [string, string][] = [
+    ["suna-ma la 0722 123 456", "telefon"],
+    ["+40 722-123-456", "telefon"],
+    ["zero sapte doi doi unu doi trei patru cinci sase", "telefon"],
+    ["scrie-mi pe ion.pop@firma.ro", "email"],
+    ["ion punct pop at gmail punct com", "email"],
+    ["dam-i un mesaj pe whats app", "aplicatie"],
+    ["ma gasesti @ionpop88", "aplicatie"],
+    ["intra pe firmamea . ro", "link"],
+  ];
+  for (const [text, motiv] of prinse) t(`filtrul prinde: „${text}"`, verificaContact(text) === motiv);
+  t("site-ul clientului e permis (partenerul il vede oricum)", verificaContact("am pus linkul catre firma.ro", ["firma.ro"]) === null);
+  t("datele si preturile nu sunt luate drept telefon", verificaContact("Apare pe 29.09.2026 10:00, pret 1500 lei, CUI 46466484") === null);
+  const api = citesteFisier("src/app/api/mesaje-plasare/route.ts");
+  t("cine scrie se decide din token, nu din browser", !/sender:\s*d\./.test(api) && /verificaToken\(t\)/.test(api));
+  t("clientul scrie doar pe plasarile comenzii lui", /pl\.orderSubmissionId !== tok\.id/.test(api));
+  const lib = citesteFisier("src/lib/mesaje-plasare.ts");
+  t("mesajul oprit nu ajunge la celalalt", /isNull\(placementMessages\.blocked\)/.test(lib));
+  t("la mesaj oprit, adminul primeste alerta", /Încercare de schimb de contact/.test(lib));
+  t("raspunsul pe email ajunge la noi, nu la celalalt", /replyTo: ADMIN_EMAIL/.test(lib));
 }
 
 console.log("\n" + "=".repeat(64));

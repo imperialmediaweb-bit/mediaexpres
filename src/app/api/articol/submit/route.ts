@@ -12,6 +12,7 @@ import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, screenContent } from "@/lib/content-policy";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { trimitePlasari } from "@/lib/trimite-plasari";
+import { semneazaToken } from "@/lib/plasare-token";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
@@ -251,6 +252,24 @@ export async function POST(req: NextRequest) {
             linkNotes: d.linkNotes || null,
             orderSubmissionId: submissionId,
           });
+          if (r.ok) {
+            // Clientul primeste pagina lui: starea fiecarei publicatii si
+            // chatul cu ele (app/comanda-mea).
+            const link = `${SITE.url}/comanda-mea/${semneazaToken({ scope: "client", id: submissionId, v: 0 })}`;
+            await sendEmail({
+              to: order.email,
+              subject: `Articolul a plecat la ${r.plasari.length} ${r.plasari.length === 1 ? "publicație parteneră" : "publicații partenere"}`,
+              html: wrapEmail(
+                "Articolul tău e la publicații",
+                `<p>Bună ziua,</p>
+                 <p>Articolul <strong>„${esc(d.title)}"</strong> a fost trimis la: <strong>${r.plasari.map((x) => esc(x.publicatie)).join(", ")}</strong>.</p>
+                 <p>Pe pagina de mai jos vezi unde a ajuns fiecare și le poți scrie direct, prin platformă, dacă ai o întrebare sau o modificare.</p>
+                 <p style="margin:20px 0;"><a href="${link}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi comanda și mesajele</a></p>
+                 <p style="color:#64748b;font-size:13px;">Îți trimitem pe email fiecare link, pe măsură ce apare.</p>`,
+              ),
+              replyTo: ADMIN_EMAIL,
+            }).catch(() => {});
+          }
           if (!r.ok) {
             await sendEmail({
               to: ADMIN_EMAIL,

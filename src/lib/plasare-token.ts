@@ -19,9 +19,13 @@ import crypto from "crypto";
  */
 
 const SEP = "|";
-const ZILE: Record<Scope, number> = { plasare: 45, panou: 400 };
+const ZILE: Record<Scope, number> = { plasare: 45, panou: 400, client: 400 };
 
-export type Scope = "plasare" | "panou";
+/**
+ * `client` (29.09.2026) — clientul care a cumparat publicatii partenere:
+ * starea lor si chatul cu fiecare. id = comanda (order_submission).
+ */
+export type Scope = "plasare" | "panou" | "client";
 
 export interface PlasareToken {
   scope: Scope;
@@ -76,7 +80,7 @@ export function verificaToken(token: string | undefined, scope?: Scope): Plasare
 
   const [s, id, vStr, expiraStr] = payload.split(SEP);
   if (!s || !id || !vStr || !expiraStr) return null;
-  if (s !== "plasare" && s !== "panou") return null;
+  if (s !== "plasare" && s !== "panou" && s !== "client") return null;
   if (scope && s !== scope) return null;
 
   const expira = parseInt(expiraStr, 10);

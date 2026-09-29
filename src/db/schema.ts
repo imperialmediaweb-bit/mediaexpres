@@ -469,6 +469,21 @@ export const placements = pgTable("placement", {
  * cererii; suma e scrisa aici o data, la cerere, din plasarile rezervate —
  * niciodata din ce trimite browserul.
  */
+/**
+ * Chatul dupa comanda, intre client si publicatia partenera (29.09.2026).
+ * Un fir pe plasare. Mesajele cu date de contact raman aici cu `blocked`,
+ * nu ajung la celalalt (lib/filtru-contact.ts).
+ */
+export const placementMessages = pgTable("placement_message", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  placementId: text("placement_id").notNull(),
+  /** client | partener | admin */
+  sender: text("sender").notNull(),
+  body: text("body").notNull(),
+  blocked: text("blocked"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
 export const partnerPayouts = pgTable("partner_payout", {
   id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
   publisherId: text("publisher_id").notNull(),

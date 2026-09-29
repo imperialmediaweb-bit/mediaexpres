@@ -5,7 +5,7 @@ import { db } from "@/db";
 import { orderSubmissions, placements, publishers } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { ensurePlacementTables } from "@/lib/ensure-columns";
-import { verificaToken } from "@/lib/plasare-token";
+import { verificaToken, semneazaToken } from "@/lib/plasare-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { onlinePanaLa, tranzitiePermisa, type StarePlasare } from "@/lib/plasari";
 
@@ -118,7 +118,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
   if (d.action === "publicat" && pl.orderSubmissionId && d.url) {
     try {
       const [cmd] = await db
-        .select({ email: orderSubmissions.email, title: orderSubmissions.title })
+        .select({ id: orderSubmissions.id, email: orderSubmissions.email, title: orderSubmissions.title })
         .from(orderSubmissions)
         .where(eq(orderSubmissions.id, pl.orderSubmissionId))
         .limit(1);
@@ -132,6 +132,7 @@ export async function PATCH(req: NextRequest, { params }: { params: { token: str
              <p>Articolul <strong>„${esc(cmd.title)}"</strong> a fost publicat pe <strong>${esc(nume)}</strong>:</p>
              <p style="margin:18px 0;"><a href="${esc(d.url)}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi articolul</a></p>
              <p style="color:#64748b;font-size:13px;">Rămâne online cel puțin 12 luni. La final primești raportul complet, cu toate linkurile.</p>
+             <p style="font-size:13px;">Toate publicațiile comenzii și mesajele cu ele: <a href="${SITE.url}/comanda-mea/${semneazaToken({ scope: "client", id: cmd.id, v: 0 })}">pagina comenzii tale</a>.</p>
              <p style="margin-top:20px;">Cu respect,<br/><strong>Echipa ${SITE.name}</strong></p>`,
           ),
           replyTo: ADMIN_EMAIL,

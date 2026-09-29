@@ -1,9 +1,9 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { desc, eq } from "drizzle-orm";
+import { desc, eq, sql } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { placements, publishers } from "@/db/schema";
+import { placementMessages, placements, publishers } from "@/db/schema";
 import { ensureOrderColumns, ensurePlacementTables } from "@/lib/ensure-columns";
 import { etichetaStare } from "@/lib/plasari";
 import { ADAOS_PLASARE } from "@/lib/niveluri-publicatii";
@@ -22,10 +22,20 @@ export default async function AdminPlasari() {
 
   await Promise.all([ensureOrderColumns(), ensurePlacementTables()]);
 
-  const [randuri, parteneri] = await Promise.all([
+  const [randuri, parteneri, mesaje] = await Promise.all([
     db.select().from(placements).orderBy(desc(placements.sentAt)).limit(100),
     db.select().from(publishers).where(eq(publishers.status, "approved")).orderBy(publishers.siteName),
+    db
+      .select({
+        placementId: placementMessages.placementId,
+        total: sql<number>`count(*)::int`,
+        oprite: sql<number>`count(${placementMessages.blocked})::int`,
+      })
+      .from(placementMessages)
+      .groupBy(placementMessages.placementId),
   ]);
+  const mesajePe = new Map(mesaje.map((m) => [m.placementId, m]));
+  const cuIncercari = mesaje.filter((m) => m.oprite > 0).length;
 
   const dupaId = new Map(parteneri.map((p) => [p.id, p]));
   // Publicatiile fara tarif nu pot primi plasari — se vede de aici, ca sa nu
@@ -67,6 +77,13 @@ export default async function AdminPlasari() {
         </p>
       )}
 
+      {cuIncercari > 0 && (
+        <p className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-sm text-red-900">
+          🚫 {cuIncercari} {cuIncercari === 1 ? "discuție are" : "discuții au"} încercări de schimb de contact —
+          marcate cu roșu în tabel.
+        </p>
+      )}
+
       <div className="mt-6">
         {gata.length === 0 ? (
           <p className="rounded-xl border border-slate-200 bg-white p-6 text-sm text-slate-600">
@@ -101,12 +118,13 @@ export default async function AdminPlasari() {
               <th className="px-4 py-3">Plătim</th>
               <th className="px-4 py-3">Încasăm</th>
               <th className="px-4 py-3">Link</th>
+              <th className="px-4 py-3">Mesaje</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-slate-100">
             {randuri.length === 0 && (
               <tr>
-                <td colSpan={7} className="px-4 py-8 text-center text-slate-500">
+                <td colSpan={8} className="px-4 py-8 text-center text-slate-500">
                   Nicio plasare încă.
                 </td>
               </tr>
@@ -117,7 +135,11 @@ export default async function AdminPlasari() {
                 <td className="px-4 py-3 font-medium text-brand-navy">
                   {dupaId.get(r.publisherId)?.siteName || "—"}
                 </td>
-                <td className="max-w-xs truncate px-4 py-3 text-slate-700">{r.articleTitle}</td>
+                <td className="max-w-xs truncate px-4 py-3 text-slate-700">
+                  <Link href={`/admin/plasari/${r.id}`} className="hover:text-brand-red hover:underline">
+                    {r.articleTitle}
+                  </Link>
+                </td>
                 <td className="px-4 py-3 text-xs">{etichetaStare(r.status)}</td>
                 <td className="px-4 py-3">{r.pricePartner} lei</td>
                 <td className="px-4 py-3">{r.priceClient} lei</td>
@@ -128,6 +150,16 @@ export default async function AdminPlasari() {
                     </a>
                   ) : (
                     "—"
+                  )}
+                </td>
+                <td className="px-4 py-3 text-xs">
+                  <Link href={`/admin/plasari/${r.id}`} className="underline">
+                    {mesajePe.get(r.id)?.total ?? 0}
+                  </Link>
+                  {(mesajePe.get(r.id)?.oprite ?? 0) > 0 && (
+                    <span className="ml-1 rounded bg-red-100 px-1.5 py-0.5 font-semibold text-red-700">
+                      🚫 {mesajePe.get(r.id)?.oprite}
+                    </span>
                   )}
                 </td>
               </tr>

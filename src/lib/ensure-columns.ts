@@ -135,6 +135,20 @@ export function ensurePlacementTables(): Promise<void> {
           )`,
         ),
       )
+      .then(() =>
+        // 29.09.2026 — chatul client–partener (lib/mesaje-plasare.ts).
+        db.execute(
+          sql`CREATE TABLE IF NOT EXISTS "placement_message" (
+            "id" text PRIMARY KEY NOT NULL,
+            "placement_id" text NOT NULL,
+            "sender" text NOT NULL,
+            "body" text NOT NULL,
+            "blocked" text,
+            "created_at" timestamp DEFAULT now() NOT NULL
+          )`,
+        ),
+      )
+      .then(() => db.execute(sql`CREATE INDEX IF NOT EXISTS "placement_message_placement_idx" ON "placement_message" ("placement_id")`))
       .then(() => undefined)
       .catch((e) => {
         placementsDone = null;
