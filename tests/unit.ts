@@ -1847,6 +1847,15 @@ console.log("\n########## S. RECENZII ##########");
   t("fisierul de rute nu exporta altceva decat handlerele", !/export async function inregistreaza/.test(wh));
 }
 
+
+// Cronurile ruleaza din server, nu doar din afara (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("serverul isi porneste singur cronurile", /pornestePlanificator/.test(citesteFisier("src/instrumentation.ts")) && /materiale-lipsa/.test(citesteFisier("src/planificator.ts")));
+  t("cronurile accepta cheia interna sau cea externa", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/materiale-lipsa/route.ts")) && /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/promo-announce/route.ts")));
+  t("eroarea la recuperarea abonamentelor se vede in admin", /eroareAbonamente/.test(citesteFisier("src/app/admin/materiale/page.tsx")));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

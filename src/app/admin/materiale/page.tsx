@@ -47,7 +47,14 @@ export default async function MaterialePage() {
   // 29.09.2026 — abonamentele platite fara comanda se recupereaza si la
   // deschiderea paginii (nu doar din cron): comanda apare pe loc, iar
   // clientul primeste formularul pe email in aceeasi clipa.
-  await recupereazaAbonamente().catch((e) => console.error("[admin/materiale] abonamente:", e));
+  let eroareAbonamente: string | null = null;
+  let abonamenteAdaugate = 0;
+  try {
+    abonamenteAdaugate = await recupereazaAbonamente();
+  } catch (e) {
+    eroareAbonamente = e instanceof Error ? e.message : String(e);
+    console.error("[admin/materiale] abonamente:", e);
+  }
 
   const platiteFaraMaterial = await db
     .select({
@@ -82,6 +89,16 @@ export default async function MaterialePage() {
             usa separata — ca sa existe un singur loc unde stau toate. */}
         <NewOrderForm />
       </div>
+      {eroareAbonamente && (
+        <p className="mt-3 rounded-lg border border-red-300 bg-red-50 p-3 text-sm text-red-800">
+          Nu am putut verifica abonamentele din Stripe: {eroareAbonamente}
+        </p>
+      )}
+      {abonamenteAdaugate > 0 && (
+        <p className="mt-3 rounded-lg border border-green-300 bg-green-50 p-3 text-sm text-green-800">
+          Am găsit {abonamenteAdaugate} {abonamenteAdaugate === 1 ? "abonament plătit fără comandă" : "abonamente plătite fără comandă"}: comanda e creată mai jos, iar clientul a primit acum pe email formularul.
+        </p>
+      )}
       <p className="mt-2 text-sm text-slate-600">
         Articolele trimise de clienți după plată — text, poze și contact, într-un singur loc.
         {pending > 0 && (

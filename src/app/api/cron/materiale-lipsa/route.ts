@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cronAutorizat } from "@/lib/cron-auth";
 import { and, eq, gt, isNull, isNotNull, lt, notInArray } from "drizzle-orm";
 import { db } from "@/db";
 import { orders, orderSubmissions } from "@/db/schema";
@@ -115,8 +116,7 @@ async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
 }
 
 export async function POST(req: NextRequest) {
-  const key = req.headers.get("x-api-key");
-  if (!key || key !== process.env.EXTENSION_API_KEY) {
+  if (!cronAutorizat(req.headers)) {
     return NextResponse.json({ ok: false, error: "Neautentificat" }, { status: 401 });
   }
 

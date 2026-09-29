@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { cronAutorizat } from "@/lib/cron-auth";
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db";
 import { users, promoAnnouncements } from "@/db/schema";
@@ -21,8 +22,7 @@ export const maxDuration = 120;
  * Cronul face doar anuntul pe email catre toti oamenii din sistem.
  */
 export async function POST(req: NextRequest) {
-  const key = req.headers.get("x-api-key");
-  if (!key || key !== process.env.EXTENSION_API_KEY) {
+  if (!cronAutorizat(req.headers)) {
     return NextResponse.json({ ok: false, error: "Neautentificat" }, { status: 401 });
   }
 

@@ -1,6 +1,8 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
+  // src/instrumentation.ts: planificatorul intern al cronurilor.
+  experimental: { instrumentationHook: true },
   poweredByHeader: false,
   images: {
     remotePatterns: [{ protocol: "https", hostname: "**" }],
