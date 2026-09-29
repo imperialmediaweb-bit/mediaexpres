@@ -43,7 +43,12 @@ export function ensureOrderColumns(): Promise<void> {
           ADD COLUMN IF NOT EXISTS "tier" text,
           ADD COLUMN IF NOT EXISTS "price_per_article" integer,
           ADD COLUMN IF NOT EXISTS "declaration_accepted" boolean NOT NULL DEFAULT false,
-          ADD COLUMN IF NOT EXISTS "token_version" integer NOT NULL DEFAULT 0`,
+          ADD COLUMN IF NOT EXISTS "token_version" integer NOT NULL DEFAULT 0,
+          ADD COLUMN IF NOT EXISTS "domain_authority" integer,
+          ADD COLUMN IF NOT EXISTS "page_authority" integer,
+          ADD COLUMN IF NOT EXISTS "spam_score" integer,
+          ADD COLUMN IF NOT EXISTS "open_page_rank" real,
+          ADD COLUMN IF NOT EXISTS "authority_checked_at" timestamp`,
       ),
     ])
       .then(() => undefined)

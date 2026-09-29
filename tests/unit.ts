@@ -25,6 +25,8 @@ import { buildNewspaperListPdf } from "@/lib/newspaper-list-pdf";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
+import { domeniuDin } from "@/lib/autoritate";
+
 import {
   PRAG_RETRAGERE,
   calculeazaSold,
@@ -1668,6 +1670,19 @@ console.log("\n########## S. RECENZII ##########");
   t("intrarea nu spune cine e partener si cine nu", /return NextResponse\.json\(\{ ok: true \}\)/.test(link) && /eq\(publishers\.status, "approved"\)/.test(link));
   t("regula veche de decontare a disparut peste tot", !/sfârșitul trimestrului/.test(citesteFisier("src/app/plasare/[token]/page.tsx") + citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
   t("contul de partener e legat din emailurile de plasare si de aprobare", /cont-partener/.test(citesteFisier("src/app/api/admin/placements/route.ts")) && /cont-partener/.test(citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
+}
+
+
+// Autoritatea partenerilor, citita de noi din Moz (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("domeniul se scoate curat din orice adresa", domeniuDin("https://www.Ziarul.ro/stiri?x=1") === "ziarul.ro" && domeniuDin("ziarul.ro") === "ziarul.ro" && domeniuDin("nimic") === null);
+  const aut = citesteFisier("src/lib/autoritate.ts");
+  t("fara cheie, verificarea nu opreste nimic (intoarce null)", /if \(!token\) return null;/.test(aut));
+  t("Moz nu poate bloca inscrierea (timeout)", /cuTimeout\(/.test(aut));
+  t("nivelul propus foloseste si autoritatea, nu doar traficul", /nivelPropus\(p\.domainAuthority, p\.monthlyTraffic\)/.test(citesteFisier("src/app/admin/parteneri/[id]/page.tsx")));
+  t("la inscriere, scorul se verifica singur", /verificaAutoritate\(d\.siteUrl\)/.test(citesteFisier("src/app/api/publishers/route.ts")));
+  t("reverificarea cere login de admin", /getSession\(\)/.test(citesteFisier("src/app/api/admin/publishers/[id]/autoritate/route.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

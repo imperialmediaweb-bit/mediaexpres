@@ -4,6 +4,8 @@ import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
+import { eq } from "drizzle-orm";
+import { verificaAutoritate } from "@/lib/autoritate";
 
 export const runtime = "nodejs";
 
@@ -96,6 +98,18 @@ export async function POST(req: NextRequest) {
     status: "pending",
   });
 
+  // 29.09.2026 — autoritatea o citim noi, din Moz (lib/autoritate.ts), cat
+  // timp omul inca asteapta raspunsul formularului. Daca Moz nu raspunde,
+  // inscrierea merge mai departe: scorul se poate reverifica din admin.
+  const aut = await verificaAutoritate(d.siteUrl).catch(() => null);
+  if (aut) {
+    await db
+      .update(publishers)
+      .set({ ...aut, authorityCheckedAt: new Date() })
+      .where(eq(publishers.id, id))
+      .catch((e) => console.error("[publishers] autoritate:", e));
+  }
+
   const html = wrapEmail(
     "Aplicație ziar nou — MediaExpres",
     `
@@ -105,6 +119,7 @@ export async function POST(req: NextRequest) {
       ${kv("URL", d.siteUrl)}
       ${kv("Judet / Regiune", `${d.county || "—"} / ${d.region || "—"}`)}
       ${kv("Facebook", d.facebookUrl || "—")}
+      ${kv("Autoritate (verificată de noi)", aut ? `DA ${aut.domainAuthority ?? "—"} · PA ${aut.pageAuthority ?? "—"} · spam ${aut.spamScore ?? "—"}%${aut.openPageRank != null ? ` · OPR ${aut.openPageRank}/10` : ""}` : "neverificată (lipsește cheia Moz sau Moz nu a răspuns)")}
       ${kv("Trafic lunar", d.monthlyTraffic ? `${d.monthlyTraffic.toLocaleString()} vizite` : "—")}
       ${kv("Dovada traficului", d.analyticsProofUrl ? `<a href="${d.analyticsProofUrl}">captura din Analytics</a>` : "⚠️ NU a urcat captura")}
       ${kv("Urmaritori Facebook", d.facebookFollowers ? d.facebookFollowers.toLocaleString() : "—")}

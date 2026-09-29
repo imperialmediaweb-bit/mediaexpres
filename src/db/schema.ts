@@ -6,6 +6,7 @@ import {
   text,
   timestamp,
   unique,
+  real,
 } from "drizzle-orm/pg-core";
 import type { AdapterAccountType } from "next-auth/adapters";
 
@@ -353,6 +354,13 @@ export const publishers = pgTable("publisher", {
    * suparat, e prea tarziu.
    */
   dofollowLinks: boolean("dofollow_links"),
+  // 29.09.2026 — autoritatea, citita de NOI din Moz / Open PageRank
+  // (lib/autoritate.ts), niciodata declarata de partener.
+  domainAuthority: integer("domain_authority"),
+  pageAuthority: integer("page_authority"),
+  spamScore: integer("spam_score"),
+  openPageRank: real("open_page_rank"),
+  authorityCheckedAt: timestamp("authority_checked_at"),
   /** Bronz / Argint / Aur / Platina — dupa cifre, nu dupa negociere. */
   tier: text("tier"),
   /** Cat ii platim pe articol publicat (lei). Vine din nivel, se poate ajusta. */

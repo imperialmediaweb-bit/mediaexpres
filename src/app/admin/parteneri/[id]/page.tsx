@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { publishers } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { ArrowLeft } from "lucide-react";
+import { ReverificaAutoritate } from "./ReverificaAutoritate";
 import { PartnerActions } from "./PartnerActions";
 import { PartnerCommercial } from "./PartnerCommercial";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
@@ -99,13 +100,29 @@ export default async function AdminPartnerDetail({
         <aside>
           <div className="space-y-5">
           <PartnerActions publisherId={p.id} currentStatus={p.status} />
+          {/* 29.09.2026 — autoritatea, citita de noi (lib/autoritate.ts). */}
+          <div className="rounded-xl border border-slate-200 bg-white p-5">
+            <h2 className="font-serif text-lg font-semibold text-brand-navy">Autoritate (verificată de noi)</h2>
+            {p.authorityCheckedAt ? (
+              <dl className="mt-3 grid grid-cols-2 gap-2 text-sm">
+                <div><dt className="text-slate-500">Moz DA</dt><dd className="font-serif text-2xl font-bold text-brand-navy">{p.domainAuthority ?? "—"}</dd></div>
+                <div><dt className="text-slate-500">Moz PA</dt><dd className="font-serif text-2xl font-bold text-brand-navy">{p.pageAuthority ?? "—"}</dd></div>
+                <div><dt className="text-slate-500">Spam score</dt><dd className={`font-semibold ${(p.spamScore ?? 0) >= 30 ? "text-brand-red" : "text-brand-navy"}`}>{p.spamScore != null ? `${p.spamScore}%` : "—"}</dd></div>
+                <div><dt className="text-slate-500">Open PageRank</dt><dd className="font-semibold text-brand-navy">{p.openPageRank != null ? `${p.openPageRank}/10` : "—"}</dd></div>
+                <p className="col-span-2 text-xs text-slate-500">Verificat pe {new Date(p.authorityCheckedAt).toLocaleDateString("ro-RO")}</p>
+              </dl>
+            ) : (
+              <p className="mt-2 text-sm text-slate-600">Neverificată încă.</p>
+            )}
+            <ReverificaAutoritate publisherId={p.id} />
+          </div>
           <PartnerCommercial
             publisherId={p.id}
             status={p.status}
             tier={p.tier}
             pricePerArticle={p.pricePerArticle}
             dofollowLinks={p.dofollowLinks}
-            nivelSugerat={nivelPropus(null, p.monthlyTraffic).id}
+            nivelSugerat={nivelPropus(p.domainAuthority, p.monthlyTraffic).id}
           />
         </div>
         </aside>
