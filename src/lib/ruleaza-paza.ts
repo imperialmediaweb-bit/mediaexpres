@@ -8,6 +8,7 @@ import {
   verificaLink,
   eBlocant,
   ETICHETE_LINK,
+  ETICHETE_CLIENT,
   ZILE_INTRE_VERIFICARI,
   ZILE_REVERIFICARE_PROBLEMA,
   CONFIRMARI_PROBLEMA,
@@ -46,6 +47,33 @@ export async function verificaPlasare(pl: Plasare, pub: Publicatie | undefined, 
     dofollow: pl.dofollowExpected !== false,
     doarPagina: pub?.kind === "influencer",
   });
+}
+
+/**
+ * Clientul afla DE LA NOI, pe email, cand articolul lui are o problema si
+ * cand s-a rezolvat — nu descopera singur, peste o luna, ca linkul a disparut.
+ */
+async function anuntaClientul(pl: Plasare, subiect: string, continut: string) {
+  if (!pl.orderSubmissionId) return;
+  const [c] = await db
+    .select({ id: orderSubmissions.id, email: orderSubmissions.email })
+    .from(orderSubmissions)
+    .where(eq(orderSubmissions.id, pl.orderSubmissionId))
+    .limit(1);
+  if (!c?.email) return;
+  const link = `${SITE.url}/comanda-mea/${semneazaToken({ scope: "client", id: c.id, v: 0 })}#${pl.id}`;
+  await sendEmail({
+    to: c.email,
+    subject: subiect,
+    html: wrapEmail(
+      subiect,
+      `<p>Bună ziua,</p>
+       ${continut}
+       <p style="margin:20px 0;"><a href="${link}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Vezi starea comenzii</a></p>
+       <p style="margin-top:20px;">Cu respect,<br/><strong>Echipa ${SITE.name}</strong></p>`,
+    ),
+    replyTo: ADMIN_EMAIL,
+  }).catch(() => {});
 }
 
 /**
@@ -101,6 +129,25 @@ async function aplicaRezultat(pl: Plasare, pub: Publicatie | undefined, r: Rezul
         subject: `✅ Link reparat — ${nume}`,
         html: wrapEmail("Link reparat", `<p>${esc(pl.articleTitle)} — ${esc(nume)}: ${esc(r.detalii)}.</p>`),
       }).catch(() => {});
+      if (eBlocant(pl.linkStatus)) {
+        await anuntaClientul(
+          pl,
+          `Rezolvat: articolul de pe ${nume} e din nou în regulă`,
+          `<p>Problema semnalată la articolul <strong>„${esc(pl.articleTitle)}"</strong> de pe <strong>${esc(nume)}</strong> a fost rezolvată: articolul e online, cu linkul tău activ.</p>
+           <p style="color:#64748b;font-size:13px;">Continuăm să-l verificăm automat în fiecare săptămână.</p>`,
+        );
+        if (pub?.contactEmail) {
+          await sendEmail({
+            to: pub.contactEmail,
+            subject: `Mulțumim — articolul de pe ${nume} e în regulă`,
+            html: wrapEmail(
+              "Articol reparat",
+              `<p>Articolul <strong>„${esc(pl.articleTitle)}"</strong> trece din nou verificarea. Suma pentru el a revenit în soldul tău.</p>`,
+            ),
+            replyTo: ADMIN_EMAIL,
+          }).catch(() => {});
+        }
+      }
     }
     return;
   }
@@ -117,11 +164,34 @@ async function aplicaRezultat(pl: Plasare, pub: Publicatie | undefined, r: Rezul
   const eticheta = ETICHETE_LINK[r.stare as StareLink];
   if (!pl.linkAlertAt) {
     await db.update(placements).set({ linkAlertAt: acum }).where(eq(placements.id, pl.id));
+    if (pub?.contactEmail && !eBlocant(r.stare)) {
+      // Site cazut sau bot blocat: partenerul afla, fara amenintari de plata.
+      await sendEmail({
+        to: pub.contactEmail,
+        subject: `Site-ul ${nume} nu răspunde la verificarea noastră`,
+        html: wrapEmail(
+          "Site-ul nu răspunde",
+          `<p>De câteva zile nu putem deschide articolul <strong>„${esc(pl.articleTitle)}"</strong>: ${esc(r.detalii)}.</p>
+           <p>Dacă site-ul merge la voi, e posibil să ne blocheze firewall-ul (Cloudflare etc.). Scrie-ne și rezolvăm.</p>
+           <p><a href="${esc(pl.publishedUrl || "")}">${esc(pl.publishedUrl || "")}</a></p>`,
+        ),
+        replyTo: ADMIN_EMAIL,
+      }).catch(() => {});
+    }
+    if (eBlocant(r.stare)) {
+      await anuntaClientul(
+        pl,
+        `Am observat o problemă la articolul tău de pe ${nume}`,
+        `<p>La verificarea automată a articolului <strong>„${esc(pl.articleTitle)}"</strong> de pe <strong>${esc(nume)}</strong> am găsit:</p>
+         <p style="background:#fff7ed;padding:12px;border-radius:8px;"><strong>${esc(ETICHETE_CLIENT[r.stare as StareLink])}</strong></p>
+         <p>Am cerut deja publicației să repare în ${ZILE_REPARARE} zile. Dacă nu o face, mutăm articolul pe altă publicație sau îți returnăm banii pentru el. <strong>Nu trebuie să faci nimic</strong> — te anunțăm când e rezolvat.</p>`,
+      );
+    }
     if (pub?.contactEmail && eBlocant(r.stare)) {
       const link = `${SITE.url}/plasare/${semneazaToken({ scope: "plasare", id: pl.id, v: pl.tokenVersion ?? 0 })}`;
       await sendEmail({
         to: pub.contactEmail,
-        subject: `Problemă la articolul publicat pe ${nume}`,
+        subject: r.stare === "pagina_lipsa" ? `Articolul a fost șters de pe ${nume} — te rugăm să-l repui` : `Problemă la articolul publicat pe ${nume}`,
         html: wrapEmail(
           "Articolul trebuie reparat",
           `<p>La verificarea automată a articolului <strong>„${esc(pl.articleTitle)}"</strong> am găsit:</p>

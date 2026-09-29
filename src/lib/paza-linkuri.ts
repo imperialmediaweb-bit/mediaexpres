@@ -34,6 +34,16 @@ export const ETICHETE_LINK: Record<StareLink, string> = {
   eroare: "Site-ul nu a răspuns la verificare",
 };
 
+/** Ce vede CLIENTUL: aceeasi problema, spusa pe limba lui. */
+export const ETICHETE_CLIENT: Record<StareLink, string> = {
+  ok: "Online, cu linkul tău activ",
+  pagina_lipsa: "Articolul a fost șters de pe site",
+  link_lipsa: "Linkul către site-ul tău a fost scos din articol",
+  nofollow: "Linkul tău a fost marcat nofollow (nu mai transmite valoare SEO)",
+  noindex: "Pagina a fost ascunsă de Google",
+  eroare: "Site-ul publicației nu răspunde momentan",
+};
+
 /** Cat asteptam pana la urmatoarea verificare. */
 export const ZILE_INTRE_VERIFICARI = 7;
 export const ZILE_REVERIFICARE_PROBLEMA = 1;

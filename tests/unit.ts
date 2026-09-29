@@ -1796,6 +1796,19 @@ console.log("\n########## S. RECENZII ##########");
   t("la influencer nu se cere scor Moz", /influencer \? null : await verificaAutoritate/.test(api));
 }
 
+
+// Articol sters / link stricat: clientul si publicatia afla (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const paza = citesteFisier("src/lib/ruleaza-paza.ts");
+  t("clientul primeste email cand articolul e sters sau linkul stricat", /Am observat o problemă la articolul tău/.test(paza));
+  t("clientul primeste email cand s-a rezolvat", /Rezolvat: articolul de pe/.test(paza));
+  t("publicatia afla explicit ca articolul a fost sters", /Articolul a fost șters de pe/.test(paza));
+  t("publicatia afla si cand site-ul nu raspunde, fara oprirea platii", /nu răspunde la verificarea noastră/.test(paza));
+  t("pagina clientului spune exact ce s-a intamplat", /ETICHETE_CLIENT\[pl\.linkStatus/.test(citesteFisier("src/app/comanda-mea/[token]/page.tsx")));
+  t("sectiunea „pazite 12 luni” apare doar cand exista parteneri", /parteneri\.length > 0 && \(/.test(citesteFisier("src/app/alege-ziarele/page.tsx")));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

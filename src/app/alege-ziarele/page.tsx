@@ -84,6 +84,63 @@ export default async function AlegeZiarelePage() {
         </div>
       </section>
 
+      {/*
+        29.09.2026 — ce ne deosebeste de pietele de linkuri: paza linkurilor la
+        partenerii din catalog (lib/paza-linkuri.ts). Apare doar cand exista
+        parteneri de cumparat. Fara comparatii cu altii si fara „garantat
+        indexat": promitem doar ce verificam noi.
+      */}
+      {parteneri.length > 0 && (
+        <section className="section bg-white">
+          <div className="container">
+            <div className="mx-auto max-w-4xl">
+              <p className="eyebrow text-center">La publicațiile partenere și influenceri</p>
+              <h2 className="h2 mt-2 text-center">Linkurile tale, păzite 12 luni</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-center text-slate-600">
+                Nu vindem „un articol publicat”. Vindem un articol care rămâne online, cu linkul tău întreg,
+                un an întreg — și verificăm asta noi, nu tu.
+              </p>
+              <div className="mt-8 grid gap-4 sm:grid-cols-2">
+                {[
+                  {
+                    t: "🛡 Verificat în fiecare săptămână",
+                    p: "Automat: pagina e online, linkul către site-ul tău e acolo, e dofollow și nimic nu o ascunde de Google.",
+                  },
+                  {
+                    t: "⏱ Stricat? 3 zile să repare",
+                    p: "Dacă ceva nu mai e în regulă, publicația are 3 zile să repare. Până atunci nu o plătim.",
+                  },
+                  {
+                    t: "↩ Nereparat? Te despăgubim",
+                    p: "Mutăm articolul pe altă publicație sau îți returnăm banii pentru ea. Tu nu alergi după nimeni.",
+                  },
+                  {
+                    t: "👁 Vezi tot, oricând",
+                    p: "Pe pagina comenzii tale: unde a apărut fiecare articol și „verificat automat pe…”, cu data.",
+                  },
+                  {
+                    t: "💬 Discuți prin noi",
+                    p: "Întrebări sau modificări? Scrii publicației direct din pagina comenzii — noi vedem tot și intervenim.",
+                  },
+                  {
+                    t: "✍️ Articolul îl scriem noi",
+                    p: "Comunicat, advertorial sau articol SEO, cu linkurile puse exact pe cuvintele alese de tine.",
+                  },
+                ].map((c) => (
+                  <div key={c.t} className="rounded-2xl border border-slate-200 p-5">
+                    <p className="font-semibold text-brand-navy">{c.t}</p>
+                    <p className="mt-1 text-sm text-slate-600">{c.p}</p>
+                  </div>
+                ))}
+              </div>
+              <p className="mt-5 text-center text-xs text-slate-500">
+                Verificăm că pagina poate fi găsită de Google; dacă și când o indexează, decide Google.
+              </p>
+            </div>
+          </div>
+        </section>
+      )}
+
       <section className="section bg-slate-50 pb-32">
         <div className="container">
           <div className="mx-auto max-w-3xl">
