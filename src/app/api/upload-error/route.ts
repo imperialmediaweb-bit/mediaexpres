@@ -1,3 +1,4 @@
+import { SITE } from "@/data/site";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
@@ -70,7 +71,7 @@ export async function POST(req: NextRequest) {
         ${kv("Mărime", d.fileSize ? `${(d.fileSize / 1024 / 1024).toFixed(2)} MB` : "—")}
         ${kv("Tip", esc(d.fileType || "—"))}
       </table>
-      <p>Rulează diagnosticul ca să vezi dacă e o problemă generală de configurare: <a href="/api/admin/diagnostic-upload">/api/admin/diagnostic-upload</a> (trebuie să fii logat în admin).</p>
+      <p>Rulează diagnosticul ca să vezi dacă e o problemă generală de configurare: <a href="${SITE.url}/api/admin/diagnostic-upload">/api/admin/diagnostic-upload</a> (trebuie să fii logat în admin).</p>
       `,
     ),
   }).catch((e) => console.error("[upload-error] alerta nu a plecat:", e));

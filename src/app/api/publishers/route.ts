@@ -8,6 +8,7 @@ import { TERMENI_VERSIUNE } from "@/lib/termene-parteneri";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { eq } from "drizzle-orm";
 import { verificaAutoritate } from "@/lib/autoritate";
+import { SITE } from "@/data/site";
 
 export const runtime = "nodejs";
 
@@ -173,7 +174,7 @@ export async function POST(req: NextRequest) {
       ${kv("Companie plata", d.payoutCompany || "—")}
     </table>
     ${d.notes ? `<p style="margin-top:12px;"><strong>Observatii:</strong><br/>${d.notes.replace(/</g, "&lt;")}</p>` : ""}
-    <p style="margin-top:16px;"><a href="/admin/parteneri">Deschide in admin →</a></p>
+    <p style="margin-top:16px;"><a href="${SITE.url}/admin/parteneri/${id}">Deschide în admin →</a></p>
   `
   );
 
