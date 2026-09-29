@@ -26,6 +26,16 @@ import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import {
+  PRAG_RETRAGERE,
+  calculeazaSold,
+  poateCerePlata,
+  catMaiAi,
+  ibanValid,
+  normalizeazaIban,
+  ePlatibila,
+} from "@/lib/decont";
+
+import {
   pretAlacarte,
   pretBucata,
   urmatorulPrag as urmatorulPragZiare,
@@ -1618,6 +1628,46 @@ console.log("\n########## S. RECENZII ##########");
   t("drumul spre pagina exista din pachete si din retea",
     /alege-ziarele/.test(citesteFisier("src/app/pachete/page.tsx")) &&
     /alege-ziarele/.test(citesteFisier("src/app/reteaua-noastra/page.tsx")));
+}
+
+
+// ---------------------------------------------------------------------------
+// Portofelul partenerilor (29.09.2026)
+// ---------------------------------------------------------------------------
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const pl = (status: string, pricePartner: number, statementId: string | null = null) => ({ status, pricePartner, statementId });
+
+  const s1 = calculeazaSold([pl("publicat", 150), pl("finalizat", 80), pl("acceptat", 250), pl("refuzat", 400), pl("expirat", 100)]);
+  t("banii intra in sold doar din articolele publicate", s1.deIncasat === 230);
+  t("acceptatele apar separat, ca bani care urmeaza", s1.inLucru === 250);
+  t("refuzatele si expiratele nu se platesc", !ePlatibila("refuzat") && !ePlatibila("expirat") && !ePlatibila("anulat"));
+  const s2 = calculeazaSold([pl("publicat", 150, "c1"), pl("publicat", 150, "c2"), pl("publicat", 80)], new Set(["c2"]));
+  t("o plasare dintr-o cerere deschisa e „in plata”, nu „de incasat”", s2.deIncasat === 80 && s2.inPlata === 150);
+  t("o plasare dintr-o cerere platita nu mai apare nicaieri", s2.inPlata + s2.deIncasat === 230);
+  t("sub prag nu poate cere plata", !poateCerePlata({ deIncasat: PRAG_RETRAGERE - 1, inPlata: 0, inLucru: 0 }, false));
+  t("la prag poate cere plata", poateCerePlata({ deIncasat: PRAG_RETRAGERE, inPlata: 0, inLucru: 0 }, false));
+  t("cu o cerere deschisa nu mai poate cere a doua", !poateCerePlata({ deIncasat: 900, inPlata: 0, inLucru: 0 }, true));
+  t("„cat mai ai” nu coboara sub zero", catMaiAi(PRAG_RETRAGERE + 50) === 0 && catMaiAi(50) === PRAG_RETRAGERE - 50);
+  t("IBAN valid trece (cu spatii)", ibanValid("RO49 AAAA 1B31 0075 9384 0000"));
+  t("IBAN cu o cifra gresita e prins", !ibanValid("RO49AAAA1B31007593840001"));
+  t("IBAN RO cu lungime gresita e prins", !ibanValid("RO49AAAA1B3100759384"));
+  t("IBAN-ul se normalizeaza (fara spatii, majuscule)", normalizeazaIban(" ro49 aaaa 1b31 ") === "RO49AAAA1B31");
+
+  const api = citesteFisier("src/app/api/partener/retragere/route.ts");
+  t("cererea ruleaza intr-o tranzactie", /db\.transaction\(/.test(api));
+  t("o singura cerere deschisa (409)", /status: 409/.test(api) && /eq\(partnerPayouts\.status, "cerut"\)/.test(api));
+  t("plasarile se rezerva doar daca nu sunt in alta cerere", /isNull\(placements\.statementId\)/.test(api));
+  t("suma NU vine din browser", !/amount:\s*d\./.test(api) && !/suma:\s*z\./.test(api) && /rezervate\.reduce/.test(api));
+  t("sub prag tranzactia se anuleaza cu totul", /throw new SubPrag/.test(api));
+  const adm = citesteFisier("src/app/api/admin/payouts/[id]/route.ts");
+  t("„Am platit” merge doar pe o cerere deschisa (fara dublu click)", /eq\(partnerPayouts\.status, "cerut"\)/.test(adm));
+  t("anularea elibereaza plasarile", /statementId: null/.test(adm));
+  t("adminul trebuie sa fie logat", /getSession\(\)/.test(adm));
+  const link = citesteFisier("src/app/api/partener/link/route.ts");
+  t("intrarea nu spune cine e partener si cine nu", /return NextResponse\.json\(\{ ok: true \}\)/.test(link) && /eq\(publishers\.status, "approved"\)/.test(link));
+  t("regula veche de decontare a disparut peste tot", !/sfârșitul trimestrului/.test(citesteFisier("src/app/plasare/[token]/page.tsx") + citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
+  t("contul de partener e legat din emailurile de plasare si de aprobare", /cont-partener/.test(citesteFisier("src/app/api/admin/placements/route.ts")) && /cont-partener/.test(citesteFisier("src/app/api/admin/publishers/[id]/route.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

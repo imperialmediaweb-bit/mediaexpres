@@ -136,6 +136,10 @@ export async function POST(req: NextRequest) {
         online ${LUNI_ONLINE} luni, cu linkurile neatinse.
         Ai ${ZILE_PUBLICARE} zile lucrătoare pentru publicare.
       </p>
+      <p style="color:#64748b;font-size:13px;">
+        Toate articolele și banii tăi, într-un loc:
+        <a href="${SITE.url}/cont-partener/${semneazaToken({ scope: "panou", id: p.id, v: p.tokenVersion ?? 0 })}">contul de partener</a>.
+      </p>
       `,
     );
     await sendEmail({ to: p.contactEmail, subject: `Articol de publicat — ${p.siteName}`, html, replyTo: ADMIN_EMAIL });

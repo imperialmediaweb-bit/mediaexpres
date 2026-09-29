@@ -1,3 +1,5 @@
+import { PRAG_RETRAGERE, ZILE_PLATA } from "@/lib/decont";
+import { semneazaToken } from "@/lib/plasare-token";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
@@ -131,8 +133,9 @@ export async function PATCH(
         <li>Dacă îl accepți, îl publici în ${ZILE_PUBLICARE} zile lucrătoare și lipești adresa articolului în aceeași pagină.</li>
         <li>Articolul rămâne online ${LUNI_ONLINE} luni, cu linkurile neatinse.</li>
       </ol>
-      <p>Decontarea se face când ajungi la 500 de lei sau la sfârșitul trimestrului, ce vine primul: îți trimitem situația articolelor, emiți factura pe ea, plătim în 10 zile lucrătoare.</p>
-      <p>Nu ai nevoie de cont și de parolă — fiecare articol vine cu propriul link.</p>
+      <p><strong>Banii:</strong> fiecare articol publicat intră în soldul tău. De la ${PRAG_RETRAGERE} de lei ceri plata singur, din contul de partener, emiți factura și plătim în ${ZILE_PLATA} zile lucrătoare.</p>
+      <p style="margin:18px 0;"><a href="${SITE.url}/cont-partener/${semneazaToken({ scope: "panou", id: p.id, v: p.tokenVersion ?? 0 })}" style="background:#C8102E;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold;">Intră în contul de partener</a></p>
+      <p>Fără parolă: linkul de mai sus e al tău. Dacă îl pierzi, ceri altul pe ${SITE.url.replace(/^https?:\/\//, "")}/cont-partener.</p>
       <p>Pentru orice întrebare, răspunde direct la acest email.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa ${SITE.name}</strong></p>
     `

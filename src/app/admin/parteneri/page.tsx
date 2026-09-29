@@ -2,7 +2,9 @@ import { redirect } from "next/navigation";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
-import { publishers } from "@/db/schema";
+import { partnerPayouts, publishers } from "@/db/schema";
+import { ensurePlacementTables } from "@/lib/ensure-columns";
+import { CereriPlata } from "./CereriPlata";
 import { desc, eq } from "drizzle-orm";
 
 export const dynamic = "force-dynamic";
@@ -34,11 +36,38 @@ export default async function AdminPartneriPage({
     ? baseQuery.orderBy(desc(publishers.createdAt))
     : baseQuery.where(eq(publishers.status, filter)).orderBy(desc(publishers.createdAt)));
 
+  // Cererile de plata deschise ale partenerilor (portofelul din /cont-partener).
+  await ensurePlacementTables();
+  const deschise = await db
+    .select()
+    .from(partnerPayouts)
+    .where(eq(partnerPayouts.status, "cerut"))
+    .orderBy(desc(partnerPayouts.requestedAt));
+  const numeDupaId = new Map(rows.map((r) => [r.id, r.siteName]));
+  const lipsa = deschise.filter((c) => !numeDupaId.has(c.publisherId)).map((c) => c.publisherId);
+  if (lipsa.length) {
+    for (const r of await db.select({ id: publishers.id, siteName: publishers.siteName }).from(publishers)) {
+      numeDupaId.set(r.id, r.siteName);
+    }
+  }
+  const cereri = deschise.map((c) => ({
+    id: c.id,
+    publicatie: numeDupaId.get(c.publisherId) || c.publisherId,
+    suma: c.amount,
+    articole: c.placementsCount,
+    iban: c.iban,
+    titular: c.accountHolder,
+    cui: c.cui,
+    factura: c.invoiceNumber,
+    cerutaLa: new Date(c.requestedAt).toLocaleDateString("ro-RO", { day: "numeric", month: "long" }),
+  }));
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">
         Aplicații ziare (parteneri)
       </h1>
+      <CereriPlata cereri={cereri} />
       <p className="mt-2 text-sm text-slate-600">
         Ziarele care vor să intre în rețeaua MediaExpres. Aprobarea/respingerea
         trimite email automat candidatului.

@@ -6,6 +6,7 @@ import { ensurePlacementTables } from "@/lib/ensure-columns";
 import { verificaToken } from "@/lib/plasare-token";
 import { etichetaStare, timpRamas, ZILE_PUBLICARE, ZILE_REFUZ, LUNI_ONLINE } from "@/lib/plasari";
 import { SITE } from "@/data/site";
+import { PRAG_RETRAGERE, ZILE_PLATA } from "@/lib/decont";
 import { PlacementActions } from "./PlacementActions";
 
 export const dynamic = "force-dynamic";
@@ -132,9 +133,10 @@ export default async function PaginaPlasare({ params }: { params: { token: strin
       <div className="mt-6 rounded-xl bg-slate-50 p-4 text-xs leading-relaxed text-slate-600">
         <strong>Regulile, pe scurt:</strong> refuzi în {ZILE_REFUZ} zile lucrătoare, fără să explici
         de ce. Dacă publici, ai {ZILE_PUBLICARE} zile lucrătoare și lipești aici adresa articolului.
-        Articolul rămâne online {LUNI_ONLINE} luni, cu linkurile neatinse. Decontarea se face când
-        ajungi la 500 de lei sau la sfârșitul trimestrului: îți trimitem situația, emiți factura pe
-        ea, plătim în 10 zile lucrătoare.
+        Articolul rămâne online {LUNI_ONLINE} luni, cu linkurile neatinse. După publicare, suma intră în
+        soldul tău; de la {PRAG_RETRAGERE} de lei ceri plata din{" "}
+        <a href="/cont-partener" className="underline">contul de partener</a>, emiți factura și plătim în{" "}
+        {ZILE_PLATA} zile lucrătoare.
       </div>
     </Cadru>
   );
