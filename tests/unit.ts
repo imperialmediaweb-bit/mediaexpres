@@ -1702,6 +1702,19 @@ console.log("\n########## S. RECENZII ##########");
   t("butonul de plata e marcat (bulele nu-l acopera)", /data-comanda="1"/.test(citesteFisier("src/app/alege-ziarele/AlegeZiare.tsx")));
 }
 
+
+// Tipul articolului scris de AI: comunicat / advertorial / SEO (29.09.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const adv = citesteFisier("src/lib/advertorial.ts");
+  t("fiecare tip are regulile lui de scris", /comunicat: `/.test(adv) && /seo: `/.test(adv) && /advertorial: `/.test(adv));
+  t("AI-ul primeste linkurile si scrie exact acele cuvinte", /Foloseste EXACT aceste expresii/.test(adv));
+  t("tipul se valideaza pe server", /tip: z\.enum\(TIPURI_ARTICOL\)/.test(citesteFisier("src/app/api/articol/generate/route.ts")));
+  const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+  t("formularul trimite tipul, cuvantul-cheie si linkurile", /tip, cuvantCheie, linkuri: linkNotes/.test(form));
+  t("campul de linkuri apare o singura data pe ecran", /mode !== "ai" && campLinkuri/.test(form));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

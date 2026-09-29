@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { verifyOrderToken } from "@/lib/order-token";
 import { fetchSiteContext } from "@/lib/site-context";
-import { generateAdvertorial } from "@/lib/advertorial";
+import { generateAdvertorial, TIPURI_ARTICOL } from "@/lib/advertorial";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -13,6 +13,9 @@ const schema = z.object({
   companyName: z.string().max(200).optional(),
   siteUrl: z.string().max(300).optional(),
   city: z.string().max(120).optional(),
+  tip: z.enum(TIPURI_ARTICOL).optional(),
+  cuvantCheie: z.string().max(120).optional(),
+  linkuri: z.string().max(1500).optional(),
 });
 
 // Generarea costa bani per apel — limitam per token, nu per IP.
@@ -80,6 +83,9 @@ export async function POST(req: NextRequest) {
         ? [site.title, site.description, site.text].filter(Boolean).join("\n")
         : undefined,
       city: data.city,
+      tip: data.tip,
+      cuvantCheie: data.cuvantCheie?.trim() || undefined,
+      linkuri: data.linkuri?.trim() || undefined,
       isCasino: order.packageId.includes("cazino"),
     });
 

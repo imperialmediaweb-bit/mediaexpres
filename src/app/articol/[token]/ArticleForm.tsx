@@ -47,6 +47,8 @@ export function ArticleForm({
   const [cui, setCui] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
   const [brief, setBrief] = useState("");
+  const [tip, setTip] = useState<"advertorial" | "comunicat" | "seo">("advertorial");
+  const [cuvantCheie, setCuvantCheie] = useState("");
 
   const [title, setTitle] = useState("");
   const [body, setBody] = useState("");
@@ -101,7 +103,7 @@ export function ArticleForm({
       const res = await fetch("/api/articol/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ token, brief, companyName, siteUrl }),
+        body: JSON.stringify({ token, brief, companyName, siteUrl, tip, cuvantCheie, linkuri: linkNotes }),
       });
       const json = await res.json();
       if (!res.ok || !json.ok) throw new Error(json.error || "Generarea a eșuat");
@@ -322,6 +324,28 @@ export function ArticleForm({
     }
   }
 
+  // In modul AI, linkurile se cer INAINTE de generare, ca AI-ul sa scrie
+  // exact cuvintele pe care vor sta; altfel stau sub articol, ca pana acum.
+  const campLinkuri = (
+    <div>
+      <label className="mb-1 block text-sm font-medium text-slate-700">
+        Linkurile dorite{" "}
+        <span className="font-normal text-slate-500">(până la 3 — pe ce cuvinte și către ce adresă)</span>
+      </label>
+      <textarea
+        rows={3}
+        value={linkNotes}
+        onChange={(e) => setLinkNotes(e.target.value)}
+        placeholder={"stație ITP Sector 5 → https://firma.ro\nprogramare online → https://firma.ro/contact"}
+        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
+      />
+      <p className="mt-1 text-xs text-slate-500">
+        Scrie ce cuvinte din articol să fie link și către ce adresă. Dacă lași gol,
+        punem numele firmei ca link către site.
+      </p>
+    </div>
+  );
+
   if (done) {
     return (
       <div className="rounded-2xl border border-green-200 bg-green-50 p-10 text-center">
@@ -479,7 +503,40 @@ export function ArticleForm({
         </label>
 
         {mode === "ai" && (
-          <div className="mb-5 rounded-xl bg-slate-50 p-4">
+          <div className="mb-5 space-y-4 rounded-xl bg-slate-50 p-4">
+            <div>
+              <p className="mb-2 text-sm font-medium text-slate-700">Ce fel de articol vrei?</p>
+              <div className="grid gap-2 sm:grid-cols-3">
+                {(
+                  [
+                    ["comunicat", "Comunicat de presă", "Știre despre firmă, ton neutru"],
+                    ["advertorial", "Advertorial", "Prezentare care vinde, cu îndemn"],
+                    ["seo", "Articol SEO", "Ghid util, ca să apari pe Google"],
+                  ] as const
+                ).map(([k, nume, desc]) => (
+                  <label
+                    key={k}
+                    className={`cursor-pointer rounded-xl border-2 bg-white p-3 text-sm transition ${
+                      tip === k ? "border-brand-red" : "border-slate-200 hover:border-slate-300"
+                    }`}
+                  >
+                    <input type="radio" name="tip" checked={tip === k} onChange={() => setTip(k)} className="sr-only" />
+                    <span className={`block font-semibold ${tip === k ? "text-brand-red" : "text-slate-800"}`}>{nume}</span>
+                    <span className="block text-xs text-slate-500">{desc}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+            {tip === "seo" && (
+              <Field
+                label="Pe ce căutare vrei să apari? (opțional)"
+                value={cuvantCheie}
+                onChange={setCuvantCheie}
+                placeholder="Ex: curățenie birouri Cluj"
+              />
+            )}
+            {campLinkuri}
+            <div>
             <label className="mb-1 block text-sm font-medium text-slate-700">
               Ce vrei să comunici?
             </label>
@@ -508,6 +565,7 @@ export function ArticleForm({
                 </>
               )}
             </button>
+            </div>
           </div>
         )}
 
@@ -553,23 +611,7 @@ export function ArticleForm({
             Formularul OP avea campul asta; cel de dupa plata cu cardul, nu.
             Aici e drumul principal, deci aici lipsea cel mai tare.
           */}
-          <div>
-            <label className="mb-1 block text-sm font-medium text-slate-700">
-              Linkurile dorite{" "}
-              <span className="font-normal text-slate-500">(până la 3 — pe ce cuvinte și către ce adresă)</span>
-            </label>
-            <textarea
-              rows={3}
-              value={linkNotes}
-              onChange={(e) => setLinkNotes(e.target.value)}
-              placeholder={"stație ITP Sector 5 → https://firma.ro\nprogramare online → https://firma.ro/contact"}
-              className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
-            />
-            <p className="mt-1 text-xs text-slate-500">
-              Scrie ce cuvinte din articol să fie link și către ce adresă. Dacă lași gol,
-              punem numele firmei ca link către site.
-            </p>
-          </div>
+          {mode !== "ai" && campLinkuri}
 
           {keywords.length > 0 && (
             <div className="rounded-xl bg-slate-50 p-3">
