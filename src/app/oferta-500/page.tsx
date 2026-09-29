@@ -60,9 +60,9 @@ import { DateFirma } from "@/components/DateFirma";
 */
 
 export const metadata: Metadata = {
-  title: "Firma ta în 50 de ziare — 500 lei",
+  title: "Advertorial în 50 de ziare — 500 lei",
   description:
-    "Articolul tău publicat în 50 de ziare românești pentru 500 lei. Rămâne permanent și primești lista cu toate cele 50 de linkuri, de pus pe site la „Apariții în presă”.",
+    "Advertorial sau comunicat de presă publicat în 50 de ziare românești pentru 500 lei — publicitate în presa locală și națională. Rămâne permanent și primești lista cu toate cele 50 de linkuri, de pus pe site la „Apariții în presă”.",
   robots: { index: false, follow: false },
 };
 
@@ -358,7 +358,13 @@ export default async function Oferta500Page() {
               licitatie raman mai jos, in „La ce foloseste", unde au context.
             */}
             <p className="mt-6 text-lg text-white/85 md:text-xl">
-              Publicat în maximum 12 ore lucrătoare, sau în ritmul ales de tine.
+              {/*
+                29.09.2026 — „advertorial" / „comunicat de presa" / „publicitate"
+                sunt exact cuvintele cumparate pe Google; pagina trebuie sa le
+                contina sus, altfel Google da scor de calitate mic anuntului.
+              */}
+              Advertorial sau comunicat de presă — publicitate în presa locală și națională,
+              publicată în maximum 12 ore lucrătoare, sau în ritmul ales de tine.
               Rămâne permanent. Primești lista cu toate cele 50 de linkuri — le
               poți pune pe site, la „Apariții în presă”.
             </p>
