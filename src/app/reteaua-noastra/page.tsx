@@ -10,7 +10,7 @@ import { StareRetea } from "@/components/StareRetea";
 import { citesteAutoritateaRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 
 // Scorurile Moz se citesc din baza; pagina se regenereaza o data pe ora.
-export const revalidate = 3600;
+export const revalidate = 600;
 
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
