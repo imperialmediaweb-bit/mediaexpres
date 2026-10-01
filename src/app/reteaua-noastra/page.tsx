@@ -9,8 +9,9 @@ import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { StareRetea } from "@/components/StareRetea";
 import { citesteAutoritateaRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 
-// Scorurile Moz se citesc din baza; pagina se regenereaza o data pe ora.
-export const revalidate = 600;
+// Scorurile Moz se citesc din baza la fiecare cerere (la build Railway nu are baza,
+// iar copia statica ramanea fara scoruri).
+export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
   title: "Rețeaua noastră de ziare",
