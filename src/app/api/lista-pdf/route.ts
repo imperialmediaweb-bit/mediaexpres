@@ -13,6 +13,10 @@ export const runtime = "nodejs";
  * strica linkul din email a doua zi, cand omul vrea sa-l redeschida. Emailul
  * se cere pentru ca merita cerut, nu pentru ca fisierul ar fi secret.
  */
+// 01.10.2026 — GET fara request e prerandat static de Next; PDF-ul citeste
+// scorurile DA din baza, deci trebuie generat la fiecare cerere.
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const pdf = buildNewspaperListPdf(await autoritatePentruPdf());
   return new NextResponse(new Uint8Array(pdf), {
