@@ -3,7 +3,7 @@
 import { RitmSelect } from "@/components/forms/RitmSelect";
 import { RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Loader2, Sparkles, Upload, X, Star, CheckCircle2 } from "lucide-react";
 import {
   reportUploadError,
@@ -17,6 +17,8 @@ import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
 import { comprimaPoza } from "@/lib/comprima-poza";
 import { SITE } from "@/data/site";
+import { EditorLinkuri, type LinkAles } from "@/components/forms/EditorLinkuri";
+import { parseazaLinkuri, serializeazaLinkuri } from "@/lib/articol-html";
 
 type Mode = "ai" | "write";
 
@@ -42,7 +44,11 @@ export function ArticleForm({
 
   const [companyName, setCompanyName] = useState("");
   const [siteUrl, setSiteUrl] = useState("");
-  const [linkNotes, setLinkNotes] = useState("");
+  // 01.10.2026 — linkurile se pun pe cuvinte, din text (EditorLinkuri);
+  // in baza raman tot „ancora → adresa", ca pana acum.
+  const [linkuri, setLinkuri] = useState<LinkAles[]>([]);
+  const linkNotes = serializeazaLinkuri(linkuri);
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [contactPhone, setContactPhone] = useState("");
   const [cui, setCui] = useState("");
   const [billingAddress, setBillingAddress] = useState("");
@@ -229,7 +235,10 @@ export function ArticleForm({
       setMode("write");
       if (d.title && !title.trim()) setTitle(d.title);
       if (d.body) setBody(d.body);
-      if (d.linkNotes) setLinkNotes((prev) => (prev.trim() ? `${prev.trim()}\n${d.linkNotes}` : d.linkNotes));
+      if (d.linkNotes) {
+        const dinDocx = parseazaLinkuri(d.linkNotes).filter((l) => l.ancora).map((l) => ({ ancora: l.ancora as string, url: l.url }));
+        setLinkuri((prev) => [...prev, ...dinDocx].slice(0, 3));
+      }
       const noi = d.images.slice(0, room).map((i) => ({ url: i.url, publicId: i.publicId }));
       if (noi.length) setImages((prev) => [...prev, ...noi]);
       setNotice(mesajImportDocx(d, room));
@@ -326,25 +335,7 @@ export function ArticleForm({
 
   // In modul AI, linkurile se cer INAINTE de generare, ca AI-ul sa scrie
   // exact cuvintele pe care vor sta; altfel stau sub articol, ca pana acum.
-  const campLinkuri = (
-    <div>
-      <label className="mb-1 block text-sm font-medium text-slate-700">
-        Linkurile dorite{" "}
-        <span className="font-normal text-slate-500">(până la 3 — pe ce cuvinte și către ce adresă)</span>
-      </label>
-      <textarea
-        rows={3}
-        value={linkNotes}
-        onChange={(e) => setLinkNotes(e.target.value)}
-        placeholder={"stație ITP Sector 5 → https://firma.ro\nprogramare online → https://firma.ro/contact"}
-        className="w-full rounded-xl border border-slate-200 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
-      />
-      <p className="mt-1 text-xs text-slate-500">
-        Scrie ce cuvinte din articol să fie link și către ce adresă. Dacă lași gol,
-        punem numele firmei ca link către site.
-      </p>
-    </div>
-  );
+  const campLinkuri = <EditorLinkuri body={body} linkuri={linkuri} onChange={setLinkuri} textareaRef={textareaRef} />;
 
   if (done) {
     return (
@@ -587,6 +578,7 @@ export function ArticleForm({
               Textul articolului
             </label>
             <textarea
+              ref={textareaRef}
               value={body}
               onChange={(e) => setBody(e.target.value)}
               rows={14}
@@ -601,8 +593,8 @@ export function ArticleForm({
               {body.trim() ? `${body.trim().split(/\s+/).length} cuvinte` : "Minim 100 de caractere"}
             </p>
             <p className="mt-1 text-xs text-amber-700">
-              Dacă ai copiat textul din Word, linkurile puse pe cuvinte se pierd — scrie
-              adresele direct în text sau trece-le mai jos.
+              Dacă ai copiat textul din Word, linkurile de pe cuvinte se pierd — marchează cuvântul
+              și apasă „Pune link pe cuvântul selectat”, mai jos.
             </p>
           </div>
 

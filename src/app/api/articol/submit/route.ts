@@ -12,6 +12,7 @@ import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, screenContent } from "@/lib/content-policy";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { trimitePlasari } from "@/lib/trimite-plasari";
+import { linkuriImplicite } from "@/lib/articol-html";
 import { semneazaToken } from "@/lib/plasare-token";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
@@ -156,6 +157,11 @@ export async function POST(req: NextRequest) {
       console.error("[articol/submit] nu am putut citi campurile de pe Stripe:", err);
     }
   }
+
+  // 01.10.2026 — fara linkuri cerute, punem numele firmei ca link catre site
+  // (lib/articol-html.ts). Se salveaza asa, ca adminul si partenerii sa vada
+  // linkul deja pus pe cuvant, nu o caseta goala.
+  d.linkNotes = linkuriImplicite({ linkNotes: d.linkNotes, companyName: d.companyName, siteUrl: d.siteUrl, body: d.body });
 
   // featuredIndex vine din UI, dar poate depasi numarul real de poze.
   const featured = d.images[d.featuredIndex] ?? d.images[0];

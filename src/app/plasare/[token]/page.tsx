@@ -20,7 +20,7 @@ function citesteOptiuniComandate(json: string | null): string[] {
   }
 }
 import { PlacementActions } from "./PlacementActions";
-import { ArticolGata } from "./ArticolGata";
+import { ArticolGata } from "@/components/ArticolGata";
 import { ChatPlasare } from "@/components/ChatPlasare";
 import { articolHtml, linkDescarcarePoza } from "@/lib/articol-html";
 

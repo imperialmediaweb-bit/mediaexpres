@@ -10,6 +10,8 @@ import { etichetaRitm } from "@/lib/ritm";
 import { findPackageById } from "@/data/packages";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
 import { PrimitExtern } from "./PrimitExtern";
+import { ArticolGata } from "@/components/ArticolGata";
+import { articolHtml, linkuriImplicite, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-html";
 import { MarkPublishedButton } from "./MarkPublishedButton";
 import { NewOrderForm } from "./NewOrderForm";
 
@@ -300,9 +302,38 @@ export default async function MaterialePage() {
                   {r.keywords && (
                     <p className="mt-1 text-xs text-slate-500"><strong>Cuvinte-cheie:</strong> {r.keywords}</p>
                   )}
-                  <div className="mt-3 max-h-72 overflow-y-auto whitespace-pre-wrap rounded-lg border border-slate-100 bg-slate-50 p-4 text-sm text-slate-700">
-                    {r.body}
-                  </div>
+                  {/*
+                    01.10.2026 — articolul cu linkurile DEJA puse pe cuvinte, plus
+                    „Copiaza cu linkuri" / Word / poze (acelasi ArticolGata ca la
+                    parteneri). Fara linkuri cerute, numele firmei → site-ul ei.
+                  */}
+                  {(() => {
+                    const note = linkuriImplicite({ linkNotes: r.linkNotes, companyName: r.companyName, siteUrl: r.siteUrl, body: r.body });
+                    const { html, negasite } = articolHtml({ titlu: r.title, corp: r.body, linkNotes: note, dofollow: true });
+                    const lista = parseazaLinkuri(note);
+                    return (
+                      <div className="mt-3">
+                        {lista.length > 0 && (
+                          <p className="mb-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                            <strong>Linkuri (dofollow):</strong>{" "}
+                            {lista.map((l) => `„${l.ancora || "—"}” → ${l.url}`).join(" · ")}
+                            {!r.linkNotes?.trim() && " — clientul n-a cerut linkuri; am pus numele firmei către site."}
+                            {negasite.length > 0 && (
+                              <span className="block font-semibold text-red-700">
+                                Nu găsesc în text: {negasite.map((l) => l.ancora || l.url).join(", ")} — pune-l tu pe un cuvânt potrivit.
+                              </span>
+                            )}
+                          </p>
+                        )}
+                        <ArticolGata
+                          titlu={r.title}
+                          html={html}
+                          poze={images.map((p) => ({ url: p.url, descarcare: linkDescarcarePoza(p.url) }))}
+                          featuredIndex={r.featuredIndex ?? 0}
+                        />
+                      </div>
+                    );
+                  })()}
                 </div>
 
                 <div className="border-t border-slate-100 px-5 py-4">

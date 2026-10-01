@@ -27,7 +27,7 @@ import { CLIENTI } from "@/data/clienti";
 import { CAMPANII, EXEMPLU_RAPORT } from "@/data/campanii";
 import { domeniuDin } from "@/lib/autoritate";
 import { pretOptiuneClient, citesteOptiuni } from "@/lib/optiuni-partener";
-import { articolHtml, parseazaLinkuri, linkDescarcarePoza } from "@/lib/articol-html";
+import { articolHtml, parseazaLinkuri, linkDescarcarePoza, linkuriImplicite, serializeazaLinkuri, normalizeazaUrl } from "@/lib/articol-html";
 import { verificaContact } from "@/lib/filtru-contact";
 import { analizeazaPagina } from "@/lib/paza-linkuri";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
@@ -1143,7 +1143,8 @@ console.log("\n########## S. RECENZII ##########");
       t("OP: butonul spune „fara poze” la a doua apasare", /Trimite fără poze/.test(op));
       for (const f of ["src/app/comanda/transfer/TransferForm.tsx", "src/app/articol/[token]/ArticleForm.tsx"]) {
         const x = citesteFisier(f);
-        t(`${f.split("/").pop()}: cere linkurile dorite (ancora → adresa)`, /linkNotes/.test(x) && /Linkurile dorite/.test(x));
+        // 01.10.2026 — dupa plata linkurile se pun pe cuvinte (EditorLinkuri); la OP ramane caseta.
+        t(`${f.split("/").pop()}: cere linkurile dorite`, /linkNotes/.test(x) && (/Linkurile dorite/.test(x) || /EditorLinkuri/.test(x)));
       }
       // Micsorarea in browser: pana pe 13.09 pozele de telefon erau RESPINSE.
       const cpz = citesteFisier("src/lib/comprima-poza.ts");
@@ -1854,6 +1855,26 @@ console.log("\n########## S. RECENZII ##########");
   t("serverul isi porneste singur cronurile", /pornestePlanificator/.test(citesteFisier("src/instrumentation.ts")) && /materiale-lipsa/.test(citesteFisier("src/planificator.ts")));
   t("cronurile accepta cheia interna sau cea externa", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/materiale-lipsa/route.ts")) && /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/promo-announce/route.ts")));
   t("eroarea la recuperarea abonamentelor se vede in admin", /eroareAbonamente/.test(citesteFisier("src/app/admin/materiale/page.tsx")));
+}
+
+
+// Linkurile puse pe cuvinte, din text; fara linkuri, numele firmei → site (01.10.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const corp = "NOZOMI Travel deschide colaborarea cu agentiile de turism. Compania NOZOMI Travel pregateste o retea.";
+  t("fara linkuri cerute: numele firmei devine link catre site", linkuriImplicite({ linkNotes: "", companyName: "NOZOMI Travel Society", siteUrl: "www.nozomi.travel", body: corp }) === "NOZOMI Travel → https://www.nozomi.travel");
+  t("ancora se scurteaza pana apare in text (fara „Society”)", /^NOZOMI Travel →/.test(linkuriImplicite({ linkNotes: null, companyName: "NOZOMI Travel Society", siteUrl: "https://nozomi.travel", body: corp })));
+  t("linkurile cerute de client raman neatinse", linkuriImplicite({ linkNotes: "circuite → https://nozomi.travel/circuite", companyName: "X", siteUrl: "x.ro", body: corp }) === "circuite → https://nozomi.travel/circuite");
+  t("fara site, nu inventam link", linkuriImplicite({ linkNotes: "", companyName: "Firma", siteUrl: "", body: corp }) === "");
+  t("adresa fara https primeste https", normalizeazaUrl("firma.ro/contact") === "https://firma.ro/contact" && normalizeazaUrl("http://a.ro") === "http://a.ro");
+  t("linkurile din editor se salveaza ca „ancora → adresa”", serializeazaLinkuri([{ ancora: "curatenie", url: "https://a.ro" }, { ancora: "x", url: " " }]) === "curatenie → https://a.ro");
+  const implicit = linkuriImplicite({ linkNotes: "", companyName: "NOZOMI Travel Society", siteUrl: "www.nozomi.travel", body: corp });
+  const r = articolHtml({ titlu: "T", corp, linkNotes: implicit, dofollow: true });
+  t("linkul implicit cade pe prima aparitie a numelui, dofollow", /<a href="https:\/\/www\.nozomi\.travel">NOZOMI Travel<\/a> deschide/.test(r.html) && !/nofollow/.test(r.html) && r.negasite.length === 0);
+  const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
+  t("formularul foloseste editorul de linkuri pe cuvinte", /<EditorLinkuri /.test(form) && /ref=\{textareaRef\}/.test(form));
+  t("la trimitere se aplica linkul implicit", /d\.linkNotes = linkuriImplicite\(/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+  t("adminul vede articolul cu linkurile puse si butonul de copiat", /<ArticolGata/.test(citesteFisier("src/app/admin/materiale/page.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

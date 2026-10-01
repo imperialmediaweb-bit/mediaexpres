@@ -7,6 +7,19 @@
  * linkurile, cu riscul sa le puna gresit sau deloc.
  */
 
+/** Domeniul dintr-o adresa (local: fisierul se foloseste si in browser). */
+function domeniuDin(url: string): string | null {
+  const t = (url || "").trim();
+  if (!t) return null;
+  try {
+    const u = new URL(/^https?:\/\//i.test(t) ? t : `https://${t}`);
+    const h = u.hostname.toLowerCase().replace(/^www\./, "");
+    return /\./.test(h) ? h : null;
+  } catch {
+    return null;
+  }
+}
+
 export interface LinkCerut {
   ancora: string | null;
   url: string;
@@ -99,4 +112,47 @@ export function linkDescarcarePoza(url: string): string {
   return url.includes("res.cloudinary.com") && url.includes("/upload/") && !url.includes("fl_attachment")
     ? url.replace("/upload/", "/upload/fl_attachment/")
     : url;
+}
+
+/** „ancora → adresa", o linie pe link — forma salvata pe comanda. */
+export function serializeazaLinkuri(l: { ancora: string; url: string }[]): string {
+  return l
+    .filter((x) => x.url.trim())
+    .map((x) => `${x.ancora.trim()} → ${x.url.trim()}`)
+    .join("\n");
+}
+
+/** Adresa curata, cu https:// in fata daca lipseste. */
+export function normalizeazaUrl(u: string): string {
+  const t = (u || "").trim();
+  if (!t) return "";
+  return /^https?:\/\//i.test(t) ? t : `https://${t}`;
+}
+
+/**
+ * 01.10.2026 — „nu stiu unde sa pun linkul" (proprietarul, la comanda NOZOMI).
+ * Cand clientul n-a cerut niciun link, punem NOI numele firmei ca link catre
+ * site-ul lui — regula scrisa de mult in formular, dar aplicata abia acum
+ * automat. Ancora: numele firmei asa cum apare in text; daca numele intreg
+ * nu apare („NOZOMI Travel Society"), incercam fara ultimul cuvant („NOZOMI
+ * Travel") s.a.m.d. Daca nu-l gasim deloc, ramane numele intreg, iar pagina
+ * arata ca nu l-a gasit.
+ */
+export function linkuriImplicite(d: {
+  linkNotes: string | null | undefined;
+  companyName: string | null | undefined;
+  siteUrl: string | null | undefined;
+  body: string;
+}): string {
+  if (parseazaLinkuri(d.linkNotes).length) return (d.linkNotes || "").trim();
+  const url = normalizeazaUrl(d.siteUrl || "");
+  const nume = (d.companyName || "").trim();
+  if (!url || !nume || !domeniuDin(url)) return (d.linkNotes || "").trim();
+  const cuvinte = nume.split(/\s+/);
+  const corp = d.body.toLowerCase();
+  for (let n = cuvinte.length; n >= 1; n--) {
+    const ancora = cuvinte.slice(0, n).join(" ");
+    if (ancora.length >= 3 && corp.includes(ancora.toLowerCase())) return `${ancora} → ${url}`;
+  }
+  return `${nume} → ${url}`;
 }
