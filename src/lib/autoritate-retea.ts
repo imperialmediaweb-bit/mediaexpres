@@ -108,22 +108,32 @@ export async function actualizeazaAutoritateaRetelei(maxim = 60): Promise<{ masu
   return { masurate, esuate, ramase: Math.max(0, deMasurat.length - maxim) };
 }
 
-/** Media DA a retelei si data celei mai vechi masuratori — pentru textul de pe pagina. */
-export function rezumatAutoritate(m: Map<string, AutoritateZiar>): { medie: number; nr: number; masuratLa: Date } | null {
+/** Scorul pe domeniu, pentru pagini si PDF: domeniu → {da, pa}. */
+export type ScorRetea = Record<string, { da: number; pa: number | null }>;
+
+/** Media DA/PA a retelei si data celei mai vechi masuratori — pentru textul de pe pagina. */
+export function rezumatAutoritate(m: Map<string, AutoritateZiar>): { medie: number; mediePa: number | null; nr: number; masuratLa: Date } | null {
   const cu = Array.from(m.values()).filter((x) => x.da != null);
   if (!cu.length) return null;
   const medie = Math.round(cu.reduce((s, x) => s + (x.da as number), 0) / cu.length);
+  const cuPa = cu.filter((x) => x.pa != null);
+  const mediePa = cuPa.length ? Math.round(cuPa.reduce((s, x) => s + (x.pa as number), 0) / cuPa.length) : null;
   const masuratLa = new Date(Math.min(...cu.map((x) => x.checkedAt.getTime())));
-  return { medie, nr: cu.length, masuratLa };
+  return { medie, mediePa, nr: cu.length, masuratLa };
 }
 
-/** domeniu → DA, pentru PDF si pagini; gol daca baza nu raspunde. */
-export async function autoritatePentruPdf(): Promise<Record<string, number>> {
-  const out: Record<string, number> = {};
+/** domeniu → {da, pa}, pentru PDF si pagini; gol daca baza nu raspunde. */
+export async function scoruriRetea(): Promise<ScorRetea> {
+  const out: ScorRetea = {};
   try {
-    for (const [d, a] of await citesteAutoritateaRetelei()) if (a.da != null) out[d] = a.da;
+    for (const [d, a] of await citesteAutoritateaRetelei()) if (a.da != null) out[d] = { da: a.da, pa: a.pa };
   } catch {
     /* fara scoruri */
   }
   return out;
+}
+
+/** Compatibilitate: doar DA. */
+export async function autoritatePentruPdf(): Promise<ScorRetea> {
+  return scoruriRetea();
 }

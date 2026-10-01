@@ -13,7 +13,14 @@ function domeniu(url: string): string {
  * `autoritate`: domeniu → Domain Authority (Moz), citit de noi (lib/autoritate-retea).
  * Optional: fara el, lista arata ca pana acum.
  */
-export function NewspaperDirectory({ autoritate }: { autoritate?: Record<string, number> } = {}) {
+/** Culoarea etichetei dupa DA: verde ≥ 35, galben 20–34, gri sub 20. */
+function clasaScor(da: number): string {
+  if (da >= 35) return "bg-emerald-50 text-emerald-700 ring-emerald-200";
+  if (da >= 20) return "bg-amber-50 text-amber-700 ring-amber-200";
+  return "bg-slate-100 text-slate-500 ring-slate-200";
+}
+
+export function NewspaperDirectory({ autoritate }: { autoritate?: Record<string, { da: number; pa: number | null }> } = {}) {
   return (
     <div className="mx-auto max-w-5xl space-y-4">
       {(["Național", "Moldova", "Transilvania", "Muntenia", "Banat"] as const).map(
@@ -55,12 +62,13 @@ export function NewspaperDirectory({ autoritate }: { autoritate?: Record<string,
                           <span className="text-slate-400"> — {p.county}</span>
                         ) : null}
                       </span>
-                      {autoritate?.[domeniu(p.url)] != null && (
+                      {autoritate?.[domeniu(p.url)] && (
                         <span
-                          title="Domain Authority (Moz), măsurat de noi"
-                          className="shrink-0 rounded-md bg-slate-100 px-1.5 py-0.5 text-[11px] font-semibold text-slate-600"
+                          title="Domain Authority · Page Authority (Moz), măsurate de noi"
+                          className={`shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ${clasaScor(autoritate[domeniu(p.url)].da)}`}
                         >
-                          DA {autoritate[domeniu(p.url)]}
+                          DA {autoritate[domeniu(p.url)].da}
+                          {autoritate[domeniu(p.url)].pa != null && <span className="font-normal opacity-80"> · PA {autoritate[domeniu(p.url)].pa}</span>}
                         </span>
                       )}
                     </a>

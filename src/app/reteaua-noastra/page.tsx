@@ -7,7 +7,7 @@ import { REGION_COUNTS } from "@/data/newspapers";
 import { CountyGrid } from "@/components/CountyGrid";
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { StareRetea } from "@/components/StareRetea";
-import { citesteAutoritateaRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
+import { citesteAutoritateaRetelei, rezumatAutoritate, type ScorRetea } from "@/lib/autoritate-retea";
 
 // Scorurile Moz se citesc din baza la fiecare cerere (la build Railway nu are baza,
 // iar copia statica ramanea fara scoruri).
@@ -48,8 +48,8 @@ const REGIONS = [
 export default async function ReteauaPage() {
   // 01.10.2026 — DA pe fiecare domeniu, cerut de agentii („lista cu DA?").
   const scoruri = await citesteAutoritateaRetelei();
-  const autoritate: Record<string, number> = {};
-  for (const [d, a] of scoruri) if (a.da != null) autoritate[d] = a.da;
+  const autoritate: ScorRetea = {};
+  for (const [d, a] of scoruri) if (a.da != null) autoritate[d] = { da: a.da, pa: a.pa };
   const rezumat = rezumatAutoritate(scoruri);
   return (
     <>
@@ -140,13 +140,22 @@ export default async function ReteauaPage() {
               </p>
             </div>
             <div className="mt-10">
+              {rezumat && (
+                <div className="mx-auto mb-5 flex max-w-5xl flex-wrap items-center justify-between gap-3 rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                  <p>
+                    <strong>Autoritatea rețelei (Moz):</strong> DA mediu <strong>{rezumat.medie}</strong>
+                    {rezumat.mediePa != null && <> · PA mediu <strong>{rezumat.mediePa}</strong></>} · {rezumat.nr} domenii măsurate
+                  </p>
+                  <p className="text-xs text-emerald-800">
+                    Scoruri publice, citite de noi pe{" "}
+                    {rezumat.masuratLa.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })}; le poți verifica pe orice domeniu cu Moz Link Explorer.
+                  </p>
+                </div>
+              )}
               <NewspaperDirectory autoritate={autoritate} />
               {rezumat && (
                 <p className="mx-auto mt-4 max-w-3xl text-center text-xs text-slate-500">
-                  „DA” = Domain Authority (Moz), scor public, măsurat de noi pe{" "}
-                  {rezumat.masuratLa.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric" })} pentru{" "}
-                  {rezumat.nr} domenii, medie {rezumat.medie}. Îl poți verifica pe orice domeniu din listă cu Moz Link Explorer.
-                  E un fapt despre domenii, nu o promisiune de poziții în Google.
+                  DA = Domain Authority, PA = Page Authority (Moz). Sunt fapte despre domenii, nu o promisiune de poziții în Google.
                 </p>
               )}
             </div>

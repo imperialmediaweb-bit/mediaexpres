@@ -1892,8 +1892,8 @@ console.log("\n########## S. RECENZII ##########");
   const r = rezumatAutoritate(m)!;
   t("rezumatul: media doar pe domeniile masurate, data celei mai vechi masuratori", r.medie === 37 && r.nr === 2 && r.masuratLa.toISOString().startsWith("2026-09-20"));
   t("fara scoruri, fara rezumat", rezumatAutoritate(new Map()) === null);
-  t("lista de pe site arata DA langa fiecare ziar", /DA \{autoritate\[domeniu\(p\.url\)\]\}/.test(citesteFisier("src/components/NewspaperDirectory.tsx")));
-  t("PDF-ul cu lista pune DA langa nume", /\(DA \$\{autoritate\[domeniuPdf\(n\.url\)\]\}\)/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")));
+  t("lista de pe site arata DA si PA langa fiecare ziar", /DA \{autoritate\[domeniu\(p\.url\)\]\.da\}/.test(citesteFisier("src/components/NewspaperDirectory.tsx")) && /PA \{autoritate\[domeniu\(p\.url\)\]\.pa\}/.test(citesteFisier("src/components/NewspaperDirectory.tsx")));
+  t("PDF-ul cu lista pune DA / PA langa nume", /\(DA \$\{autoritate\[domeniuPdf\(n\.url\)\]\.da\}/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")) && /PA \$\{autoritate\[domeniuPdf\(n\.url\)\]\.pa\}/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")));
   t("scorurile se reimprospateaza din planificator, zilnic, doar cele vechi de 30 de zile", /autoritate-retea/.test(citesteFisier("src/planificator.ts")) && /ZILE_INTRE_MASURATORI = 30/.test(citesteFisier("src/lib/autoritate-retea.ts")));
   t("cronul cere cheia", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/autoritate-retea/route.ts")));
 }

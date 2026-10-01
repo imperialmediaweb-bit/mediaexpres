@@ -30,9 +30,9 @@ const REGION_ORDER = [
 const OFFICIAL_TOTAL = 50;
 
 /**
- * `autoritate`: domeniu → DA (Moz), optional — apare langa numele ziarului.
+ * `autoritate`: domeniu → {da, pa} (Moz), optional — apare langa numele ziarului.
  */
-export function buildNewspaperListPdf(autoritate?: Record<string, number>): Buffer {
+export function buildNewspaperListPdf(autoritate?: Record<string, { da: number; pa: number | null }>): Buffer {
   const bonus = NEWSPAPERS.length - OFFICIAL_TOTAL;
   const hasPunycode = NEWSPAPERS.some((n) => n.url.includes("xn--"));
 
@@ -46,7 +46,9 @@ export function buildNewspaperListPdf(autoritate?: Record<string, number>): Buff
         url: n.url,
         title:
           (n.county ? `${n.name} — ${n.county}` : `${n.name} — ${region}`) +
-          (autoritate?.[domeniuPdf(n.url)] != null ? `  (DA ${autoritate[domeniuPdf(n.url)]})` : ""),
+          (autoritate?.[domeniuPdf(n.url)]
+            ? `  (DA ${autoritate[domeniuPdf(n.url)].da}${autoritate[domeniuPdf(n.url)].pa != null ? ` / PA ${autoritate[domeniuPdf(n.url)].pa}` : ""})`
+            : ""),
       })),
   );
 

@@ -32,7 +32,7 @@ import { cifreLive, type CifreRetea } from "@/lib/cifre-live";
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 const deadline = promoDeadlineLabel();
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
-import { citesteAutoritateaRetelei } from "@/lib/autoritate-retea";
+import { scoruriRetea } from "@/lib/autoritate-retea";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
 import { OfferChatBubble } from "@/components/OfferChatBubble";
 import { DateFirma } from "@/components/DateFirma";
@@ -328,12 +328,7 @@ export default async function Oferta500Page() {
   const CIFRE = await cifreLive();
   const FAQ = buildFaq(CIFRE);
   // DA pe fiecare domeniu (Moz, citit de noi); fara baza, lista ramane fara scoruri.
-  const autoritateRetea: Record<string, number> = {};
-  try {
-    for (const [d, a] of await citesteAutoritateaRetelei()) if (a.da != null) autoritateRetea[d] = a.da;
-  } catch {
-    /* lista fara scoruri */
-  }
+  const autoritateRetea = await scoruriRetea();
   return (
     <div className="bg-white">
       {/* Hero — id-ul e tinta barei fixe de pe mobil ("Comanda acum") */}
