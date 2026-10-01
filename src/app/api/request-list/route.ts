@@ -7,6 +7,7 @@ import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/
 import { SITE } from "@/data/site";
 import { buildListEmail, LIST_EMAIL_SUBJECT } from "@/lib/list-email";
 import { buildNewspaperListPdf, LIST_PDF_FILENAME } from "@/lib/newspaper-list-pdf";
+import { autoritatePentruPdf } from "@/lib/autoritate-retea";
 import { promoDeadlineLabel } from "@/data/packages";
 
 export const runtime = "nodejs";
@@ -59,7 +60,7 @@ export async function POST(req: NextRequest) {
   // lista intreaga e oricum in corpul mesajului.
   let listPdf: string | null = null;
   try {
-    listPdf = buildNewspaperListPdf().toString("base64");
+    listPdf = buildNewspaperListPdf(await autoritatePentruPdf()).toString("base64");
   } catch (err) {
     console.error("[request-list] PDF-ul listei nu s-a generat:", err);
   }

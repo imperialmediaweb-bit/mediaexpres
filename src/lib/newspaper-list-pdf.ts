@@ -14,6 +14,10 @@ import { SITE } from "@/data/site";
  */
 export const LIST_PDF_FILENAME = "Reteaua-MediaExpres-50-ziare.pdf";
 
+function domeniuPdf(url: string): string {
+  return url.replace(/^https?:\/\//i, "").replace(/^www\./i, "").replace(/\/.*$/, "").toLowerCase();
+}
+
 const REGION_ORDER = [
   "Național",
   "Moldova",
@@ -25,7 +29,10 @@ const REGION_ORDER = [
 /** Cifra din reclame si contracte; in date pot fi mai multe. */
 const OFFICIAL_TOTAL = 50;
 
-export function buildNewspaperListPdf(): Buffer {
+/**
+ * `autoritate`: domeniu → DA (Moz), optional — apare langa numele ziarului.
+ */
+export function buildNewspaperListPdf(autoritate?: Record<string, number>): Buffer {
   const bonus = NEWSPAPERS.length - OFFICIAL_TOTAL;
   const hasPunycode = NEWSPAPERS.some((n) => n.url.includes("xn--"));
 
@@ -37,7 +44,9 @@ export function buildNewspaperListPdf(): Buffer {
       .sort((a, b) => a.name.localeCompare(b.name, "ro"))
       .map((n) => ({
         url: n.url,
-        title: n.county ? `${n.name} — ${n.county}` : `${n.name} — ${region}`,
+        title:
+          (n.county ? `${n.name} — ${n.county}` : `${n.name} — ${region}`) +
+          (autoritate?.[domeniuPdf(n.url)] != null ? `  (DA ${autoritate[domeniuPdf(n.url)]})` : ""),
       })),
   );
 

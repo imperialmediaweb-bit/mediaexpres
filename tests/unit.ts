@@ -32,6 +32,7 @@ import { verificaContact } from "@/lib/filtru-contact";
 import { analizeazaPagina } from "@/lib/paza-linkuri";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
+import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 
 import {
   PRAG_RETRAGERE,
@@ -1875,6 +1876,26 @@ console.log("\n########## S. RECENZII ##########");
   t("formularul foloseste editorul de linkuri pe cuvinte", /<EditorLinkuri /.test(form) && /ref=\{textareaRef\}/.test(form));
   t("la trimitere se aplica linkul implicit", /d\.linkNotes = linkuriImplicite\(/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   t("adminul vede articolul cu linkurile puse si butonul de copiat", /<ArticolGata/.test(citesteFisier("src/app/admin/materiale/page.tsx")));
+}
+
+
+// DA (Moz) pe fiecare ziar al retelei, pe /reteaua-noastra si in PDF (01.10.2026)
+{
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const dom = domeniileRetelei();
+  t("toate ziarele retelei au domeniu de masurat", dom.length >= 50 && dom.includes("botosaniexpres.ro") && dom.every((d) => !d.startsWith("www.")));
+  const m = new Map([
+    ["a.ro", { domain: "a.ro", da: 40, pa: 30, spam: 1, checkedAt: new Date("2026-10-01") }],
+    ["b.ro", { domain: "b.ro", da: 34, pa: 28, spam: 2, checkedAt: new Date("2026-09-20") }],
+    ["c.ro", { domain: "c.ro", da: null, pa: null, spam: null, checkedAt: new Date("2026-09-25") }],
+  ]);
+  const r = rezumatAutoritate(m)!;
+  t("rezumatul: media doar pe domeniile masurate, data celei mai vechi masuratori", r.medie === 37 && r.nr === 2 && r.masuratLa.toISOString().startsWith("2026-09-20"));
+  t("fara scoruri, fara rezumat", rezumatAutoritate(new Map()) === null);
+  t("lista de pe site arata DA langa fiecare ziar", /DA \{autoritate\[domeniu\(p\.url\)\]\}/.test(citesteFisier("src/components/NewspaperDirectory.tsx")));
+  t("PDF-ul cu lista pune DA langa nume", /\(DA \$\{autoritate\[domeniuPdf\(n\.url\)\]\}\)/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")));
+  t("scorurile se reimprospateaza din planificator, zilnic, doar cele vechi de 30 de zile", /autoritate-retea/.test(citesteFisier("src/planificator.ts")) && /ZILE_INTRE_MASURATORI = 30/.test(citesteFisier("src/lib/autoritate-retea.ts")));
+  t("cronul cere cheia", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/autoritate-retea/route.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

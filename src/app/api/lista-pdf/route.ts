@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { buildNewspaperListPdf, LIST_PDF_FILENAME } from "@/lib/newspaper-list-pdf";
+import { autoritatePentruPdf } from "@/lib/autoritate-retea";
 
 export const runtime = "nodejs";
 
@@ -13,7 +14,7 @@ export const runtime = "nodejs";
  * se cere pentru ca merita cerut, nu pentru ca fisierul ar fi secret.
  */
 export async function GET() {
-  const pdf = buildNewspaperListPdf();
+  const pdf = buildNewspaperListPdf(await autoritatePentruPdf());
   return new NextResponse(new Uint8Array(pdf), {
     headers: {
       "Content-Type": "application/pdf",

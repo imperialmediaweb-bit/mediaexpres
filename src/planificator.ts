@@ -28,5 +28,9 @@ export async function pornestePlanificator() {
   setInterval(() => ruleaza("/api/cron/materiale-lipsa"), 5 * MIN);
   setTimeout(() => ruleaza("/api/cron/promo-announce"), 3 * MIN);
   setInterval(() => ruleaza("/api/cron/promo-announce"), 6 * 60 * MIN);
-  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore");
+  // Scorurile Moz ale ziarelor noastre: zilnic, dar masoara doar ce e mai
+  // vechi de 30 de zile (lib/autoritate-retea.ts).
+  setTimeout(() => ruleaza("/api/cron/autoritate-retea"), 2 * MIN);
+  setInterval(() => ruleaza("/api/cron/autoritate-retea"), 24 * 60 * MIN);
+  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic");
 }
