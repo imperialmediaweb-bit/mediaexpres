@@ -245,6 +245,16 @@ export default async function MaterialePage() {
                     ) : "—"}
                   </p>
                   <p><span className="text-slate-500">Facebook:</span> {r.facebookOptIn ? "da" : "NU (refuzat)"}</p>
+                  {/* 01.10.2026 — ziarul ales de client pentru cele 3 zile de promovare
+                      platita se salva din 06.09, dar nu se vedea nicaieri in admin. */}
+                  <p>
+                    <span className="text-slate-500">Promovare Facebook (3 zile):</span>{" "}
+                    {r.fbBoostPaper ? (
+                      <strong className="text-brand-navy">{r.fbBoostPaper}</strong>
+                    ) : (
+                      <span className="text-amber-700">n-a ales — alegi tu ziarul din județul lui</span>
+                    )}
+                  </p>
                   <p>
                     <span className="text-slate-500">Publicare:</span>{" "}
                     {r.uniquePerSite ? (
