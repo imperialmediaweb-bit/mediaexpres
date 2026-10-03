@@ -9,7 +9,8 @@ import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, orders, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
-import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, screenContent } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
+import { capturaSite } from "@/lib/captura-site";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { trimitePlasari } from "@/lib/trimite-plasari";
 import { linkuriImplicite } from "@/lib/articol-html";
@@ -20,10 +21,14 @@ import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
 import { campaniaPentruComanda } from "@/lib/retea";
 
 export const runtime = "nodejs";
+// Captura site-ului (lib/captura-site.ts) poate dura pana la ~30 s.
+export const maxDuration = 60;
 
 const imageSchema = z.object({
   url: z.string().url().max(500),
   publicId: z.string().max(300).optional(),
+  /** Pusa de server: captura site-ului, cand clientul n-a trimis poze. */
+  capturaSite: z.boolean().optional(),
 });
 
 const schema = z.object({
@@ -79,32 +84,11 @@ export async function POST(req: NextRequest) {
   d.title = cleanTitle(d.title);
   d.body = cleanArticleText(d.body);
 
-  // Pozele, verificate PE SERVER, nu doar in formular.
-  //
-  // 13.09.2026 — a patra comanda sosita „Imagini (0/3)", la cateva minute
-  // dupa ce formularul incepuse sa ceara 3 poze. Motivul: paginile deschise
-  // INAINTE de deploy ruleaza mai departe codul vechi din browser. Un client
-  // care are formularul deschis de o ora nu afla niciodata de regula noua.
-  // Deci regula sta aici, unde ajunge orice trimitere, oricat de veche e
-  // pagina. Verificarea e inaintea oricarei scrieri: nimic nu se pierde,
-  // clientul adauga pozele si trimite din nou.
-  // 22.09.2026 — exceptia: clientul a INCERCAT si incarcarea i-a picat in
-  // browser. Un om care a platit nu are voie sa ramana captiv intre banii
-  // dati si un formular care nu-l lasa sa trimita. Comanda intra fara poze,
-  // marcata ca atare, iar pozele vin pe WhatsApp.
-  if (d.images.length < POZE_OBLIGATORII && !d.pozeEsuate) {
-    return NextResponse.json(
-      {
-        ok: false,
-        error:
-          d.images.length === 0
-            ? `Articolul nu poate fi trimis fără nicio poză. Urcă cel puțin o poză cu firma ta (logo, sediu, produs, echipă) la pasul „Poze" și apasă din nou Trimite. Dacă poza nu se încarcă de pe telefon, trimite-o pe WhatsApp la ${SITE.phone} și o punem noi — textul tău e păstrat.`
-            : `Mai urcă ${POZE_OBLIGATORII - d.images.length} ${POZE_OBLIGATORII - d.images.length === 1 ? "poză" : "poze"} (ai ${d.images.length}, sunt necesare ${POZE_OBLIGATORII}) și apasă din nou Trimite.`,
-      },
-      { status: 400 },
-    );
-  }
-
+  // Pozele NU mai blocheaza trimiterea (03.10.2026, decizia user: „optional,
+  // sau daca nu, facem un screen pe site"). Istoric: 13.09 — 3 obligatorii,
+  // verificate aici ca paginile vechi din browser sa nu treaca; 22.09 —
+  // portita cand incarcarea pica; 03.10 — 1, apoi niciuna. Fara poze, dupa
+  // verificarea tokenului, punem o captura a site-ului clientului.
   const order = verifyOrderToken(d.token);
   if (!order) {
     return NextResponse.json(
@@ -162,6 +146,16 @@ export async function POST(req: NextRequest) {
   // (lib/articol-html.ts). Se salveaza asa, ca adminul si partenerii sa vada
   // linkul deja pus pe cuvant, nu o caseta goala.
   d.linkNotes = linkuriImplicite({ linkNotes: d.linkNotes, companyName: d.companyName, siteUrl: d.siteUrl, body: d.body });
+
+  // Fara poze: captura site-ului clientului, ca imagine principala. Daca nu
+  // iese (site lipsa, servicii picate), ramane fara, ca inainte.
+  if (d.images.length === 0) {
+    const captura = await capturaSite(d.siteUrl, order.sessionId);
+    if (captura) {
+      d.images = [captura];
+      d.featuredIndex = 0;
+    }
+  }
 
   // featuredIndex vine din UI, dar poate depasi numarul real de poze.
   const featured = d.images[d.featuredIndex] ?? d.images[0];
@@ -393,7 +387,10 @@ export async function POST(req: NextRequest) {
   }
 
   const imagesHtml = d.images.length
-    ? d.images
+    ? (d.images[0]?.capturaSite
+        ? '<p style="color:#b45309;font-weight:700;">⚠️ Clientul n-a trimis poze — am pus o captură a site-ului lui ca imagine principală. Cere-i o poză adevărată pe WhatsApp, dacă vrei mai bine.</p>'
+        : "") +
+      d.images
         .map(
           (img, i) =>
             `<p style="margin:4px 0;"><a href="${esc(img.url)}">${esc(img.url)}</a>${

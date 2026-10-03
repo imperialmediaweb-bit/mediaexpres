@@ -206,7 +206,7 @@ export default async function MaterialePage() {
         <div className="mt-8 space-y-6">
           {rows.map((r) => {
             const pkg = findPackageById(r.packageId);
-            let images: { url: string; publicId?: string }[] = [];
+            let images: { url: string; publicId?: string; capturaSite?: boolean }[] = [];
             try {
               images = JSON.parse(r.images || "[]");
             } catch {
@@ -402,6 +402,11 @@ export default async function MaterialePage() {
                         <a key={img.url} href={img.url} target="_blank" rel="noopener noreferrer" className="relative block">
                           {/* eslint-disable-next-line @next/next/no-img-element */}
                           <img src={img.url} alt="" className="h-28 w-40 rounded-lg border border-slate-200 object-cover" />
+                          {img.capturaSite && (
+                            <span className="absolute bottom-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                              CAPTURĂ SITE — fără poze de la client
+                            </span>
+                          )}
                           {i === r.featuredIndex && (
                             <span className="absolute left-1 top-1 rounded bg-brand-red px-1.5 py-0.5 text-[10px] font-bold text-white">
                               REPREZENTATIVĂ

@@ -34,6 +34,7 @@ import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
 import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
+import { surseCaptura } from "@/lib/captura-site";
 
 import {
   PRAG_RETRAGERE,
@@ -1100,20 +1101,20 @@ console.log("\n########## S. RECENZII ##########");
   {
     const cp = citesteFisier("src/lib/content-policy.ts");
     t("avertismentul fara poze e unul singur, in content-policy", /FARA_POZE_AVERTISMENT/.test(cp) && /Trimite fără poze/.test(cp));
-    t("dupa plata, pozele sunt obligatorii: cel putin 1 (decizia user 03.10.2026, nu 3)", /POZE_OBLIGATORII = 1/.test(cp));
+    t("dupa plata, pozele nu mai blocheaza (decizia user 03.10.2026: optional, altfel captura site)", /POZE_OBLIGATORII = 0/.test(cp));
     {
       // Formularul de DUPA PLATA: cel putin o poza obligatorie, butonul blocat pana atunci.
       const s = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
-      t("articol: fara nicio poza nu se poate trimite", /images\.length < POZE_OBLIGATORII/.test(s));
-      t("articol: butonul spune cate poze mai lipsesc", /Urcă \$\{POZE_OBLIGATORII - images\.length === 1/.test(s));
+      t("articol: fara poze, un avertisment, apoi a doua apasare trimite", /images\.length === 0 && !faraPozeConfirmat/.test(s));
+      t("articol: butonul spune ca trimite fara poze", /Trimite f\u0103r\u0103 poze →/.test(s));
       t("articol: eroarea de la poze se arata langa poze", /pozeEroare/.test(s) && /role="alert"/.test(s));
       t("articol: pozele mari se micsoreaza, nu se refuza", /comprimaPoza\(ales\)/.test(s));
       // Garda de pe SERVER: o pagina deschisa inainte de deploy ruleaza codul
       // vechi din browser, deci regula nu poate trai doar in formular.
       const api = citesteFisier("src/app/api/articol/submit/route.ts");
-      t("serverul refuza trimiterea fara pozele cerute", /d\.images\.length < POZE_OBLIGATORII/.test(api) && /status: 400/.test(api));
-      t("refuzul nu pierde nimic: e inaintea oricarei scrieri", api.indexOf("POZE_OBLIGATORII)") < api.indexOf(".insert(orderSubmissions)"));
-      t("refuzul ii spune si calea prin WhatsApp", /WhatsApp la \$\{SITE\.phone\}/.test(api));
+      t("serverul nu mai refuza trimiterea fara poze", !/d\.images\.length < POZE_OBLIGATORII/.test(api));
+      t("fara poze, serverul pune captura site-ului inainte de salvare", /capturaSite\(d\.siteUrl, order\.sessionId\)/.test(api) && api.indexOf("capturaSite(d.siteUrl") < api.indexOf(".insert(orderSubmissions)"));
+      t("formularul ii spune si calea prin WhatsApp cand pozele nu se incarca", /WhatsApp la \$\{SITE\.phone\}/.test(s));
       // Fisa fara poze porneste cu emailul de cerere deja scris.
       const oa = citesteFisier("src/app/admin/materiale/[id]/OrderActions.tsx");
       t("admin: sablon gata scris pentru cererea de poze", /eticheta: "Cer pozele"/.test(oa) && /hasImages \? 0 : 2/.test(oa));
@@ -1456,13 +1457,13 @@ console.log("\n########## S. RECENZII ##########");
     const form = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
     const api = citesteFisier("src/app/api/articol/submit/route.ts");
 
-    t("zidul ramane pentru cine n-a incercat", /images\.length < POZE_OBLIGATORII && !\(pozeEroare && faraPozeConfirmat\)/.test(form));
-    t("portita se deschide DOAR dupa o incarcare esuata", /if \(pozeEroare\) \{\s*setFaraPozeConfirmat\(true\)/.test(form));
+    t("fara poze: avertisment o data, la a doua apasare trimite (nu mai e zid)", /images\.length === 0 && !faraPozeConfirmat/.test(form));
+    t("cand incarcarea a picat, mesajul spune ca punem captura site-ului", /punem o captură a site-ului tău, iar pozele ni le poți trimite pe WhatsApp/.test(form));
     t("si doar la a doua apasare, ca sa fie o decizie", /faraPozeConfirmat/.test(form));
     t("butonul spune limpede ce se intampla", /Trimite f\u0103r\u0103 poze — le dau pe WhatsApp/.test(form));
     t("clientului i se spune unde sa trimita pozele", /pe WhatsApp la \$\{SITE\.phone\}/.test(form));
     t("semnalul ajunge la server", /pozeEsuate: Boolean\(pozeEroare\)/.test(form));
-    t("serverul il accepta, dar numai cu semnalul", /pozeEsuate: z\.boolean\(\)\.optional\(\)/.test(api) && /images\.length < POZE_OBLIGATORII && !d\.pozeEsuate/.test(api));
+    t("serverul pastreaza semnalul de incarcare esuata, pentru email", /pozeEsuate: z\.boolean\(\)\.optional\(\)/.test(api) && /d\.pozeEsuate/.test(api));
     t("emailul catre admin striga ca pozele au picat", /\u00ceNC\u0102RCAREA POZELOR I-A E\u0218UAT/.test(api));
   }
 
@@ -1921,6 +1922,17 @@ console.log("\n########## S. RECENZII ##########");
   t("cronul autoblog cere cheia si e in planificator la 30 de minute", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/autoblog/route.ts")) && /autoblog"\), 30 \* MIN/.test(citesteFisier("src/planificator.ts")));
   t("harta site-ului include articolele autoblogului", /\.\.\.autoblog/.test(citesteFisier("src/app/sitemap.ts")));
   t("pagina de articol randeaza HTML-ul din baza cand nu exista fisier MDX", /postDupaSlug/.test(citesteFisier("src/app/blog/[slug]/page.tsx")) && /dangerouslySetInnerHTML/.test(citesteFisier("src/app/blog/[slug]/page.tsx")));
+}
+
+{
+  console.log("\n── Captura site-ului, cand clientul n-a trimis poze (03.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const surse = surseCaptura("https://firma.ro/");
+  t("doua surse, thum.io intai, apoi mShots", surse.length === 2 && /image\.thum\.io/.test(surse[0]) && /s0\.wp\.com\/mshots/.test(surse[1]));
+  t("adresa site-ului e codificata la mShots", surse[1].includes(encodeURIComponent("https://firma.ro/")));
+  t("captura e marcata in admin", /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/page.tsx")) && /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
+  t("emailul catre admin spune ca e captura, nu poza clientului", /am pus o captură a site-ului lui/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+  t("captura se copiaza in Cloudinary, nu ramane pe serviciul extern", /api\.cloudinary\.com/.test(citesteFisier("src/lib/captura-site.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

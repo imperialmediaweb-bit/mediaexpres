@@ -11,7 +11,7 @@ import {
   MAX_UPLOAD_BYTES,
 } from "@/lib/upload-client";
 import { ContentDeclaration } from "@/components/forms/ContentDeclaration";
-import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII, POZE_OBLIGATORII_MESAJ } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, POZE_OBLIGATORII_MESAJ } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
@@ -64,10 +64,10 @@ export function ArticleForm({
   const [contentDeclaration, setContentDeclaration] = useState(false);
 
   const [images, setImages] = useState<UploadedImage[]>([]);
-  // 13.09.2026 — a treia comanda la rand sosita „Imagini (0/3)". Sectiunea
-  // de poze era optionala si tacuta, iar omul trecea peste ea. Decizia
-  // user: aici (dupa plata) pozele sunt OBLIGATORII, 3 — vezi
-  // POZE_OBLIGATORII in content-policy. Trimiterea e blocata pana le urca.
+  // 13.09.2026: 3 poze obligatorii (comenzi sosite „Imagini (0/3)").
+  // 03.10.2026: nu mai blocheaza — vezi POZE_OBLIGATORII in content-policy.
+  // Fara poze: un avertisment, apoi trimite, iar serverul pune o captura
+  // a site-ului clientului.
   const [featuredIndex, setFeaturedIndex] = useState(0);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
@@ -276,22 +276,16 @@ export function ArticleForm({
       setError(CONTENT_DECLARATION_ERROR);
       return;
     }
-    if (images.length < POZE_OBLIGATORII && !(pozeEroare && faraPozeConfirmat)) {
-      // Daca incarcarea a picat, nu-l mai tinem captiv: a doua apasare trimite
-      // comanda, iar pozele vin pe WhatsApp. Vezi `faraPozeConfirmat`.
-      if (pozeEroare) {
-        setFaraPozeConfirmat(true);
-        setError(
-          `Încărcarea pozelor nu a reușit. Apasă din nou „Trimite" și comanda pleacă fără ele — ` +
-            `apoi trimite-ne pozele pe WhatsApp la ${SITE.phone} și le punem noi. ` +
-            `Publicarea nu se blochează.`,
-        );
-        return;
-      }
+    // 03.10.2026 — pozele nu mai blocheaza: fara ele, un singur avertisment,
+    // iar a doua apasare trimite. Serverul pune atunci o captura a site-ului
+    // (lib/captura-site.ts). Vezi POZE_OBLIGATORII in content-policy.
+    if (images.length === 0 && !faraPozeConfirmat) {
+      setFaraPozeConfirmat(true);
       setError(
-        images.length === 0
-          ? POZE_OBLIGATORII_MESAJ
-          : `Mai urcă ${POZE_OBLIGATORII - images.length} ${POZE_OBLIGATORII - images.length === 1 ? "poză" : "poze"} — sunt necesare ${POZE_OBLIGATORII} (ai ${images.length}).`,
+        pozeEroare
+          ? `Încărcarea pozelor nu a reușit. Apasă din nou „Trimite" și comanda pleacă fără ele — ` +
+              `punem o captură a site-ului tău, iar pozele ni le poți trimite pe WhatsApp la ${SITE.phone}.`
+          : POZE_OBLIGATORII_MESAJ,
       );
       return;
     }
@@ -310,7 +304,7 @@ export function ArticleForm({
           contactPhone,
           cui,
           billingAddress,
-          pozeEsuate: Boolean(pozeEroare) && images.length < POZE_OBLIGATORII,
+          pozeEsuate: Boolean(pozeEroare) && images.length === 0,
           metaDescription,
           keywords,
           images,
@@ -628,13 +622,13 @@ export function ArticleForm({
       {/* 3. Poze */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-serif text-lg font-bold text-brand-navy">
-          3. Poze <span className="text-sm font-normal text-brand-red">— cel puțin una, până la {MAX_IMAGES}</span>{" "}
+          3. Poze <span className="text-sm font-normal text-slate-500">— până la {MAX_IMAGES}, recomandat</span>{" "}
           <span className="text-sm font-normal text-slate-500">({images.length}/{MAX_IMAGES})</span>
         </h2>
         <p className="mt-1 text-sm text-slate-600">
           <strong>Urcă 1–{MAX_IMAGES} poze</strong> cu firma ta: logo, sediu, produse,
           echipă. Alege una ca <strong>imagine reprezentativă</strong> — aia apare pe
-          prima pagină și pe Facebook. Fără nicio poză, articolul nu se poate trimite.
+          prima pagină și pe Facebook. Dacă nu ai nicio poză, punem o captură a site-ului tău.
         </p>
 
         {images.length > 0 && (
@@ -818,10 +812,8 @@ export function ArticleForm({
             <Loader2 className="h-5 w-5 animate-spin" />
             Se trimite...
           </>
-        ) : images.length < POZE_OBLIGATORII && pozeEroare && faraPozeConfirmat ? (
-          "Trimite fără poze — le dau pe WhatsApp →"
-        ) : images.length < POZE_OBLIGATORII ? (
-          `Urcă ${POZE_OBLIGATORII - images.length === 1 ? (images.length === 0 ? "o poză" : "încă o poză") : `${POZE_OBLIGATORII - images.length} poze`} ca să trimiți`
+        ) : images.length === 0 && faraPozeConfirmat ? (
+          pozeEroare ? "Trimite fără poze — le dau pe WhatsApp →" : "Trimite fără poze →"
         ) : (
           "Trimite materialele →"
         )}

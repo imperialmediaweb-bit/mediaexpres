@@ -47,16 +47,18 @@ export const FARA_POZE_AVERTISMENT =
   "Nu ai urcat nicio poză. Fără poza ta, articolul apare cu o imagine generică de stoc pe toate ziarele și pe Facebook — arată mult mai slab. Urcă măcar o poză (logo, sediu, produs, echipă). Dacă chiar nu ai, apasă din nou „Trimite fără poze”.";
 
 /**
- * Pe formularul de dupa plata (articolul), pozele sunt OBLIGATORII: cel putin 1
- * (maxim 3). Pana pe 03.10.2026 erau 3 obligatorii (decizia user 13.09, dupa a
- * treia comanda sosita fara nicio poza). Apoi doi clienti platiti la rand
- * (Ilea, Sanda) n-au mai trimis nimic: pe telefon, trei poze de urcat sunt un
- * zid. Decizia user 03.10: „poate sa trimita intre 1 si 3 poze, nu obligatoriu
- * 3". Avertismentul de mai sus ramane pe formularul OP (inainte de plata).
+ * Pe formularul de dupa plata (articolul), pozele NU mai blocheaza trimiterea.
+ * Istoric: 13.09.2026 — 3 obligatorii (decizia user, dupa a treia comanda
+ * fara poze); 03.10.2026 — 1 obligatorie; tot 03.10.2026, dupa doi clienti
+ * platiti la rand care n-au mai trimis nimic (pe telefon, pozele sunt zidul),
+ * decizia user: „optional, sau daca nu, facem un screen pe site". Deci: fara
+ * poze, serverul face o captura a site-ului clientului (lib/captura-site.ts)
+ * si o pune ca imagine principala. Constanta ramane pentru teste si pentru
+ * textele care numara pozele.
  */
-export const POZE_OBLIGATORII = 1;
+export const POZE_OBLIGATORII = 0;
 export const POZE_OBLIGATORII_MESAJ =
-  "Urcă cel puțin o poză cu firma ta (logo, sediu, produs, echipă) — până la 3. Articolul se publică cu ea pe toate ziarele și pe Facebook. Fără nicio poză nu se poate trimite.";
+  "Nu ai urcat nicio poză. Fără ea, punem pe toate ziarele și pe Facebook o captură a site-ului tău (sau o imagine de stoc) — arată mai slab decât o poză adevărată cu firma. Urcă măcar una (logo, sediu, produs, echipă) sau apasă din nou „Trimite fără poze”.";
 
 /** Consecinta, spusa scurt sub bifa. Aceeasi regula ca in Termeni, art. 4. */
 export const CONTENT_DECLARATION_WARNING =

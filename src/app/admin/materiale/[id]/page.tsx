@@ -69,7 +69,7 @@ export default async function MaterialDetailPage({
   const awaitingPay = r.status === "pending_payment";
   const isPaid = r.status === "paid";
 
-  let images: { url: string; publicId?: string }[] = [];
+  let images: { url: string; publicId?: string; capturaSite?: boolean }[] = [];
   try {
     images = JSON.parse(r.images || "[]");
   } catch {
@@ -294,6 +294,11 @@ export default async function MaterialDetailPage({
                       alt=""
                       className="h-32 w-44 rounded-lg border border-slate-200 object-cover"
                     />
+                    {img.capturaSite && (
+                      <span className="absolute bottom-1 left-1 rounded bg-amber-500 px-1.5 py-0.5 text-[10px] font-bold text-white">
+                        CAPTURĂ SITE — fără poze de la client
+                      </span>
+                    )}
                     {i === r.featuredIndex && (
                       <span className="absolute left-1 top-1 rounded bg-brand-red px-1.5 py-0.5 text-[10px] font-bold text-white">
                         REPREZENTATIVĂ
