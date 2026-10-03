@@ -1,10 +1,12 @@
 import { redirect } from "next/navigation";
 import Link from "next/link";
-import { and, desc, eq, isNotNull, notInArray , isNull } from "drizzle-orm";
+import { and, desc, eq, isNotNull, notInArray, isNull } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { orderSubmissions, orders } from "@/db/schema";
+import { orderSubmissions, orders, users } from "@/db/schema";
+import { signOrderToken } from "@/lib/order-token";
+import { SITE } from "@/data/site";
 import { etichetaSursa } from "@/lib/sursa";
 import { etichetaRitm } from "@/lib/ritm";
 import { findPackageById } from "@/data/packages";
@@ -20,6 +22,29 @@ export const dynamic = "force-dynamic";
 // TOTUL PE UN SINGUR ECRAN: articolul trimis de client dupa plata, pozele,
 // datele de contact, plata si statusul. Pana acum astea traiau imprastiate
 // (emailuri, Cloudinary, Stripe) si un articol platit a fost de negasit.
+
+/**
+ * 03.10.2026 — „să se deschidă cererea articolului pe WhatsApp": butonul din
+ * caseta rosie deschide WhatsApp cu mesajul gata scris si linkul de formular
+ * al clientului (acelasi link ca in emailul de reamintire). Cu telefonul din
+ * Stripe se deschide direct conversatia; fara el, WhatsApp cere sa alegi
+ * contactul, iar mesajul e deja in caseta.
+ */
+function linkWhatsAppCerere(o: { email: string; packageId: string; sessionId: string | null; phone: string | null; amount: number }) {
+  let link = `${SITE.url}/articol`;
+  try {
+    if (o.sessionId) link = `${SITE.url}/articol/${signOrderToken({ sessionId: o.sessionId, email: o.email, packageId: o.packageId })}`;
+  } catch {
+    /* fara SESSION_SECRET nu putem semna; ramane pagina generala */
+  }
+  const pachet = findPackageById(o.packageId)?.name || "articolul";
+  const text =
+    `Bună ziua! Plata pentru ${pachet} (${(o.amount / 100).toFixed(0)} lei) a fost confirmată, vă mulțumim. ` +
+    `Ca să publicăm, mai avem nevoie de articol, poze și adresa site-ului. Durează 2 minute, aici: ${link}\n\n` +
+    `Dacă preferați, trimiteți-le direct aici, pe WhatsApp. Mulțumim!`;
+  const tel = (o.phone || "").replace(/[^\d]/g, "").replace(/^0(7\d{8})$/, "40$1");
+  return `https://wa.me/${tel}?text=${encodeURIComponent(text)}`;
+}
 
 function fmt(d: Date | null) {
   if (!d) return "—";
@@ -67,8 +92,12 @@ export default async function MaterialePage() {
       amount: orders.amount,
       createdAt: orders.createdAt,
       reminderAt: orders.materialReminderAt,
+      sessionId: orders.stripeSessionId,
+      // Telefonul vine din Stripe (cand clientul l-a dat) — e pe user, nu pe comanda.
+      phone: users.phone,
     })
     .from(orders)
+    .leftJoin(users, eq(users.email, orders.email))
     .where(
       and(
         eq(orders.status, "paid"),
@@ -141,13 +170,22 @@ export default async function MaterialePage() {
                 <span className={o.reminderAt ? "text-emerald-700" : "text-slate-400"}>
                   {o.reminderAt ? `reamintire trimisă ${fmt(o.reminderAt)}` : "reamintirea n-a plecat încă"}
                 </span>
+                {o.phone && <span className="text-slate-500">{o.phone}</span>}
                 <span className="ml-auto flex gap-2">
                   <PrimitExtern orderId={o.id} />
                   <a
-                    href={`/admin/trimite-email?to=${encodeURIComponent(o.email)}&sablon=material`}
-                    className="rounded-lg bg-brand-red px-3 py-1.5 text-xs font-bold text-white hover:bg-brand-red/90"
+                    href={linkWhatsAppCerere(o)}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="rounded-lg bg-[#25D366] px-3 py-1.5 text-xs font-bold text-white hover:bg-[#1ebe5b]"
                   >
-                    Cere articolul
+                    Cere articolul pe WhatsApp
+                  </a>
+                  <a
+                    href={`/admin/trimite-email?to=${encodeURIComponent(o.email)}&sablon=material`}
+                    className="rounded-lg border border-brand-red px-3 py-1.5 text-xs font-bold text-brand-red hover:bg-red-100"
+                  >
+                    pe email
                   </a>
                 </span>
               </li>
