@@ -35,6 +35,7 @@ import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
 import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
 import { surseCaptura } from "@/lib/captura-site";
+import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 
 import {
   PRAG_RETRAGERE,
@@ -1933,6 +1934,23 @@ console.log("\n########## S. RECENZII ##########");
   t("captura e marcata in admin", /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/page.tsx")) && /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
   t("emailul catre admin spune ca e captura, nu poza clientului", /am pus o captură a site-ului lui/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   t("captura se copiaza in Cloudinary, nu ramane pe serviciul extern", /api\.cloudinary\.com/.test(citesteFisier("src/lib/captura-site.ts")));
+}
+
+{
+  console.log("\n── Oferta zilnica pe Facebook (03.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const acum = new Date("2026-10-05T10:30:00+03:00");
+  const txt = textulZilei({ texte: TEXTE_IMPLICITE }, "2026-10-05", acum.getTime());
+  t("textul pune termenul curent al ofertei si linkul", /\d+ \w+/.test(txt) && !txt.includes("{termen}") && txt.includes("/oferta-500"));
+  t("textele se rotesc pe zile", textulZilei({ texte: ["a {termen}", "b {termen}"] }, "2026-10-05") !== textulZilei({ texte: ["a {termen}", "b {termen}"] }, "2026-10-06"));
+  t("pozele se rotesc pe zile; fara poze → null", pozaZilei({ poze: ["x", "y"] }, "2026-10-05") !== pozaZilei({ poze: ["x", "y"] }, "2026-10-06") && pozaZilei({ poze: [] }, "2026-10-05") === null);
+  t("randul: oprita → nu", !eRandulOfertei({ activ: false, ora: 10, ultimaZi: null }, acum));
+  t("randul: inainte de ora → nu", !eRandulOfertei({ activ: true, ora: 12, ultimaZi: null }, acum));
+  t("randul: dupa ora, nepostata azi → da", eRandulOfertei({ activ: true, ora: 10, ultimaZi: "2026-10-04" }, acum));
+  t("randul: deja postata azi → nu", !eRandulOfertei({ activ: true, ora: 10, ultimaZi: "2026-10-05" }, acum));
+  t("textele din admin: separate prin linie goala, cele prea scurte sarite", parseazaTexte("Un text destul de lung pentru oferta\n\nscurt\n\nAlt text destul de lung pentru oferta").length === 2);
+  t("cronul autoblog posteaza si oferta", /posteazaOferta\(\)/.test(citesteFisier("src/app/api/cron/autoblog/route.ts")));
+  t("postarea cu poza merge pe /photos, fara poza pe /feed", /\/photos`/.test(citesteFisier("src/lib/oferta-facebook.ts")) && /\/feed`/.test(citesteFisier("src/lib/oferta-facebook.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

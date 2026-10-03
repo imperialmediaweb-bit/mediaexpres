@@ -1,0 +1,178 @@
+import { eq } from "drizzle-orm";
+import { db } from "@/db";
+import { appSettings } from "@/db/schema";
+import { ensureBlogTables } from "@/lib/ensure-columns";
+import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
+import { configFacebookPagina, oraRomaniei } from "@/lib/autoblog";
+import { promoDeadlineLabel } from "@/data/packages";
+import { SITE } from "@/data/site";
+
+/**
+ * Oferta zilnica pe Facebook (03.10.2026).
+ *
+ * Proprietarul: „o data pe zi, pe langa articol, sa pui oferta: profita azi
+ * de oferta de 500, iti dau o poza". O postare pe zi pe pagina Media Express,
+ * cu una din pozele lui si unul din texte, prin rotatie, cu termenul curent
+ * al ofertei (din 3 in 3 zile, data/packages.ts) si linkul catre /oferta-500.
+ * Postare cu poza, nu link simplu: Facebook o arata la mai multi.
+ */
+
+export interface SetariOferta {
+  activ: boolean;
+  /** Ora Romaniei la care pleaca (0-23). */
+  ora: number;
+  poze: string[];
+  texte: string[];
+  /** Ziua ultimei postari, „AAAA-LL-ZZ", ora Romaniei. */
+  ultimaZi: string | null;
+  ultimaEroare: string | null;
+}
+
+export const ORA_IMPLICITA = 10;
+
+/** Textele implicite. `{termen}` se inlocuieste cu data curenta a ofertei. */
+export const TEXTE_IMPLICITE = [
+  `Profită azi de oferta de 500 lei: articolul tău publicat în 50 de ziare online din România, cu link către site și promovare pe Facebook inclusă. Valabilă până pe {termen}.\n👉 ${SITE.url}/oferta-500`,
+  `Vrei ca firma ta să apară în presă? 50 de ziare, un singur preț: 500 lei. Trimiți textul și pozele, noi publicăm în 12 ore lucrătoare și îți dăm raportul cu toate linkurile. Oferta ține până pe {termen}.\n👉 ${SITE.url}/oferta-500`,
+  `Advertorial în 50 de ziare, 500 lei, cu link dofollow și 3 zile de promovare pe Facebook pe ziarul ales de tine. Lista completă a ziarelor e publică, cu scorurile DA și PA. Până pe {termen}.\n👉 ${SITE.url}/oferta-500`,
+  `Lansezi ceva, deschizi un sediu nou, ai o ofertă? Spune-o în 50 de ziare deodată, pentru 500 lei. Fără contract, fără abonament, plătești o singură dată. Valabil până pe {termen}.\n👉 ${SITE.url}/oferta-500`,
+];
+
+const IMPLICITE: SetariOferta = { activ: false, ora: ORA_IMPLICITA, poze: [], texte: TEXTE_IMPLICITE, ultimaZi: null, ultimaEroare: null };
+
+export async function citesteSetariOferta(): Promise<SetariOferta> {
+  await ensureBlogTables();
+  const [r] = await db.select().from(appSettings).where(eq(appSettings.key, "oferta-facebook")).limit(1);
+  if (!r) return IMPLICITE;
+  try {
+    const j = JSON.parse(r.value) as Partial<SetariOferta>;
+    return {
+      activ: Boolean(j.activ),
+      ora: Number.isInteger(j.ora) && (j.ora as number) >= 0 && (j.ora as number) <= 23 ? (j.ora as number) : ORA_IMPLICITA,
+      poze: Array.isArray(j.poze) ? j.poze.map(String).filter(Boolean).slice(0, 10) : [],
+      texte: Array.isArray(j.texte) && j.texte.length ? j.texte.map(String).filter((t) => t.trim()).slice(0, 10) : TEXTE_IMPLICITE,
+      ultimaZi: typeof j.ultimaZi === "string" ? j.ultimaZi : null,
+      ultimaEroare: typeof j.ultimaEroare === "string" ? j.ultimaEroare : null,
+    };
+  } catch {
+    return IMPLICITE;
+  }
+}
+
+export async function salveazaSetariOferta(s: SetariOferta): Promise<void> {
+  await ensureBlogTables();
+  await db
+    .insert(appSettings)
+    .values({ key: "oferta-facebook", value: JSON.stringify(s), updatedAt: new Date() })
+    .onConflictDoUpdate({ target: appSettings.key, set: { value: JSON.stringify(s), updatedAt: new Date() } });
+}
+
+/** Textele din caseta de admin: separate printr-o linie goala. */
+export function parseazaTexte(text: string): string[] {
+  return text
+    .replace(/\r\n/g, "\n")
+    .split(/\n\s*\n/)
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 20)
+    .slice(0, 10);
+}
+
+export function ziRomaniei(d = new Date()): string {
+  const p = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit", day: "2-digit" }).formatToParts(d);
+  const g = (t: string) => p.find((x) => x.type === t)?.value;
+  return `${g("year")}-${g("month")}-${g("day")}`;
+}
+
+/** Numarul zilei, ca sa rotim textele si pozele fara sa tinem minte nimic. */
+function indexZi(zi: string): number {
+  return Math.floor(new Date(`${zi}T00:00:00Z`).getTime() / 86_400_000);
+}
+
+export function textulZilei(s: { texte: string[] }, zi: string, acum = Date.now()): string {
+  const texte = s.texte.length ? s.texte : TEXTE_IMPLICITE;
+  const t = texte[indexZi(zi) % texte.length];
+  const termen = promoDeadlineLabel(acum) || "";
+  return t.replace(/\{termen\}/g, termen).replace(/\s*Valabil[ăa] p[âa]n[ăa] pe \.\s*/g, " ").replace(/p[âa]n[ăa] pe \./g, "").trim();
+}
+
+export function pozaZilei(s: { poze: string[] }, zi: string): string | null {
+  if (!s.poze.length) return null;
+  return s.poze[indexZi(zi) % s.poze.length];
+}
+
+/** E ora si nu am postat azi? */
+export function eRandulOfertei(s: Pick<SetariOferta, "activ" | "ora" | "ultimaZi">, acum = new Date()): boolean {
+  if (!s.activ) return false;
+  const zi = ziRomaniei(acum);
+  if (s.ultimaZi === zi) return false;
+  return oraRomaniei(acum) >= s.ora;
+}
+
+/** Poza din admin: copiata in Cloudinary, ca sa aiba o adresa publica stabila. */
+export async function urcaPozaOferta(bytes: Buffer, tip: string): Promise<string | null> {
+  const cfg = getCloudinaryConfig();
+  if (!cfg) return null;
+  const folder = `${cfg.uploadFolder}/oferta`;
+  const publicId = `oferta-${Date.now()}`;
+  const timestamp = Math.floor(Date.now() / 1000);
+  const semnat = signUploadParams({ folder, public_id: publicId, timestamp });
+  if (!semnat) return null;
+  const fd = new FormData();
+  fd.set("file", `data:${tip};base64,${bytes.toString("base64")}`);
+  fd.set("folder", folder);
+  fd.set("public_id", publicId);
+  fd.set("timestamp", String(timestamp));
+  fd.set("signature", String(semnat.signature));
+  fd.set("api_key", cfg.apiKey);
+  const r = await fetch(`https://api.cloudinary.com/v1_1/${cfg.cloudName}/image/upload`, { method: "POST", body: fd });
+  if (!r.ok) {
+    console.warn("[oferta-facebook] cloudinary", r.status, (await r.text()).slice(0, 200));
+    return null;
+  }
+  const j = (await r.json()) as { secure_url?: string };
+  return j.secure_url || null;
+}
+
+export type RezultatOferta = { postat: false; motiv: string } | { postat: true; id: string };
+
+/** Postarea propriu-zisa. Cu `fortat`, ignora ora si ziua (butonul din admin). */
+export async function posteazaOferta(opt: { fortat?: boolean } = {}): Promise<RezultatOferta> {
+  const s = await citesteSetariOferta();
+  const acum = new Date();
+  if (!opt.fortat && !eRandulOfertei(s, acum)) return { postat: false, motiv: s.activ ? "nu e inca ora, sau azi e deja postata" : "oferta zilnica oprita" };
+  const cfg = configFacebookPagina();
+  if (!cfg) return { postat: false, motiv: "Lipsesc FB_PAGE_TOKEN / FB_PAGE_ID" };
+
+  const zi = ziRomaniei(acum);
+  const mesaj = textulZilei(s, zi, acum.getTime());
+  const poza = pozaZilei(s, zi);
+  const link = `${SITE.url}/oferta-500`;
+
+  try {
+    const r = poza
+      ? await fetch(`https://graph.facebook.com/v21.0/${cfg.pageId}/photos`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ url: poza, message: mesaj, access_token: cfg.token }),
+        })
+      : await fetch(`https://graph.facebook.com/v21.0/${cfg.pageId}/feed`, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: mesaj, link, access_token: cfg.token }),
+        });
+    const j = (await r.json()) as { id?: string; post_id?: string; error?: { message?: string } };
+    const id = j.post_id || j.id;
+    if (!r.ok || !id) {
+      const motiv = j.error?.message || `Facebook ${r.status}`;
+      await salveazaSetariOferta({ ...s, ultimaEroare: motiv.slice(0, 300) });
+      return { postat: false, motiv };
+    }
+    await salveazaSetariOferta({ ...s, ultimaZi: zi, ultimaEroare: null });
+    console.log(`[oferta-facebook] postat ${id}`);
+    return { postat: true, id };
+  } catch (e) {
+    const motiv = e instanceof Error ? e.message : String(e);
+    await salveazaSetariOferta({ ...s, ultimaEroare: motiv.slice(0, 300) });
+    return { postat: false, motiv };
+  }
+}

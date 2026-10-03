@@ -10,6 +10,7 @@ import {
   stergeCuvant,
   stergePost,
 } from "@/lib/autoblog";
+import { citesteSetariOferta, parseazaTexte, posteazaOferta, salveazaSetariOferta } from "@/lib/oferta-facebook";
 
 export const runtime = "nodejs";
 export const maxDuration = 120;
@@ -26,6 +27,14 @@ const Cerere = z.discriminatedUnion("actiune", [
   z.object({ actiune: z.literal("genereaza"), keywordId: z.string().min(1).optional() }),
   z.object({ actiune: z.literal("sterge-post"), id: z.string().min(1) }),
   z.object({ actiune: z.literal("facebook"), id: z.string().min(1) }),
+  z.object({
+    actiune: z.literal("oferta-setari"),
+    activ: z.boolean(),
+    ora: z.number().int().min(0).max(23),
+    texte: z.string().max(20000),
+  }),
+  z.object({ actiune: z.literal("oferta-sterge-poza"), url: z.string().min(1) }),
+  z.object({ actiune: z.literal("oferta-acum") }),
 ]);
 
 /** Toate actiunile din /admin/autoblog, intr-un singur loc. */
@@ -56,6 +65,21 @@ export async function POST(req: Request) {
       case "facebook": {
         const r = await posteazaPeFacebook(c.id);
         return NextResponse.json({ ok: r.ok, error: r.motiv });
+      }
+      case "oferta-setari": {
+        const s = await citesteSetariOferta();
+        const texte = parseazaTexte(c.texte);
+        await salveazaSetariOferta({ ...s, activ: c.activ, ora: c.ora, texte: texte.length ? texte : s.texte });
+        return NextResponse.json({ ok: true, texte: texte.length });
+      }
+      case "oferta-sterge-poza": {
+        const s = await citesteSetariOferta();
+        await salveazaSetariOferta({ ...s, poze: s.poze.filter((p) => p !== c.url) });
+        return NextResponse.json({ ok: true });
+      }
+      case "oferta-acum": {
+        const r = await posteazaOferta({ fortat: true });
+        return NextResponse.json({ ok: r.postat, error: r.postat ? undefined : r.motiv, id: r.postat ? r.id : undefined });
       }
     }
   } catch (e) {

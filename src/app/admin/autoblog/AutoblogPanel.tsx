@@ -2,7 +2,7 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, Trash2, Sparkles, Share2 } from "lucide-react";
+import { Loader2, Trash2, Sparkles, Share2, X, ImagePlus } from "lucide-react";
 
 interface Setari {
   activ: boolean;
@@ -15,6 +15,14 @@ interface Cuvant {
   status: string;
   error: string | null;
   usedAt: string | null;
+}
+interface Oferta {
+  activ: boolean;
+  ora: number;
+  poze: string[];
+  texte: string;
+  ultimaZi: string | null;
+  ultimaEroare: string | null;
 }
 interface Post {
   id: string;
@@ -75,16 +83,19 @@ export function AutoblogPanel({
   cuvinte,
   posturi,
   facebookConfigurat,
+  oferta,
 }: {
   setari: Setari;
   ritmuri: { id: string; eticheta: string }[];
   cuvinte: Cuvant[];
   posturi: Post[];
   facebookConfigurat: boolean;
+  oferta: Oferta;
 }) {
   const router = useRouter();
   const [s, setS] = useState<Setari>(setari);
   const [text, setText] = useState("");
+  const [of, setOf] = useState({ activ: oferta.activ, ora: oferta.ora, texte: oferta.texte });
   const [mesaj, setMesaj] = useState<string | null>(null);
   const [ocupat, setOcupat] = useState<string | null>(null);
   const [, startTransition] = useTransition();
@@ -225,6 +236,103 @@ export function AutoblogPanel({
             ))}
           </ul>
         )}
+      </section>
+
+      {/* Oferta zilnica pe Facebook */}
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <h2 className="font-serif text-lg font-bold text-brand-navy">Oferta de 500 lei, o dată pe zi pe Facebook</h2>
+        <p className="mt-1 text-xs text-slate-500">
+          Pe lângă articole, o postare pe zi pe pagina Media Express cu oferta: una din pozele tale și unul din texte, prin
+          rotație, cu termenul curent al ofertei pus automat în locul lui <code>{"{termen}"}</code>.
+          {oferta.ultimaZi && <span className="ml-1 text-emerald-700">Ultima postare: {oferta.ultimaZi}.</span>}
+          {oferta.ultimaEroare && <span className="ml-1 text-red-600">Ultima eroare: {oferta.ultimaEroare}</span>}
+        </p>
+        <div className="mt-3 flex flex-wrap items-center gap-4 text-sm">
+          <label className="inline-flex items-center gap-2">
+            <input type="checkbox" checked={of.activ} onChange={(e) => setOf({ ...of, activ: e.target.checked })} className="h-4 w-4 accent-brand-red" />
+            <span className="font-semibold">{of.activ ? "Pornită" : "Oprită"}</span>
+          </label>
+          <label className="inline-flex items-center gap-2">
+            la ora
+            <select value={of.ora} onChange={(e) => setOf({ ...of, ora: Number(e.target.value) })} className="rounded-lg border border-slate-300 px-2 py-1.5">
+              {Array.from({ length: 16 }, (_, i) => i + 7).map((h) => (
+                <option key={h} value={h}>
+                  {h}:00
+                </option>
+              ))}
+            </select>
+          </label>
+          <button
+            type="button"
+            disabled={ocupat !== null}
+            onClick={() => ruleaza("oferta-setari", { actiune: "oferta-setari", activ: of.activ, ora: of.ora, texte: of.texte }, () => "Setările ofertei sunt salvate.")}
+            className="rounded-lg bg-brand-navy px-4 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+          >
+            {ocupat === "oferta-setari" ? <Loader2 className="inline h-3.5 w-3.5 animate-spin" /> : "Salvează"}
+          </button>
+          <button
+            type="button"
+            disabled={ocupat !== null || !facebookConfigurat}
+            title={facebookConfigurat ? "Postează oferta acum, indiferent de oră" : "Lipsește tokenul de pagină"}
+            onClick={() => ruleaza("oferta-acum", { actiune: "oferta-acum" }, () => "Oferta e postată pe Facebook.")}
+            className="inline-flex items-center gap-1.5 rounded-lg bg-[#1877F2] px-4 py-1.5 text-xs font-bold text-white disabled:opacity-50"
+          >
+            <Share2 className="h-3.5 w-3.5" /> Postează acum
+          </button>
+        </div>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Pozele (prin rotație, câte una pe zi)</p>
+        <div className="mt-2 flex flex-wrap items-center gap-3">
+          {oferta.poze.map((u) => (
+            <span key={u} className="relative block">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={u} alt="" className="h-20 w-32 rounded-lg border border-slate-200 object-cover" />
+              <button
+                type="button"
+                disabled={ocupat !== null}
+                onClick={() => ruleaza("oferta-sterge-poza", { actiune: "oferta-sterge-poza", url: u }, () => "Poză ștearsă.")}
+                aria-label="Șterge poza"
+                className="absolute -right-1 -top-1 rounded-full bg-white p-0.5 text-slate-500 shadow hover:text-red-600"
+              >
+                <X className="h-3.5 w-3.5" />
+              </button>
+            </span>
+          ))}
+          <label className="inline-flex cursor-pointer items-center gap-1.5 rounded-lg border border-dashed border-slate-300 px-3 py-2 text-xs font-medium text-slate-600 hover:border-brand-navy">
+            <ImagePlus className="h-4 w-4" /> {ocupat === "poza" ? "Se urcă..." : "Adaugă poză"}
+            <input
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              className="hidden"
+              disabled={ocupat !== null}
+              onChange={async (e) => {
+                const f = e.target.files?.[0];
+                if (!f) return;
+                setOcupat("poza");
+                setMesaj(null);
+                try {
+                  const fd = new FormData();
+                  fd.set("poza", f);
+                  const r = await fetch("/api/admin/autoblog/poza", { method: "POST", body: fd });
+                  const j = (await r.json().catch(() => ({ ok: false }))) as { ok: boolean; error?: string };
+                  setMesaj(j.ok ? "Poza e adăugată." : `Nu a mers: ${j.error || "eroare"}`);
+                  startTransition(() => router.refresh());
+                } finally {
+                  setOcupat(null);
+                  e.target.value = "";
+                }
+              }}
+            />
+          </label>
+        </div>
+
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Textele (separate printr-o linie goală, prin rotație)</p>
+        <textarea
+          value={of.texte}
+          onChange={(e) => setOf({ ...of, texte: e.target.value })}
+          rows={8}
+          className="mt-2 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus:border-brand-red focus:outline-none"
+        />
       </section>
 
       {/* Articole */}

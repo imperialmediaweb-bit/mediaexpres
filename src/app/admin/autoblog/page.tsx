@@ -9,6 +9,7 @@ import {
   RITMURI_BLOG,
 } from "@/lib/autoblog";
 import { getCloudinaryConfig } from "@/lib/cloudinary";
+import { citesteSetariOferta } from "@/lib/oferta-facebook";
 import { AutoblogPanel } from "./AutoblogPanel";
 
 export const dynamic = "force-dynamic";
@@ -19,7 +20,7 @@ export const dynamic = "force-dynamic";
  */
 export default async function AutoblogAdmin() {
   if (!getSession()) redirect("/admin/login?from=/admin/autoblog");
-  const [setari, cuvinte, posturi] = await Promise.all([citesteSetariAutoblog(), listeazaCuvinte(), toatePosturileAdmin()]);
+  const [setari, cuvinte, posturi, oferta] = await Promise.all([citesteSetariAutoblog(), listeazaCuvinte(), toatePosturileAdmin(), citesteSetariOferta()]);
 
   const stare = {
     openai: Boolean(process.env.OPENAI_API_KEY),
@@ -73,6 +74,7 @@ export default async function AutoblogAdmin() {
           fbError: p.fbError,
         }))}
         facebookConfigurat={stare.facebook}
+        oferta={{ activ: oferta.activ, ora: oferta.ora, poze: oferta.poze, texte: oferta.texte.join("\n\n"), ultimaZi: oferta.ultimaZi, ultimaEroare: oferta.ultimaEroare }}
       />
     </div>
   );
