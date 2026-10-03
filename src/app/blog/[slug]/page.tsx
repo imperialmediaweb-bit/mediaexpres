@@ -6,22 +6,39 @@ import { MDXRemote } from "next-mdx-remote/rsc";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import remarkGfm from "remark-gfm";
-import { getAllSlugs, getPostBySlug, getAllPosts } from "@/lib/mdx";
+import { getPostBySlug, type PostMeta } from "@/lib/mdx";
+import { postDupaSlug, minuteCitire } from "@/lib/autoblog";
 import { formatDate } from "@/lib/utils";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { CtaBanner } from "@/components/home/CtaBanner";
 import { SITE } from "@/data/site";
+import { toatePosturile } from "@/lib/blog-posts";
 
-export async function generateStaticParams() {
-  return getAllSlugs().map((slug) => ({ slug }));
+// Articolele autoblogului sunt in baza: pagina se randeaza la cerere.
+export const dynamic = "force-dynamic";
+
+/** Un articol, de oriunde ar veni: fisier MDX sau autoblog. */
+async function incarcaArticol(slug: string): Promise<(PostMeta & { mdx?: string; html?: string; coverCredit?: string | null }) | null> {
+  const fisier = getPostBySlug(slug);
+  if (fisier) return { ...fisier, mdx: fisier.content };
+  const p = await postDupaSlug(slug);
+  if (!p) return null;
+  return {
+    slug: p.slug,
+    title: p.title,
+    date: p.publishedAt.toISOString().slice(0, 10),
+    excerpt: p.excerpt,
+    cover: p.coverUrl || undefined,
+    coverCredit: p.coverCredit,
+    author: "Echipa MediaExpres",
+    tags: p.tags,
+    readingMinutes: minuteCitire(p.bodyHtml),
+    html: p.bodyHtml,
+  };
 }
 
-export async function generateMetadata({
-  params,
-}: {
-  params: { slug: string };
-}): Promise<Metadata> {
-  const post = getPostBySlug(params.slug);
+export async function generateMetadata({ params }: { params: { slug: string } }): Promise<Metadata> {
+  const post = await incarcaArticol(params.slug);
   if (!post) return { title: "Articol" };
   return {
     title: post.title,
@@ -33,17 +50,16 @@ export async function generateMetadata({
       authors: [post.author || SITE.name],
       title: post.title,
       description: post.excerpt,
+      images: post.cover ? [{ url: post.cover }] : undefined,
     },
   };
 }
 
-export default function BlogPostPage({ params }: { params: { slug: string } }) {
-  const post = getPostBySlug(params.slug);
+export default async function BlogPostPage({ params }: { params: { slug: string } }) {
+  const post = await incarcaArticol(params.slug);
   if (!post) notFound();
 
-  const related = getAllPosts()
-    .filter((p) => p.slug !== post.slug)
-    .slice(0, 3);
+  const related = (await toatePosturile()).filter((p) => p.slug !== post.slug).slice(0, 3);
 
   const articleJsonLd = {
     "@context": "https://schema.org",
@@ -51,6 +67,7 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     headline: post.title,
     description: post.excerpt,
     datePublished: post.date,
+    image: post.cover ? [post.cover] : undefined,
     author: { "@type": "Organization", name: post.author || SITE.name },
     publisher: {
       "@type": "Organization",
@@ -59,6 +76,14 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
     },
     mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
   };
+
+  const prose = `prose prose-lg prose-slate max-w-none
+              prose-headings:font-serif prose-headings:text-brand-navy
+              prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline
+              prose-strong:text-brand-navy
+              prose-blockquote:border-l-brand-red prose-blockquote:bg-brand-ivory prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-md prose-blockquote:not-italic
+              prose-code:bg-brand-ivory prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-brand-navy prose-code:before:content-none prose-code:after:content-none
+              prose-img:rounded-xl`;
 
   return (
     <>
@@ -105,22 +130,36 @@ export default function BlogPostPage({ params }: { params: { slug: string } }) {
 
         <div className="section bg-white">
           <div className="container max-w-3xl">
-            <div className="prose prose-lg prose-slate max-w-none
-              prose-headings:font-serif prose-headings:text-brand-navy
-              prose-a:text-brand-red prose-a:no-underline hover:prose-a:underline
-              prose-strong:text-brand-navy
-              prose-blockquote:border-l-brand-red prose-blockquote:bg-brand-ivory prose-blockquote:py-2 prose-blockquote:px-6 prose-blockquote:rounded-r-md prose-blockquote:not-italic
-              prose-code:bg-brand-ivory prose-code:px-1.5 prose-code:py-0.5 prose-code:rounded prose-code:text-brand-navy prose-code:before:content-none prose-code:after:content-none
-              prose-img:rounded-xl">
-              <MDXRemote
-                source={post.content}
-                options={{
-                  mdxOptions: {
-                    remarkPlugins: [remarkGfm],
-                    rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
-                  },
-                }}
-              />
+            {post.cover && (
+              <figure className="mb-10">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={post.cover}
+                  alt={post.title}
+                  className="aspect-[16/9] w-full rounded-2xl object-cover"
+                  loading="eager"
+                />
+                {post.coverCredit && (
+                  <figcaption className="mt-2 text-right text-xs text-slate-400">{post.coverCredit}</figcaption>
+                )}
+              </figure>
+            )}
+            <div className={prose}>
+              {post.mdx ? (
+                <MDXRemote
+                  source={post.mdx}
+                  options={{
+                    mdxOptions: {
+                      remarkPlugins: [remarkGfm],
+                      rehypePlugins: [rehypeSlug, rehypeAutolinkHeadings],
+                    },
+                  }}
+                />
+              ) : (
+                // HTML-ul autoblogului e curatat la generare (lib/autoblog.ts: doar
+                // taguri de text si linkuri interne), deci e sigur de pus direct.
+                <div dangerouslySetInnerHTML={{ __html: post.html || "" }} />
+              )}
             </div>
           </div>
         </div>

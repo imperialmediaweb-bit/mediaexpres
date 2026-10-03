@@ -183,6 +183,7 @@ export default async function AdminHome() {
           value={pendingArticles[0]?.n || 0}
           tone={pendingArticles[0]?.n ? "red" : undefined}
         />
+        <Stat href="/admin/autoblog" label="Autoblog (articole SEO)" value="setări" />
         <Stat
           href="/admin/parteneri"
           label="Aplicații ziare noi"

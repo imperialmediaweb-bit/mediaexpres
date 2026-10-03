@@ -230,3 +230,52 @@ export function ensureReviewsTable(): Promise<void> {
   }
   return reviewsDone;
 }
+
+/** Tabelele autoblogului (03.10.2026): create la prima folosire, idempotent. */
+let blogDone: Promise<void> | null = null;
+
+export function ensureBlogTables(): Promise<void> {
+  if (!blogDone) {
+    blogDone = Promise.all([
+      db.execute(sql`CREATE TABLE IF NOT EXISTS "blog_post" (
+        "id" text PRIMARY KEY,
+        "slug" text NOT NULL UNIQUE,
+        "keyword" text NOT NULL,
+        "title" text NOT NULL,
+        "excerpt" text NOT NULL,
+        "body_html" text NOT NULL,
+        "tags" text NOT NULL DEFAULT '[]',
+        "cover_url" text,
+        "cover_credit" text,
+        "cover_source" text,
+        "status" text NOT NULL DEFAULT 'published',
+        "published_at" timestamp NOT NULL DEFAULT now(),
+        "fb_post_id" text,
+        "fb_posted_at" timestamp,
+        "fb_error" text,
+        "created_at" timestamp NOT NULL DEFAULT now()
+      )`),
+      db.execute(sql`CREATE TABLE IF NOT EXISTS "blog_keyword" (
+        "id" text PRIMARY KEY,
+        "keyword" text NOT NULL,
+        "status" text NOT NULL DEFAULT 'pending',
+        "position" integer NOT NULL DEFAULT 0,
+        "post_id" text,
+        "error" text,
+        "used_at" timestamp,
+        "created_at" timestamp NOT NULL DEFAULT now()
+      )`),
+      db.execute(sql`CREATE TABLE IF NOT EXISTS "app_setting" (
+        "key" text PRIMARY KEY,
+        "value" text NOT NULL,
+        "updated_at" timestamp NOT NULL DEFAULT now()
+      )`),
+    ])
+      .then(() => undefined)
+      .catch((e) => {
+        blogDone = null;
+        console.error("[ensure-columns] blog", e);
+      });
+  }
+  return blogDone;
+}

@@ -1,11 +1,16 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/data/site";
 import { getAllSlugs } from "@/lib/mdx";
+import { posturiPublicate } from "@/lib/autoblog";
 import { COUNTIES } from "@/data/counties";
 import { TEMPLATES } from "@/data/templates";
 import { INDUSTRIES } from "@/data/industries";
 
-export default function sitemap(): MetadataRoute.Sitemap {
+// Articolele autoblogului vin din baza: harta se face la fiecare cerere, ca Google
+// sa vada articolul nou imediat, nu peste o ora.
+export const dynamic = "force-dynamic";
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const base = SITE.url;
   const now = new Date();
 
@@ -42,6 +47,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "monthly" as const,
     priority: 0.6,
   }));
+  // Autoblog (03.10.2026): articolele generate, ca Google sa le gaseasca repede.
+  const autoblog = (await posturiPublicate()).map((p) => ({
+    url: `${base}/blog/${p.slug}`,
+    lastModified: p.publishedAt,
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
 
   const counties = COUNTIES.map((c) => ({
     url: `${base}/publicare-comunicat-${c.slug}`,
@@ -64,5 +76,5 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...blog, ...counties, ...templates, ...industries];
+  return [...staticPages, ...blog, ...autoblog, ...counties, ...templates, ...industries];
 }

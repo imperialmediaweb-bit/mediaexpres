@@ -8,10 +8,10 @@ import { IndexButton } from "./IndexButton";
 
 export const dynamic = "force-dynamic";
 
-export default function AdminSeoPage() {
+export default async function AdminSeoPage() {
   if (!getSession()) redirect("/admin/login?from=/admin/seo");
 
-  const urls = sitemap().map((e) => (typeof e.url === "string" ? e.url : String(e.url)));
+  const urls = (await sitemap()).map((e) => (typeof e.url === "string" ? e.url : String(e.url)));
   const grupuri = [
     { nume: "Pagini de județ", filtru: "/publicare-comunicat-" },
     { nume: "Pagini de industrie", filtru: "/comunicate-presa-" },

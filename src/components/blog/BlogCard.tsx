@@ -6,22 +6,34 @@ import type { PostMeta } from "@/lib/mdx";
 export function BlogCard({ post }: { post: PostMeta }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white transition-all hover:-translate-y-1 hover:shadow-xl">
-      <div className="aspect-[16/9] bg-gradient-to-br from-brand-navy via-[#13396B] to-brand-red relative overflow-hidden">
-        <div
-          aria-hidden="true"
-          className="absolute inset-0 opacity-20"
-          style={{
-            backgroundImage:
-              "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
-            backgroundSize: "20px 20px",
-          }}
-        />
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <span className="font-serif text-xl font-bold text-white text-center leading-tight line-clamp-3">
-            {post.title}
-          </span>
+      {post.cover ? (
+        <Link href={`/blog/${post.slug}`} className="relative block aspect-[16/9] overflow-hidden bg-slate-100">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={post.cover}
+            alt={post.title}
+            loading="lazy"
+            className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+          />
+        </Link>
+      ) : (
+        <div className="aspect-[16/9] bg-gradient-to-br from-brand-navy via-[#13396B] to-brand-red relative overflow-hidden">
+          <div
+            aria-hidden="true"
+            className="absolute inset-0 opacity-20"
+            style={{
+              backgroundImage:
+                "radial-gradient(circle at 1px 1px, rgba(255,255,255,0.9) 1px, transparent 0)",
+              backgroundSize: "20px 20px",
+            }}
+          />
+          <div className="absolute inset-0 flex items-center justify-center p-6">
+            <span className="font-serif text-xl font-bold text-white text-center leading-tight line-clamp-3">
+              {post.title}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
       <div className="flex flex-col flex-1 p-6">
         <div className="flex items-center gap-3 text-xs text-slate-500">
           <time>{formatDate(post.date)}</time>

@@ -32,5 +32,8 @@ export async function pornestePlanificator() {
   // vechi de 30 de zile (lib/autoritate-retea.ts).
   setTimeout(() => ruleaza("/api/cron/autoritate-retea"), 2 * MIN);
   setInterval(() => ruleaza("/api/cron/autoritate-retea"), 24 * 60 * MIN);
-  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic");
+  // Autoblogul: la 30 de minute; publica doar cand ii vine randul (lib/autoblog.ts).
+  setTimeout(() => ruleaza("/api/cron/autoblog"), 4 * MIN);
+  setInterval(() => ruleaza("/api/cron/autoblog"), 30 * MIN);
+  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic, autoblog la 30 de minute");
 }

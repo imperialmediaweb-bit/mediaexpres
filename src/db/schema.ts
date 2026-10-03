@@ -563,3 +563,49 @@ export const partnerPayouts = pgTable("partner_payout", {
   cancelledAt: timestamp("cancelled_at"),
   adminNotes: text("admin_notes"),
 });
+
+/*
+ * Autoblog (03.10.2026). Proprietarul: „hai sa facem si un autoblog... daca
+ * tot am fost gasiti din cautarea aia pe Google". Articole SEO pe cuvinte
+ * cheie, scrise de model, cu poza de pe Pexels/Pixabay, publicate pe /blog
+ * intr-un ritm setat din admin si postate pe pagina de Facebook.
+ */
+export const blogPosts = pgTable("blog_post", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  slug: text("slug").unique().notNull(),
+  keyword: text("keyword").notNull(),
+  title: text("title").notNull(),
+  excerpt: text("excerpt").notNull(),
+  /** HTML curat: doar p, h2, h3, ul, ol, li, strong, em, a, blockquote. */
+  bodyHtml: text("body_html").notNull(),
+  tags: text("tags").notNull().default("[]"),
+  coverUrl: text("cover_url"),
+  coverCredit: text("cover_credit"),
+  coverSource: text("cover_source"),
+  /** draft | published */
+  status: text("status").notNull().default("published"),
+  publishedAt: timestamp("published_at").defaultNow().notNull(),
+  fbPostId: text("fb_post_id"),
+  fbPostedAt: timestamp("fb_posted_at"),
+  fbError: text("fb_error"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const blogKeywords = pgTable("blog_keyword", {
+  id: text("id").primaryKey().$defaultFn(() => crypto.randomUUID()),
+  keyword: text("keyword").notNull(),
+  /** pending | done | failed */
+  status: text("status").notNull().default("pending"),
+  position: integer("position").notNull().default(0),
+  postId: text("post_id"),
+  error: text("error"),
+  usedAt: timestamp("used_at"),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+/** Setari mici, cheie → valoare (ritmul autoblogului etc.). */
+export const appSettings = pgTable("app_setting", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});

@@ -33,6 +33,7 @@ import { analizeazaPagina } from "@/lib/paza-linkuri";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
 import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
+import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
 
 import {
   PRAG_RETRAGERE,
@@ -154,7 +155,7 @@ t("contine IBAN-ul real", mail.includes(SITE.billing.iban));
 t("contine beneficiarul", mail.includes(SITE.billing.company));
 t("contine banca", mail.includes(SITE.billing.bank));
 t("contine pretul de 500 lei", mail.includes("500 lei"));
-t("contine termenul ofertei", mail.includes("1 octombrie"));
+t("contine termenul ofertei", mail.includes(promoDeadlineLabel()!));
 t("contine WhatsApp-ul", mail.includes(SITE.phone));
 t("contine linkul catre oferta", mail.includes("/oferta-500"));
 t("promite factura fiscala", /factur[aă] fiscal[aă]/i.test(mail));
@@ -181,7 +182,7 @@ console.log("\n########## E. CUNOSTINTELE CONSULTANTULUI ##########");
 const k = buildAdvisorKnowledge();
 t("stie IBAN-ul pentru OP", k.includes(SITE.billing.iban));
 t("stie firma de pe factura", k.includes(SITE.billing.company));
-t("stie termenul ofertei", k.includes("1 OCTOMBRIE"));
+t("stie termenul ofertei", k.toUpperCase().includes(promoDeadlineLabel()!.toUpperCase()));
 t("stie de publicarea in 12 ore", /12\s*(DE\s*)?ORE/i.test(k));
 // Chatul trebuie sa raspunda ca proprietarul pe WhatsApp: pe nume la ziare,
 // cu cifre la autoritate, cinstit la trafic, ferm la reguli, si sa stie
@@ -1896,6 +1897,30 @@ console.log("\n########## S. RECENZII ##########");
   t("PDF-ul cu lista pune DA / PA langa nume", /\(DA \$\{autoritate\[domeniuPdf\(n\.url\)\]\.da\}/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")) && /PA \$\{autoritate\[domeniuPdf\(n\.url\)\]\.pa\}/.test(citesteFisier("src/lib/newspaper-list-pdf.ts")));
   t("scorurile se reimprospateaza din planificator, zilnic, doar cele vechi de 30 de zile", /autoritate-retea/.test(citesteFisier("src/planificator.ts")) && /ZILE_INTRE_MASURATORI = 30/.test(citesteFisier("src/lib/autoritate-retea.ts")));
   t("cronul cere cheia", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/autoritate-retea/route.ts")));
+}
+
+{
+  console.log("\n── Autoblog (03.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("cuvintele: o linie sau o virgula = un cuvant, fara dubluri, fara numerotare", JSON.stringify(parseazaCuvinte("1. cât costă un advertorial\nadvertorial în ziare, Cât costă un advertorial\n\n- promovare firmă")) === JSON.stringify(["cât costă un advertorial", "advertorial în ziare", "promovare firmă"]));
+  t("slugul: fara diacritice, fara semne, max 80", slugDin("Cât costă un advertorial în 2026? Ghid complet!") === "cat-costa-un-advertorial-in-2026-ghid-complet");
+  const murdar = '<h1>x</h1><p>Text <script>alert(1)</script><a href="https://evil.ro">rau</a> si <a href="/oferta-500">bun</a> <img src=x onerror=alert(1)></p><h2 style="color:red" onclick="x()">Sub</h2>';
+  const curat = curataHtml(murdar);
+  t("html-ul generat: fara script, img, h1, atribute; linkuri doar interne", curat === '<h2>x</h2><p>Text rau si <a href="/oferta-500">bun</a> </p><h2>Sub</h2>');
+  t("linkul catre site-ul nostru devine relativ", curataHtml('<a href="https://mediaexpress.ro/reteaua-noastra">x</a>') === '<a href="/reteaua-noastra">x</a>');
+  t("numarul de cuvinte ignora tagurile", numarCuvinte("<p>unu doi</p><h2>trei</h2>") === 3);
+  const zi = new Date("2026-10-05T10:00:00+03:00");
+  t("randul: fara articole, in timpul zilei → da", eRandul({ ritm: "1pezi", ultimaPublicare: null, acum: zi }));
+  t("randul: noaptea nu se publica", !eRandul({ ritm: "1pezi", ultimaPublicare: null, acum: new Date("2026-10-05T02:00:00+03:00") }));
+  t("randul: 1 pe zi, ultimul acum 10 ore → nu", !eRandul({ ritm: "1pezi", ultimaPublicare: new Date(zi.getTime() - 10 * 3600e3), acum: zi }));
+  t("randul: 1 pe zi, ultimul acum 23,6 ore → da (toleranta 30 min)", eRandul({ ritm: "1pezi", ultimaPublicare: new Date(zi.getTime() - 23.6 * 3600e3), acum: zi }));
+  t("randul: 2 pe zi, ultimul acum 12 ore → da", eRandul({ ritm: "2pezi", ultimaPublicare: new Date(zi.getTime() - 12 * 3600e3), acum: zi }));
+  t("randul: 1 la 2 zile, ultimul acum 30 ore → nu", !eRandul({ ritm: "la2zile", ultimaPublicare: new Date(zi.getTime() - 30 * 3600e3), acum: zi }));
+  t("ritmurile cerute: 2 pe zi, 1 pe zi, 1 la 2 zile, 1 la 3 zile", RITMURI_BLOG.map((r) => r.oreIntre).join(",") === "12,24,48,72");
+  t("postarea pe Facebook are titlul, rezumatul si linkul", textPostareFacebook({ title: "T", excerpt: "R", slug: "s" }) === `T\n\nR\n\nCitește articolul: ${SITE.url}/blog/s`);
+  t("cronul autoblog cere cheia si e in planificator la 30 de minute", /cronAutorizat\(req\.headers\)/.test(citesteFisier("src/app/api/cron/autoblog/route.ts")) && /autoblog"\), 30 \* MIN/.test(citesteFisier("src/planificator.ts")));
+  t("harta site-ului include articolele autoblogului", /\.\.\.autoblog/.test(citesteFisier("src/app/sitemap.ts")));
+  t("pagina de articol randeaza HTML-ul din baza cand nu exista fisier MDX", /postDupaSlug/.test(citesteFisier("src/app/blog/[slug]/page.tsx")) && /dangerouslySetInnerHTML/.test(citesteFisier("src/app/blog/[slug]/page.tsx")));
 }
 
 console.log("\n" + "=".repeat(64));

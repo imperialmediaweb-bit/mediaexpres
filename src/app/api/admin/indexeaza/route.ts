@@ -20,7 +20,7 @@ export const maxDuration = 120;
  * configurat, IndexNow tot isi face treaba.
  */
 async function handle() {
-  const urls = sitemap().map((e) => (typeof e.url === "string" ? e.url : String(e.url)));
+  const urls = (await sitemap()).map((e) => (typeof e.url === "string" ? e.url : String(e.url)));
 
   const [indexNow, google] = await Promise.all([pingIndexNow(urls), submitToGoogle(urls)]);
 

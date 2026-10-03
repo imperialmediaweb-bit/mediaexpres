@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { BlogCard } from "@/components/blog/BlogCard";
-import { getAllPosts } from "@/lib/mdx";
+import { toatePosturile } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
   title: "Blog",
@@ -9,8 +9,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/blog" },
 };
 
-export default function BlogPage() {
-  const posts = getAllPosts();
+// Articolele autoblogului vin din baza, deci pagina se randeaza la cerere.
+export const dynamic = "force-dynamic";
+
+export default async function BlogPage() {
+  const posts = await toatePosturile();
   return (
     <>
       <section className="bg-brand-navy text-white">
