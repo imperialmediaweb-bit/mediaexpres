@@ -41,7 +41,11 @@ function linkWhatsAppCerere(o: { email: string; packageId: string; sessionId: st
   const text =
     `Bună ziua! Plata pentru ${pachet} (${(o.amount / 100).toFixed(0)} lei) a fost confirmată, vă mulțumim. ` +
     `Ca să publicăm, mai avem nevoie de articol, poze și adresa site-ului. Durează 2 minute, aici: ${link}\n\n` +
-    `Dacă preferați, trimiteți-le direct aici, pe WhatsApp. Mulțumim!`;
+    `Dacă preferați, trimiteți-le direct aici, pe WhatsApp, și spuneți-ne și:\n` +
+    `1. Ritmul de publicare: toate în 12 ore, întinse pe 3 zile sau pe 2 săptămâni (recomandat pentru SEO)?\n` +
+    `2. Variantă unică pentru fiecare ziar (recomandat, fără conținut duplicat) sau exact textul dvs., identic peste tot?\n` +
+    `3. Ziarul sau orașul unde doriți promovarea pe Facebook (3 zile, inclusă în preț).\n` +
+    `Mulțumim!`;
   const tel = (o.phone || "").replace(/[^\d]/g, "").replace(/^0(7\d{8})$/, "40$1");
   return `https://wa.me/${tel}?text=${encodeURIComponent(text)}`;
 }
