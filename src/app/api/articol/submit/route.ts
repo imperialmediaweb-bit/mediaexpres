@@ -98,7 +98,7 @@ export async function POST(req: NextRequest) {
         ok: false,
         error:
           d.images.length === 0
-            ? `Articolul nu poate fi trimis fără poze. Urcă ${POZE_OBLIGATORII} poze cu firma ta (logo, sediu, produse, echipă) la pasul „Poze" și apasă din nou Trimite. Dacă poza nu se încarcă de pe telefon, trimite-o pe WhatsApp la ${SITE.phone} și o punem noi — textul tău e păstrat.`
+            ? `Articolul nu poate fi trimis fără nicio poză. Urcă cel puțin o poză cu firma ta (logo, sediu, produs, echipă) la pasul „Poze" și apasă din nou Trimite. Dacă poza nu se încarcă de pe telefon, trimite-o pe WhatsApp la ${SITE.phone} și o punem noi — textul tău e păstrat.`
             : `Mai urcă ${POZE_OBLIGATORII - d.images.length} ${POZE_OBLIGATORII - d.images.length === 1 ? "poză" : "poze"} (ai ${d.images.length}, sunt necesare ${POZE_OBLIGATORII}) și apasă din nou Trimite.`,
       },
       { status: 400 },

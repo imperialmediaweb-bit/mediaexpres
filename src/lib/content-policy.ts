@@ -47,14 +47,16 @@ export const FARA_POZE_AVERTISMENT =
   "Nu ai urcat nicio poză. Fără poza ta, articolul apare cu o imagine generică de stoc pe toate ziarele și pe Facebook — arată mult mai slab. Urcă măcar o poză (logo, sediu, produs, echipă). Dacă chiar nu ai, apasă din nou „Trimite fără poze”.";
 
 /**
- * Pe formularul de dupa plata (articolul), pozele sunt OBLIGATORII: 3.
- * Decizia user 13.09.2026 („trebuie sa trimita si 3 poze"), dupa a treia
- * comanda sosita fara nicio poza. Avertismentul de mai sus ramane pe
- * formularul OP (inainte de plata, unde un blocaj costa comanda).
+ * Pe formularul de dupa plata (articolul), pozele sunt OBLIGATORII: cel putin 1
+ * (maxim 3). Pana pe 03.10.2026 erau 3 obligatorii (decizia user 13.09, dupa a
+ * treia comanda sosita fara nicio poza). Apoi doi clienti platiti la rand
+ * (Ilea, Sanda) n-au mai trimis nimic: pe telefon, trei poze de urcat sunt un
+ * zid. Decizia user 03.10: „poate sa trimita intre 1 si 3 poze, nu obligatoriu
+ * 3". Avertismentul de mai sus ramane pe formularul OP (inainte de plata).
  */
-export const POZE_OBLIGATORII = 3;
+export const POZE_OBLIGATORII = 1;
 export const POZE_OBLIGATORII_MESAJ =
-  `Trimite ${POZE_OBLIGATORII} poze cu firma ta (logo, sediu, produse, echipă) — articolul se publică cu ele pe toate ziarele și pe Facebook. Fără poze nu se poate trimite.`;
+  "Urcă cel puțin o poză cu firma ta (logo, sediu, produs, echipă) — până la 3. Articolul se publică cu ea pe toate ziarele și pe Facebook. Fără nicio poză nu se poate trimite.";
 
 /** Consecinta, spusa scurt sub bifa. Aceeasi regula ca in Termeni, art. 4. */
 export const CONTENT_DECLARATION_WARNING =

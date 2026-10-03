@@ -283,7 +283,7 @@ export function ArticleForm({
         setFaraPozeConfirmat(true);
         setError(
           `Încărcarea pozelor nu a reușit. Apasă din nou „Trimite" și comanda pleacă fără ele — ` +
-            `apoi trimite-ne cele ${POZE_OBLIGATORII} poze pe WhatsApp la ${SITE.phone} și le punem noi. ` +
+            `apoi trimite-ne pozele pe WhatsApp la ${SITE.phone} și le punem noi. ` +
             `Publicarea nu se blochează.`,
         );
         return;
@@ -628,13 +628,13 @@ export function ArticleForm({
       {/* 3. Poze */}
       <section className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
         <h2 className="font-serif text-lg font-bold text-brand-navy">
-          3. Poze <span className="text-sm font-normal text-brand-red">— obligatoriu, {POZE_OBLIGATORII} poze</span>{" "}
+          3. Poze <span className="text-sm font-normal text-brand-red">— cel puțin una, până la {MAX_IMAGES}</span>{" "}
           <span className="text-sm font-normal text-slate-500">({images.length}/{MAX_IMAGES})</span>
         </h2>
         <p className="mt-1 text-sm text-slate-600">
-          <strong>Urcă {POZE_OBLIGATORII} poze</strong> cu firma ta: logo, sediu, produse,
+          <strong>Urcă 1–{MAX_IMAGES} poze</strong> cu firma ta: logo, sediu, produse,
           echipă. Alege una ca <strong>imagine reprezentativă</strong> — aia apare pe
-          prima pagină și pe Facebook. Fără poze, articolul nu se poate trimite.
+          prima pagină și pe Facebook. Fără nicio poză, articolul nu se poate trimite.
         </p>
 
         {images.length > 0 && (
@@ -821,7 +821,7 @@ export function ArticleForm({
         ) : images.length < POZE_OBLIGATORII && pozeEroare && faraPozeConfirmat ? (
           "Trimite fără poze — le dau pe WhatsApp →"
         ) : images.length < POZE_OBLIGATORII ? (
-          `Urcă ${POZE_OBLIGATORII - images.length === 1 ? "încă o poză" : `${POZE_OBLIGATORII - images.length} poze`} ca să trimiți`
+          `Urcă ${POZE_OBLIGATORII - images.length === 1 ? (images.length === 0 ? "o poză" : "încă o poză") : `${POZE_OBLIGATORII - images.length} poze`} ca să trimiți`
         ) : (
           "Trimite materialele →"
         )}

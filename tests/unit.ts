@@ -1100,11 +1100,11 @@ console.log("\n########## S. RECENZII ##########");
   {
     const cp = citesteFisier("src/lib/content-policy.ts");
     t("avertismentul fara poze e unul singur, in content-policy", /FARA_POZE_AVERTISMENT/.test(cp) && /Trimite fără poze/.test(cp));
-    t("dupa plata, pozele sunt obligatorii: 3", /POZE_OBLIGATORII = 3/.test(cp));
+    t("dupa plata, pozele sunt obligatorii: cel putin 1 (decizia user 03.10.2026, nu 3)", /POZE_OBLIGATORII = 1/.test(cp));
     {
-      // Formularul de DUPA PLATA: 3 poze obligatorii, butonul blocat pana atunci.
+      // Formularul de DUPA PLATA: cel putin o poza obligatorie, butonul blocat pana atunci.
       const s = citesteFisier("src/app/articol/[token]/ArticleForm.tsx");
-      t("articol: sub 3 poze nu se poate trimite", /images\.length < POZE_OBLIGATORII/.test(s));
+      t("articol: fara nicio poza nu se poate trimite", /images\.length < POZE_OBLIGATORII/.test(s));
       t("articol: butonul spune cate poze mai lipsesc", /Urcă \$\{POZE_OBLIGATORII - images\.length === 1/.test(s));
       t("articol: eroarea de la poze se arata langa poze", /pozeEroare/.test(s) && /role="alert"/.test(s));
       t("articol: pozele mari se micsoreaza, nu se refuza", /comprimaPoza\(ales\)/.test(s));

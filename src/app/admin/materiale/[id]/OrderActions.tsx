@@ -82,7 +82,7 @@ function sabloane(articleTitle: string, raportUrl?: string | null) {
       text: [
         "Bună ziua,",
         "",
-        `Am primit articolul „${articleTitle}", mulțumim. Mai avem nevoie de un singur lucru ca să îl publicăm: 3 poze.`,
+        `Am primit articolul „${articleTitle}", mulțumim. Mai avem nevoie de un singur lucru ca să îl publicăm: 1–3 poze.`,
         "",
         "Merg: logo-ul, sediul sau showroomul, produsele, echipa la lucru. Una dintre ele apare ca imagine principală, pe prima pagină a ziarelor și pe Facebook.",
         "",
