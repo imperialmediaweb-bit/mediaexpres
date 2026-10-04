@@ -9,6 +9,7 @@ import { orderSubmissions, publicationReports, clientMessages } from "@/db/schem
 import { etichetaSursa } from "@/lib/sursa";
 import { etichetaRitm, ritmDupaId } from "@/lib/ritm";
 import { campaniaPentruComanda, etichetaStareRetea, RETEA_URL } from "@/lib/retea";
+import { TrimiteInRetea } from "./TrimiteInRetea";
 import { findPackageById } from "@/data/packages";
 import { OrderActions } from "./OrderActions";
 import { CopyButton } from "./CopyButton";
@@ -415,6 +416,20 @@ export default async function MaterialDetailPage({
           */}
           <section className="rounded-xl border border-slate-200 bg-white p-5">
             <h2 className="font-serif text-lg font-bold text-brand-navy">Campania în rețea</h2>
+            {/* 04.10.2026 — comanda pleaca singura in retea la trimiterea articolului / confirmarea platii; aici vezi daca a ajuns si o poti (re)trimite. */}
+            <div className="mt-2 flex flex-wrap items-center gap-3 text-sm">
+              {r.reteaId ? (
+                <span className="text-emerald-700">
+                  Trimisă în rețea: comanda #{r.reteaId}
+                  {r.reteaTrimisLa ? `, ${fmt(new Date(r.reteaTrimisLa))}` : ""}. Stă acolo ca „material primit”, nepublicată, până o pornești tu.
+                </span>
+              ) : r.reteaEroare ? (
+                <span className="text-red-700">Nu a ajuns în rețea: {r.reteaEroare}</span>
+              ) : (
+                <span className="text-slate-500">Încă netrimisă în rețea.</span>
+              )}
+              <TrimiteInRetea id={r.id} trimisa={Boolean(r.reteaId)} />
+            </div>
             {retea.stare === "gasita" ? (
               <div className="mt-2">
                 <Row label="Stare" value={etichetaStareRetea(retea.campanie.stare)} />

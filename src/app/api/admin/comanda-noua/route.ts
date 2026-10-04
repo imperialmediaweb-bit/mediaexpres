@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { trimiteAutomatInRetea } from "@/lib/retea";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
@@ -130,6 +131,8 @@ export async function POST(req: NextRequest) {
         .returning({ id: orderSubmissions.id });
       ids.push(row.id);
     }
+    // 04.10.2026 — comenzile deja incasate pleaca in retea pe loc (lib/retea.ts).
+    if (d.paid) for (const id of ids) await trimiteAutomatInRetea(id, "comanda noua din admin");
 
     const [existing] = await db
       .select({ id: users.id })

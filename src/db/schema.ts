@@ -257,6 +257,11 @@ export const orderSubmissions = pgTable("order_submission", {
   ritm: text("ritm").notNull().default("rapid"),
   // JSON: {url, name} — dovada platii incarcata la comenzile prin OP.
   paymentProof: text("payment_proof"),
+  // 04.10.2026 — comanda trimisa in reteaua de publicare (lib/retea.ts):
+  // id-ul ei acolo, cand a plecat, si ultima eroare daca n-a mers.
+  reteaId: integer("retea_id"),
+  reteaTrimisLa: timestamp("retea_trimis_la"),
+  reteaEroare: text("retea_eroare"),
   // Date de facturare, cerute explicit la OP (la card vin din Stripe).
   companyCui: text("company_cui"),
   companyAddress: text("company_address"),

@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
+import { trimiteAutomatInRetea } from "@/lib/retea";
 
 export const runtime = "nodejs";
 
@@ -38,6 +39,8 @@ export async function PATCH(
     if (!updated) {
       return NextResponse.json({ ok: false, error: "Nu există" }, { status: 404 });
     }
+    // 04.10.2026 — banii au intrat: comanda pleaca in retea (lib/retea.ts).
+    await trimiteAutomatInRetea(params.id, "plata OP confirmata");
     return NextResponse.json({ ok: true });
   }
 

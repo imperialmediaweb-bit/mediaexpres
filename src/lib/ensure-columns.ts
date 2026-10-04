@@ -29,6 +29,9 @@ export function ensureOrderColumns(): Promise<void> {
       ),
       db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "source" text`),
       db.execute(
+        sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "retea_id" integer, ADD COLUMN IF NOT EXISTS "retea_trimis_la" timestamp, ADD COLUMN IF NOT EXISTS "retea_eroare" text`,
+      ),
+      db.execute(
         sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "ritm" text NOT NULL DEFAULT 'rapid'`,
       ),
       db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "link_notes" text`),

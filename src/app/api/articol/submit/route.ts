@@ -11,6 +11,7 @@ import { eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
 import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
 import { capturaSite } from "@/lib/captura-site";
+import { trimiteAutomatInRetea } from "@/lib/retea";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
 import { trimitePlasari } from "@/lib/trimite-plasari";
 import { linkuriImplicite } from "@/lib/articol-html";
@@ -220,6 +221,10 @@ export async function POST(req: NextRequest) {
    * admin, cu un email care spune de ce. Pe reteaua noastra un om citeste
    * inainte de publicare; la parteneri, verificarea asta e omul.
    */
+  // 04.10.2026 — comanda pleaca singura in reteaua de publicare, ca
+  // „material primit", nepublicata (lib/retea.ts).
+  if (submissionId && !alreadySubmitted) await trimiteAutomatInRetea(submissionId, "articol trimis de client");
+
   if (submissionId && !alreadySubmitted) {
     try {
       const [plata] = await db

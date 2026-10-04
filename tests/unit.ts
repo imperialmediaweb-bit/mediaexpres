@@ -36,6 +36,7 @@ import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
 import { surseCaptura } from "@/lib/captura-site";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
+import { comandaPentruRetea } from "@/lib/retea";
 
 import {
   PRAG_RETRAGERE,
@@ -1951,6 +1952,36 @@ console.log("\n########## S. RECENZII ##########");
   t("textele din admin: separate prin linie goala, cele prea scurte sarite", parseazaTexte("Un text destul de lung pentru oferta\n\nscurt\n\nAlt text destul de lung pentru oferta").length === 2);
   t("cronul autoblog posteaza si oferta", /posteazaOferta\(\)/.test(citesteFisier("src/app/api/cron/autoblog/route.ts")));
   t("postarea cu poza merge pe /photos, fara poza pe /feed", /\/photos`/.test(citesteFisier("src/lib/oferta-facebook.ts")) && /\/feed`/.test(citesteFisier("src/lib/oferta-facebook.ts")));
+}
+
+{
+  console.log("\n── Comanda pleaca in retea (04.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const rand = {
+    id: "sub-1", stripeSessionId: "cs_test_abc", source: "facebook", fbBoostPaper: "Iași Expres", linkNotes: "curățenie birouri → https://firma.ro/curatenie",
+    email: "ion@firma.ro", packageId: "promo-50", title: "Firma X lansează", body: "Firma X oferă curățenie birouri în Iași.\n\nDe ce noi\n\nProgramări online.",
+    metaDescription: "Meta", keywords: "curatenie, birouri", companyName: "Firma X SRL", siteUrl: "firma.ro", contactPhone: "0722 111 222", cui: "123", billingAddress: "Iași",
+    images: JSON.stringify([{ url: "https://img/1.jpg" }, { url: "https://img/2.jpg" }]), featuredIndex: 1, facebookOptIn: true, uniquePerSite: false, ritm: "sapt2",
+    generatedByAi: false, isCasino: false, paymentMethod: "card", paymentProof: null, reteaId: null, reteaTrimisLa: null, reteaEroare: null, companyCui: "123", companyAddress: "Iași",
+    status: "pending", createdAt: new Date(), publishedAt: null, paymentRemindersSent: 0, paymentReminderAt: null, materialExternAt: null,
+  } as unknown as Parameters<typeof comandaPentruRetea>[0];
+  const c = comandaPentruRetea(rand, { pretLei: 500 });
+  t("fara site-ul clientului, nu pleaca (reteaua cere linkul)", "eroare" in comandaPentruRetea({ ...rand, siteUrl: "" } as typeof rand, { pretLei: 500 }));
+  if ("eroare" in c) { t("comanda se construieste", false); } else {
+    t("referinta = sesiunea de plata (asa se leaga cu Campania in retea)", c.comanda_externa === "cs_test_abc");
+    t("linkul clientului curatat, cu https", c.link_client === "https://firma.ro");
+    t("poza reprezentativa prima", c.poze[0] === "https://img/2.jpg" && c.poze.length === 2);
+    t("textul pleaca formatat, cu linkul pe cuvant, dofollow", /<a href="https:\/\/firma.ro\/curatenie">curățenie birouri<\/a>/.test(c.material) && !/nofollow/.test(c.material));
+    t("text identic cerut de client → text_identic", c.text_identic === true);
+    t("promovarea pe Facebook: 3 zile pe ziarul ales", c.promovare_zile === 3 && /Iași Expres/.test(c.promovare_public || ""));
+    t("ritmul cerut e in observatii, cu orele de esalonare", /RITM CERUT: Întins pe 2 săptămâni → eșalonare 336 ore/.test(c.observatii));
+    t("observatiile spun ca textul e identic", /IDENTIC pe toate ziarele/.test(c.observatii));
+    t("pretul si pachetul", c.pret === 500 && /50/.test(c.pachet));
+    t("cardul = platit", c.platit === true);
+  }
+  t("trimiterea automata: la articol trimis, la plata OP confirmata, la comanda noua platita", /trimiteAutomatInRetea\(submissionId/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /trimiteAutomatInRetea\(params\.id/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")) && /if \(d\.paid\) for \(const id of ids\) await trimiteAutomatInRetea/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
+  t("cazinoul si OP-ul neincasat nu pleaca automat", /if \(r\.isCasino\) return;/.test(citesteFisier("src/lib/retea.ts")) && /paymentMethod === "op" && r\.status === "pending_payment"\) return;/.test(citesteFisier("src/lib/retea.ts")));
+  t("in retea intra NEPUBLICATA (POST /api/admin/comenzi, nu publish)", /\/api\/admin\/comenzi\?key=/.test(citesteFisier("src/lib/retea.ts")) && !/api\/admin\/publish/.test(citesteFisier("src/lib/retea.ts")));
 }
 
 console.log("\n" + "=".repeat(64));
