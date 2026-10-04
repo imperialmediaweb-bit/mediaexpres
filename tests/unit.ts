@@ -37,6 +37,7 @@ import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostar
 import { surseCaptura } from "@/lib/captura-site";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 import { comandaPentruRetea } from "@/lib/retea";
+import { autolink } from "@/lib/articol-html";
 
 import {
   PRAG_RETRAGERE,
@@ -1982,6 +1983,16 @@ console.log("\n########## S. RECENZII ##########");
   t("trimiterea automata: la articol trimis, la plata OP confirmata, la comanda noua platita", /trimiteAutomatInRetea\(submissionId/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /trimiteAutomatInRetea\(params\.id/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")) && /if \(d\.paid\) for \(const id of ids\) await trimiteAutomatInRetea/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
   t("cazinoul si OP-ul neincasat nu pleaca automat", /if \(r\.isCasino\) return;/.test(citesteFisier("src/lib/retea.ts")) && /paymentMethod === "op" && r\.status === "pending_payment"\) return;/.test(citesteFisier("src/lib/retea.ts")));
   t("in retea intra NEPUBLICATA (POST /api/admin/comenzi, nu publish)", /\/api\/admin\/comenzi\?key=/.test(citesteFisier("src/lib/retea.ts")) && !/api\/admin\/publish/.test(citesteFisier("src/lib/retea.ts")));
+}
+
+{
+  console.log("\n── Linkurile din textul original raman linkuri (04.10.2026) ──");
+  t("adresa scrisa in text devine link, fara punctul de la final", autolink("Vezi https://firma.ro/oferta.") === 'Vezi <a href="https://firma.ro/oferta">https://firma.ro/oferta</a>.');
+  t("www. fara protocol primeste https", autolink("pe www.firma.ro, azi") === 'pe <a href="https://www.firma.ro">www.firma.ro</a>, azi');
+  t("nofollow cand e cerut", /rel="nofollow"/.test(autolink("x https://a.ro", ' rel="nofollow"')));
+  const r = articolHtml({ titlu: "T", corp: "Detalii pe https://firma.ro/preturi si la telefon.\n\nFirma X ofera servicii.", linkNotes: "Firma X → https://firma.ro", dofollow: true });
+  t("articolul: adresa din text e link, iar ancora ceruta e pusa separat", /<a href="https:\/\/firma.ro\/preturi">https:\/\/firma.ro\/preturi<\/a>/.test(r.html) && /<a href="https:\/\/firma.ro">Firma X<\/a>/.test(r.html) && r.negasite.length === 0);
+  t("un email nu devine link", autolink("scrie la ion@firma.ro") === "scrie la ion@firma.ro");
 }
 
 console.log("\n" + "=".repeat(64));

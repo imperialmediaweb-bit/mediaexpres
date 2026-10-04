@@ -54,6 +54,24 @@ function eSubtitlu(p: string, urmeazaText: boolean): boolean {
   return urmeazaText && !p.includes("\n") && p.length <= 90 && !/[.!?:;,]$/.test(p);
 }
 
+/**
+ * 04.10.2026 — proprietarul: „vezi ce linkuri are in articolul original si le
+ * pui de acolo". Adresele scrise direct in text (https://firma.ro/oferta,
+ * www.firma.ro) devin linkuri, nu raman text simplu. Textul e deja trecut
+ * prin escHtml, deci nu exista taguri in el; punctuatia de la final nu intra
+ * in adresa.
+ */
+const URL_IN_TEXT = /(^|[\s(„"'>])((?:https?:\/\/|www\.)[^\s<>"']+)/gi;
+
+export function autolink(textEscapat: string, rel = ""): string {
+  return textEscapat.replace(URL_IN_TEXT, (m, inainte: string, adresa: string) => {
+    const curata = adresa.replace(/[.,;:!?)»”"']+$/, "");
+    const rest = adresa.slice(curata.length);
+    const href = /^https?:\/\//i.test(curata) ? curata : `https://${curata}`;
+    return `${inainte}<a href="${href}"${rel}>${curata}</a>${rest}`;
+  });
+}
+
 export function articolHtml(d: {
   titlu: string;
   corp: string;
@@ -67,14 +85,14 @@ export function articolHtml(d: {
     .map((p) => p.trim())
     .filter(Boolean);
 
+  const rel = d.dofollow === false ? ' rel="nofollow"' : "";
+
   const blocuri = paragrafe.map((p, i) => {
     const text = escHtml(p);
     return eSubtitlu(p, i < paragrafe.length - 1)
       ? { tag: "h2", html: text }
-      : { tag: "p", html: text.replace(/\n/g, "<br>") };
+      : { tag: "p", html: autolink(text, rel).replace(/\n/g, "<br>") };
   });
-
-  const rel = d.dofollow === false ? ' rel="nofollow"' : "";
   const negasite: LinkCerut[] = [];
   for (const l of parseazaLinkuri(d.linkNotes)) {
     if (!l.ancora) {
