@@ -103,7 +103,7 @@ export default async function MaterialDetailPage({
 
   // Campania din platforma de publicare, cautata dupa referinta comenzii sau
   // dupa email. Daca reteaua nu raspunde, pagina spune asta si merge mai departe.
-  const retea = await campaniaPentruComanda(r.stripeSessionId, r.email);
+  const retea = await campaniaPentruComanda(r.stripeSessionId, r.email, r.fbBoostPaper);
 
   return (
     <div>

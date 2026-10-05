@@ -465,7 +465,7 @@ export async function POST(req: NextRequest) {
   // Daca reteaua tace, emailul pleaca exact ca inainte.
   let linkRaport: string | null = null;
   try {
-    const r = await campaniaPentruComanda(order.sessionId, order.email);
+    const r = await campaniaPentruComanda(order.sessionId, order.email, d.fbBoostPaper);
     if (r.stare === "gasita") linkRaport = r.campanie.raportUrl;
   } catch (err) {
     console.error("[articol/submit] nu am putut citi campania din retea:", err);

@@ -60,14 +60,29 @@ export type RezultatRetea =
   | { stare: "neconfigurat" }
   | { stare: "eroare"; mesaj: string };
 
-function transforma(r: RandRetea, potrivire: "referinta" | "email"): CampanieRetea {
+/**
+ * 05.10.2026 — proprietarul: „linkul de raport il creezi cu adresa domeniului
+ * ales pentru promovare pe Facebook; daca e Bucuresti, pui bucurestiexpres".
+ * Raportul e aceeasi pagina pe orice ziar din retea (aceeasi aplicatie), deci
+ * clientul il primeste pe ziarul lui, nu pe Botosani. Fara ziar ales sau cu
+ * un nume necunoscut, ramane RETEA_URL.
+ */
+export function domeniulRaportului(ziarPromovare: string | null | undefined): string {
+  const cautat = (ziarPromovare || "").trim().toLowerCase();
+  if (!cautat) return RETEA_URL;
+  const norm = (t: string) => t.toLowerCase().replace(/[ăâ]/g, "a").replace(/î/g, "i").replace(/[șş]/g, "s").replace(/[țţ]/g, "t");
+  const z = NEWSPAPERS.find((n) => norm(n.name) === norm(cautat)) || NEWSPAPERS.find((n) => norm(cautat).includes(norm(n.name)) || norm(n.name).includes(norm(cautat)));
+  return z ? z.url.replace(/\/$/, "") : RETEA_URL;
+}
+
+function transforma(r: RandRetea, potrivire: "referinta" | "email", ziarPromovare?: string | null): CampanieRetea {
   return {
     id: r.id,
     client: r.client,
     email: r.email,
     stare: r.stare,
     token: r.token,
-    raportUrl: r.token ? `${RETEA_URL}/raport/${r.token}` : null,
+    raportUrl: r.token ? `${domeniulRaportului(ziarPromovare)}/raport/${r.token}` : null,
     articole: Number(r.articole || 0),
     articoleLive: Number(r.articole_live || 0),
     ultimulLa: r.ultimul_la,
@@ -103,6 +118,8 @@ export async function campaniileDinRetea(): Promise<RandRetea[] | null> {
 export async function campaniaPentruComanda(
   reference: string | null | undefined,
   email: string | null | undefined,
+  /** Ziarul ales de client pentru promovarea pe Facebook: raportul se da pe domeniul lui. */
+  ziarPromovare?: string | null,
 ): Promise<RezultatRetea> {
   if (!process.env.RETEA_KEY) return { stare: "neconfigurat" };
   const toate = await campaniileDinRetea();
@@ -110,14 +127,14 @@ export async function campaniaPentruComanda(
 
   if (reference) {
     const exact = toate.find((c) => c.comanda_externa && c.comanda_externa === reference);
-    if (exact) return { stare: "gasita", campanie: transforma(exact, "referinta") };
+    if (exact) return { stare: "gasita", campanie: transforma(exact, "referinta", ziarPromovare) };
   }
   const e = (email || "").trim().toLowerCase();
   if (e) {
     const dupaEmail = toate
       .filter((c) => (c.email || "").trim().toLowerCase() === e)
       .sort((a, b) => (b.creata_la || "").localeCompare(a.creata_la || ""));
-    if (dupaEmail[0]) return { stare: "gasita", campanie: transforma(dupaEmail[0], "email") };
+    if (dupaEmail[0]) return { stare: "gasita", campanie: transforma(dupaEmail[0], "email", ziarPromovare) };
   }
   return { stare: "negasita" };
 }
@@ -163,6 +180,7 @@ import { articolHtml } from "@/lib/articol-html";
 import { ritmDupaId } from "@/lib/ritm";
 import { etichetaSursa } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
+import { NEWSPAPERS } from "@/data/newspapers";
 
 export interface ComandaPentruRetea {
   comanda_externa: string;

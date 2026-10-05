@@ -36,7 +36,7 @@ import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
 import { surseCaptura } from "@/lib/captura-site";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
-import { comandaPentruRetea } from "@/lib/retea";
+import { comandaPentruRetea, domeniulRaportului } from "@/lib/retea";
 import { autolink } from "@/lib/articol-html";
 
 import {
@@ -1522,7 +1522,7 @@ console.log("\n########## S. RECENZII ##########");
   // Legatura cu reteaua: pagina comenzii cauta campania si ofera raportul.
   {
     const mat = citesteFisier("src/app/admin/materiale/[id]/page.tsx");
-    t("pagina comenzii intreaba reteaua dupa referinta si email", /campaniaPentruComanda\(r\.stripeSessionId, r\.email\)/.test(mat));
+    t("pagina comenzii intreaba reteaua dupa referinta si email", /campaniaPentruComanda\(r\.stripeSessionId, r\.email, r\.fbBoostPaper\)/.test(mat));
     t("pagina comenzii arata cate articole sunt live si raportul public", /articoleLive/.test(mat) && /raportUrl/.test(mat));
     t("fara RETEA_KEY pagina nu cade, spune ca nu e configurat", /neconfigurat/.test(citesteFisier("src/lib/retea.ts")) && /neconfigurat/.test(mat));
     t("formularul de raport primeste linkul din retea", /initialReportUrl/.test(citesteFisier("src/app/admin/rapoarte/RaportForm.tsx")));
@@ -1993,6 +1993,17 @@ console.log("\n########## S. RECENZII ##########");
   const r = articolHtml({ titlu: "T", corp: "Detalii pe https://firma.ro/preturi si la telefon.\n\nFirma X ofera servicii.", linkNotes: "Firma X → https://firma.ro", dofollow: true });
   t("articolul: adresa din text e link, iar ancora ceruta e pusa separat", /<a href="https:\/\/firma.ro\/preturi">https:\/\/firma.ro\/preturi<\/a>/.test(r.html) && /<a href="https:\/\/firma.ro">Firma X<\/a>/.test(r.html) && r.negasite.length === 0);
   t("un email nu devine link", autolink("scrie la ion@firma.ro") === "scrie la ion@firma.ro");
+}
+
+{
+  console.log("\n── Raportul pe domeniul ziarului ales pentru promovare (05.10.2026) ──");
+  t("Bucuresti Expres → bucurestiexpres.ro", domeniulRaportului("București Expres") === "https://bucurestiexpres.ro");
+  t("Romania Expres → romaniaexpres.ro", domeniulRaportului("România Expres") === "https://romaniaexpres.ro");
+  t("fara diacritice merge la fel", domeniulRaportului("iasi expres") === "https://iasiexpres.ro");
+  t("fara ziar ales → adresa retelei", domeniulRaportului("") === "https://botosaniexpres.ro" && domeniulRaportului(null) === "https://botosaniexpres.ro");
+  t("nume necunoscut → adresa retelei", domeniulRaportului("Ziarul Inexistent") === "https://botosaniexpres.ro");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("pagina comenzii si emailul clientului cer raportul pe ziarul ales", /campaniaPentruComanda\(r\.stripeSessionId, r\.email, r\.fbBoostPaper\)/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")) && /campaniaPentruComanda\(order\.sessionId, order\.email, d\.fbBoostPaper\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
 }
 
 console.log("\n" + "=".repeat(64));
