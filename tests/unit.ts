@@ -1953,7 +1953,7 @@ console.log("\n########## S. RECENZII ##########");
   t("randul: deja postata azi → nu", !eRandulOfertei({ activ: true, ora: 10, ultimaZi: "2026-10-05" }, acum));
   t("textele din admin: separate prin linie goala, cele prea scurte sarite", parseazaTexte("Un text destul de lung pentru oferta\n\nscurt\n\nAlt text destul de lung pentru oferta").length === 2);
   t("cronul autoblog posteaza si oferta", /posteazaOferta\(\)/.test(citesteFisier("src/app/api/cron/autoblog/route.ts")));
-  t("postarea cu poza merge pe /photos, fara poza pe /feed", /\/photos`/.test(citesteFisier("src/lib/oferta-facebook.ts")) && /\/feed`/.test(citesteFisier("src/lib/oferta-facebook.ts")));
+  t("postarea: direct (/photos sau /feed) sau prin reteaua care are pagina conectata", /\/photos`/.test(citesteFisier("src/lib/facebook-pagina.ts")) && /\/feed`/.test(citesteFisier("src/lib/facebook-pagina.ts")) && /\/api\/facebook\/post/.test(citesteFisier("src/lib/facebook-pagina.ts")));
 }
 
 {

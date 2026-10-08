@@ -5,6 +5,7 @@ import { ensureBlogTables } from "@/lib/ensure-columns";
 import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
 import { SITE } from "@/data/site";
 import { pingIndexNowUrl } from "@/lib/indexnow";
+import { posteazaPePagina } from "@/lib/facebook-pagina";
 
 /**
  * Autoblogul (03.10.2026).
@@ -400,38 +401,20 @@ export function textPostareFacebook(p: { title: string; excerpt: string; slug: s
   return `${p.title}\n\n${p.excerpt}\n\nCitește articolul: ${SITE.url}/blog/${p.slug}`;
 }
 
-export function configFacebookPagina(): { token: string; pageId: string } | null {
-  const token = process.env.FB_PAGE_TOKEN?.trim();
-  const pageId = process.env.FB_PAGE_ID?.trim();
-  return token && pageId ? { token, pageId } : null;
-}
+export { configFacebookPagina } from "@/lib/facebook-pagina";
 
 export async function posteazaPeFacebook(postId: string): Promise<{ ok: boolean; motiv?: string }> {
   await ensureBlogTables();
-  const cfg = configFacebookPagina();
-  if (!cfg) return { ok: false, motiv: "Lipsesc FB_PAGE_TOKEN / FB_PAGE_ID" };
   const [p] = await db.select().from(blogPosts).where(eq(blogPosts.id, postId)).limit(1);
   if (!p) return { ok: false, motiv: "Articolul nu exista" };
   if (p.fbPostId) return { ok: true };
-  try {
-    const r = await fetch(`https://graph.facebook.com/v21.0/${cfg.pageId}/feed`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: textPostareFacebook(p), link: `${SITE.url}/blog/${p.slug}`, access_token: cfg.token }),
-    });
-    const j = (await r.json()) as { id?: string; error?: { message?: string } };
-    if (!r.ok || !j.id) {
-      const motiv = j.error?.message || `Facebook ${r.status}`;
-      await db.update(blogPosts).set({ fbError: motiv.slice(0, 300) }).where(eq(blogPosts.id, p.id));
-      return { ok: false, motiv };
-    }
-    await db.update(blogPosts).set({ fbPostId: j.id, fbPostedAt: new Date(), fbError: null }).where(eq(blogPosts.id, p.id));
-    return { ok: true };
-  } catch (e) {
-    const motiv = e instanceof Error ? e.message : String(e);
-    await db.update(blogPosts).set({ fbError: motiv.slice(0, 300) }).where(eq(blogPosts.id, p.id));
-    return { ok: false, motiv };
+  const r = await posteazaPePagina({ mesaj: textPostareFacebook(p), link: `${SITE.url}/blog/${p.slug}` });
+  if (!r.ok) {
+    await db.update(blogPosts).set({ fbError: r.motiv.slice(0, 300) }).where(eq(blogPosts.id, p.id));
+    return { ok: false, motiv: r.motiv };
   }
+  await db.update(blogPosts).set({ fbPostId: r.id, fbPostedAt: new Date(), fbError: null }).where(eq(blogPosts.id, p.id));
+  return { ok: true };
 }
 
 // ───────────────────────── Publicare ─────────────────────────

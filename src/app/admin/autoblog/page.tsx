@@ -50,7 +50,7 @@ export default async function AutoblogAdmin() {
         <Semafor ok={stare.pexels} ce="Pexels (poze)" lipsa="PEXELS_API_KEY în Railway" />
         <Semafor ok={stare.pixabay} ce="Pixabay (poze, rezervă)" lipsa="PIXABAY_API_KEY în Railway" />
         <Semafor ok={stare.cloudinary} ce="Cloudinary (copiem pozele la noi)" lipsa="cheile Cloudinary" />
-        <Semafor ok={stare.facebook} ce="Facebook (postare automată)" lipsa="FB_PAGE_TOKEN + FB_PAGE_ID în Railway" />
+        <Semafor ok={stare.facebook} ce="Facebook (postare automată, prin rețea)" lipsa="RETEA_KEY sau FB_PAGE_TOKEN în Railway" />
       </div>
 
       <AutoblogPanel

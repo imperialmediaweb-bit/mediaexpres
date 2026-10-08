@@ -3,7 +3,8 @@ import { db } from "@/db";
 import { appSettings } from "@/db/schema";
 import { ensureBlogTables } from "@/lib/ensure-columns";
 import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
-import { configFacebookPagina, oraRomaniei } from "@/lib/autoblog";
+import { oraRomaniei } from "@/lib/autoblog";
+import { posteazaPePagina } from "@/lib/facebook-pagina";
 import { promoDeadlineLabel } from "@/data/packages";
 import { SITE } from "@/data/site";
 
@@ -140,39 +141,20 @@ export async function posteazaOferta(opt: { fortat?: boolean } = {}): Promise<Re
   const s = await citesteSetariOferta();
   const acum = new Date();
   if (!opt.fortat && !eRandulOfertei(s, acum)) return { postat: false, motiv: s.activ ? "nu e inca ora, sau azi e deja postata" : "oferta zilnica oprita" };
-  const cfg = configFacebookPagina();
-  if (!cfg) return { postat: false, motiv: "Lipsesc FB_PAGE_TOKEN / FB_PAGE_ID" };
-
   const zi = ziRomaniei(acum);
   const mesaj = textulZilei(s, zi, acum.getTime());
   const poza = pozaZilei(s, zi);
   const link = `${SITE.url}/oferta-500`;
 
-  try {
-    const r = poza
-      ? await fetch(`https://graph.facebook.com/v21.0/${cfg.pageId}/photos`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ url: poza, message: mesaj, access_token: cfg.token }),
-        })
-      : await fetch(`https://graph.facebook.com/v21.0/${cfg.pageId}/feed`, {
-          method: "POST",
-          headers: { "content-type": "application/json" },
-          body: JSON.stringify({ message: mesaj, link, access_token: cfg.token }),
-        });
-    const j = (await r.json()) as { id?: string; post_id?: string; error?: { message?: string } };
-    const id = j.post_id || j.id;
-    if (!r.ok || !id) {
-      const motiv = j.error?.message || `Facebook ${r.status}`;
-      await salveazaSetariOferta({ ...s, ultimaEroare: motiv.slice(0, 300) });
-      return { postat: false, motiv };
+  {
+    const r = await posteazaPePagina({ mesaj, link, poza });
+    if (!r.ok) {
+      await salveazaSetariOferta({ ...s, ultimaEroare: r.motiv.slice(0, 300) });
+      return { postat: false, motiv: r.motiv };
     }
+    const id = r.id;
     await salveazaSetariOferta({ ...s, ultimaZi: zi, ultimaEroare: null });
     console.log(`[oferta-facebook] postat ${id}`);
     return { postat: true, id };
-  } catch (e) {
-    const motiv = e instanceof Error ? e.message : String(e);
-    await salveazaSetariOferta({ ...s, ultimaEroare: motiv.slice(0, 300) });
-    return { postat: false, motiv };
   }
 }
