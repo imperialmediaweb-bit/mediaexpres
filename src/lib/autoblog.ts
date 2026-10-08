@@ -264,30 +264,50 @@ Titluri deja publicate (nu le repeta): ${titluriExistente.slice(0, 40).join(" | 
 
 Scrie articolul.`;
 
-  const res = await fetch("https://api.openai.com/v1/chat/completions", {
-    method: "POST",
-    headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
-    body: JSON.stringify({
-      model: process.env.OPENAI_MODEL || "gpt-4o",
-      messages: [
-        { role: "system", content: system },
-        { role: "user", content: user },
-      ],
-      max_tokens: 4000,
-      response_format: { type: "json_object" },
-      temperature: 0.7,
-    }),
-  });
-  if (!res.ok) throw new Error(`OpenAI ${res.status}: ${(await res.text()).slice(0, 200)}`);
-  const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
-  const raw = data.choices?.[0]?.message?.content || "";
-  let j: Partial<ArticolGenerat>;
-  try {
-    j = JSON.parse(raw) as Partial<ArticolGenerat>;
-  } catch {
-    throw new Error("Raspunsul modelului nu e JSON");
+  // 08.10.2026 — primul articol a iesit la ~550 de cuvinte, doua sectiuni:
+  // prea subtire pentru Google. Daca iese sub MIN_CUVINTE, o a doua cerere il
+  // rescrie complet, mai lung, pe aceleasi reguli.
+  const MIN_CUVINTE = 900;
+  const cere = async (mesaje: { role: "system" | "user" | "assistant"; content: string }[]) => {
+    const res = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "content-type": "application/json", authorization: `Bearer ${key}` },
+      body: JSON.stringify({
+        model: process.env.OPENAI_MODEL || "gpt-4o",
+        messages: mesaje,
+        max_tokens: 6000,
+        response_format: { type: "json_object" },
+        temperature: 0.7,
+      }),
+    });
+    if (!res.ok) throw new Error(`OpenAI ${res.status}: ${(await res.text()).slice(0, 200)}`);
+    const data = (await res.json()) as { choices?: { message?: { content?: string } }[] };
+    const raw = data.choices?.[0]?.message?.content || "";
+    try {
+      return { raw, j: JSON.parse(raw) as Partial<ArticolGenerat> };
+    } catch {
+      throw new Error("Raspunsul modelului nu e JSON");
+    }
+  };
+
+  const mesaje: { role: "system" | "user" | "assistant"; content: string }[] = [
+    { role: "system", content: system },
+    { role: "user", content: user },
+  ];
+  let { raw, j } = await cere(mesaje);
+  let html = curataHtml(String(j.html || ""));
+  if (numarCuvinte(html) < MIN_CUVINTE) {
+    const nr = numarCuvinte(html);
+    ({ raw, j } = await cere([
+      ...mesaje,
+      { role: "assistant", content: raw },
+      {
+        role: "user",
+        content: `Articolul are doar ${nr} de cuvinte. Rescrie-l COMPLET, la 1100-1400 de cuvinte: cel putin 5 sectiuni <h2> (fiecare cu 2-4 paragrafe consistente si exemple concrete), plus sectiunea de intrebari frecvente cu 4-5 intrebari. Aceleasi reguli si acelasi format JSON.`,
+      },
+    ]));
+    html = curataHtml(String(j.html || ""));
   }
-  const html = curataHtml(String(j.html || ""));
   const title = String(j.title || "").trim();
   if (!title || numarCuvinte(html) < 400) throw new Error(`Articol prea scurt sau fara titlu (${numarCuvinte(html)} cuvinte)`);
   return {
