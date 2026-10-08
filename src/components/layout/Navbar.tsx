@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { NAV_LINKS } from "@/data/site";
 import { cn } from "@/lib/utils";
 import { MobileNav } from "./MobileNav";
-import { OrderModal } from "@/components/forms/OrderModal";
 
 export function Navbar() {
   const pathname = usePathname();
@@ -52,9 +51,9 @@ export function Navbar() {
           })}
         </nav>
         <div className="hidden lg:block">
-          <OrderModal
-            trigger={<Button variant="accent">Comandă acum</Button>}
-          />
+          <Button asChild variant="accent">
+            <Link href="/oferta-500">Comandă acum</Link>
+          </Button>
         </div>
         <MobileNav />
       </div>

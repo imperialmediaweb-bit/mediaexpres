@@ -3,7 +3,6 @@
 import Link from "next/link";
 import { ArrowRight, Play, Newspaper, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OrderModal } from "@/components/forms/OrderModal";
 
 export function Hero() {
   return (
@@ -70,17 +69,16 @@ export function Hero() {
                 Vezi pachetele <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <OrderModal
-              trigger={
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white/30 bg-white/5 text-white hover:bg-white hover:text-brand-navy"
-                >
-                  <Play className="h-4 w-4" /> Comandă acum
-                </Button>
-              }
-            />
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-white/30 bg-white/5 text-white hover:bg-white hover:text-brand-navy"
+            >
+              <Link href="/oferta-500">
+                <Play className="h-4 w-4" /> Comandă acum
+              </Link>
+            </Button>
           </div>
 
           <ul className="mt-12 flex flex-wrap items-center gap-x-6 gap-y-3 text-sm text-white/80">

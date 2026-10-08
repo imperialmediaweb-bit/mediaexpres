@@ -79,7 +79,7 @@ export function MobileNav() {
             asChild
             onClick={() => setOpen(false)}
           >
-            <Link href="/comanda">Comandă acum</Link>
+            <Link href="/oferta-500">Comandă acum</Link>
           </Button>
         </div>
       </aside>

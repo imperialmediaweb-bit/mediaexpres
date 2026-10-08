@@ -1,7 +1,7 @@
 "use client";
 
 import { Check } from "lucide-react";
-import { OrderModal } from "@/components/forms/OrderModal";
+import { SITE } from "@/data/site";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -81,14 +81,15 @@ export function SubscriptionTable() {
                 variant="outline"
                 className="w-full"
               />
-              <OrderModal
-                defaultPackageId={`sub-${plan.id}`}
-                trigger={
-                  <Button variant="ghost" className="w-full text-xs">
-                    Vorbeste cu noi intai
-                  </Button>
-                }
-              />
+              <Button asChild variant="ghost" className="w-full text-xs">
+                <a
+                  href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua! Mă interesează abonamentul ${plan.name}. Putem vorbi?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
+                  Vorbește cu noi întâi (WhatsApp)
+                </a>
+              </Button>
             </div>
           </div>
         ))}

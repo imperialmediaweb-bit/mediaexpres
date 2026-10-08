@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { OrderModal } from "@/components/forms/OrderModal";
 
 export function CtaBanner() {
   return (
@@ -31,17 +30,14 @@ export function CtaBanner() {
                 Vezi pachetele <ArrowRight className="h-4 w-4" />
               </Link>
             </Button>
-            <OrderModal
-              trigger={
-                <Button
-                  variant="outline"
-                  size="lg"
-                  className="border-white/30 bg-white/10 text-white hover:bg-white hover:text-brand-navy"
-                >
-                  Comandă acum
-                </Button>
-              }
-            />
+            <Button
+              asChild
+              variant="outline"
+              size="lg"
+              className="border-white/30 bg-white/10 text-white hover:bg-white hover:text-brand-navy"
+            >
+              <Link href="/oferta-500">Comandă acum</Link>
+            </Button>
           </div>
         </div>
       </div>

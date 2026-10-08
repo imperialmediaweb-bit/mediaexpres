@@ -3,7 +3,7 @@
 import { Check, Newspaper } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { OrderModal } from "@/components/forms/OrderModal";
+import Link from "next/link";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { formatPrice, cn } from "@/lib/utils";
 import type { Package } from "@/data/packages";
@@ -73,14 +73,12 @@ export function PackageCard({ pkg }: PackageCardProps) {
           size="lg"
           className="w-full"
         />
-        <OrderModal
-          defaultPackageId={pkg.id}
-          trigger={
-            <Button variant="outline" size="default" className="w-full">
-              Comandă cu ordin de plată (factură)
-            </Button>
-          }
-        />
+        {/* 08.10.2026 — formularul complet de OP (poze, CUI, adresa, linkuri,
+            ritm, ziarul de promovare), nu fereastra veche care cerea doar
+            nume si email: comanda lui Florin a venit fara date de factura. */}
+        <Button asChild variant="outline" size="default" className="w-full">
+          <Link href={`/comanda/transfer?pachet=${pkg.id}`}>Comandă cu ordin de plată (factură)</Link>
+        </Button>
       </div>
     </div>
   );
