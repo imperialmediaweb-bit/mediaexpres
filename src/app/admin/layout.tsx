@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Rss } from "lucide-react";
 import { getSession } from "@/lib/auth";
 import { Logo } from "@/components/Logo";
 import { LogoutButton } from "./ziare/LogoutButton";
@@ -47,6 +48,7 @@ const NAV = [
   { href: "/admin/plasari", label: "Plasări partenere", icon: Handshake },
   { href: "/admin/parteneri", label: "Parteneri (ziare)", icon: Newspaper },
   { href: "/admin/seo", label: "SEO & indexare", icon: Zap },
+  { href: "/admin/autoblog", label: "Blog automat & Facebook", icon: Rss },
 ];
 
 export default function AdminLayout({
