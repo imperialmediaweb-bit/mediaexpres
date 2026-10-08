@@ -260,6 +260,8 @@ export const orderSubmissions = pgTable("order_submission", {
   // 04.10.2026 — comanda trimisa in reteaua de publicare (lib/retea.ts):
   // id-ul ei acolo, cand a plecat, si ultima eroare daca n-a mers.
   reteaId: integer("retea_id"),
+  // 08.10.2026 — zona (Regional) sau ziarul (Local) ales de client (lib/zona-pachet.ts).
+  ziareAlese: text("ziare_alese"),
   reteaTrimisLa: timestamp("retea_trimis_la"),
   reteaEroare: text("retea_eroare"),
   // Date de facturare, cerute explicit la OP (la card vin din Stripe).

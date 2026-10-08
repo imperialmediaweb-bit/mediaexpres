@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eticheteazaAlegerea } from "@/lib/zona-pachet";
 import { z } from "zod";
 import { getStripe } from "@/lib/stripe";
 import { findPackageById, findSubscriptionPlanById } from "@/data/packages";
@@ -33,6 +34,8 @@ const checkoutSchema = z.object({
   // 29.09.2026 — publicatiile partenere bifate: „id" sau „id+facebook+…".
   // Maxim 10 pe comanda (id-urile trebuie sa incapa in metadata Stripe).
   parteneri: z.array(z.string().min(8).max(120)).max(10).optional(),
+  // 08.10.2026 — zona (Regional) sau ziarul (Local) ales pe card-ul pachetului.
+  alegere: z.string().max(80).optional(),
 });
 
 export async function POST(req: NextRequest) {
@@ -54,7 +57,7 @@ export async function POST(req: NextRequest) {
   if (!parsed.success) {
     return NextResponse.json({ ok: false, error: "Date invalide" }, { status: 400 });
   }
-  const { packageId, mode, email, ziare, parteneri } = parsed.data;
+  const { packageId, mode, email, ziare, parteneri, alegere } = parsed.data;
 
   // Cookie-urile de atribuire Meta (_fbp si mai ales _fbc, care contine
   // fbclid-ul din linkul reclamei) exista DOAR in browserul clientului.
@@ -240,7 +243,9 @@ export async function POST(req: NextRequest) {
         { status: 404 }
       );
     }
-    const name = `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})`;
+    const alegerea = eticheteazaAlegerea(packageId, alegere);
+    if (!alegerea.ok) return NextResponse.json({ ok: false, error: alegerea.eroare }, { status: 400 });
+    const name = `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})${alegerea.eticheta ? ` — ${alegerea.eticheta}` : ""}`;
     try {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -275,6 +280,7 @@ export async function POST(req: NextRequest) {
           packageId,
           mode,
           category: pkg.category,
+          ...(alegerea.eticheta ? { ziare: alegerea.eticheta } : {}),
           ...(userId ? { userId } : {}),
           ...fbMeta,
         },

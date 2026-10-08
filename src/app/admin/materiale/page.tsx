@@ -261,6 +261,7 @@ export default async function MaterialePage() {
                     )}
                     <span className="text-xs text-slate-500">
                       {fmt(r.createdAt)} · {pkg ? `${pkg.name} — ${pkg.price} RON` : r.packageId}
+                      {r.ziareAlese && <strong className="ml-2 rounded bg-amber-100 px-1.5 py-0.5 text-amber-900">{r.ziareAlese}</strong>}
                     </span>
                   </div>
                   <div className="flex items-center gap-3">

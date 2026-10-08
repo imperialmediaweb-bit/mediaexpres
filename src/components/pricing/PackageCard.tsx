@@ -1,6 +1,9 @@
 "use client";
 
+import { useState } from "react";
 import { Check, Newspaper } from "lucide-react";
+import { AlegeZona } from "@/components/pricing/AlegeZona";
+import { felAlegere } from "@/lib/zona-pachet";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -14,6 +17,10 @@ interface PackageCardProps {
 
 export function PackageCard({ pkg }: PackageCardProps) {
   const isFeatured = !!pkg.featured;
+  // 08.10.2026 — Regional: zona; Local: ziarul judetean (lib/zona-pachet.ts).
+  const fel = felAlegere(pkg.id);
+  const [alegere, setAlegere] = useState("");
+  const lipsaAlegere = fel !== null && !alegere;
 
   return (
     <div
@@ -65,8 +72,11 @@ export function PackageCard({ pkg }: PackageCardProps) {
       </ul>
 
       <div className="mt-8 space-y-2">
+        {fel && <AlegeZona fel={fel} valoare={alegere} onChange={setAlegere} />}
         <CheckoutButton
           packageId={pkg.id}
+          alegere={alegere || undefined}
+          blocat={lipsaAlegere ? (fel === "zona" ? "Alege mai întâi zona" : "Alege mai întâi ziarul") : undefined}
           mode="package"
           label={`Plateste ${formatPrice(pkg.price)} RON`}
           variant={isFeatured ? "accent" : "default"}
@@ -77,7 +87,7 @@ export function PackageCard({ pkg }: PackageCardProps) {
             ritm, ziarul de promovare), nu fereastra veche care cerea doar
             nume si email: comanda lui Florin a venit fara date de factura. */}
         <Button asChild variant="outline" size="default" className="w-full">
-          <Link href={`/comanda/transfer?pachet=${pkg.id}`}>Comandă cu ordin de plată (factură)</Link>
+          <Link href={`/comanda/transfer?pachet=${pkg.id}${alegere ? `&alegere=${encodeURIComponent(alegere)}` : ""}`}>Comandă cu ordin de plată (factură)</Link>
         </Button>
       </div>
     </div>

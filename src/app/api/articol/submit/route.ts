@@ -110,13 +110,16 @@ export async function POST(req: NextRequest) {
   // dusa prin metadata sesiunii pana in `orders.source` (webhook). De acolo
   // o citim. Cererea curenta ramane doar plasa, cand plata nu se gaseste.
   let sursa = sursaDinCerere(req);
+  let ziareAlese: string | null = null;
   try {
     const [plata] = await db
-      .select({ source: orders.source })
+      .select({ source: orders.source, newspapers: orders.newspapers })
       .from(orders)
       .where(eq(orders.stripeSessionId, order.sessionId))
       .limit(1);
     if (plata?.source) sursa = plata.source;
+    // 08.10.2026 — zona/ziarul ales la pachetele Regional/Local (lib/zona-pachet.ts).
+    if (plata?.newspapers && /^(Zona|Ziar): /.test(plata.newspapers)) ziareAlese = plata.newspapers;
   } catch (err) {
     console.error("[articol/submit] nu am putut citi sursa platii:", err);
   }
@@ -178,6 +181,7 @@ export async function POST(req: NextRequest) {
         source: sursa,
         fbBoostPaper: d.fbBoostPaper?.trim() || null,
         linkNotes: d.linkNotes?.trim() || null,
+        ziareAlese,
         email: order.email,
         packageId: order.packageId,
         title: d.title,

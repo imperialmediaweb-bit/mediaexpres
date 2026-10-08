@@ -19,6 +19,8 @@ import { FbBoostSelect } from "@/components/forms/FbBoostSelect";
 import { CONTENT_DECLARATION_ERROR, TITLU_DE_PROPUS, FARA_POZE_AVERTISMENT } from "@/lib/content-policy";
 import { FormError } from "@/components/forms/FormError";
 import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
+import { AlegeZona } from "@/components/pricing/AlegeZona";
+import { felAlegere } from "@/lib/zona-pachet";
 
 export function TransferForm({
   packageId,
@@ -26,12 +28,17 @@ export function TransferForm({
   isCasino,
   // Emailul scris deja pe pagina de oferta — sa nu-l ceara nimeni de doua ori.
   initialEmail = "",
+  initialAlegere = "",
 }: {
   packageId: string;
   price: number;
   isCasino: boolean;
   initialEmail?: string;
+  /** 08.10.2026 — zona/ziarul ales deja pe cardul pachetului. */
+  initialAlegere?: string;
 }) {
+  const fel = felAlegere(packageId);
+  const [alegere, setAlegere] = useState(initialAlegere);
   const [f, setF] = useState({
     email: initialEmail,
     contactPhone: "",
@@ -150,6 +157,7 @@ export function TransferForm({
       [f.body.trim().length < 100,
         "Articolul (sau descrierea a ce vrei comunicat) trebuie să aibă minimum 100 de caractere."],
       [!contentDeclaration, CONTENT_DECLARATION_ERROR],
+      [fel !== null && !alegere, fel === "zona" ? "Alege zona în care vrei ziarele." : "Alege ziarul județean."],
     ];
     for (const [gresit, mesaj] of verificari) {
       if (gresit) {
@@ -171,6 +179,7 @@ export function TransferForm({
         body: JSON.stringify({
           packageId,
           isCasino,
+          ...(alegere ? { alegere } : {}),
           ...f,
           email: f.email.trim(),
           // Titlul nu mai e obligatoriu: cine ne cere sa scriem noi articolul
@@ -222,6 +231,11 @@ export function TransferForm({
 
   return (
     <div className="space-y-8">
+      {fel && (
+        <section className="rounded-xl border border-slate-200 bg-white p-6">
+          <AlegeZona fel={fel} valoare={alegere} onChange={setAlegere} />
+        </section>
+      )}
       <section className="rounded-xl border border-slate-200 bg-white p-6">
         <h2 className="font-serif text-lg font-bold text-brand-navy">1. Date de facturare</h2>
         <p className="mt-1 text-sm text-slate-600">

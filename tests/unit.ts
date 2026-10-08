@@ -38,6 +38,7 @@ import { surseCaptura } from "@/lib/captura-site";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 import { comandaPentruRetea, domeniulRaportului } from "@/lib/retea";
 import { autolink } from "@/lib/articol-html";
+import { felAlegere, eticheteazaAlegerea, ziareLocale } from "@/lib/zona-pachet";
 
 import {
   PRAG_RETRAGERE,
@@ -2004,6 +2005,23 @@ console.log("\n########## S. RECENZII ##########");
   t("nume necunoscut → adresa retelei", domeniulRaportului("Ziarul Inexistent") === "https://botosaniexpres.ro");
   const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
   t("pagina comenzii si emailul clientului cer raportul pe ziarul ales", /campaniaPentruComanda\(r\.stripeSessionId, r\.email, r\.fbBoostPaper\)/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")) && /campaniaPentruComanda\(order\.sessionId, order\.email, d\.fbBoostPaper\)/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
+}
+
+{
+  console.log("\n── Zona / ziarul ales la Regional si Local (08.10.2026) ──");
+  t("Regional cere zona, Local cere ziarul, 50 de ziare nimic", felAlegere("regional") === "zona" && felAlegere("local") === "ziar" && felAlegere("national") === null && felAlegere("promo-50") === null);
+  const ok = eticheteazaAlegerea("regional", "moldova");
+  t("zona valida → eticheta Zona: Moldova", ok.ok && ok.eticheta === "Zona: Moldova");
+  t("Regional fara zona → eroare", !eticheteazaAlegerea("regional", "").ok);
+  t("zona inventata → eroare", !eticheteazaAlegerea("regional", "Dobrogea").ok);
+  const z = ziareLocale()[0];
+  const l = eticheteazaAlegerea("local", z.nume);
+  t("Local cu ziar din retea → eticheta Ziar: nume", l.ok && l.eticheta === `Ziar: ${z.nume}`);
+  t("pachetele de 50 nu cer nimic", (() => { const r = eticheteazaAlegerea("national", undefined); return r.ok && r.eticheta === null; })());
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("checkout-ul refuza Regional fara zona si pune zona in metadata", /eticheteazaAlegerea\(packageId, alegere\)/.test(citesteFisier("src/app/api/checkout/route.ts")) && /ziare: alegerea\.eticheta/.test(citesteFisier("src/app/api/checkout/route.ts")));
+  t("formularul de OP cere zona si o salveaza", /ziareAlese: alegerea\.eticheta/.test(citesteFisier("src/app/api/comanda/transfer/route.ts")));
+  t("zona ajunge in observatiile din retea", /ZIARE: \$\{r\.ziareAlese\}/.test(citesteFisier("src/lib/retea.ts")));
 }
 
 console.log("\n" + "=".repeat(64));

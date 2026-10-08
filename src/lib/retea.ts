@@ -236,6 +236,7 @@ export function comandaPentruRetea(r: RandComanda, extra: { pretLei: number | nu
 
   const obs = [
     `Comandă MediaExpres ${r.stripeSessionId} (${etichetaSursa(r.source)}), ${r.paymentMethod === "op" ? "plată prin transfer" : "plată cu cardul"}.`,
+    r.ziareAlese ? `ZIARE: ${r.ziareAlese} — pachetul ${findPackageById(r.packageId)?.name || r.packageId}, ${findPackageById(r.packageId)?.newspapers ?? "?"} ziare.` : "",
     `RITM CERUT: ${ritm.eticheta} → eșalonare ${ritm.ore} ore.`,
     r.uniquePerSite ? "TEXT: variantă unică pe fiecare ziar (rescriere)." : "TEXT: IDENTIC pe toate ziarele, cerut de client — fără rescriere.",
     r.facebookOptIn

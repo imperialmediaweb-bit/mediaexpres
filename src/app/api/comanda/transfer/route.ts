@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { eticheteazaAlegerea } from "@/lib/zona-pachet";
 import { z } from "zod";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
@@ -53,6 +54,8 @@ const schema = z.object({
   isCasino: z.boolean().default(false),
   // Ziarul din lista pe care promovam postarea 3 zile; gol = alegem noi.
   fbBoostPaper: z.string().max(120).optional(),
+  // 08.10.2026 — zona (Regional) sau ziarul (Local), lib/zona-pachet.ts.
+  alegere: z.string().max(80).optional(),
 });
 
 /**
@@ -81,6 +84,8 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  const alegerea = eticheteazaAlegerea(d.packageId, d.alegere);
+  if (!alegerea.ok) return NextResponse.json({ ok: false, error: alegerea.eroare }, { status: 400 });
   // Curatam la intrare, o singura data, si tot lantul de dupa — email, admin,
   // copiere, publicare — vede text de om, nu gunoi de PDF.
   d.title = cleanTitle(d.title.trim() || TITLU_DE_PROPUS);
@@ -120,6 +125,7 @@ export async function POST(req: NextRequest) {
       ritm: d.ritm,
       isCasino: d.isCasino,
       paymentMethod: "op",
+      ziareAlese: alegerea.eticheta,
       paymentProof: d.paymentProof ? JSON.stringify(d.paymentProof) : null,
       status: "pending_payment",
     });

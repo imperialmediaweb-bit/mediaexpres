@@ -24,7 +24,7 @@ export const metadata: Metadata = {
 export default function TransferPage({
   searchParams,
 }: {
-  searchParams: { pachet?: string; email?: string };
+  searchParams: { pachet?: string; email?: string; alegere?: string };
 }) {
   const pkg = findPackageById(searchParams.pachet || "promo-50");
   if (!pkg) notFound();
@@ -80,6 +80,7 @@ export default function TransferPage({
             price={pkg.price}
             isCasino={isCasino}
             initialEmail={searchParams.email || ""}
+            initialAlegere={searchParams.alegere || ""}
           />
         </div>
 

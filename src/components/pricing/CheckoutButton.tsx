@@ -11,6 +11,10 @@ interface Props {
   variant?: "default" | "accent" | "outline" | "gold";
   size?: "default" | "sm" | "lg";
   className?: string;
+  /** 08.10.2026 — zona (Regional) sau ziarul (Local), lib/zona-pachet.ts. */
+  alegere?: string;
+  /** Daca e setat, butonul nu porneste plata si arata mesajul (ex. „Alege zona"). */
+  blocat?: string;
 }
 
 export function CheckoutButton({
@@ -20,18 +24,24 @@ export function CheckoutButton({
   variant = "accent",
   size = "default",
   className,
+  alegere,
+  blocat,
 }: Props) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   async function go() {
+    if (blocat) {
+      setError(blocat);
+      return;
+    }
     setLoading(true);
     setError(null);
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ packageId, mode }),
+        body: JSON.stringify({ packageId, mode, ...(alegere ? { alegere } : {}) }),
       });
       const body = await res.json();
       if (!res.ok || !body.ok || !body.url) {
