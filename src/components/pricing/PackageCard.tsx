@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Check, Newspaper } from "lucide-react";
 import { AlegeZona } from "@/components/pricing/AlegeZona";
 import { felAlegere } from "@/lib/zona-pachet";
+import { SITE } from "@/data/site";
+import { MessageCircle } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -72,22 +74,39 @@ export function PackageCard({ pkg }: PackageCardProps) {
       </ul>
 
       <div className="mt-8 space-y-2">
-        {fel && <AlegeZona fel={fel} valoare={alegere} onChange={setAlegere} />}
-        <CheckoutButton
-          packageId={pkg.id}
-          alegere={alegere || undefined}
-          blocat={lipsaAlegere ? (fel === "zona" ? "Alege mai întâi zona" : "Alege mai întâi ziarul") : undefined}
-          mode="package"
-          label={`Plateste ${formatPrice(pkg.price)} RON`}
-          variant={isFeatured ? "accent" : "default"}
-          size="lg"
-          className="w-full"
-        />
-        {/* 08.10.2026 — formularul complet de OP (poze, CUI, adresa, linkuri,
-            ritm, ziarul de promovare), nu fereastra veche care cerea doar
-            nume si email: comanda lui Florin a venit fara date de factura. */}
-        <Button asChild variant="outline" size="default" className="w-full">
-          <Link href={`/comanda/transfer?pachet=${pkg.id}${alegere ? `&alegere=${encodeURIComponent(alegere)}` : ""}`}>Comandă cu ordin de plată (factură)</Link>
+        {pkg.id === "local" ? (
+          /* 08.10.2026 — Local: alegi ziarul (sau mai multe, si nationale) pe
+             /alege-ziarele, dupa oras; primul costa 150, ca pachetul. */
+          <Button asChild variant={isFeatured ? "accent" : "default"} size="lg" className="w-full">
+            <Link href="/alege-ziarele">Alege ziarul (unul sau mai multe) →</Link>
+          </Button>
+        ) : (
+          <>
+            {fel && <AlegeZona fel={fel} valoare={alegere} onChange={setAlegere} />}
+            <CheckoutButton
+              packageId={pkg.id}
+              alegere={alegere || undefined}
+              blocat={lipsaAlegere ? (fel === "zona" ? "Alege mai întâi zona" : "Alege mai întâi ziarul") : undefined}
+              mode="package"
+              label={`Plătește ${formatPrice(pkg.price)} RON cu cardul`}
+              variant={isFeatured ? "accent" : "default"}
+              size="lg"
+              className="w-full"
+            />
+            {/* formularul complet de OP (poze, CUI, adresa, ritm, ziar de promovare) */}
+            <Button asChild variant="outline" size="default" className="w-full">
+              <Link href={`/comanda/transfer?pachet=${pkg.id}${alegere ? `&alegere=${encodeURIComponent(alegere)}` : ""}`}>Comandă cu ordin de plată (factură)</Link>
+            </Button>
+          </>
+        )}
+        <Button asChild variant="ghost" size="default" className="w-full text-emerald-700 hover:text-emerald-800">
+          <a
+            href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua! Mă interesează pachetul ${pkg.name} (${formatPrice(pkg.price)} lei)${alegere ? `, ${alegere}` : ""}. Cum procedăm?`)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <MessageCircle className="h-4 w-4" /> Întreabă-ne pe WhatsApp
+          </a>
         </Button>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { Check, Search, X, Newspaper, Loader2, ExternalLink } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { SITE } from "@/data/site";
 import { cn } from "@/lib/utils";
 import {
   ZIARE_ALEGIBILE,
@@ -419,6 +420,18 @@ export function AlegeZiare({
                   </p>
                 )}
               </div>
+              {/* 08.10.2026 — cine nu plateste cu cardul: aceeasi lista, pe WhatsApp,
+                  cu factura si OP. */}
+              {nrGeneral > 0 && (
+                <a
+                  href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua! Aș vrea un articol pe: ${ZIARE_ALEGIBILE.filter((z) => alese.includes(z.slug)).map((z) => z.name).join(", ")}${idsP.length ? ` și ${idsP.length} publicații partenere` : ""} (${totalGeneral} lei). Prefer factură și plata prin transfer bancar. Cum procedăm?`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-xs font-semibold text-emerald-700 underline"
+                >
+                  Prin OP / WhatsApp
+                </a>
+              )}
               {/* data-comanda: bula de chat si WhatsApp se dau la o parte (useZonaLibera). */}
               <Button
                 data-comanda="1"
