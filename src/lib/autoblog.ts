@@ -4,6 +4,7 @@ import { appSettings, blogKeywords, blogPosts } from "@/db/schema";
 import { ensureBlogTables } from "@/lib/ensure-columns";
 import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
 import { SITE } from "@/data/site";
+import { pingIndexNowUrl } from "@/lib/indexnow";
 
 /**
  * Autoblogul (03.10.2026).
@@ -39,7 +40,49 @@ export interface SetariAutoblog {
   facebook: boolean;
 }
 
-const SETARI_IMPLICITE: SetariAutoblog = { activ: false, ritm: "1pezi", facebook: true };
+/**
+ * 08.10.2026 — proprietarul: „sa-i dam drumul la blog". Cu AUTOBLOG_PORNIT=1
+ * in Railway, autoblogul porneste singur (1 articol pe zi) cat timp nimeni
+ * n-a salvat inca setarile din admin; o salvare din admin are prioritate.
+ */
+const SETARI_IMPLICITE: SetariAutoblog = { activ: process.env.AUTOBLOG_PORNIT === "1", ritm: "1pezi", facebook: true };
+
+/**
+ * Cuvintele cu care porneste, din cautarile reale in Romania (Ubersuggest,
+ * 08.10.2026). Se pun singure doar daca lista e goala si AUTOBLOG_PORNIT=1.
+ */
+export const CUVINTE_DE_START = [
+  "ce este un advertorial",
+  "model comunicat de presă",
+  "cum scrii un comunicat de presă",
+  "advertorial exemple",
+  "advertorial vs comunicat de presă",
+  "link building",
+  "ce este un link dofollow",
+  "backlink-uri din presă",
+  "ce înseamnă Domain Authority",
+  "cum apari în presă cu firma ta",
+  "comunicat de presă lansare produs model",
+  "comunicat de presă eveniment model",
+  "promovare firmă",
+  "promovare firmă online",
+  "advertorial SEO",
+  "link building România",
+  "promovare firmă de construcții",
+  "promovare cabinet stomatologic",
+  "promovare restaurant în presa locală",
+  "promovare agenție imobiliară",
+  "promovare pensiune turistică",
+  "promovare magazin online",
+  "promovare eveniment local",
+  "PR pentru firme mici",
+  "reputație online firmă",
+  "ziare online din România",
+  "cât costă un advertorial",
+  "publicare comunicat de presă",
+  "SEO local pentru firme mici",
+  "articole sponsorizate",
+];
 
 /** Paginile interne pe care modelul are voie sa le lege din articol. */
 export const PAGINI_INTERNE = [
@@ -191,19 +234,29 @@ export async function genereazaArticolBlog(keyword: string, titluriExistente: st
 
   const system = `Esti redactorul blogului MediaExpres (${SITE.url}), un serviciu din Romania care publica advertoriale si comunicate de presa in 50 de ziare online locale si nationale. Scrii ghiduri utile, in romana corecta cu diacritice, pentru antreprenori si firme mici care vor sa apara in presa si pe Google.
 
-Reguli:
-- Articolul raspunde la intentia de cautare a cuvantului cheie, concret si practic: pasi, exemple, cifre, greseli de evitat, o sectiune de intrebari frecvente.
-- 1000-1400 de cuvinte. Titlul contine cuvantul cheie, natural, sub 65 de caractere.
+Reguli SEO:
+- Titlul: cuvantul cheie in el, natural, maxim 60 de caractere.
+- Primul paragraf raspunde direct la intrebarea din cuvantul cheie, in 2-3 propozitii, si contine cuvantul cheie.
+- Cuvantul cheie apare si intr-un <h2>. Restul subtitlurilor <h2>/<h3> sunt intrebari reale pe care si le pune omul care cauta asta.
+- Practic si concret: pasi, exemple romanesti (o firma din Iasi, un cabinet din Cluj), cifre plauzibile, greseli de evitat.
+- La final, sectiunea <h2>Întrebări frecvente</h2> cu 3-5 intrebari ca <h3> si raspunsuri scurte.
+- 1000-1400 de cuvinte, fara umplutura.
 - HTML simplu: doar <p>, <h2>, <h3>, <ul>, <ol>, <li>, <strong>, <em>, <blockquote>, <a>. Fara <h1>, fara imagini, fara tabele, fara stiluri, fara markdown.
-- 2-3 linkuri interne, puse natural pe cuvinte din text, DOAR catre paginile de mai jos (href relativ, exact cum e scris). Niciun link extern.
+- 3-5 linkuri interne, puse natural pe cuvinte din text, DOAR catre paginile de mai jos (href relativ, exact cum e scris). Niciun link extern.
 - MediaExpres se mentioneaza o singura data, in final, ca optiune, fara superlative. Restul e ghid onest, nu reclama.
 - Fara promisiuni („garantat", „locul 1 in Google"), fara cifre inventate despre MediaExpres.
 - Nu repeta titluri deja publicate pe blog.
 
+Stil, sa nu para scris de AI:
+- Fraze de lungimi diferite. Ton de om care lucreaza de ani in PR si presa locala, nu de manual.
+- Interzis: „în era digitală", „descoperă", „este important de menționat", „în concluzie", „în lumea de azi", „nu în ultimul rând", „un aspect esențial", „joacă un rol crucial".
+- Liste doar unde chiar sunt pasi sau elemente paralele, nu in fiecare sectiune.
+- Romana corecta, cu diacritice (ș, ț cu virgula).
+
 Pagini interne permise:
 ${PAGINI_INTERNE.map((p) => `- ${p.cale} — ${p.ce}`).join("\n")}
 
-Raspunzi STRICT cu JSON: {"title": string, "excerpt": string (1-2 propozitii, max 160 caractere, pentru meta description), "html": string, "tags": string[] (2-4 etichete scurte), "imageQuery": string (2-4 cuvinte in engleza pentru o poza stock relevanta, fara nume de firme)}.`;
+Raspunzi STRICT cu JSON: {"title": string, "excerpt": string (1-2 propozitii, max 155 caractere, cu cuvantul cheie, pentru meta description), "html": string, "tags": string[] (2-4 etichete scurte), "imageQuery": string (2-4 cuvinte in engleza pentru o poza stock relevanta, fara nume de firme)}.`;
 
   const user = `Cuvant cheie: ${keyword}
 Titluri deja publicate (nu le repeta): ${titluriExistente.slice(0, 40).join(" | ") || "—"}
@@ -423,6 +476,11 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
     }
   }
 
+  if (process.env.AUTOBLOG_PORNIT === "1" && !opt.keywordId) {
+    const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(blogKeywords);
+    if (n === 0) await adaugaCuvinte(CUVINTE_DE_START.join("\n"));
+  }
+
   const [cuvant] = opt.keywordId
     ? await db.select().from(blogKeywords).where(eq(blogKeywords.id, opt.keywordId)).limit(1)
     : await db
@@ -481,6 +539,10 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
       const fb = await posteazaPeFacebook(inserat.id);
       facebook = fb.ok ? "postat" : `nepostat: ${fb.motiv}`;
     }
+    // 08.10.2026 — „sa fim repede gasiti din Google": articolul nou e anuntat
+    // imediat motoarelor (IndexNow: Bing, Yandex, Seznam; Google il ia din
+    // sitemap-ul dinamic). Nu blocheaza publicarea daca pica.
+    await pingIndexNowUrl(`${SITE.url}/blog/${slug}`).catch(() => undefined);
     console.log(`[autoblog] publicat „${art.title}" (${slug}); facebook: ${facebook}`);
     return { facut: true, id: inserat.id, slug, title: art.title, facebook };
   } catch (e) {
