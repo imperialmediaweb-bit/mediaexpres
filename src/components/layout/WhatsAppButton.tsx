@@ -45,7 +45,14 @@ export function WhatsAppButton() {
 
   // Pe ecrane mici, bara fixa de comanda ocupa banda de jos. Cand exista, urcam
   // butonul deasupra ei; altfel sta jos de tot.
-  const bottom = hasStickyMobileCta(pathname) ? "bottom-24" : "bottom-6";
+  // 08.10.2026 — pe /alege-ziarele bara de plata de jos e inalta (~150px pe
+  // telefon) si cercul verde statea peste „Plătește cu cardul": il urcam
+  // deasupra ei.
+  const bottom = pathname.startsWith("/alege-ziarele")
+    ? "bottom-44"
+    : hasStickyMobileCta(pathname)
+      ? "bottom-24"
+      : "bottom-6";
 
   return (
     <a
