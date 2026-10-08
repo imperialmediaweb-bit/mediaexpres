@@ -23,6 +23,7 @@ interface Oferta {
   texte: string;
   ultimaZi: string | null;
   ultimaEroare: string | null;
+  imagineAI?: string | null;
 }
 interface Post {
   id: string;
@@ -285,7 +286,16 @@ export function AutoblogPanel({
           </button>
         </div>
 
-        <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Pozele (prin rotație, câte una pe zi)</p>
+        {oferta.imagineAI && (
+          <div className="mt-4">
+            <p className="text-xs font-semibold uppercase tracking-wider text-slate-500">Ultima imagine generată cu OpenAI</p>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={oferta.imagineAI} alt="" className="mt-2 h-32 w-56 rounded-lg border border-slate-200 object-cover" />
+          </div>
+        )}
+        <p className="mt-4 text-xs font-semibold uppercase tracking-wider text-slate-500">
+          Pozele tale (prin rotație). Dacă nu pui niciuna, generăm zilnic o imagine nouă cu OpenAI.
+        </p>
         <div className="mt-2 flex flex-wrap items-center gap-3">
           {oferta.poze.map((u) => (
             <span key={u} className="relative block">

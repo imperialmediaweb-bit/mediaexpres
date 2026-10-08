@@ -74,7 +74,7 @@ export default async function AutoblogAdmin() {
           fbError: p.fbError,
         }))}
         facebookConfigurat={stare.facebook}
-        oferta={{ activ: oferta.activ, ora: oferta.ora, poze: oferta.poze, texte: oferta.texte.join("\n\n"), ultimaZi: oferta.ultimaZi, ultimaEroare: oferta.ultimaEroare }}
+        oferta={{ activ: oferta.activ, ora: oferta.ora, poze: oferta.poze, texte: oferta.texte.join("\n\n"), ultimaZi: oferta.ultimaZi, ultimaEroare: oferta.ultimaEroare, imagineAI: Object.entries(oferta.imaginiAI).sort().pop()?.[1] || null }}
       />
     </div>
   );
