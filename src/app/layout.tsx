@@ -51,6 +51,9 @@ export const metadata: Metadata = {
   },
   description: SITE.description,
   verification: {
+    // Google Search Console (09.10.2026): codul din „Etichetă HTML" se pune in
+    // Railway ca GOOGLE_SITE_VERIFICATION, fara cod nou si fara deploy manual.
+    ...(process.env.GOOGLE_SITE_VERIFICATION ? { google: process.env.GOOGLE_SITE_VERIFICATION.trim() } : {}),
     other: {
       "facebook-domain-verification": "iz5oj3nyyqnsd5d2k2u256fzuoyviq",
     },
