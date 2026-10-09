@@ -35,6 +35,7 @@ export const metadata: Metadata = {
   title: "Transparență — cifrele rețelei MediaExpres",
   description:
     "Câte publicații, câte articole pe zi, câte pagini de Facebook și ce parte din conținut e publicitate. Cifrele rețelei MediaExpres, verificabile una câte una.",
+  alternates: { canonical: "/transparenta" },
 };
 
 // Aceeași frecvență ca pe ofertă: cifrele se reîmprospătează din oră în oră.

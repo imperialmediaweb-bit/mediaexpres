@@ -45,7 +45,7 @@ export const TEMPLATES: Template[] = [
   {
     slug: "parteneriat-strategic",
     category: "parteneriat",
-    title: "Parteneriat strategic între două companii",
+    title: "Parteneriat strategic între companii",
     industry: "Orice domeniu",
     description: "Pentru anunțarea unei colaborări, joint venture sau parteneriat tehnologic.",
     body: `[COMPANIA A] și [COMPANIA B] anunță un parteneriat strategic pentru [obiectiv comun]\n\n[Oraș], [data] — [COMPANIA A], [scurtă descriere], și [COMPANIA B], [scurtă descriere], anunță încheierea unui parteneriat strategic care va permite [beneficiu concret pentru clienți / piață].\n\nÎn baza acestui acord, cele două companii vor [acțiuni specifice: integrarea tehnologiilor / acces comun la piață / dezvoltarea unei oferte combinate].\n\nParteneriatul vizează în special [public țintă] și se așteaptă să genereze [rezultat estimat: număr clienți, volum afaceri, etc.] în primul an.\n\n„[Citat reprezentant Compania A]", a declarat [NUME], [funcție].\n\n„[Citat reprezentant Compania B]", a adăugat [NUME], [funcție].\n\nPrimele rezultate concrete ale colaborării sunt așteptate până la [data], iar serviciile combinate vor fi disponibile clienților începând cu [data].\n\nDespre [COMPANIA A]: [boilerplate].\nDespre [COMPANIA B]: [boilerplate].`,
@@ -77,7 +77,7 @@ export const TEMPLATES: Template[] = [
   {
     slug: "csr-actiune-comunitate",
     category: "csr",
-    title: "Acțiune de responsabilitate socială",
+    title: "Acțiune CSR în comunitate",
     industry: "Orice industrie",
     description: "Pentru proiecte CSR — donații, voluntariat, sustenabilitate.",
     body: `[NUME COMPANIE] investește [X] RON în [proiectul CSR] pentru a sprijini [beneficiari]\n\n[Oraș], [data] — [NUME COMPANIE], [scurtă descriere], anunță lansarea proiectului [NUME PROIECT], o inițiativă de [tip: educațională / de mediu / socială] cu un buget total de [X] RON pe perioada [interval].\n\nProiectul va beneficia direct [N] [tip beneficiari: copii, studenți, comunități, hectare reabilitate] din [zonele/orașele vizate], prin [acțiuni concrete: ateliere, dotări, plantări, etc.].\n\nPrincipalele direcții de acțiune:\n— [direcție 1]\n— [direcție 2]\n— [direcție 3]\n\nProiectul va fi implementat în parteneriat cu [ONG / instituție / autoritate], iar primele rezultate vor fi vizibile în [interval].\n\n„[Citat manager CSR sau CEO despre motivația proiectului]", a declarat [NUME], [funcție].\n\nProgresul proiectului poate fi urmărit pe [URL] și pe canalele de social media ale [NUME COMPANIE].\n\nDespre [NUME COMPANIE]: [boilerplate].`,
@@ -109,7 +109,7 @@ export const TEMPLATES: Template[] = [
   {
     slug: "schimbare-management",
     category: "premii",
-    title: "Numire / promovare în echipa de management",
+    title: "Numire în echipa de management",
     industry: "Corporate",
     description: "Pentru numirea unui CEO, director sau alt rol cheie.",
     body: `[NUME COMPANIE] îl numește pe [NUME PERSOANĂ] în funcția de [FUNCȚIE]\n\n[Oraș], [data] — [NUME COMPANIE] anunță numirea [NUME PERSOANĂ] în funcția de [FUNCȚIE], începând cu data de [data]. În noul rol, [prenume] va coordona [arii de responsabilitate].\n\n[NUME PERSOANĂ] are o experiență de peste [N] ani în [domeniu], dintre care ultimii [Y] la [companie precedentă], unde a fost responsabil pentru [realizări concrete].\n\nPrincipalele obiective pentru următoarele 12 luni:\n— [obiectiv 1]\n— [obiectiv 2]\n— [obiectiv 3]\n\n„[Citat CEO/board despre alegerea persoanei]", a declarat [NUME], [funcție].\n\n„[Citat al persoanei numite despre planuri]", a spus [NUME PERSOANĂ].\n\n[Prenume] este absolvent al [universitate] și deține [certificări/diplome relevante].\n\nDespre [NUME COMPANIE]: [boilerplate].`,

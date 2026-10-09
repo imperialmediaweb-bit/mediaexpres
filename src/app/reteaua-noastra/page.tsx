@@ -14,7 +14,7 @@ import { citesteAutoritateaRetelei, rezumatAutoritate, type ScorRetea } from "@/
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Rețeaua noastră de ziare",
+  title: "Lista celor 50 de ziare online din rețea | MediaExpres",
   description:
     "Lista completă a celor 50 de ziare MediaExpres: 41 locale + 9 naționale, cu link către fiecare publicație. Plus 46 de pagini de Facebook asociate.",
   alternates: { canonical: "/reteaua-noastra" },

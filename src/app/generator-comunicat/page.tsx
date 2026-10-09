@@ -2,9 +2,9 @@ import type { Metadata } from "next";
 import { CheckCircle2, Sparkles, Clock, Shield, Zap } from "lucide-react";
 import { PublicGenerateForm } from "./PublicGenerateForm";
 
-const TITLE = "Generator gratuit comunicat de presă cu AI — MediaExpres";
+const TITLE = "Generator comunicat de presă gratuit, cu AI";
 const DESCRIPTION =
-  "Scrie un comunicat de presă profesional în 30 de secunde, gratuit și fără cont. AI antrenat pe stilul jurnalistic românesc. Apoi îl poți publica pe 50 de ziare cu un singur click.";
+  "Scrie un comunicat de presă în 30 de secunde, gratuit și fără cont. Apoi îl poți publica pe 50 de ziare online din România.";
 
 export const metadata: Metadata = {
   title: TITLE,

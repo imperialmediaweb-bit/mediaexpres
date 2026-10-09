@@ -2024,6 +2024,18 @@ console.log("\n########## S. RECENZII ##########");
   t("zona ajunge in observatiile din retea", /ZIARE: \$\{r\.ziareAlese\}/.test(citesteFisier("src/lib/retea.ts")));
 }
 
+{
+  console.log("\n── Audit SEO (09.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  const layout = citesteFisier("src/app/layout.tsx");
+  t("fara sufix automat in titluri (nu mai iese MediaExpres de doua ori)", /template: `%s`/.test(layout));
+  t("imaginea de share e PNG, nu SVG", /og-default\.png/.test(layout) && !/og-default\.svg/.test(layout) && fs.existsSync("public/og-default.png"));
+  t("prima pagina are canonical si tinteste advertorial", /canonical: "\/"/.test(citesteFisier("src/app/page.tsx")) && /Advertorial/.test(citesteFisier("src/app/page.tsx")));
+  t("oferta-500 (noindex) nu sta in sitemap", !/url: `\$\{base\}\/oferta-500`/.test(citesteFisier("src/app/sitemap.ts")));
+  for (const f of ["transparenta", "strateg-ai", "parteneri"]) t(`/${f} are canonical`, /canonical:/.test(citesteFisier(`src/app/${f}/page.tsx`)));
+  t("sabloanele tintesc model comunicat de presa", /Model comunicat de presă/.test(citesteFisier("src/app/sabloane/[slug]/page.tsx")));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

@@ -4,9 +4,9 @@ import { FileText, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { TEMPLATES, TEMPLATE_CATEGORIES } from "@/data/templates";
 
-const TITLE = "Șabloane comunicate de presă — MediaExpres";
+const TITLE = "Model comunicat de presă: 12 șabloane gratuite";
 const DESCRIPTION =
-  "12 șabloane gratuite de comunicate de presă pentru orice industrie. Lansare produs, eveniment, parteneriat, rezultate, premii — copy-paste, ajustezi și publici.";
+  "12 modele de comunicat de presă gratuite: lansare produs, eveniment, parteneriat, rezultate, premii. Copiezi modelul, îl completezi și îl publici.";
 
 export const metadata: Metadata = {
   title: TITLE,
@@ -38,7 +38,7 @@ export default function SabloaneIndexPage() {
               <FileText className="h-3.5 w-3.5" /> Gratuit • 12 șabloane
             </div>
             <h1 className="h1 mt-4">
-              Șabloane comunicate de presă pentru orice ocazie
+              Model comunicat de presă: șabloane pentru orice ocazie
             </h1>
             <p className="lead mt-4 text-slate-600">
               Lansare produs, eveniment, parteneriat, rezultate, premii — am

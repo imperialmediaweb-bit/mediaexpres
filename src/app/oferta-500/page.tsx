@@ -65,6 +65,7 @@ export const metadata: Metadata = {
   description:
     "Advertorial sau comunicat de presă publicat în 50 de ziare românești pentru 500 lei — publicitate în presa locală și națională. Rămâne permanent și primești lista cu toate cele 50 de linkuri, de pus pe site la „Apariții în presă”.",
   robots: { index: false, follow: false },
+  alternates: { canonical: "/oferta-500" },
 };
 
 // Pagina se regenereaza din ora in ora ca mentiunea termenului limita sa

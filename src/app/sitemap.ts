@@ -18,7 +18,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/`, lastModified: now, changeFrequency: "weekly" as const, priority: 1 },
     { url: `${base}/pachete`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.9 },
     // Landingul din campania Facebook — pagina cu cel mai mult trafic platit.
-    { url: `${base}/oferta-500`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.95 },
+    // /oferta-500 e noindex intentionat (linkurile spre cele 50 de ziare), deci nu sta in sitemap.
     // Lista celor 50 de publicatii: pagina cu cel mai mult continut unic din site.
     { url: `${base}/reteaua-noastra`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     // Clientul bifeaza singur publicatiile si plateste exact cat a bifat.

@@ -4,7 +4,7 @@ import { LegalLayout } from "@/components/LegalLayout";
 import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "Termeni și condiții",
+  title: "Termeni și condiții | MediaExpres",
   description: "Termenii și condițiile de utilizare a serviciilor MediaExpres.",
   alternates: { canonical: "/legal/termeni" },
 };

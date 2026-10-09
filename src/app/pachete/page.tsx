@@ -13,7 +13,7 @@ import { BankTransferBox } from "@/components/BankTransferBox";
 import { Mail } from "lucide-react";
 
 export const metadata: Metadata = {
-  title: "Pachete și prețuri — Distribuție pe 50 ziare românești",
+  title: "Prețuri advertorial și comunicat de presă | MediaExpres",
   description:
     "Pachete MediaExpres: Local (150 lei), Regional (500 lei), Național 50 (1500 lei). Variante Cazino/iGaming și abonamente lunare Bronze/Silver/Gold/Platinum.",
   alternates: { canonical: "/pachete" },
@@ -35,7 +35,7 @@ export default function PacheteTPage() {
       <section className="bg-brand-navy text-white">
         <div className="container py-20 text-center">
           <p className="eyebrow text-brand-gold">Prețuri transparente</p>
-          <h1 className="h1 mt-3 text-white">Pachete pentru fiecare nevoie</h1>
+          <h1 className="h1 mt-3 text-white">Prețuri pentru advertorial și comunicat de presă</h1>
           <p className="lead mx-auto mt-6 max-w-2xl text-white/85">
             De la un singur articol într-un ziar județean, la publicare națională pe 50 de ziare
             sau abonamente lunare. Alege pachetul potrivit afacerii tale.

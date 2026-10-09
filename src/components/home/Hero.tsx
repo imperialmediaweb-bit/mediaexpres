@@ -33,7 +33,7 @@ export function Hero() {
               <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-brand-gold opacity-75" />
               <span className="relative inline-flex h-2 w-2 rounded-full bg-brand-gold" />
             </span>
-            Distribuție în 12 ore lucrătoare
+            Advertorial și comunicat de presă
           </div>
 
           <h1 className="mt-6 font-serif text-5xl font-bold leading-[1.05] tracking-tight sm:text-6xl lg:text-7xl">
@@ -58,9 +58,9 @@ export function Hero() {
           </h1>
 
           <p className="mt-8 max-w-xl text-lg leading-relaxed text-white/85">
-            Distribuție rapidă de comunicate de presă pe 50 de ziare și 46 de pagini de Facebook.
-            Primești raport PDF și Excel cu toate linkurile. Publicare permanentă,
-            linkuri permanente către site-ul tău.
+            Advertorialul sau comunicatul tău de presă, publicat pe 50 de ziare online și distribuit
+            pe 46 de pagini de Facebook. Primești raport cu toate linkurile, iar articolele și
+            linkurile către site-ul tău rămân permanent.
           </p>
 
           <div className="mt-10 flex flex-wrap gap-4">

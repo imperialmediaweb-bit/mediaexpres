@@ -33,7 +33,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru imobiliare",
     metaTitle: "Comunicate de presă imobiliare — publicare în 50 de ziare",
     metaDescription:
-      "Promovează ansambluri rezidențiale, agenții și proiecte imobiliare în presa din toată România. Publicare în 12 ore lucrătoare, raport cu linkuri. De la 150 RON.",
+      "Ansambluri rezidențiale, agenții și proiecte imobiliare în presa din toată România. Publicare în 12 ore lucrătoare, raport cu linkuri, de la 150 lei.",
     intro: [
       "Un ansamblu rezidențial se vinde greu doar din anunțuri pe portaluri. Cumpărătorul unei locuințe caută semnale de încredere: cine e dezvoltatorul, ce a mai construit, ce spun sursele independente. Un articol în presa locală și națională e exact genul de validare pe care OLX-ul nu ți-l poate da.",
       "MediaExpres publică articolul tău în ziarele din județul unde vinzi — plus, la nevoie, în toată țara. Cumpărătorii care caută pe Google numele proiectului tău găsesc presă, nu doar reclame.",
@@ -62,9 +62,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "clinici-medicale",
     name: "clinici și cabinete medicale",
     heading: "Comunicate de presă pentru clinici și cabinete medicale",
-    metaTitle: "PR pentru clinici medicale — articole în presa din toată țara",
+    metaTitle: "Comunicate de presă pentru clinici medicale",
     metaDescription:
-      "Adu pacienți noi cu articole în presa locală: medici noi, aparatură modernă, servicii unice în județ. Publicare în 12 ore lucrătoare, conform reglementărilor.",
+      "Pacienți noi prin presa locală: medici noi, aparatură modernă, servicii noi în județ. Articole publicate în 12 ore lucrătoare.",
     intro: [
       "Pacienții nu aleg clinica din bannere — o aleg pe cea despre care au citit, pe care le-a recomandat-o cineva, sau care apare în presă ca autoritate locală. Un medic citat într-un articol despre prevenție valorează mai mult decât zece reclame.",
       "Publicăm articole despre clinica ta în ziarele din județ și din țară: aparatura nouă, medicii care s-au alăturat echipei, campaniile de screening. Ton editorial, credibil, fără promisiuni medicale interzise de lege.",
@@ -93,9 +93,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "avocati-juridic",
     name: "cabinete de avocatură",
     heading: "Comunicate de presă pentru avocați și case de avocatură",
-    metaTitle: "PR juridic — vizibilitate în presă pentru cabinete de avocatură",
+    metaTitle: "Comunicate de presă pentru cabinete de avocatură",
     metaDescription:
-      "Poziționează-te ca autoritate juridică: comentarii pe legislație nouă, ghiduri pentru public, prezentarea echipei. Publicare în 50 de ziare în 12 ore lucrătoare.",
+      "Autoritate juridică în presă: comentarii pe legislația nouă, ghiduri pentru public, prezentarea echipei. În 50 de ziare, în 12 ore lucrătoare.",
     intro: [
       "Clienții nu compară avocații pe preț — îl caută pe cel care pare că știe. Iar „pare că știe\" se construiește public: avocatul citat în presă pe o schimbare de lege devine prima opțiune când cititorul are o problemă juridică.",
       "Publicăm analize și ghiduri semnate de cabinetul tău în presa locală și națională. Publicitatea directă e restricționată pentru avocați — dar conținutul editorial de informare juridică este exact instrumentul permis și eficient.",
@@ -124,9 +124,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "it-startup",
     name: "IT și startup-uri",
     heading: "Comunicate de presă pentru startup-uri și companii IT",
-    metaTitle: "PR pentru startup-uri — lansări și finanțări în presa din România",
+    metaTitle: "Comunicate de presă pentru startup-uri și IT",
     metaDescription:
-      "Lansezi un produs, ai închis o rundă de finanțare, angajezi masiv? Publicăm știrea în 50 de ziare în 12 ore lucrătoare — vizibilitate pentru clienți și investitori.",
+      "Lansezi un produs sau ai închis o rundă de finanțare? Publicăm știrea în 50 de ziare în 12 ore lucrătoare, vizibilă pentru clienți și investitori.",
     intro: [
       "În tech, presa nu e vanitate — e due diligence. Investitorii care îți primesc pitch-ul te caută pe Google. Clienții enterprise la fel. Candidații seniori la fel. Dacă nu găsesc nimic, pari mai mic decât ești.",
       "Publicăm lansările, rundele de finanțare și milestone-urile tale în presa din toată țara. Un layer de legitimitate pe care îl construiești cu un articol pe lună, nu cu ani de așteptat să te remarce un jurnalist.",
@@ -186,9 +186,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "restaurante-horeca",
     name: "restaurante și HoReCa",
     heading: "Comunicate de presă pentru restaurante, cafenele și hoteluri",
-    metaTitle: "PR HoReCa — restaurantul tău în presa locală în 12 ore lucrătoare",
+    metaTitle: "Comunicate de presă pentru restaurante și HoReCa",
     metaDescription:
-      "Deschidere de local, meniu nou, chef premiat? Publică în ziarele orașului tău și umple mesele. Articole cu poze, de la 150 RON, publicate în 12 ore lucrătoare.",
+      "Local nou, meniu nou, chef premiat? Apari în ziarele orașului tău și umple mesele. Articole cu poze, de la 150 lei, publicate în 12 ore lucrătoare.",
     intro: [
       "Un local nou are 6 luni să devină „locul acela despre care se vorbește\" — sau rămâne gol. Presa locală e acceleratorul: articolul despre deschidere ajunge exact la publicul din oraș care caută un loc nou de încercat.",
       "Publicăm în ziarele din județul tău articole cu care te lauzi apoi pe Instagram: deschiderea, meniul de sezon, chef-ul, evenimentele. Cu fotografii care fac poftă.",
@@ -219,7 +219,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru firme de construcții și amenajări",
     metaTitle: "PR construcții — proiectele tale în presa din toată România",
     metaDescription:
-      "Câștigă licitații și clienți mari: firmele de construcții vizibile în presă inspiră încredere. Publicare proiecte, echipamente, angajări — în 12 ore lucrătoare.",
+      "Firmele de construcții vizibile în presă inspiră încredere la licitații și la clienți mari. Proiecte, utilaje, angajări, publicate în 12 ore lucrătoare.",
     intro: [
       "În construcții, contractele mari se dau firmelor care par solide. Iar soliditatea se demonstrează public: proiecte finalizate în presă, echipamente noi, echipe în creștere. Beneficiarul care te caută pe Google înainte de licitație trebuie să găsească dovezi, nu doar site-ul tău.",
       "Publicăm portofoliul tău ca știri: lucrarea predată la termen, utilajul nou din flotă, șantierul deschis. Fiecare articol e o referință publică permanentă.",
@@ -250,7 +250,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru dealeri auto și service-uri",
     metaTitle: "PR auto — dealeri, service-uri și parcuri auto în presă",
     metaDescription:
-      "Lansări de modele, oferte de sezon, service-uri autorizate — publicate în ziarele din județul tău în 12 ore lucrătoare. Adu clienți în showroom cu presa locală.",
+      "Modele noi, oferte de sezon, service autorizat: publicate în ziarele din județul tău în 12 ore lucrătoare. Adu clienți în showroom prin presa locală.",
     intro: [
       "Mașina e a doua cea mai mare achiziție a unei familii — și se cumpără local. Clientul care intră în showroom a citit înainte: despre model, despre dealer, despre ofertele momentului. Presa județeană e canalul care îl aduce pe ușă.",
       "Publicăm lansările, ofertele și serviciile tale în presa din zona de unde vin clienții. De la dealeri de mărci noi la parcuri de rulate și service-uri specializate.",
@@ -279,9 +279,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "educatie",
     name: "educație și training",
     heading: "Comunicate de presă pentru școli private, grădinițe și cursuri",
-    metaTitle: "PR educație — școli, grădinițe și furnizori de cursuri în presă",
+    metaTitle: "Comunicate de presă pentru școli și educație",
     metaDescription:
-      "Umple locurile la înscrieri: părinții aleg școlile despre care citesc. Articole despre rezultate, profesori, programe — publicate în 12 ore lucrătoare în presa locală.",
+      "Părinții aleg școlile despre care citesc. Articole despre rezultate, profesori și programe, publicate în presa locală în 12 ore lucrătoare.",
     intro: [
       "Părinții nu aleg grădinița din pliante — o aleg pe cea despre care au citit lucruri bune și pe care o recomandă alți părinți. Presa locală e locul unde se formează exact această reputație, cu luni înainte de perioada de înscrieri.",
       "Publicăm articole despre rezultatele elevilor tăi, programele speciale, profesorii remarcabili. Când vine sesiunea de înscrieri, numele instituției e deja cunoscut și asociat cu performanța.",
@@ -312,7 +312,7 @@ export const INDUSTRIES: Industry[] = [
     heading: "Comunicate de presă pentru saloane, clinici estetice și spa",
     metaTitle: "PR beauty — saloane și clinici estetice în presa locală",
     metaDescription:
-      "Clientele noi vin din încredere: publică în presa orașului deschiderea, aparatura nouă, specialiștii tăi. Articole cu poze, publicate în 12 ore lucrătoare.",
+      "Clientele noi vin din încredere: apari în presa orașului cu deschiderea, aparatura nouă și specialiștii tăi. Articole cu poze, în 12 ore lucrătoare.",
     intro: [
       "În beauty, clienta nouă vine pe recomandare — sau pe reputație publică. Între două saloane cu prețuri identice, câștigă cel despre care a citit ceva: aparatura de ultimă generație, specialista cu certificări, transformările reale.",
       "Publicăm în presa orașului tău articolele care construiesc exact această reputație. Iar linkurile rămân permanent — oricine caută numele salonului găsește presă, nu doar Instagram.",
@@ -341,7 +341,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "finante-contabilitate",
     name: "finanțe și contabilitate",
     heading: "Comunicate de presă pentru firme de contabilitate și consultanță",
-    metaTitle: "PR financiar — contabili și consultanți ca autorități în presă",
+    metaTitle: "Comunicate de presă pentru contabili și consultanți",
     metaDescription:
       "Clienții vin la expertul pe care îl citesc: comentează schimbările fiscale în presă și devino prima opțiune a antreprenorilor din zona ta.",
     intro: [
@@ -403,9 +403,9 @@ export const INDUSTRIES: Industry[] = [
     slug: "ong",
     name: "ONG-uri și cauze sociale",
     heading: "Comunicate de presă pentru ONG-uri și campanii sociale",
-    metaTitle: "PR pentru ONG-uri — campaniile tale în presa din toată țara",
+    metaTitle: "Comunicate de presă pentru ONG-uri",
     metaDescription:
-      "Strângeri de fonduri, campanii de 3,5%, proiecte comunitare — vizibilitatea în presă aduce donatori și voluntari. Publicare în 12 ore lucrătoare, în 50 de ziare.",
+      "Strângeri de fonduri, campanii de 3,5%, proiecte comunitare: apariția în presă aduce donatori și voluntari. În 50 de ziare, în 12 ore lucrătoare.",
     intro: [
       "Cauzele bune nevăzute rămân nefinanțate. Donatorii dau către organizațiile despre care au citit, companiile sponsorizează proiecte cu vizibilitate, iar formularul de 3,5% se completează pentru ONG-urile cu nume cunoscut.",
       "Publicăm campaniile tale în presa locală și națională: strângerile de fonduri, rezultatele proiectelor, poveștile beneficiarilor. Transparența publică care transformă simpatia în donații.",
@@ -434,7 +434,7 @@ export const INDUSTRIES: Industry[] = [
     slug: "agricultura-food",
     name: "agricultură și producători locali",
     heading: "Comunicate de presă pentru fermieri și producători locali",
-    metaTitle: "PR pentru producători locali — produsele tale în presa națională",
+    metaTitle: "Comunicate de presă pentru producători locali",
     metaDescription:
       "De la ferma ta pe mesele românilor: publică povestea produselor tale în 50 de ziare. Consumatorii caută producători autentici — ajută-i să te găsească.",
     intro: [

@@ -15,6 +15,7 @@ export const metadata: Metadata = {
   title: "Program de parteneri reseller - MediaExpres",
   description:
     "Agentii PR si freelanceri: revindeti reteaua MediaExpres clientilor vostri cu discount -25% pana la -35% si raport white-label.",
+  alternates: { canonical: "/parteneri" },
 };
 
 export default function ParteneriPage() {

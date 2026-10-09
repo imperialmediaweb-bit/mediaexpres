@@ -8,7 +8,7 @@ import { CtaBanner } from "@/components/home/CtaBanner";
 export const metadata: Metadata = {
   title: "Despre noi — MediaExpres",
   description:
-    "MediaExpres este o agenție românească specializată în distribuție de comunicate de presă pe rețeaua celor mai citite ziare din România.",
+    "MediaExpres este o agenție din Botoșani care publică advertoriale și comunicate de presă pe o rețea de 50 de ziare online din România.",
   alternates: { canonical: "/despre" },
 };
 

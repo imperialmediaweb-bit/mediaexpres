@@ -3,7 +3,7 @@ import Link from "next/link";
 import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "GDPR",
+  title: "GDPR și protecția datelor | MediaExpres",
   description: "Drepturile tale conform Regulamentului General privind Protecția Datelor (GDPR).",
   alternates: { canonical: "/legal/gdpr" },
 };

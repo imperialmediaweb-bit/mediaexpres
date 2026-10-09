@@ -7,9 +7,9 @@ import { CAMPANII, EXEMPLU_RAPORT, EXEMPLU_RAPORT_LIVE } from "@/data/campanii";
 import { SITE } from "@/data/site";
 
 export const metadata: Metadata = {
-  title: "Clienți și campanii — agenții de PR, turnee, firme | MediaExpres",
+  title: "Exemple de advertoriale și campanii de presă | MediaExpres",
   description:
-    "Agenții de comunicare, organizatori de turnee și firme din toată țara publică prin MediaExpres. Campanii reale, articole publicate, raport de publicare ca exemplu.",
+    "Agenții de PR, organizatori de turnee și firme din toată țara publică prin MediaExpres. Campanii reale, articole publicate și un raport de publicare.",
   alternates: { canonical: "/exemple" },
 };
 

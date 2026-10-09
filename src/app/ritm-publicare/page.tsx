@@ -4,7 +4,7 @@ import { Clock, CalendarDays, TrendingUp, CheckCircle2 } from "lucide-react";
 import { RITMURI } from "@/lib/ritm";
 
 export const metadata: Metadata = {
-  title: "În cât timp apar articolele — ritmul de publicare | MediaExpres",
+  title: "În cât timp apar articolele: ritmul de publicare",
   description:
     "Rapid, în 12 ore, întins pe 3 zile sau pe 2 săptămâni: cum alegi ritmul de publicare pentru cele 50 de articole, în funcție de ce vrei să obții.",
   alternates: { canonical: "/ritm-publicare" },

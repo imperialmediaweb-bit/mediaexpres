@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { LegalLayout } from "@/components/LegalLayout";
 
 export const metadata: Metadata = {
-  title: "Politica de cookies",
+  title: "Politica de cookies | MediaExpres",
   description: "Informații despre cookie-urile folosite pe MediaExpres.",
   alternates: { canonical: "/legal/cookies" },
 };

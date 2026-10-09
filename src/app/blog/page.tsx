@@ -3,7 +3,7 @@ import { BlogCard } from "@/components/blog/BlogCard";
 import { toatePosturile } from "@/lib/blog-posts";
 
 export const metadata: Metadata = {
-  title: "Blog",
+  title: "Blog despre advertoriale, PR și comunicate | MediaExpres",
   description:
     "Ghiduri despre comunicate de presă, strategii PR și distribuție media pentru afaceri românești.",
   alternates: { canonical: "/blog" },

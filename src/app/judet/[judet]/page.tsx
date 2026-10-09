@@ -25,7 +25,7 @@ export async function generateMetadata({
   if (!county) return { title: "Pagina nu există" };
 
   const title = `Publicare comunicat de presă în ${county.name} — MediaExpres`;
-  const description = `Publică-ți comunicatul de presă pe ziarele din județul ${county.name} în 12 ore lucrătoare. Pachet Local de la 150 RON, Regional 500 RON sau Național 1500 RON pe 50 ziare. Plată online cu cardul.`;
+  const description = `Comunicatul tău pe ziarele din județul ${county.name}, în 12 ore lucrătoare. Local de la 150 lei, Regional 500 lei, Național pe 50 de ziare. Card sau OP.`;
 
   return {
     title,

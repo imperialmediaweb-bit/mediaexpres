@@ -17,8 +17,10 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const t = findTemplateBySlug(params.slug);
   if (!t) return { title: "Șablon inexistent" };
-  const title = `${t.title} — Șablon comunicat de presă`;
-  const description = `${t.description} Șablon gratuit de comunicat de presă pentru ${t.industry}, gata de copy-paste și publicare.`;
+  const title = `Model comunicat de presă: ${t.title}`;
+  const descriere = `Model gratuit de comunicat de presă pentru ${t.industry}. ${t.description}`;
+  // Sub 160 de caractere, taiat la ultimul cuvant intreg (audit SEO 09.10.2026).
+  const description = descriere.length <= 158 ? descriere : `${descriere.slice(0, 155).replace(/\s+\S*$/, "")}…`;
   return {
     title,
     description,

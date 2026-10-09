@@ -13,9 +13,10 @@ import {
 import { StrategyGenerator } from "../oferta/[token]/StrategyGenerator";
 
 export const metadata: Metadata = {
-  title: "Strateg Editorial AI - 5 idei de articole in 30 secunde | MediaExpres",
+  title: "Strateg editorial AI: 5 idei de articole în 30 de secunde",
   description:
-    "Tool gratuit: introdu site-ul sau brandul vostru si primesti instant 5 idei de articole tailored, pachet de distributie potrivit si frecventa optima. Powered by MediaExpres, cea mai mare retea de presa online din Romania.",
+    "Unealtă gratuită: scrii site-ul sau brandul și primești 5 idei de articole, pachetul de distribuție potrivit și cât de des să publici.",
+  alternates: { canonical: "/strateg-ai" },
   openGraph: {
     title: "Strateg Editorial AI - MediaExpres",
     description:
