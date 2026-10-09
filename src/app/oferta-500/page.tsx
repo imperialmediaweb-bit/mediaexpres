@@ -88,7 +88,7 @@ const INCLUDED = [
     icon: Layers,
     title: "Text diferit pe fiecare ziar",
     description:
-      "Nu 50 de copii identice. Fiecare publicație primește altă formulare și alt titlu, cu același mesaj și aceleași date de contact. Deschide două linkuri din raport și vezi diferența.",
+      "Nu 50 de copii și nici 10 cuvinte schimbate: fiecare publicație primește articolul rescris complet, cu alt titlu, cu același mesaj și aceleași date de contact. Deschide două linkuri din raport și vezi diferența.",
   },
   {
     // 06.09.2026, dupa-amiaza — reteaua a scos marcajul de continut platit:
@@ -253,7 +253,7 @@ function buildFaq(CIFRE: CifreRetea) {
   },
   {
     q: "E același articol copiat pe toate ziarele?",
-    a: "Nu e copiat. Fiecare ziar primește o variantă unică: alt titlu, altă formulare, altă adresă — același mesaj, aceleași date de contact și aceleași linkuri către site-ul tău. Deschide două linkuri din raport și compari. Dacă vrei textul tău identic peste tot (comunicat oficial, text aprobat juridic), spui la comandă și îl publicăm neschimbat.",
+    a: "Nu e copiat și nu schimbăm doar câteva cuvinte. Fiecare ziar primește articolul rescris complet: alt titlu, altă introducere, altă formulare și altă ordine a paragrafelor, altă adresă. Rămân neschimbate doar lucrurile care trebuie să rămână: mesajul, numele, cifrele, prețurile, citatele, datele de contact și linkurile către site-ul tău. Deschide două linkuri din raport și compari. Dacă vrei textul tău identic peste tot (comunicat oficial, text aprobat juridic), spui la comandă și îl publicăm neschimbat.",
   },
   {
     // 17.09.2026 — un prospect a ridicat obiectia „e facut cu AI". Pana acum
@@ -439,6 +439,73 @@ export default async function Oferta500Page() {
                 <p className="mt-2 text-sm text-slate-600">{item.description}</p>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/*
+        09.10.2026 — un prospect: „nu sunt unice, schimbati 10 cuvinte si e la
+        fel peste tot". Raspunsul statea doar in FAQ, jos de tot. Aici, la
+        vedere: ce se rescrie si ce ramane neschimbat — exact regulile din
+        rescrierea retelei (advertorial-rewrite.ts), fara procente promise.
+      */}
+      <section id="articol-unic" className="section scroll-mt-20 pt-0">
+        <div className="container">
+          <div className="mx-auto max-w-4xl rounded-2xl border-2 border-brand-red/20 bg-white p-6 md:p-10">
+            <div className="text-center">
+              <p className="eyebrow">Articol unic pe fiecare ziar</p>
+              <h2 className="h2 mt-2">Nu schimbăm 10 cuvinte. Rescriem tot articolul.</h2>
+              <p className="mx-auto mt-3 max-w-2xl text-slate-600">
+                Fiecare din cele 50 de ziare primește varianta lui, rescrisă de la titlu până la ultimul
+                paragraf. Google vede 50 de articole diferite despre același subiect, nu același text
+                copiat de 50 de ori.
+              </p>
+            </div>
+            <div className="mt-8 grid gap-6 md:grid-cols-2">
+              <div className="rounded-xl bg-slate-50 p-5">
+                <h3 className="flex items-center gap-2 font-serif text-lg font-bold text-brand-navy">
+                  <Layers className="h-5 w-5 text-brand-red" /> Se rescrie pe fiecare ziar
+                </h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-slate-700">
+                  {[
+                    "Titlul: alt început, altă construcție, alte cuvinte",
+                    "Introducerea, scrisă altfel",
+                    "Formularea fiecărui paragraf",
+                    "Ordinea paragrafelor și trecerile dintre ele",
+                    "Adresa paginii (linkul articolului)",
+                  ].map((p) => (
+                    <li key={p} className="flex items-start gap-2.5">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+              <div className="rounded-xl bg-slate-50 p-5">
+                <h3 className="flex items-center gap-2 font-serif text-lg font-bold text-brand-navy">
+                  <ShieldCheck className="h-5 w-5 text-brand-red" /> Rămâne exact ca la tine
+                </h3>
+                <ul className="mt-4 space-y-2.5 text-sm text-slate-700">
+                  {[
+                    "Mesajul și informațiile, fără nimic inventat",
+                    "Numele firmei, produselor și persoanelor",
+                    "Prețurile, cifrele și datele de contact",
+                    "Citatele, cuvânt cu cuvânt",
+                    "Linkurile către site-ul tău, cu același text",
+                    "Pozele și clipurile",
+                  ].map((p) => (
+                    <li key={p} className="flex items-start gap-2.5">
+                      <Check className="mt-0.5 h-4 w-4 shrink-0 text-brand-red" />
+                      <span>{p}</span>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            </div>
+            <p className="mt-6 text-center text-sm text-slate-600">
+              Verifici singur: deschide două linkuri din raport și compară-le. Ai nevoie de text identic
+              peste tot (comunicat oficial, text aprobat juridic)? Spui la comandă și îl publicăm neschimbat.
+            </p>
           </div>
         </div>
       </section>
