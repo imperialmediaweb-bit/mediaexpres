@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { SITE } from "@/data/site";
 import { Hero } from "@/components/home/Hero";
 import { CoverageBanner } from "@/components/home/CoverageBanner";
 import { ClientiStrip } from "@/components/ClientiStrip";
@@ -20,9 +21,30 @@ export const metadata: Metadata = {
   alternates: { canonical: "/" },
 };
 
+// Serviciul, descris pentru motoarele de cautare si asistentii AI (11.10.2026):
+// ce vindem, unde, la ce pret. Preturile sunt cele din data/packages.ts.
+const SERVICIU = {
+  "@context": "https://schema.org",
+  "@type": "Service",
+  name: "Publicare advertoriale și comunicate de presă în 50 de ziare online",
+  serviceType: "Publicare advertoriale și comunicate de presă",
+  description:
+    "Advertorialul sau comunicatul de presă al clientului, publicat în 50 de ziare online din România (41 locale, câte unul pe județ, și 9 naționale), în maximum 12 ore lucrătoare, cu raport cu toate linkurile și distribuire pe 46 de pagini de Facebook.",
+  provider: { "@type": "Organization", name: SITE.name, url: SITE.url },
+  areaServed: { "@type": "Country", name: "România" },
+  url: SITE.url,
+  offers: [
+    { "@type": "Offer", name: "Articol în 50 de ziare (ofertă)", price: "500", priceCurrency: "RON", url: `${SITE.url}/oferta-500` },
+    { "@type": "Offer", name: "Local: 1 ziar ales", price: "150", priceCurrency: "RON", url: `${SITE.url}/pachete` },
+    { "@type": "Offer", name: "Regional: 10 ziare dintr-o regiune", price: "500", priceCurrency: "RON", url: `${SITE.url}/pachete` },
+    { "@type": "Offer", name: "Cazino și pariuri: 50 de ziare", price: "1000", priceCurrency: "RON", url: `${SITE.url}/oferta-500` },
+  ],
+};
+
 export default function HomePage() {
   return (
     <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(SERVICIU) }} />
       <Hero />
       <CoverageBanner />
       <ClientiStrip />

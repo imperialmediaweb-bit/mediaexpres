@@ -2062,6 +2062,18 @@ console.log("\n########## S. RECENZII ##########");
   t("planificatorul ruleaza reamintirea", /abonamente-reamintire/.test(fs.readFileSync("src/planificator.ts", "utf8")));
 }
 
+{
+  console.log("\n── Cautare cu AI: ChatGPT, Gemini, Perplexity (11.10.2026) ──");
+  const faq = fs.readFileSync("src/components/home/FAQ.tsx", "utf8");
+  t("prima pagina raspunde la ce este un advertorial si cat costa", /Ce este un advertorial\?/.test(faq) && /Cât costă un advertorial/.test(faq));
+  t("intrebarile de pe prima pagina pleaca si ca FAQPage", /"@type": "FAQPage"/.test(faq));
+  t("prima pagina descrie serviciul cu pret (Service + Offer)", /"@type": "Service"/.test(fs.readFileSync("src/app/page.tsx", "utf8")));
+  const rob = fs.readFileSync("src/app/robots.ts", "utf8");
+  t("robots poftesc explicit ChatGPT, Claude, Perplexity, Gemini", ["GPTBot", "OAI-SearchBot", "ClaudeBot", "PerplexityBot", "Google-Extended"].every((b) => rob.includes(`"${b}"`)));
+  const llms = fs.readFileSync("public/llms.txt", "utf8");
+  t("llms.txt are raspunsuri scurte si rezumat in engleza", /Întrebări frecvente, pe scurt/.test(llms) && /## In English/.test(llms));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

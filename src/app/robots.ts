@@ -1,9 +1,32 @@
 import type { MetadataRoute } from "next";
 import { SITE } from "@/data/site";
 
+// Asistentii si motoarele de cautare cu AI (11.10.2026): ii poftim explicit,
+// cu aceleasi interdictii ca restul. Ce blocheaza Cloudflare inainte de
+// robots.txt (GPTBot, ClaudeBot) se deblocheaza din contul Cloudflare.
+const ROBOTI_AI = [
+  "GPTBot",
+  "OAI-SearchBot",
+  "ChatGPT-User",
+  "ClaudeBot",
+  "Claude-SearchBot",
+  "Claude-User",
+  "PerplexityBot",
+  "Perplexity-User",
+  "Google-Extended",
+  "Applebot-Extended",
+  "Bingbot",
+  "meta-externalagent",
+  "DuckAssistBot",
+  "MistralAI-User",
+];
+
+const INTERZIS = ["/admin", "/admin/*", "/api", "/api/*", "/comanda", "/cont/"];
+
 export default function robots(): MetadataRoute.Robots {
   return {
     rules: [
+      { userAgent: ROBOTI_AI, allow: "/", disallow: INTERZIS },
       {
         userAgent: "*",
         allow: "/",
