@@ -163,6 +163,12 @@ export const PROMO_ROLLING = {
   periodDays: 3,
   // Ultima prelungire posibila: 31 decembrie (ora de iarna, +02:00).
   hardEndIso: "2026-12-31T23:59:59+02:00",
+  // 11.10.2026 (user: „sa zic ca oferta e valabila inca o saptamana"):
+  // de azi, termenul e la o saptamana — 18 octombrie, apoi 25 etc.
+  // Pana pe 10 octombrie raman pasii de 3 zile, ca istoricul sa nu se schimbe.
+  saptamanalDinIso: "2026-10-11T00:00:00+03:00",
+  saptamanalAnchorIso: "2026-10-18T23:59:59+03:00",
+  saptamanalZile: 7,
 };
 
 /** Termenul curent al ofertei, sau null dupa 31 decembrie. `now` e param pentru teste. */
@@ -170,8 +176,9 @@ export function currentPromoDeadline(now: number = Date.now()): Date | null {
   const anchor = new Date(PROMO_ROLLING.anchorIso).getTime();
   const hardEnd = new Date(PROMO_ROLLING.hardEndIso).getTime();
   if (now >= hardEnd) return null;
-  const period = PROMO_ROLLING.periodDays * 86_400_000;
-  let t = anchor;
+  const saptamanal = now >= new Date(PROMO_ROLLING.saptamanalDinIso).getTime();
+  const period = (saptamanal ? PROMO_ROLLING.saptamanalZile : PROMO_ROLLING.periodDays) * 86_400_000;
+  let t = saptamanal ? new Date(PROMO_ROLLING.saptamanalAnchorIso).getTime() : anchor;
   while (t <= now) t += period;
   return new Date(Math.min(t, hardEnd));
 }

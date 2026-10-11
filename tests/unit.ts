@@ -137,6 +137,11 @@ t("termenul nu sare peste luni", (() => {
   return ok;
 })());
 
+t("10 octombrie ramane 10 octombrie (istoricul pe 3 zile neschimbat)", promoDeadlineLabel(at("2026-10-10T12:00:00+03:00")) === "10 octombrie");
+t("din 11 octombrie termenul e la o saptamana: 18 octombrie", promoDeadlineLabel(at("2026-10-11T09:00:00+03:00")) === "18 octombrie");
+t("dupa 18 octombrie se prelungeste la 25 octombrie", promoDeadlineLabel(at("2026-10-19T09:00:00+03:00")) === "25 octombrie");
+t("pagina ofertei citeste termenul la fiecare randare, nu la pornirea serverului", !/^const deadline = promoDeadlineLabel\(\)/m.test(fs.readFileSync("src/app/oferta-500/page.tsx", "utf8")));
+
 console.log("\n########## B. PACHETE SI PRETURI ##########");
 const promo = findPackageById("promo-50")!;
 const promoCaz = findPackageById("promo-50-cazino")!;

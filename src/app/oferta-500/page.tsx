@@ -30,7 +30,9 @@ import { nr, milioane } from "@/data/cifre";
 import { cifreLive, type CifreRetea } from "@/lib/cifre-live";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
-const deadline = promoDeadlineLabel();
+// 11.10.2026: termenul se citeste la fiecare randare, nu o data la pornirea
+// serverului. Calculat aici sus, ramanea blocat pe data din ziua deploy-ului
+// (pe 11 octombrie pagina inca scria „valabila pana pe 10 octombrie").
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { scoruriRetea } from "@/lib/autoritate-retea";
 import { ClientTestimonials } from "@/components/ClientTestimonials";
@@ -243,6 +245,7 @@ const CONDITIONS = [
 // Intrebarile se construiesc cu cifrele LIVE ale retelei (vezi lib/cifre-live.ts),
 // de aceea sunt o functie, nu o constanta.
 function buildFaq(CIFRE: CifreRetea) {
+  const deadline = promoDeadlineLabel();
   return [
   {
     q: "De ce 500 lei și nu 1.500?",
@@ -328,6 +331,7 @@ export default async function Oferta500Page() {
   // daca nu raspunde, cele din data/cifre.ts, cu data lor.
   const CIFRE = await cifreLive();
   const FAQ = buildFaq(CIFRE);
+  const deadline = promoDeadlineLabel();
   // DA pe fiecare domeniu (Moz, citit de noi); fara baza, lista ramane fara scoruri.
   const autoritateRetea = await scoruriRetea();
   return (
