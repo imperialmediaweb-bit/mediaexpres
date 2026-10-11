@@ -35,5 +35,8 @@ export async function pornestePlanificator() {
   // Autoblogul: la 30 de minute; publica doar cand ii vine randul (lib/autoblog.ts).
   setTimeout(() => ruleaza("/api/cron/autoblog"), 4 * MIN);
   setInterval(() => ruleaza("/api/cron/autoblog"), 30 * MIN);
-  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic, autoblog la 30 de minute");
+  // Reamintirea dinainte de reinnoirea abonamentelor (11.10.2026): o data pe ora.
+  setTimeout(() => ruleaza("/api/cron/abonamente-reamintire"), 6 * MIN);
+  setInterval(() => ruleaza("/api/cron/abonamente-reamintire"), 60 * MIN);
+  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic, autoblog la 30 de minute, reamintire abonamente la o ora");
 }

@@ -2041,6 +2041,27 @@ console.log("\n########## S. RECENZII ##########");
   t("sabloanele tintesc model comunicat de presa", /Model comunicat de presă/.test(citesteFisier("src/app/sabloane/[slug]/page.tsx")));
 }
 
+{
+  console.log("\n── Reamintire inainte de reinnoirea abonamentului (11.10.2026) ──");
+  const R = await import("../src/lib/abonament-oprire");
+  const acum = Date.parse("2026-11-07T10:00:00+02:00");
+  const tok = R.semneazaOprire("sub_123", "client@firma.ro", acum);
+  const v = R.verificaOprire(tok, acum + 86400000);
+  t("linkul de oprire se verifica si poarta abonamentul si emailul", !!v && v.subId === "sub_123" && v.email === "client@firma.ro");
+  t("linkul modificat e refuzat", R.verificaOprire(tok.slice(0, -2) + "00", acum) === null);
+  t("linkul expira dupa 45 de zile", R.verificaOprire(tok, acum + 46 * 86400000) === null);
+  const zece = Date.parse("2026-11-10T10:00:00+02:00");
+  t("cu 3 zile inainte de 10 noiembrie e timpul", R.eTimpulPentruReamintire(zece, acum));
+  t("cu 5 zile inainte inca nu", !R.eTimpulPentruReamintire(zece, acum - 2 * 86400000));
+  t("dupa reinnoire nu se mai trimite", !R.eTimpulPentruReamintire(zece, zece + 1000));
+  const m = R.emailReamintire("Ion", "400 lei", "10 noiembrie 2026", "https://mediaexpress.ro/abonament/opreste?t=x");
+  t("emailul spune suma, data, ca nu trebuie facut nimic pentru continuare si are butonul de oprire", /400 lei/.test(m.html) && /10 noiembrie 2026/.test(m.subiect) && /Nu trebuie să faci nimic/.test(m.html) && /abonament\/opreste\?t=x/.test(m.html));
+  const ruta = fs.readFileSync("src/app/api/abonament/opreste/route.ts", "utf8");
+  t("oprirea se face doar prin POST (scannerul de linkuri nu opreste abonamentul)", /export async function POST/.test(ruta) && !/export async function GET/.test(ruta));
+  t("se opreste la sfarsitul perioadei, nu pe loc", /cancel_at_period_end: true/.test(ruta));
+  t("planificatorul ruleaza reamintirea", /abonamente-reamintire/.test(fs.readFileSync("src/planificator.ts", "utf8")));
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));
