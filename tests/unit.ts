@@ -2086,6 +2086,8 @@ console.log("\n########## S. RECENZII ##########");
   t("clientul din strainatate primeste confirmarea si reamintirea in engleza", /Payment confirmed — MediaExpres/.test(wh) && /Your order at MediaExpres is waiting/.test(wh));
   const en = fs.readFileSync("src/app/en/page.tsx", "utf8");
   t("pagina /en are pretul, hreflang si FAQPage", /€149/.test(en) && /languages:/.test(en) && /"FAQPage"/.test(en));
+  t("pe /en nu apar meniul, footerul si bannerele romanesti cu preturi in lei", /AscundePeEn/.test(fs.readFileSync("src/app/layout.tsx", "utf8")) && /pathname === "\/en"/.test(fs.readFileSync("src/components/layout/Navbar.tsx", "utf8")));
+  t("/en spune ca pretul include traducerea si suport in engleza", /Includes English-to-Romanian translation and support in English/.test(en));
   t("/en e in sitemap", /\/en`/.test(fs.readFileSync("src/app/sitemap.ts", "utf8")));
   const { sumaComenzii, inLei } = await import("../src/lib/suma");
   t("suma comenzii arata moneda corecta", sumaComenzii(14900, "eur") === "149 EUR" && sumaComenzii(50000, "ron") === "500 lei");

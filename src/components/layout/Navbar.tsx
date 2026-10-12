@@ -22,6 +22,22 @@ export function Navbar() {
 
   if (pathname.startsWith("/admin")) return null;
 
+  // Pe /en: antet simplu in engleza, fara meniul romanesc (pachete in lei).
+  if (pathname === "/en" || pathname.startsWith("/en/")) {
+    return (
+      <header className="sticky top-0 z-40 w-full border-b border-slate-200 bg-white/95 backdrop-blur-md">
+        <div className="container flex h-16 items-center justify-between">
+          <Link href="/en" aria-label="MediaExpres">
+            <Logo />
+          </Link>
+          <a href="#order" className="rounded-lg bg-brand-red px-4 py-2 text-sm font-semibold text-white">
+            Order now
+          </a>
+        </div>
+      </header>
+    );
+  }
+
   return (
     <header
       className={cn(

@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Playfair_Display, Inter, Oswald } from "next/font/google";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
+import { AscundePeEn } from "@/components/layout/AscundePeEn";
 import { SITE } from "@/data/site";
 import { StructuredData } from "@/components/seo/StructuredData";
 import {
@@ -114,11 +115,15 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         <GoogleAnalytics />
         <SourceCapture />
         <StructuredData />
-        <ConversionBanner />
+        <AscundePeEn>
+          <ConversionBanner />
+        </AscundePeEn>
         <Navbar />
         <main className="flex-1">{children}</main>
-        <Footer />
-        <ConversionWidgets />
+        <AscundePeEn>
+          <Footer />
+          <ConversionWidgets />
+        </AscundePeEn>
         <WhatsAppButton />
       </body>
     </html>

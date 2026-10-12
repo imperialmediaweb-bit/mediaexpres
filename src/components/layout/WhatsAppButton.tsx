@@ -54,9 +54,14 @@ export function WhatsAppButton() {
       ? "bottom-24"
       : "bottom-6";
 
+  // Pe /en, mesajul pregatit e in engleza.
+  const href = pathname === "/en" || pathname.startsWith("/en/")
+    ? `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent("Hello! I saw your English page and I have a question about publishing a press release in Romania.")}`
+    : hrefWhatsApp(propozitieSursa);
+
   return (
     <a
-      href={hrefWhatsApp(propozitieSursa)}
+      href={href}
       data-testid="wa-flotant"
       target="_blank"
       rel="noopener noreferrer"

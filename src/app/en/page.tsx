@@ -109,10 +109,11 @@ export default function EnglishPage({ searchParams }: { searchParams: { cancelle
             41 local news sites, one in every Romanian county, plus 9 national ones. Translated from English, published within
             12 working hours, with a report of all live links.
           </p>
-          <div className="mt-8 flex flex-wrap items-end gap-6">
+          <div id="order" className="mt-8 flex scroll-mt-24 flex-wrap items-end gap-6">
             <div>
               <p className="text-5xl font-bold">€149</p>
               <p className="text-sm text-white/70">final price · translation included · no VAT</p>
+              <p className="mt-1 text-xs text-white/60">Includes English-to-Romanian translation and support in English.</p>
             </div>
             <ButonPlata />
           </div>
@@ -193,6 +194,14 @@ export default function EnglishPage({ searchParams }: { searchParams: { cancelle
           </p>
         </div>
       </section>
+
+      <footer className="bg-brand-navy py-10 text-sm text-white/70">
+        <div className="container">
+          <p className="font-semibold text-white">MediaExpres</p>
+          <p className="mt-2">Legio Web Development Tools S.R.L. · Botoșani, Romania · {SITE.email} · WhatsApp {SITE.phone}</p>
+          <p className="mt-2">© {new Date().getFullYear()} MediaExpres</p>
+        </div>
+      </footer>
     </div>
   );
 }
