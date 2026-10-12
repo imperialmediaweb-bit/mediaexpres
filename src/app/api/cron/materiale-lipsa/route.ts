@@ -1,3 +1,4 @@
+import { sumaComenzii } from "@/lib/suma";
 import { NextRequest, NextResponse } from "next/server";
 import { cronAutorizat } from "@/lib/cron-auth";
 import { and, eq, gt, isNull, isNotNull, lt, notInArray } from "drizzle-orm";
@@ -118,6 +119,7 @@ async function faraMaterial(prag: number, campGol: "reminder" | "alert") {
       email: orders.email,
       packageId: orders.packageId,
       amount: orders.amount,
+      currency: orders.currency,
       sessionId: orders.stripeSessionId,
       createdAt: orders.createdAt,
     })
@@ -206,7 +208,7 @@ export async function POST(req: NextRequest) {
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
         ${kv("Email", o.email)}
         ${kv("Pachet", pkg?.name || o.packageId)}
-        ${kv("Sumă", `${(o.amount / 100).toFixed(2)} RON`)}
+        ${kv("Sumă", sumaComenzii(o.amount, o.currency, 2))}
         ${kv("Plătit la", o.createdAt.toLocaleString("ro-RO"))}
       </table>
       <p><a href="${SITE.url}/admin/materiale">Deschide Materiale în admin</a></p>

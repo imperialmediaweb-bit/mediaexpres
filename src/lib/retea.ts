@@ -172,6 +172,7 @@ export function etichetaStareRetea(stare: string): string {
 // retea, unde alege esalonarea (12 ore / 3 zile / 2 saptamani) dupa observatii.
 // ─────────────────────────────────────────────────────────────────────────────
 
+import { inLei } from "@/lib/suma";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orderSubmissions, orders } from "@/db/schema";
@@ -288,8 +289,9 @@ export async function trimiteComandaInRetea(submissionId: string): Promise<Rezul
 
   let pretLei: number | null = null;
   try {
-    const [o] = await db.select({ amount: orders.amount }).from(orders).where(eq(orders.stripeSessionId, r.stripeSessionId)).limit(1);
-    if (o?.amount) pretLei = Math.round(o.amount / 100);
+    const [o] = await db.select({ amount: orders.amount, currency: orders.currency }).from(orders).where(eq(orders.stripeSessionId, r.stripeSessionId)).limit(1);
+    // Comenzile in euro (de pe /en) intra in retea convertite aproximativ.
+    if (o?.amount) pretLei = inLei(o.amount, o.currency);
   } catch {
     /* fara pret, nu e grav */
   }

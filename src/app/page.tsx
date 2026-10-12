@@ -18,7 +18,7 @@ export const metadata: Metadata = {
   title: "Advertorial și comunicat de presă în 50 de ziare",
   description:
     "Advertorialul sau comunicatul tău de presă publicat în 50 de ziare online din România, în 12 ore lucrătoare. Raport cu toate linkurile, factură, de la 150 lei.",
-  alternates: { canonical: "/" },
+  alternates: { canonical: "/", languages: { "ro-RO": "/", en: "/en", "x-default": "/" } },
 };
 
 // Serviciul, descris pentru motoarele de cautare si asistentii AI (11.10.2026):

@@ -2074,6 +2074,24 @@ console.log("\n########## S. RECENZII ##########");
   t("llms.txt are raspunsuri scurte si rezumat in engleza", /Întrebări frecvente, pe scurt/.test(llms) && /## In English/.test(llms));
 }
 
+{
+  console.log("\n── Pagina in engleza si plata in euro (12.10.2026) ──");
+  const intl = findPackageById("intl-50");
+  t("pachetul pentru strainatate: 149 EUR, 50 de ziare", !!intl && intl.price === 149 && intl.currency === "EUR" && intl.newspapers === 50);
+  t("pachetul in euro nu cere zona sau ziar", felAlegere("intl-50") === null);
+  const co = fs.readFileSync("src/app/api/checkout/route.ts", "utf8");
+  t("plata ia moneda pachetului si se deschide in engleza pentru euro", /currency: pkg\.currency\.toLowerCase\(\)/.test(co) && /locale: strain \? "en" : "ro"/.test(co));
+  t("factura in euro nu pleaca automat in lei", /toLowerCase\(\) !== "ron"/.test(fs.readFileSync("src/lib/invoicing.ts", "utf8")));
+  const wh = fs.readFileSync("src/app/api/webhook/stripe/route.ts", "utf8");
+  t("clientul din strainatate primeste confirmarea si reamintirea in engleza", /Payment confirmed — MediaExpres/.test(wh) && /Your order at MediaExpres is waiting/.test(wh));
+  const en = fs.readFileSync("src/app/en/page.tsx", "utf8");
+  t("pagina /en are pretul, hreflang si FAQPage", /€149/.test(en) && /languages:/.test(en) && /"FAQPage"/.test(en));
+  t("/en e in sitemap", /\/en`/.test(fs.readFileSync("src/app/sitemap.ts", "utf8")));
+  const { sumaComenzii, inLei } = await import("../src/lib/suma");
+  t("suma comenzii arata moneda corecta", sumaComenzii(14900, "eur") === "149 EUR" && sumaComenzii(50000, "ron") === "500 lei");
+  t("comanda in euro intra in retea convertita in lei", inLei(14900, "eur") === 745 && inLei(50000, "ron") === 500);
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

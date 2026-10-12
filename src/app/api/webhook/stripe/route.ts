@@ -1,3 +1,4 @@
+import { findPackageById } from "@/data/packages";
 import { NextRequest, NextResponse } from "next/server";
 import type Stripe from "stripe";
 import { getStripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
@@ -249,7 +250,7 @@ async function handleCheckoutCompleted(
       eventName: "Purchase",
       eventId: session.id,
       value: amount / 100,
-      currency: "RON",
+      currency: (session.currency || "ron").toUpperCase(),
       user: {
         email: email || undefined,
         phone: session.customer_details?.phone || undefined,
@@ -291,6 +292,7 @@ async function handleCheckoutCompleted(
     const billing = session.customer_details?.address;
     await issueInvoiceForOrder({
       email,
+      currency: session.currency || "ron",
       customerName: session.customer_details?.name || null,
       // CUI-ul poate veni din campul oficial de tax ID al Stripe sau din custom field.
       cui:
@@ -458,6 +460,24 @@ async function handleCheckoutExpired(session: Stripe.Checkout.Session) {
   const isPromo = packageId === "promo-50" || packageId === "promo-50-cazino";
   const amount = (session.amount_total || 0) / 100;
   const firstName = escapeHtml((session.customer_details?.name || "").split(" ")[0] || "");
+
+  // Clientii de pe /en: aceeasi reamintire, in engleza si in euro.
+  if (findPackageById(packageId)?.currency === "EUR") {
+    await sendEmail({
+      to: email,
+      subject: "Your order at MediaExpres is waiting",
+      html: wrapEmail(
+        "You were one step away",
+        `<p>Hello${firstName ? " " + firstName : ""},</p>
+      <p>You started an order of <strong>${amount.toFixed(0)} EUR</strong> for your press release on 50 Romanian news sites, but the payment wasn't completed.</p>
+      <p style="margin:16px 0;"><a href="${recoveryUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Complete the payment →</a></p>
+      <p>Any questions? Just reply to this email or write to us on WhatsApp: ${SITE.phone}.</p>
+      <p style="margin-top:24px;">Best regards,<br/><strong>MediaExpres team</strong></p>`,
+      ),
+      replyTo: ADMIN_EMAIL,
+    });
+    return;
+  }
 
   await sendEmail({
     to: email,
@@ -647,6 +667,9 @@ async function sendConfirmationEmails(args: {
 }) {
   const { kind, email, customerName, amount, label, sessionId, source, publicatii } =
     args;
+  // Clientii din strainatate (pachetul de pe /en) platesc in euro si primesc emailul in engleza.
+  const strain = kind === "payment" && findPackageById(label)?.currency === "EUR";
+  const moneda = strain ? "EUR" : "RON";
   // Numele vine din formularul Stripe, deci e input de la client: escapat
   // inainte de a intra in HTML-ul emailului.
   const firstName = escapeHtml((customerName || "").split(" ")[0] || "");
@@ -658,7 +681,7 @@ async function sendConfirmationEmails(args: {
     <table style="width:100%;border-collapse:collapse;">
       ${kv(kind === "payment" ? "Pachet" : "Abonament", label)}
       ${publicatii ? kv("Publicatii alese", publicatii) : ""}
-      ${kv("Suma", `${amount.toFixed(2)} RON`)}
+      ${kv("Suma", `${amount.toFixed(2)} ${moneda}`)}
       ${kv("Email client", email || "—")}
       ${kv("Nume client", customerName || "—")}
       ${kv("De unde a venit", etichetaSursa(source))}
@@ -672,7 +695,7 @@ async function sendConfirmationEmails(args: {
     to: ADMIN_EMAIL,
     subject:
       kind === "payment"
-        ? `[Plata Stripe] ${label} — ${amount.toFixed(2)} RON`
+        ? `[Plata Stripe] ${label} — ${amount.toFixed(2)} ${moneda}`
         : `[Abonament Stripe] ${label} — ${amount.toFixed(2)} RON`,
     html: adminHtml,
     replyTo: email || undefined,
@@ -690,6 +713,24 @@ async function sendConfirmationEmails(args: {
       email,
       packageId: kind === "payment" ? label : label && label !== "abonament" ? label : "promo-lunar",
     })}`;
+
+    if (strain) {
+      await sendEmail({
+        to: email,
+        subject: "Payment confirmed — MediaExpres",
+        html: wrapEmail(
+          "Payment confirmed",
+          `<p>Hello${firstName ? " " + firstName : ""},</p>
+      <p>Thank you! We received <strong>${amount.toFixed(2)} EUR</strong> for your press release on 50 Romanian news sites.</p>
+      <p>Next step: send us your press release in English, plus any images and links. We translate it into Romanian and publish it within 12 working hours.</p>
+      <p style="margin:16px 0;"><a href="${articleUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Send your press release →</a></p>
+      <p style="color:#64748b;font-size:13px;">The form is in Romanian (your browser can translate it); you can fill it in English. Or simply reply to this email with the press release and your company details for the invoice.</p>
+      <p style="margin-top:24px;">Best regards,<br/><strong>MediaExpres team</strong></p>`,
+        ),
+        replyTo: ADMIN_EMAIL,
+      });
+      return;
+    }
 
     const customerHtml = wrapEmail(
       kind === "payment" ? "Plata confirmata — MediaExpres" : "Abonament activ — MediaExpres",

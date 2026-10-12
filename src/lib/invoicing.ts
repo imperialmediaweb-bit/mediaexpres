@@ -37,6 +37,8 @@ export interface IssueInvoiceInput {
   markPaid?: boolean;
   /** Textul de pe factura; implicit e cel de la plata cu cardul. */
   mentions?: string;
+  /** Moneda platii (implicit RON). Plata in euro, de la clientii din strainatate, se factureaza manual. */
+  currency?: string | null;
 }
 
 /** Alerta catre admin cand factura trebuie emisa de mana. */
@@ -54,7 +56,7 @@ async function alertManualInvoice(input: IssueInvoiceInput, reason: string) {
         ${kv("Email", input.email || "—")}
         ${kv("CUI", input.cui || "— (lipseste)")}
         ${kv("Adresa", input.address || "—")}
-        ${kv("Suma", `${input.amount.toFixed(2)} RON`)}
+        ${kv("Suma", `${input.amount.toFixed(2)} ${(input.currency || "ron").toUpperCase()}`)}
         ${kv("Serviciu", INVOICE_PRODUCT_NAME)}
         ${kv("Pachet", input.packageLabel)}
         ${kv("Referință comandă", input.orderReference)}
@@ -77,6 +79,16 @@ export async function issueInvoiceForOrder(
   input: IssueInvoiceInput,
 ): Promise<void> {
   try {
+    // 12.10.2026: comenzile de pe /en se platesc in euro, de firme din afara
+    // Romaniei. Facturarea automata stie doar lei si CUI romanesc, deci aici
+    // factura o face omul (cu mentiunea de TVA pentru client din afara UE).
+    if ((input.currency || "ron").toLowerCase() !== "ron") {
+      await alertManualInvoice(
+        input,
+        "Plata e in " + (input.currency || "").toUpperCase() + ", de la un client din strainatate. Factura se emite manual, in moneda platii, cu datele firmei din formularul de dupa plata (mentiunea de TVA pentru client din afara UE, cu contabila).",
+      );
+      return;
+    }
     if (!isStartcoConfigured()) {
       await alertManualInvoice(input, "StartCo nu este configurat (STARTCO_TOKEN lipseste).");
       return;

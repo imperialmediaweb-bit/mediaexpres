@@ -1,3 +1,4 @@
+import { sumaComenzii } from "@/lib/suma";
 import { redirect } from "next/navigation";
 import Link from "next/link";
 import { and, desc, eq, isNotNull, notInArray, isNull } from "drizzle-orm";
@@ -30,7 +31,7 @@ export const dynamic = "force-dynamic";
  * Stripe se deschide direct conversatia; fara el, WhatsApp cere sa alegi
  * contactul, iar mesajul e deja in caseta.
  */
-function linkWhatsAppCerere(o: { email: string; packageId: string; sessionId: string | null; phone: string | null; amount: number }) {
+function linkWhatsAppCerere(o: { email: string; packageId: string; sessionId: string | null; phone: string | null; amount: number; currency?: string | null }) {
   let link = `${SITE.url}/articol`;
   try {
     if (o.sessionId) link = `${SITE.url}/articol/${signOrderToken({ sessionId: o.sessionId, email: o.email, packageId: o.packageId })}`;
@@ -39,7 +40,7 @@ function linkWhatsAppCerere(o: { email: string; packageId: string; sessionId: st
   }
   const pachet = findPackageById(o.packageId)?.name || "articolul";
   const text =
-    `Bună ziua! Plata pentru ${pachet} (${(o.amount / 100).toFixed(0)} lei) a fost confirmată, vă mulțumim. ` +
+    `Bună ziua! Plata pentru ${pachet} (${sumaComenzii(o.amount, o.currency)}) a fost confirmată, vă mulțumim. ` +
     `Ca să publicăm, mai avem nevoie de articol, poze și adresa site-ului. Durează 2 minute, aici: ${link}\n\n` +
     `Dacă preferați, trimiteți-le direct aici, pe WhatsApp, și spuneți-ne și:\n` +
     `1. Ritmul de publicare: toate în 12 ore, întinse pe 3 zile sau pe 2 săptămâni (recomandat pentru SEO)?\n` +
@@ -94,6 +95,7 @@ export default async function MaterialePage() {
       email: orders.email,
       packageId: orders.packageId,
       amount: orders.amount,
+      currency: orders.currency,
       createdAt: orders.createdAt,
       reminderAt: orders.materialReminderAt,
       sessionId: orders.stripeSessionId,
@@ -169,7 +171,7 @@ export default async function MaterialePage() {
                 <span className="font-semibold text-brand-navy">{o.email}</span>
                 <span className="text-slate-500">
                   {findPackageById(o.packageId)?.name || o.packageId} ·{" "}
-                  {(o.amount / 100).toFixed(0)} lei · {fmt(o.createdAt)}
+                  {sumaComenzii(o.amount, o.currency)} · {fmt(o.createdAt)}
                 </span>
                 <span className={o.reminderAt ? "text-emerald-700" : "text-slate-400"}>
                   {o.reminderAt ? `reamintire trimisă ${fmt(o.reminderAt)}` : "reamintirea n-a plecat încă"}

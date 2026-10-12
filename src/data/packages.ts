@@ -5,7 +5,7 @@ export interface Package {
   name: string;
   tagline: string;
   price: number;
-  currency: "RON";
+  currency: "RON" | "EUR";
   newspapers: number;
   reach: string;
   category: PackageCategory;
@@ -319,6 +319,30 @@ export function getAllPackages(): Package[] {
   return [...STANDARD_PACKAGES, ...CASINO_PACKAGES];
 }
 
+// Pachetul pentru clientii din strainatate (12.10.2026), vandut de pe /en:
+// aceleasi 50 de ziare, plata in euro, traducerea din engleza inclusa.
+// Decizia proprietarului: 149 EUR (clienta din Australia a intrebat de
+// traducere si de TVA; firma nu e platitoare de TVA, deci 149 e pretul final).
+export const INTL_PACKAGES: Package[] = [
+  {
+    id: "intl-50",
+    name: "Romania press release — 50 news sites",
+    tagline: "For international clients — translation included",
+    price: 149,
+    currency: "EUR",
+    newspapers: 50,
+    reach: "41 local + 9 national Romanian news sites",
+    category: "standard",
+    highlights: [
+      "Your press release on 50 Romanian online news sites",
+      "English-to-Romanian translation included",
+      "Published within 12 working hours",
+      "Report with all 50 live links",
+      "Links stay online permanently",
+    ],
+  },
+];
+
 export function findPackageById(id: string): Package | undefined {
-  return [...getAllPackages(), ...PROMO_PACKAGES].find((p) => p.id === id);
+  return [...getAllPackages(), ...PROMO_PACKAGES, ...INTL_PACKAGES].find((p) => p.id === id);
 }

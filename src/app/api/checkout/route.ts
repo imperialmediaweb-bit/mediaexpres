@@ -245,7 +245,9 @@ export async function POST(req: NextRequest) {
     }
     const alegerea = eticheteazaAlegerea(packageId, alegere);
     if (!alegerea.ok) return NextResponse.json({ ok: false, error: alegerea.eroare }, { status: 400 });
-    const name = `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})${alegerea.eticheta ? ` — ${alegerea.eticheta}` : ""}`;
+    // Pachetul in euro (de pe /en) are plata in engleza; restul raman in lei.
+    const strain = pkg.currency === "EUR";
+    const name = strain ? pkg.name : `${pkg.name} (${pkg.category === "casino" ? "Cazino" : "Standard"})${alegerea.eticheta ? ` — ${alegerea.eticheta}` : ""}`;
     try {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
@@ -265,12 +267,13 @@ export async function POST(req: NextRequest) {
         line_items: [
           {
             price_data: {
-              currency: "ron",
+              currency: pkg.currency.toLowerCase(),
               unit_amount: pkg.price * 100,
               product_data: {
                 name,
-                description:
-                  "Publicare advertorial / comunicat pe reteaua MediaExpres",
+                description: strain
+                  ? "Press release publication on 50 Romanian news sites, translation included"
+                  : "Publicare advertorial / comunicat pe reteaua MediaExpres",
               },
             },
             quantity: 1,
@@ -316,13 +319,13 @@ export async function POST(req: NextRequest) {
         custom_fields: [
           {
             key: "company_name",
-            label: { type: "custom", custom: "Nume firma (optional)" },
+            label: { type: "custom", custom: strain ? "Company name (optional)" : "Nume firma (optional)" },
             type: "text",
             optional: true,
           },
           {
             key: "company_cui",
-            label: { type: "custom", custom: "CUI (optional)" },
+            label: { type: "custom", custom: strain ? "Tax / registration number (optional)" : "CUI (optional)" },
             type: "text",
             optional: true,
           },
@@ -332,8 +335,8 @@ export async function POST(req: NextRequest) {
         // plateasca (firma fara card, sef care vrea OP) trebuie sa primeasca
         // pe loc drumul prin ordin de plata pentru ACELASI pachet, nu o
         // pagina generica cu „vezi pachete" la pret intreg.
-        cancel_url: `${SITE.url}/comanda/anulat?pachet=${encodeURIComponent(packageId)}`,
-        locale: "ro",
+        cancel_url: strain ? `${SITE.url}/en?cancelled=1` : `${SITE.url}/comanda/anulat?pachet=${encodeURIComponent(packageId)}`,
+        locale: strain ? "en" : "ro",
         allow_promotion_codes: true,
       });
       return NextResponse.json({ ok: true, url: checkout.url });
