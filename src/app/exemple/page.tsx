@@ -187,7 +187,7 @@ export default function ExemplePage() {
                   <a
                     href={a.url}
                     target="_blank"
-                    rel="noopener noreferrer"
+                    rel="nofollow noopener noreferrer"
                     className="text-brand-red hover:underline"
                   >
                     Deschide articolul →

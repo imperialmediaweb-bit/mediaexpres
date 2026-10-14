@@ -2094,6 +2094,17 @@ console.log("\n########## S. RECENZII ##########");
   t("comanda in euro intra in retea convertita in lei", inLei(14900, "eur") === 745 && inLei(50000, "ron") === 500);
 }
 
+{
+  console.log("\n── Pagina SEO si linkurile spre retea (14.10.2026) ──");
+  const seo = fs.readFileSync("src/app/advertoriale-seo/page.tsx", "utf8");
+  t("pagina SEO nu are linkuri spre cele 50 de site-uri", !/NEWSPAPERS|NewspaperDirectory|StareRetea|expres\.ro/.test(seo));
+  t("pagina SEO tinteste advertoriale seo si are canonical", /Advertoriale SEO/.test(seo) && /canonical: "\/advertoriale-seo"/.test(seo));
+  t("pagina SEO e in sitemap", /advertoriale-seo/.test(fs.readFileSync("src/app/sitemap.ts", "utf8")));
+  for (const f of ["src/components/NewspaperDirectory.tsx", "src/app/en/page.tsx", "src/components/StareRetea.tsx", "src/app/exemple/page.tsx", "src/app/alege-ziarele/AlegeZiare.tsx"]) {
+    t(`linkurile spre retea sunt nofollow: ${f.split("/").slice(-2).join("/")}`, /rel="nofollow/.test(fs.readFileSync(f, "utf8")));
+  }
+}
+
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));

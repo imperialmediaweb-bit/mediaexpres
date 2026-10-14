@@ -165,7 +165,7 @@ export default function EnglishPage({ searchParams }: { searchParams: { cancelle
                 <ul className="mt-3 space-y-1.5 text-sm">
                   {NEWSPAPERS.filter((n) => n.region === r.regiune).map((n) => (
                     <li key={n.url}>
-                      <a href={n.url} target="_blank" rel="noopener" className="text-slate-700 underline decoration-slate-300 hover:text-brand-red">
+                      <a href={n.url} target="_blank" rel="nofollow noopener" className="text-slate-700 underline decoration-slate-300 hover:text-brand-red">
                         {n.name}
                       </a>
                       {n.county ? <span className="text-slate-400"> · {n.county}</span> : null}

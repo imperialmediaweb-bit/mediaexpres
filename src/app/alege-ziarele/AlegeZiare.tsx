@@ -171,7 +171,7 @@ export function AlegeZiare({
           </span>
         </button>
         <div className="mt-2 flex flex-wrap items-center gap-2 pl-8">
-          <a href={p.url} target="_blank" rel="noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-red">
+          <a href={p.url} target="_blank" rel="nofollow noopener noreferrer" className="inline-flex items-center gap-1 text-xs text-slate-500 hover:text-brand-red">
             {p.tip === "influencer" ? "vezi canalul" : "vezi site-ul"} <ExternalLink className="h-3 w-3" />
           </a>
           {bifat &&

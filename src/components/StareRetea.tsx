@@ -32,7 +32,7 @@ export async function StareRetea({ compact = false }: { compact?: boolean }) {
             <a
               href={z.url}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow noopener noreferrer"
               className="font-semibold text-brand-navy hover:text-brand-red"
             >
               {z.nume}
@@ -46,7 +46,7 @@ export async function StareRetea({ compact = false }: { compact?: boolean }) {
               <a
                 href={z.facebook}
                 target="_blank"
-                rel="noopener noreferrer"
+                rel="nofollow noopener noreferrer"
                 aria-label={`Pagina de Facebook ${z.nume}`}
                 className="text-slate-400 hover:text-[#1877F2]"
               >
@@ -56,7 +56,7 @@ export async function StareRetea({ compact = false }: { compact?: boolean }) {
             <a
               href={z.url}
               target="_blank"
-              rel="noopener noreferrer"
+              rel="nofollow noopener noreferrer"
               aria-label={`Deschide ${z.nume}`}
               className="text-slate-400 hover:text-brand-red"
             >
