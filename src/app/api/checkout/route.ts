@@ -166,6 +166,11 @@ export async function POST(req: NextRequest) {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        // 16.10.2026 — fără „Alegeți moneda” (USD/RON): Stripe le arăta
+        // românilor prețul și în dolari, cu „banca poate aplica comisioane”.
+        // Încă o decizie chiar înainte de card; prețul rămâne doar în moneda
+        // pachetului. (Câmpul lipsește din tipurile SDK-ului v17.)
+        ...({ adaptive_pricing: { enabled: false } } as object),
         expires_at: Math.floor(Date.now() / 1000) + 2 * 60 * 60,
         after_expiration: {
           recovery: { enabled: true, allow_promotion_codes: true },
@@ -252,6 +257,11 @@ export async function POST(req: NextRequest) {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        // 16.10.2026 — fără „Alegeți moneda” (USD/RON): Stripe le arăta
+        // românilor prețul și în dolari, cu „banca poate aplica comisioane”.
+        // Încă o decizie chiar înainte de card; prețul rămâne doar în moneda
+        // pachetului. (Câmpul lipsește din tipurile SDK-ului v17.)
+        ...({ adaptive_pricing: { enabled: false } } as object),
         // Recuperare cos abandonat: sesiunea expira in 2h, iar Stripe emite
         // checkout.session.expired cu un link care REDESCHIDE exact plata asta.
         // Webhookul trimite atunci emailul de reamintire.
@@ -366,6 +376,11 @@ export async function POST(req: NextRequest) {
     const checkout = await stripe.checkout.sessions.create({
       mode: "subscription",
       payment_method_types: ["card"],
+        // 16.10.2026 — fără „Alegeți moneda” (USD/RON): Stripe le arăta
+        // românilor prețul și în dolari, cu „banca poate aplica comisioane”.
+        // Încă o decizie chiar înainte de card; prețul rămâne doar în moneda
+        // pachetului. (Câmpul lipsește din tipurile SDK-ului v17.)
+        ...({ adaptive_pricing: { enabled: false } } as object),
       ...(stripeCustomerId
         ? { customer: stripeCustomerId }
         : sessionEmail
