@@ -3,6 +3,7 @@ import { SITE } from "@/data/site";
 import { Hero } from "@/components/home/Hero";
 import { CoverageBanner } from "@/components/home/CoverageBanner";
 import { ClientiStrip } from "@/components/ClientiStrip";
+import { Agentii } from "@/components/home/Agentii";
 import { HowItWorks } from "@/components/home/HowItWorks";
 import { Features } from "@/components/home/Features";
 import { Stats } from "@/components/home/Stats";
@@ -48,6 +49,7 @@ export default function HomePage() {
       <Hero />
       <CoverageBanner />
       <ClientiStrip />
+      <Agentii />
       <HowItWorks />
       <Features />
       <Stats />

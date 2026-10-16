@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NEWSPAPERS } from "@/data/newspapers";
 import { SITE } from "@/data/site";
 import { ButonPlata } from "./ButonPlata";
+import { Agentii } from "@/components/home/Agentii";
 
 /**
  * Pagina in engleza (12.10.2026), pentru agentiile si firmele din strainatate
@@ -124,6 +125,8 @@ export default function EnglishPage({ searchParams }: { searchParams: { cancelle
           )}
         </div>
       </section>
+
+      <Agentii lang="en" />
 
       <section className="section">
         <div className="container max-w-4xl">
