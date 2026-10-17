@@ -9,13 +9,13 @@ import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
  * oricum, iar imaginea principala e o captura a site-ului lui, facuta aici,
  * pe server, si copiata in Cloudinary ca sa nu dispara.
  *
- * Doua servicii gratuite, unul dupa altul: thum.io (raspunde cu poza direct)
+ * Servicii gratuite, unul dupa altul: microlink (vezi surseCaptura), thum.io (raspunde cu poza direct)
  * si mShots de la WordPress (uneori intoarce intai un GIF „se genereaza",
  * pe care il refuzam). Daca pica amandoua, articolul ramane fara poza, ca
  * inainte, si adminul vede asta.
  */
 
-const TIMP_MAXIM_MS = 25_000;
+const TIMP_MAXIM_MS = 30_000;
 
 function urlCurat(site: string): string | null {
   const t = (site || "").trim();
@@ -50,6 +50,10 @@ async function descarcaImagine(url: string): Promise<{ bytes: Buffer; tip: strin
 /** Sursele, in ordinea incercarii. Exportat pentru teste. */
 export function surseCaptura(site: string): string[] {
   return [
+    // 17.10.2026 — microlink intai: asteapta 4 secunde sa se incarce
+    // animatiile. thum.io fotografia site-urile animate (ex. imperial-media.ro)
+    // inainte sa apara textul — iesea doar fundalul gol.
+    `https://api.microlink.io/?url=${encodeURIComponent(site)}&screenshot=true&meta=false&embed=screenshot.url&viewport.width=1200&viewport.height=675&viewport.deviceScaleFactor=1&screenshot.type=jpeg&waitForTimeout=4000`,
     `https://image.thum.io/get/width/1200/crop/675/noanimate/${site}`,
     `https://s0.wp.com/mshots/v1/${encodeURIComponent(site)}?w=1200&h=675`,
   ];

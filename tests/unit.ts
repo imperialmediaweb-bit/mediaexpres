@@ -35,6 +35,8 @@ import { consecinta, procentLaTimp } from "@/lib/termene-parteneri";
 import { domeniileRetelei, rezumatAutoritate } from "@/lib/autoritate-retea";
 import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostareFacebook, RITMURI_BLOG } from "@/lib/autoblog";
 import { surseCaptura } from "@/lib/captura-site";
+import { normalizeCui } from "@/lib/anaf";
+import { esteRefComanda } from "@/lib/comanda-ref";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 import { comandaPentruRetea, domeniulRaportului } from "@/lib/retea";
 import { autolink } from "@/lib/articol-html";
@@ -1937,8 +1939,8 @@ console.log("\n########## S. RECENZII ##########");
   console.log("\n── Captura site-ului, cand clientul n-a trimis poze (03.10.2026) ──");
   const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
   const surse = surseCaptura("https://firma.ro/");
-  t("doua surse, thum.io intai, apoi mShots", surse.length === 2 && /image\.thum\.io/.test(surse[0]) && /s0\.wp\.com\/mshots/.test(surse[1]));
-  t("adresa site-ului e codificata la mShots", surse[1].includes(encodeURIComponent("https://firma.ro/")));
+  t("trei surse: microlink (asteapta animatiile), thum.io, apoi mShots", surse.length === 3 && /api\.microlink\.io/.test(surse[0]) && /waitForTimeout=/.test(surse[0]) && /image\.thum\.io/.test(surse[1]) && /s0\.wp\.com\/mshots/.test(surse[2]));
+  t("adresa site-ului e codificata la microlink si mShots", surse[0].includes(encodeURIComponent("https://firma.ro/")) && surse[2].includes(encodeURIComponent("https://firma.ro/")));
   t("captura e marcata in admin", /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/page.tsx")) && /CAPTURĂ SITE/.test(citesteFisier("src/app/admin/materiale/[id]/page.tsx")));
   t("emailul catre admin spune ca e captura, nu poza clientului", /am pus o captură a site-ului lui/.test(citesteFisier("src/app/api/articol/submit/route.ts")));
   t("captura se copiaza in Cloudinary, nu ramane pe serviciul extern", /api\.cloudinary\.com/.test(citesteFisier("src/lib/captura-site.ts")));
@@ -1987,7 +1989,8 @@ console.log("\n########## S. RECENZII ##########");
     t("cardul = platit", c.platit === true);
   }
   t("trimiterea automata: la articol trimis, la plata OP confirmata, la comanda noua platita", /trimiteAutomatInRetea\(submissionId/.test(citesteFisier("src/app/api/articol/submit/route.ts")) && /trimiteAutomatInRetea\(params\.id/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")) && /if \(d\.paid\) for \(const id of ids\) await trimiteAutomatInRetea/.test(citesteFisier("src/app/api/admin/comanda-noua/route.ts")));
-  t("cazinoul si OP-ul neincasat nu pleaca automat", /if \(r\.isCasino\) return;/.test(citesteFisier("src/lib/retea.ts")) && /paymentMethod === "op" && r\.status === "pending_payment"\) return;/.test(citesteFisier("src/lib/retea.ts")));
+  // 17.10.2026 — orice comanda neincasata (OP sau formular nou, inca neplatit), nu doar OP.
+  t("cazinoul si comenzile neincasate nu pleaca automat", /if \(r\.isCasino\) return;/.test(citesteFisier("src/lib/retea.ts")) && /if \(r\.status === "pending_payment"\) return;/.test(citesteFisier("src/lib/retea.ts")));
   t("in retea intra NEPUBLICATA (POST /api/admin/comenzi, nu publish)", /\/api\/admin\/comenzi\?key=/.test(citesteFisier("src/lib/retea.ts")) && !/api\/admin\/publish/.test(citesteFisier("src/lib/retea.ts")));
 }
 
@@ -2108,3 +2111,16 @@ console.log("\n########## S. RECENZII ##########");
 console.log("\n" + "=".repeat(64));
 console.log(`TOTAL: ${n} verificari | ESUATE: ${fails.length}`);
 if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));
+
+{
+  console.log("\n── Comanda inainte de plata (17.10.2026) ──");
+  const citesteFisier = (f: string) => fs.readFileSync(f, "utf8");
+  t("CUI normalizat: RO, spatii, puncte", normalizeCui("RO 46.466.484") === "46466484" && normalizeCui("abc") === null);
+  t("referinta comenzii: cmd_/op_ + uuid", esteRefComanda("cmd_27566aeb-9a88-47c4-9e80-3c720e8b473d") && !esteRefComanda("cs_test_x") && !esteRefComanda("cmd_../../x"));
+  t("factura StartCo: unitatea BUC cu majuscule", /um: "BUC"/.test(citesteFisier("src/lib/startco.ts")));
+  t("factura automata verifica firma la ANAF inainte", /lookupCui\(input\.cui\)/.test(citesteFisier("src/lib/invoicing.ts")));
+  t("webhookul leaga plata de comanda salvata (orderRef)", /metadata\?\.orderRef/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")));
+  t("publicarea refuza orice comanda neincasata", /if \(row\.status === "pending_payment"\)/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")));
+  t("oferta 500 (plata unica) duce la formular", /\/comanda\/noua\?pachet=/.test(citesteFisier("src/components/comanda/comanda-promo.tsx")));
+}
+

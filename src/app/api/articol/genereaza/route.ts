@@ -59,6 +59,17 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  // Datele de contact stau des doar pe pagina de contact (prima pagina are
+  // telefonul in antet, emailul si adresa nu). O citim si pe ea, ca
+  // paragraful de contact de la final sa nu iasa ciuntit.
+  const origine = new URL(site.url).origin;
+  let contact: Awaited<ReturnType<typeof fetchSiteContext>> = null;
+  for (const cale of ["/contact", "/contact/", "/contacte", "/contact-us"]) {
+    contact = await fetchSiteContext(origine + cale);
+    if (contact && contact.url !== site.url) break;
+    contact = null;
+  }
+
   const brief = [
     d.brief.trim() || "Prezintă firma, ce face și de ce merită aleasă, pe baza informațiilor de pe site-ul ei.",
     "La finalul articolului pune un paragraf scurt cu datele de contact ale firmei (telefon, email, adresă, site) — DOAR cele care apar în textul site-ului; nu inventa niciunul.",
@@ -72,7 +83,14 @@ export async function POST(req: NextRequest) {
       linkuri: d.linkuri?.trim() || undefined,
       companyName: d.companyName?.trim() || undefined,
       siteUrl: site.url,
-      siteContext: [site.title, site.description, site.text].filter(Boolean).join("\n"),
+      siteContext: [
+        site.title,
+        site.description,
+        site.text,
+        contact ? `PAGINA DE CONTACT (${contact.url}):\n${contact.text.slice(0, 2500)}` : "",
+      ]
+        .filter(Boolean)
+        .join("\n"),
       isCasino: d.isCasino,
     });
     return NextResponse.json({ ok: true, article });
