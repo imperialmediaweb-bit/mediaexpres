@@ -9,6 +9,7 @@ import {
 } from "@/lib/startco";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { lookupCui, type AnafCompany } from "@/lib/anaf";
 
 export interface IssueInvoiceInput {
   email: string | null;
@@ -103,13 +104,37 @@ export async function issueInvoiceForOrder(
       return;
     }
 
+    // 17.10.2026: pe factura merg numele si adresa OFICIALE de la ANAF, nu
+    // ce a tastat clientul — ca la emiterea manuala, cand cauti clientul dupa
+    // CUI. CUI inexistent, firma radiata/inactiva sau ANAF picat: nu emitem
+    // nimic automat; o factura gresita ajunge in e-Factura si se poate doar
+    // storna.
+    const lookup = await lookupCui(input.cui);
+    if (lookup.status !== "found") {
+      await alertManualInvoice(
+        input,
+        lookup.status === "error"
+          ? `Nu am putut verifica CUI-ul la ANAF (${lookup.message}). Factura nu s-a emis — verifica firma si emite manual.`
+          : `CUI-ul "${input.cui}" nu exista in registrul ANAF. Factura nu s-a emis — cere clientului CUI-ul corect.`,
+      );
+      return;
+    }
+    const firma: AnafCompany = lookup.company;
+    if (firma.deregistered || firma.inactive) {
+      await alertManualInvoice(
+        input,
+        `Firma ${firma.name} (CUI ${firma.cui}) este ${firma.deregistered ? `radiată (${firma.deregistered})` : "inactivă fiscal la ANAF"}. Factura nu s-a emis automat — verifică înainte să facturezi.`,
+      );
+      return;
+    }
+
     const invoice = await createInvoice({
       client: {
-        identifier: input.cui.trim(),
+        identifier: firma.cui,
         type: "business",
-        name: input.customerName || undefined,
-        address: input.address || undefined,
-        city: input.city || undefined,
+        name: firma.name,
+        address: firma.address || input.address || undefined,
+        city: firma.city || input.city || undefined,
         email: input.email || undefined,
         phone: input.phone || undefined,
       },
@@ -174,8 +199,10 @@ export async function issueInvoiceForOrder(
         `
         <table style="width:100%;border-collapse:collapse;">
           ${kv("Numar", `${invoice.series} ${invoice.number}`)}
-          ${kv("Client", input.customerName || input.email || "—")}
-          ${kv("CUI", input.cui)}
+          ${kv("Firma pe factură (ANAF)", `${firma.name}, CUI ${firma.cui}`)}
+          ${kv("Adresa pe factură (ANAF)", firma.address || "—")}
+          ${kv("Scris de client", `${input.customerName || "—"}, CUI ${input.cui}`)}
+          ${kv("Adresa scrisă de client", input.address || "—")}
           ${kv("Total", `${invoice.total} ${invoice.currency}`)}
           ${kv("Status", input.markPaid === false ? "Emisa NEincasata (OP) — marcheaz-o dupa extras" : paymentRecorded ? "Incasata" : "⚠️ Emisa — marcheaz-o incasata manual")}
           ${kv("Link", invoice.shareUrl || "—")}
