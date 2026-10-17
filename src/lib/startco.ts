@@ -218,7 +218,7 @@ export async function createInvoice(
         {
           name: input.productName || INVOICE_PRODUCT_NAME,
           price: input.amount,
-          um: "buc",
+          um: "BUC",
           qty: 1,
           risky: false,
           includeTva: false,
