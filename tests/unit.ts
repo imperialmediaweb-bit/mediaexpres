@@ -38,6 +38,7 @@ import { surseCaptura } from "@/lib/captura-site";
 import { normalizeCui } from "@/lib/anaf";
 import { esteRefComanda } from "@/lib/comanda-ref";
 import { cuvinteAlese, propuneLinkuri } from "@/lib/linkuri-propuse";
+import { decodeazaCfEmail } from "@/lib/site-context";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 import { comandaPentruRetea, domeniulRaportului } from "@/lib/retea";
 import { autolink } from "@/lib/articol-html";
@@ -2124,6 +2125,7 @@ if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));
   t("publicarea refuza orice comanda neincasata", /if \(row\.status === "pending_payment"\)/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")));
   t("cuvinte cheie: virgula, maximum 3, fara cele prea scurte", JSON.stringify(cuvinteAlese("creare site, magazin online; ab, seo local, al patrulea")) === JSON.stringify(["creare site", "magazin online", "seo local"]));
   t("linkuri propuse doar pe cuvinte care apar in text", propuneLinkuri(["creare site Botoșani", "inexistent aici", "magazin online"], "Oferim creare site Botoșani și magazin online.", "https://x.ro/") === "creare site Botoșani → https://x.ro/\nmagazin online → https://x.ro/");
+  t("email ascuns de Cloudflare se decodeaza", decodeazaCfEmail("4f202929262c2a0f26223f2a3d262e2362222a2b262e613d20").includes("@") && decodeazaCfEmail("zz") === "");
   t("oferta 500 (plata unica) duce la formular", /\/comanda\/noua\?pachet=/.test(citesteFisier("src/components/comanda/comanda-promo.tsx")));
 }
 

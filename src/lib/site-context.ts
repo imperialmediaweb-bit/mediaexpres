@@ -201,9 +201,25 @@ function extractMeta(html: string, name: string): string {
   return "";
 }
 
+/**
+ * Cloudflare ascunde emailurile din pagina („Email Address Obfuscation"):
+ * in HTML ramane `[email protected]`, iar adresa reala sta codificata in
+ * `data-cfemail` — primul octet e cheia, restul sunt XOR cu ea. Fara
+ * decodare, articolul generat iesea cu „[email protected]" la contact.
+ */
+export function decodeazaCfEmail(hex: string): string {
+  if (!/^[0-9a-f]{4,}$/i.test(hex) || hex.length % 2) return "";
+  const cheie = parseInt(hex.slice(0, 2), 16);
+  let out = "";
+  for (let i = 2; i < hex.length; i += 2) out += String.fromCharCode(parseInt(hex.slice(i, i + 2), 16) ^ cheie);
+  return /^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(out) ? out : "";
+}
+
 function htmlToText(html: string): string {
   return decodeEntities(
     html
+      .replace(/<(a|span)\b[^>]*data-cfemail="([0-9a-f]+)"[^>]*>[\s\S]*?<\/\1>/gi, (_, _t, hex) => ` ${decodeazaCfEmail(hex)} `)
+      .replace(/\[email(?:&#160;|&nbsp;|\s)protected\]/gi, " ")
       .replace(/<script[\s\S]*?<\/script>/gi, " ")
       .replace(/<style[\s\S]*?<\/style>/gi, " ")
       .replace(/<noscript[\s\S]*?<\/noscript>/gi, " ")
