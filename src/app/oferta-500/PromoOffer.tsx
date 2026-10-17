@@ -168,7 +168,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           >
             {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CreditCard className="h-5 w-5" />}
             {loading
-              ? "Se deschide plata..."
+              ? (monthly ? "Se deschide plata..." : "Se deschide comanda...")
               : `${monthly ? "Abonează-te" : "Comandă acum"} — ${offer.price.toLocaleString("ro")} lei${offer.suffix}`}
           </button>
           {/* Singura promisiune cu bani inapoi de pe pagina — pana acum
@@ -225,15 +225,22 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
           fluxul exista, dar omul nu-l vedea nicaieri si pleca. */}
       <div className="mt-5 rounded-xl border border-white/15 bg-white/5 p-4 text-left">
         <p className="text-xs font-bold uppercase tracking-wider text-brand-gold">
-          Ce se întâmplă după plată
+          {monthly ? "Ce se întâmplă după plată" : "Cum comanzi"}
         </p>
         <ol className="mt-2 space-y-1.5 text-sm text-white/85">
           <li>
             <strong className="text-white">1.</strong>{" "}
-            <strong className="text-white">Cu cardul:</strong> ești dus direct la un
-            formular unde trimiți articolul și până la 3 poze.{" "}
-            <strong className="text-white">Prin OP:</strong> completezi totul pe pagina
-            de transfer — primești factura pe email și plătești pe baza ei, după.
+            {monthly ? (
+              <>Ești dus la plata cu cardul, apoi la formularul unde trimiți articolul și până la 3 poze.</>
+            ) : (
+              <>
+                Completezi comanda: <strong className="text-white">firma</strong> (o găsim
+                după CUI), <strong className="text-white">articolul</strong> și pozele.
+                Abia apoi alegi cum plătești — <strong className="text-white">card</strong>,{" "}
+                <strong className="text-white">ordin de plată</strong> sau WhatsApp. Factura
+                fiscală vine automat pe email.
+              </>
+            )}
           </li>
           <li>
             <strong className="text-white">2.</strong> Nu ai articol scris?{" "}
@@ -256,24 +263,10 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             cele 50 de linkuri, în PDF și Excel — documentul pe care îl trimiți
             mai departe.{" "}
             <span className="text-white/60">
-              Factura fiscală o primești pe email în aceeași zi lucrătoare, indiferent cum plătești.
+              Factura fiscală vine automat pe email, indiferent cum plătești.
             </span>
           </li>
         </ol>
-        {!monthly && (
-          <p className="mt-3 border-t border-white/10 pt-3 text-xs text-white/70">
-            <strong className="text-white/90">Plătești prin transfer bancar (OP)?</strong>{" "}
-            <a
-              href={`/comanda/transfer?pachet=${offer.packageId}`}
-              className="font-semibold text-brand-gold underline"
-            >
-              Mergi pe traseul pentru OP
-            </a>{" "}
-            — acolo ai datele de plată și încarci dovada, articolul, pozele și datele de
-            facturare, într-un singur pas. Sau ne trimiți totul pe WhatsApp la{" "}
-            <strong className="text-white/90">{SITE.phone}</strong>.
-          </p>
-        )}
       </div>
 
     </div>

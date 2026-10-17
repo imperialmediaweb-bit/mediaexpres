@@ -58,7 +58,7 @@ export async function PATCH(
   if (!row) {
     return NextResponse.json({ ok: false, error: "Nu există" }, { status: 404 });
   }
-  if (row.paymentMethod === "op" && row.status === "pending_payment") {
+  if (row.status === "pending_payment") {
     return NextResponse.json(
       { ok: false, error: "Comanda nu e încasată. Confirmă întâi plata (după ce o vezi în extras)." },
       { status: 409 },

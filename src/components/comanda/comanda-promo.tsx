@@ -50,6 +50,13 @@ export function useComandaPromo() {
     if (loading) return;
     setLoading(true);
     setError(null);
+    // 17.10.2026 — plata unica: intai formularul (firma, articol, poze), abia
+    // apoi alegerea platii (card / OP / WhatsApp), pe /comanda/plata/[ref].
+    // Abonamentul ramane direct pe Stripe.
+    if (!monthly) {
+      window.location.href = `/comanda/noua?pachet=${encodeURIComponent(offer.packageId)}`;
+      return;
+    }
     try {
       const res = await fetch("/api/checkout", {
         method: "POST",

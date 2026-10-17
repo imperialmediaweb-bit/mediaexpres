@@ -5,11 +5,12 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
-import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
+import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
-import { issueInvoiceForOrder } from "@/lib/invoicing";
-import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS } from "@/lib/content-policy";
+import { pornestePlataOp } from "@/lib/comanda-op";
+import { lookupCui } from "@/lib/anaf";
+import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS, ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
@@ -31,7 +32,18 @@ const schema = z.object({
   companyAddress: z.string().min(5, "Scrie adresa de facturare.").max(300),
   // Titlul lipseste cand clientul ne cere sa scriem noi articolul.
   title: z.string().max(300).optional().default(""),
-  body: z.string().min(100, "Articolul trebuie să aibă minimum 100 de caractere.").max(30000),
+  // Minimul de 100 de caractere se verifica mai jos, doar cand articolul vine
+  // acum — la „Îl trimit după plată” corpul e gol.
+  body: z.string().max(30000).default(""),
+  /** 17.10.2026 — clientul trimite articolul abia dupa plata. */
+  articolDupa: z.boolean().default(false),
+  /**
+   * 17.10.2026 — „op" = comanda direct prin transfer (pagina veche);
+   * „later" = formularul nou, unde metoda de plata se alege DUPA trimitere,
+   * pe /comanda/plata/[ref]. La „later" nu pleaca nici factura, nici emailul
+   * cu contul: omul poate alege cardul.
+   */
+  plata: z.enum(["op", "later"]).default("op"),
   siteUrl: z.string().max(300).optional(),
   // Ce cuvinte se leaga si incotro — vezi comentariul din formular.
   linkNotes: z.string().max(1000).optional(),
@@ -84,12 +96,36 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  if (d.articolDupa) {
+    d.body = ARTICOL_DUPA_PLATA;
+  } else if (d.body.trim().length < 100) {
+    return NextResponse.json(
+      { ok: false, error: "Articolul trebuie să aibă minimum 100 de caractere." },
+      { status: 400 },
+    );
+  }
   const alegerea = eticheteazaAlegerea(d.packageId, d.alegere);
   if (!alegerea.ok) return NextResponse.json({ ok: false, error: alegerea.eroare }, { status: 400 });
   // Curatam la intrare, o singura data, si tot lantul de dupa — email, admin,
   // copiere, publicare — vede text de om, nu gunoi de PDF.
   d.title = cleanTitle(d.title.trim() || TITLU_DE_PROPUS);
-  d.body = cleanArticleText(d.body);
+  if (!d.articolDupa) d.body = cleanArticleText(d.body);
+
+  // 17.10.2026 — pe comanda (si apoi pe factura) merg numele si adresa
+  // OFICIALE de la ANAF. CUI inexistent = oprim aici, cu mesaj; ANAF picat =
+  // lasam ce a scris clientul, factura automata il verifica oricum din nou.
+  const anaf = await lookupCui(d.companyCui);
+  if (anaf.status === "invalid" || anaf.status === "not_found") {
+    return NextResponse.json(
+      { ok: false, error: "Nu am găsit firma la ANAF după acest CUI. Verifică-l și încearcă din nou." },
+      { status: 400 },
+    );
+  }
+  if (anaf.status === "found") {
+    d.companyCui = anaf.company.cui;
+    d.companyName = anaf.company.name;
+    if (anaf.company.address) d.companyAddress = anaf.company.address;
+  }
 
   const pkg = findPackageById(d.packageId);
   if (!pkg) {
@@ -99,7 +135,8 @@ export async function POST(req: NextRequest) {
 
   // Identificator propriu, in acelasi camp unic ca la Stripe — o comanda OP nu
   // se poate trimite de doua ori din aceeasi pagina.
-  const reference = `op_${crypto.randomUUID()}`;
+  const laPlata = d.plata === "later";
+  const reference = `${laPlata ? "cmd" : "op"}_${crypto.randomUUID()}`;
   const sursa = sursaDinCerere(req);
 
   try {
@@ -124,7 +161,7 @@ export async function POST(req: NextRequest) {
       uniquePerSite: d.uniquePerSite,
       ritm: d.ritm,
       isCasino: d.isCasino,
-      paymentMethod: "op",
+      paymentMethod: laPlata ? "nedecis" : "op",
       ziareAlese: alegerea.eticheta,
       paymentProof: d.paymentProof ? JSON.stringify(d.paymentProof) : null,
       status: "pending_payment",
@@ -167,13 +204,17 @@ export async function POST(req: NextRequest) {
   await sendEmail({
     to: ADMIN_EMAIL,
     replyTo: email,
-    subject: `🏦 Comandă prin OP — ${d.companyName} (${pkg.price} lei)`,
+    subject: laPlata
+      ? `📝 Comandă nouă, încă neplătită — ${d.companyName} (${pkg.price} lei)`
+      : `🏦 Comandă prin OP — ${d.companyName} (${pkg.price} lei)`,
     html: wrapEmail(
-      "Comandă nouă prin transfer bancar",
+      laPlata ? "Comandă nouă — alege acum cum plătește" : "Comandă nouă prin transfer bancar",
       `
+      ${laPlata ? `<p style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;color:#1e3a8a;">Clientul a completat formularul și e pe pagina de plată (card / OP / WhatsApp). <strong>Încă n-a plătit și nu s-a emis nicio factură.</strong> Dacă nu plătește în câteva ore, merită un telefon: ${esc(d.contactPhone)}.</p>` : ""}
+      ${d.articolDupa ? '<p style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;"><strong>Articolul vine după plată</strong> — clientul l-a lăsat pentru mai târziu.</p>' : ""}
       ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, factura a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
-      <p style="color:#b91c1c;"><strong>Emite factura în StartCo pe datele de mai jos și trimite-o clientului din admin</strong> (Materiale → comanda → „Trimite factura"). Emiterea automată se încearcă, dar de regulă eșuează — nu te baza pe ea. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>
-      <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură — de copiat în StartCo</h3>
+      ${laPlata ? "" : '<p>Factura se emite automat în StartCo pe datele de mai jos (verificate la ANAF). Dacă nu reușește, primești un email separat „Factura de emis manual”. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>'}
+      <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură${anaf.status === "found" ? " (verificate la ANAF)" : " — ANAF n-a răspuns, sunt cele scrise de client"}</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
         ${kv("Denumire", d.companyName)}
         ${kv("CUI", d.companyCui)}
@@ -201,35 +242,26 @@ export async function POST(req: NextRequest) {
     ),
   });
 
-  sendEmail({
-    to: email,
-    subject: "Am primit comanda ta — MediaExpres",
-    html: wrapEmail(
-      "Comandă primită",
-      `
-      <p>Salut,</p>
-      <p>Am primit comanda și materialele pentru <strong>${esc(pkg.name)}</strong> — ${pkg.price} lei.</p>
-      <p><strong>Ce urmează, în ordine:</strong></p>
-      <ol style="padding-left:20px;margin:8px 0 16px;">
-        <li style="margin:6px 0;"><strong>Îți trimitem factura fiscală</strong> pe acest email, în scurt timp.</li>
-        <li style="margin:6px 0;"><strong>Plătești prin transfer bancar</strong> — datele contului sunt mai jos, ca să le ai la îndemână.</li>
-        <li style="margin:6px 0;"><strong>Publicăm în maximum 12 ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
-      </ol>
-      ${d.paymentProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
-      ${bankTransferEmailBox(`${pkg.price} lei`, `${esc(pkg.name)} — ${esc(d.companyName)}`)}
-      <p style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:13px;color:#78350f;"><strong>De reținut:</strong> la comandă ai declarat că articolul nu prezintă tratamente sau metode de vindecare pentru boli și nu conține alt conținut interzis. Dacă la verificare se dovedește altfel, comanda se anulează, articolul nu se publică <strong>și suma plătită nu se restituie</strong> (art. 4 din <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>). Dacă ai un dubiu, întreabă-ne ÎNAINTE să plătești — răspundem repede.</p>
-      <p>Dacă între timp ai întrebări, răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
+  if (laPlata) {
+    sendEmail({
+      to: email,
+      subject: "Comanda ta e salvată — alege cum plătești",
+      html: wrapEmail(
+        "Comanda ta e salvată",
+        `
+      <p>Bună ziua,</p>
+      <p>Am salvat comanda pentru <strong>${esc(pkg.name)}</strong> — ${pkg.price} lei, pe firma <strong>${esc(d.companyName)}</strong>.</p>
+      <p>Dacă n-ai apucat să plătești, o poți face oricând de aici — cu cardul sau prin ordin de plată:</p>
+      <p style="margin:16px 0;"><a href="${SITE.url}/comanda/plata/${reference}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Alege cum plătești →</a></p>
+      <p>Factura fiscală o primești automat pe email: la card imediat după plată, la OP imediat ce alegi transferul bancar.</p>
+      <p>Întrebări? Răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,
-    ),
-  }).catch((e) => console.error("[comanda/transfer] mail client:", e));
+      ),
+    }).catch((e) => console.error("[comanda/transfer] mail client:", e));
+  }
 
-  // Factura pleaca AUTOMAT, neincasata (markPaid: false): clientul nu poate
-  // plati fara document, iar fiecare ora de asteptare pana la factura e o
-  // sansa sa se razgandeasca. Best-effort prin design — issueInvoiceForOrder
-  // isi inghite propriile erori si alerteaza adminul; comanda e deja salvata,
-  // raspunsul catre client nu asteapta si nu depinde de StartCo.
-  // Acopera si formularul, si comanda din chat: amandoua trec pe aici.
+  // Factura (la OP) pleaca la final, prin pornestePlataOp — vezi lib/comanda-op.ts.
   if (screening.flagged) {
     await sendEmail({
       to: ADMIN_EMAIL,
@@ -259,18 +291,19 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.error("[comanda/transfer] alerta continut:", e));
   }
 
-  void issueInvoiceForOrder({
-    email,
-    customerName: d.companyName,
-    cui: d.companyCui,
-    address: d.companyAddress,
-    phone: d.contactPhone,
-    amount: pkg.price,
-    packageLabel: pkg.name,
-    orderReference: reference,
-    markPaid: false,
-    mentions: `Plata prin transfer bancar (OP). Ref: ${reference}`,
-  }).catch((e) => console.error("[comanda/transfer] factura automata:", e));
+  if (!laPlata) {
+    await pornestePlataOp({
+      email,
+      companyName: d.companyName,
+      cui: d.companyCui,
+      address: d.companyAddress,
+      phone: d.contactPhone,
+      pkgName: pkg.name,
+      price: pkg.price,
+      reference,
+      hasProof: Boolean(d.paymentProof),
+    });
+  }
 
-  return NextResponse.json({ ok: true });
+  return NextResponse.json({ ok: true, ref: reference });
 }

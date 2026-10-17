@@ -348,7 +348,8 @@ export async function trimiteAutomatInRetea(submissionId: string, motivApel: str
       .limit(1);
     if (!r) return;
     if (r.isCasino) return;
-    if (r.paymentMethod === "op" && r.status === "pending_payment") return;
+    // Neincasata (OP sau comanda noua inca neplatita): nu pleaca nicaieri.
+    if (r.status === "pending_payment") return;
     const rez = await trimiteComandaInRetea(submissionId);
     if (!rez.ok) console.warn(`[retea] ${motivApel}: ${rez.motiv}`);
   } catch (e) {

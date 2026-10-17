@@ -7,9 +7,9 @@ import { db } from "@/db";
 import { getStripe } from "@/lib/stripe";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, orders, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { and, eq } from "drizzle-orm";
 import { SITE } from "@/data/site";
-import { CONTENT_DECLARATION_ERROR, screenContent } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_ERROR, screenContent, ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
 import { capturaSite } from "@/lib/captura-site";
 import { trimiteAutomatInRetea } from "@/lib/retea";
 import { parseazaAlegeri } from "@/lib/catalog-parteneri";
@@ -212,6 +212,36 @@ export async function POST(req: NextRequest) {
       .returning({ id: orderSubmissions.id });
     alreadySubmitted = inserted.length === 0;
     submissionId = inserted[0]?.id ?? null;
+
+    // 17.10.2026 — comanda trimisa inainte de plata, cu „Îl trimit după
+    // plată”: randul exista deja (firma, ritmul), doar fara articol. Nu e o
+    // dublura — completam articolul pe randul existent.
+    if (alreadySubmitted) {
+      const completat = await db
+        .update(orderSubmissions)
+        .set({
+          title: d.title,
+          body: d.body,
+          metaDescription: d.metaDescription || null,
+          keywords: d.keywords?.length ? d.keywords.join(", ") : null,
+          siteUrl: d.siteUrl || null,
+          linkNotes: d.linkNotes?.trim() || null,
+          images: JSON.stringify(d.images),
+          featuredIndex: d.featuredIndex,
+          generatedByAi: d.generatedByAi,
+        })
+        .where(
+          and(
+            eq(orderSubmissions.stripeSessionId, order.sessionId),
+            eq(orderSubmissions.body, ARTICOL_DUPA_PLATA),
+          ),
+        )
+        .returning({ id: orderSubmissions.id });
+      if (completat.length) {
+        alreadySubmitted = false;
+        submissionId = completat[0].id;
+      }
+    }
   } catch (err) {
     console.error("[articol/submit] NU am putut salva in DB (continui pe email):", err);
   }

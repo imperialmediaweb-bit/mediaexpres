@@ -30,6 +30,13 @@ export const CONTENT_DECLARATION_SHORT =
  */
 export const TITLU_DE_PROPUS = "(fără titlu — îl propunem noi)";
 
+/**
+ * 17.10.2026 — corpul comenzii cand clientul a ales „Îl trimit după plată”.
+ * Formularul de dupa plata (/articol/[token]) recunoaste textul asta si
+ * suprascrie comanda cu articolul adevarat, in loc s-o refuze ca dublura.
+ */
+export const ARTICOL_DUPA_PLATA = "(articolul vine după plată — clientul îl trimite din linkul primit pe email)";
+
 /** Mesajul cand nu e bifata — acelasi pe client si pe server. */
 export const CONTENT_DECLARATION_ERROR =
   "Bifează declarația de conținut ca să poți trimite comanda.";

@@ -5,7 +5,9 @@ import { getStripe, STRIPE_WEBHOOK_SECRET } from "@/lib/stripe";
 import { sendEmail, wrapEmail, kv, escapeHtml, ADMIN_EMAIL } from "@/lib/email";
 import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { db } from "@/db";
-import { users, orders, subscriptions } from "@/db/schema";
+import { users, orders, subscriptions, orderSubmissions } from "@/db/schema";
+import { ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
+import { trimiteAutomatInRetea } from "@/lib/retea";
 import { and, eq, gte } from "drizzle-orm";
 import { etichetaSursa } from "@/lib/sursa";
 import { findSubscriptionPlanById } from "@/data/packages";
@@ -243,6 +245,32 @@ async function handleCheckoutCompleted(
       return;
     }
 
+    // 17.10.2026 — comanda trimisa INAINTE de plata (/comanda/noua): articolul
+    // si firma (verificata la ANAF) sunt deja salvate sub referinta cmd_…;
+    // o mutam pe sesiunea Stripe, ca tot restul (admin, formularul de dupa
+    // plata, raportul) s-o vada ca pe orice comanda platita cu cardul.
+    const orderRef = (session.metadata?.orderRef as string | undefined) || null;
+    let comandaLegata: typeof orderSubmissions.$inferSelect | null = null;
+    if (orderRef) {
+      const [legata] = await db
+        .update(orderSubmissions)
+        .set({ stripeSessionId: session.id, paymentMethod: "card", status: "pending" })
+        .where(
+          and(
+            eq(orderSubmissions.stripeSessionId, orderRef),
+            eq(orderSubmissions.status, "pending_payment"),
+          ),
+        )
+        .returning();
+      comandaLegata = legata ?? null;
+      if (!comandaLegata) console.error("[stripe-webhook] orderRef fara comanda in asteptare:", orderRef);
+      // Articolul e deja aici: comanda pleaca in reteaua de publicare, ca
+      // dupa formularul de articol de la o plata obisnuita cu cardul.
+      if (comandaLegata && comandaLegata.body !== ARTICOL_DUPA_PLATA) {
+        await trimiteAutomatInRetea(comandaLegata.id, "comanda platita cu cardul (formular inainte de plata)");
+      }
+    }
+
     // Purchase server-side (Conversions API): sursa de adevar pentru optimizarea
     // reclamelor Meta pe vanzari. event_id = session.id, deci un eventual retry
     // al webhookului e deduplicat de Meta. Email+telefon = match quality mare.
@@ -285,25 +313,31 @@ async function handleCheckoutCompleted(
       // in emailul de plata, o comanda „alege-3-ziare" nu spune NICAIERI care
       // sunt cele trei, iar publicarea ramane pe ghicite.
       publicatii: numeleZiarelor((session.metadata?.ziare as string) || ""),
+      materialePrimite: Boolean(comandaLegata && comandaLegata.body !== ARTICOL_DUPA_PLATA),
     });
 
     // Facturarea nu trebuie sa poata darama webhookul — issueInvoiceForOrder
     // isi inghite propriile erori si alerteaza adminul.
     const billing = session.customer_details?.address;
+    // La comanda trimisa inainte de plata, firma vine din formular (deja
+    // verificata la ANAF), nu din casutele optionale de pe pagina Stripe.
     await issueInvoiceForOrder({
       email,
       currency: session.currency || "ron",
-      customerName: session.customer_details?.name || null,
+      customerName: comandaLegata?.companyName || session.customer_details?.name || null,
       // CUI-ul poate veni din campul oficial de tax ID al Stripe sau din custom field.
       cui:
+        comandaLegata?.companyCui ||
+        comandaLegata?.cui ||
         session.customer_details?.tax_ids?.[0]?.value ||
         session.custom_fields?.find((f) => f.key === "company_cui")?.text?.value ||
         null,
-      address: billing
-        ? [billing.line1, billing.line2].filter(Boolean).join(", ")
-        : null,
-      city: billing?.city || null,
-      phone: session.customer_details?.phone || null,
+      address:
+        comandaLegata?.companyAddress ||
+        comandaLegata?.billingAddress ||
+        (billing ? [billing.line1, billing.line2].filter(Boolean).join(", ") : null),
+      city: comandaLegata ? null : billing?.city || null,
+      phone: comandaLegata?.contactPhone || session.customer_details?.phone || null,
       amount: amount / 100,
       packageLabel: packageId,
       orderReference: session.id,
@@ -664,8 +698,10 @@ async function sendConfirmationEmails(args: {
   source?: string | null;
   /** Publicatiile alese de client, cand si le-a ales singur (/alege-ziarele). */
   publicatii?: string | null;
+  /** 17.10.2026 — articolul a venit deja, in formularul de dinainte de plata. */
+  materialePrimite?: boolean;
 }) {
-  const { kind, email, customerName, amount, label, sessionId, source, publicatii } =
+  const { kind, email, customerName, amount, label, sessionId, source, publicatii, materialePrimite } =
     args;
   // Clientii din strainatate (pachetul de pe /en) platesc in euro si primesc emailul in engleza.
   const strain = kind === "payment" && findPackageById(label)?.currency === "EUR";
@@ -745,7 +781,9 @@ async function sendConfirmationEmails(args: {
           : ""
       }
       ${
-        articleUrl
+        materialePrimite
+          ? `<p>Avem deja articolul și datele firmei — nu mai ai nimic de trimis. <strong>Publicăm în maximum 12 ore lucrătoare</strong> și îți trimitem raportul cu toate linkurile. Factura fiscală vine într-un email separat, în câteva minute.</p>`
+          : articleUrl
           ? `<p>Următorul pas: trimite-ne articolul și pozele. Durează 2 minute, iar dacă nu ai textul scris, îl redactăm noi din datele firmei tale.</p>
       <p style="margin:16px 0;">
         <a href="${articleUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimite articolul →</a>

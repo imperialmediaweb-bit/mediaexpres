@@ -508,7 +508,9 @@ export default async function MaterialDetailPage({
               <Row
                 label="Plată"
                 value={
-                  r.paymentMethod === "op" ? (
+                  r.paymentMethod === "nedecis" ? (
+                    <strong className="text-blue-700">neplătită încă (pe pagina de plată)</strong>
+                  ) : r.paymentMethod === "op" ? (
                     <strong className="text-amber-700">transfer bancar (OP)</strong>
                   ) : (
                     "card (Stripe)"
