@@ -1,8 +1,10 @@
-// Generare de advertoriale optimizate SEO pentru clientii care tocmai au platit.
+// Generare de advertoriale optimizate SEO: in formularul de comanda si dupa plata.
 //
 // Traieste separat de `ai.ts` (care acopera comunicate de presa, calendare
 // editoriale si outreach) pentru ca are alt contract de iesire: pe langa titlu
 // si text, intoarce meta description si cuvinte-cheie.
+
+import Anthropic from "@anthropic-ai/sdk";
 
 const OPENAI_URL = "https://api.openai.com/v1/chat/completions";
 
@@ -108,23 +110,47 @@ function buildUserPrompt(input: AdvertorialInput): string {
   return parts.join("\n\n");
 }
 
-export async function generateAdvertorial(
-  input: AdvertorialInput
-): Promise<AdvertorialOutput> {
-  const key = process.env.OPENAI_API_KEY;
-  if (!key) throw new Error("OPENAI_API_KEY lipseste");
+/**
+ * 17.10.2026 — articolele se scriu cu Claude. Contul OpenAI a ramas fara
+ * credit pe 13.10 si de atunci niciun articol nu se mai genera (nici in
+ * formularul de comanda, nici dupa plata). OpenAI ramane doar plasa, daca
+ * cheia Anthropic lipseste.
+ */
+async function scrieCuClaude(cheie: string, system: string, user: string): Promise<string> {
+  const client = new Anthropic({ apiKey: cheie });
+  const raspuns = await client.beta.messages.create({
+    model: process.env.ANTHROPIC_MODEL || "claude-opus-5-5",
+    // Gandirea consuma din acelasi buget; un articol taiat la jumatate e mai
+    // rau decat unul lung.
+    max_tokens: 8000,
+    // Efort mic: clientul asteapta articolul pe ecran (promis „gata in 30 de
+    // secunde"), iar un advertorial nu e o problema grea.
+    output_config: { effort: "low" },
+    // Daca filtrele de siguranta refuza cererea, o reia singur alt model.
+    betas: ["server-side-fallback-2026-07-01"],
+    fallbacks: "default",
+    system,
+    messages: [{ role: "user", content: user }],
+  });
+  if (raspuns.stop_reason === "refusal") throw new Error("Cererea a fost refuzata de model");
+  return raspuns.content
+    .filter((b): b is Anthropic.Beta.BetaTextBlock => b.type === "text")
+    .map((b) => b.text)
+    .join("");
+}
 
+async function scrieCuOpenAI(cheie: string, system: string, user: string): Promise<string> {
   const res = await fetch(OPENAI_URL, {
     method: "POST",
     headers: {
       "content-type": "application/json",
-      authorization: `Bearer ${key}`,
+      authorization: `Bearer ${cheie}`,
     },
     body: JSON.stringify({
       model: process.env.OPENAI_MODEL || "gpt-4o",
       messages: [
-        { role: "system", content: buildSystemPrompt(Boolean(input.isCasino), input.tip || "advertorial") },
-        { role: "user", content: buildUserPrompt(input) },
+        { role: "system", content: system },
+        { role: "user", content: user },
       ],
       max_tokens: 2500,
       response_format: { type: "json_object" },
@@ -141,9 +167,27 @@ export async function generateAdvertorial(
   const data = (await res.json()) as {
     choices?: Array<{ message?: { content?: string } }>;
   };
-  const content = data.choices?.[0]?.message?.content;
+  return data.choices?.[0]?.message?.content || "";
+}
+
+export async function generateAdvertorial(
+  input: AdvertorialInput
+): Promise<AdvertorialOutput> {
+  const system = buildSystemPrompt(Boolean(input.isCasino), input.tip || "advertorial");
+  const user = buildUserPrompt(input);
+
+  const cheieClaude = process.env.ANTHROPIC_API_KEY;
+  const cheieOpenAI = process.env.OPENAI_API_KEY;
+  let content: string;
+  if (cheieClaude) {
+    content = await scrieCuClaude(cheieClaude, system, user);
+  } else if (cheieOpenAI) {
+    content = await scrieCuOpenAI(cheieOpenAI, system, user);
+  } else {
+    throw new Error("Nicio cheie AI setata (ANTHROPIC_API_KEY / OPENAI_API_KEY)");
+  }
   if (!content) {
-    console.error("[advertorial] raspuns gol", data);
+    console.error("[advertorial] raspuns gol");
     throw new Error("Raspuns gol de la model");
   }
 
