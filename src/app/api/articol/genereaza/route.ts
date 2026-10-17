@@ -3,6 +3,7 @@ import { z } from "zod";
 import { fetchSiteContext } from "@/lib/site-context";
 import { generateAdvertorial, TIPURI_ARTICOL } from "@/lib/advertorial";
 import { creeazaLimita, ipDinCerere } from "@/lib/limita-ip";
+import { cuvinteAlese, linkuriPeCuvinte, propuneLinkuri } from "@/lib/linkuri-propuse";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -23,6 +24,8 @@ const schema = z.object({
   companyName: z.string().max(200).optional(),
   tip: z.enum(TIPURI_ARTICOL).default("advertorial"),
   cuvantCheie: z.string().max(120).optional(),
+  /** Cuvintele cheie alese de client, separate prin virgula (max 3 folosite). */
+  cuvinteCheie: z.string().max(300).optional(),
   linkuri: z.string().max(1500).optional(),
   isCasino: z.boolean().default(false),
 });
@@ -70,6 +73,12 @@ export async function POST(req: NextRequest) {
     contact = null;
   }
 
+  // 17.10.2026 — cuvintele cheie alese de client devin linkuri spre site,
+  // iar articolul (orice tip) e scris in jurul lor. Fara ele, alegem noi
+  // 2-3 din cuvintele cheie ale articolului si clientul le confirma.
+  const alese = cuvinteAlese(d.cuvinteCheie);
+  const linkuri = d.linkuri?.trim() || linkuriPeCuvinte(alese, site.url);
+
   const brief = [
     d.brief.trim() || "Prezintă firma, ce face și de ce merită aleasă, pe baza informațiilor de pe site-ul ei.",
     "La finalul articolului pune un paragraf scurt cu datele de contact ale firmei (telefon, email, adresă, site) — DOAR cele care apar în textul site-ului; nu inventa niciunul.",
@@ -79,8 +88,8 @@ export async function POST(req: NextRequest) {
     const article = await generateAdvertorial({
       brief,
       tip: d.tip,
-      cuvantCheie: d.cuvantCheie?.trim() || undefined,
-      linkuri: d.linkuri?.trim() || undefined,
+      cuvantCheie: d.cuvantCheie?.trim() || alese[0] || undefined,
+      linkuri: linkuri || undefined,
       companyName: d.companyName?.trim() || undefined,
       siteUrl: site.url,
       siteContext: [
@@ -93,7 +102,9 @@ export async function POST(req: NextRequest) {
         .join("\n"),
       isCasino: d.isCasino,
     });
-    return NextResponse.json({ ok: true, article });
+    // Linkurile propuse, doar pe expresii care chiar apar in text.
+    const linkuriPropuse = linkuri || propuneLinkuri(article.keywords, article.body, site.url);
+    return NextResponse.json({ ok: true, article, linkuriPropuse });
   } catch (err) {
     console.error("[articol/genereaza] error:", err);
     return NextResponse.json(

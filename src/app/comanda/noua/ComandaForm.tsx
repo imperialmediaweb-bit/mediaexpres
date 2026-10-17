@@ -62,7 +62,7 @@ export function ComandaForm({
     siteUrl: "",
     linkNotes: "",
     brief: "",
-    cuvantCheie: "",
+    cuvinteCheie: "",
   });
   // Firma gasita la ANAF: numele si adresa nu se mai scriu de mana.
   const [firma, setFirma] = useState<{ nume: string; adresa: string; inactiva: boolean } | null>(null);
@@ -74,6 +74,8 @@ export function ComandaForm({
   const [tip, setTip] = useState<Tip>("advertorial");
   const [generez, setGenerez] = useState(false);
   const [generat, setGenerat] = useState(0);
+  // Linkurile din lista au fost puse de noi (propuse), nu scrise de client.
+  const [linkuriAuto, setLinkuriAuto] = useState(false);
 
   const [images, setImages] = useState<Uploaded[]>([]);
   const [captura, setCaptura] = useState(false);
@@ -134,14 +136,21 @@ export function ComandaForm({
           brief: f.brief,
           companyName: f.companyName || undefined,
           tip,
-          cuvantCheie: tip === "seo" ? f.cuvantCheie : undefined,
-          linkuri: f.linkNotes || undefined,
+          cuvinteCheie: f.cuvinteCheie || undefined,
+          // Linkurile propuse la generarea trecuta nu sunt alegerea clientului.
+          linkuri: linkuriAuto ? undefined : f.linkNotes || undefined,
           isCasino,
         }),
       });
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error(j.error || "Generarea a eșuat.");
-      setF((p) => ({ ...p, title: j.article.title, body: j.article.body }));
+      setF((p) => ({
+        ...p,
+        title: j.article.title,
+        body: j.article.body,
+        linkNotes: !p.linkNotes.trim() || linkuriAuto ? j.linkuriPropuse || p.linkNotes : p.linkNotes,
+      }));
+      if (!f.linkNotes.trim() || linkuriAuto) setLinkuriAuto(Boolean(j.linkuriPropuse));
       setGenerat((n) => n + 1);
       trackGaEvent("generate_article", { tip });
     } catch (e) {
@@ -149,6 +158,31 @@ export function ComandaForm({
     } finally {
       setGenerez(false);
     }
+  }
+
+  /**
+   * Textul lipit din Word sau de pe un site vine si ca HTML, cu linkurile pe
+   * cuvinte. In casuta ramane doar textul, deci linkurile le scoatem de aici
+   * si le trecem in lista „cuvant → adresa", ca sa nu se piarda pe drum.
+   */
+  function prindeLinkuri(html: string) {
+    if (!html) return;
+    const doc = new DOMParser().parseFromString(html, "text/html");
+    const gasite: string[] = [];
+    doc.querySelectorAll("a[href]").forEach((a) => {
+      const href = a.getAttribute("href") || "";
+      const text = (a.textContent || "").replace(/\s+/g, " ").trim();
+      if (!/^https?:\/\//i.test(href) || !text) return;
+      const linie = `${text} → ${href}`;
+      if (!gasite.includes(linie)) gasite.push(linie);
+    });
+    if (!gasite.length) return;
+    setF((p) => {
+      const existente = p.linkNotes.split("\n").map((l) => l.trim()).filter(Boolean);
+      const noi = gasite.filter((l) => !existente.includes(l));
+      return { ...p, linkNotes: [...existente, ...noi].join("\n").slice(0, 1000) };
+    });
+    setNotice(`Am găsit ${gasite.length} ${gasite.length === 1 ? "link" : "linkuri"} în textul lipit și ${gasite.length === 1 ? "l-am trecut" : "le-am trecut"} mai jos, la „Linkurile dorite”.`);
   }
 
   async function handleUpload(list: FileList | null) {
@@ -445,12 +479,15 @@ export function ComandaForm({
                 ))}
               </div>
             </div>
-            {tip === "seo" && (
-              <div>
-                <label className={label}>Pe ce căutare din Google vrei să apari?</label>
-                <input value={f.cuvantCheie} onChange={(e) => set("cuvantCheie", e.target.value)} className={input} placeholder="ex. service auto Botoșani" />
-              </div>
-            )}
+            <div>
+              <label className={label}>
+                Cuvinte cheie <span className="font-normal text-slate-500">(opțional — pe ce vrei să te găsească în Google, separate prin virgulă)</span>
+              </label>
+              <input value={f.cuvinteCheie} onChange={(e) => set("cuvinteCheie", e.target.value)} className={input} placeholder="ex. creare site Botoșani, magazin online" />
+              <p className="mt-1 text-xs text-slate-500">
+                Scriem articolul în jurul lor și punem pe ele linkul site-ului tău. Dacă lași gol, le alegem noi și ți le arătăm.
+              </p>
+            </div>
             <div>
               <label className={label}>
                 Ce vrei să transmită? <span className="font-normal text-slate-500">(opțional — o propoziție e de ajuns)</span>
@@ -461,7 +498,21 @@ export function ComandaForm({
               <label className={label}>
                 Linkurile dorite în articol <span className="font-normal text-slate-500">(opțional — până la 3, câte unul pe rând)</span>
               </label>
-              <textarea rows={3} value={f.linkNotes} onChange={(e) => set("linkNotes", e.target.value)} className={input} placeholder={"service auto Botoșani → https://firma.ro\nprogramare online → https://firma.ro/contact"} />
+              <textarea
+                rows={3}
+                value={f.linkNotes}
+                onChange={(e) => {
+                  set("linkNotes", e.target.value);
+                  setLinkuriAuto(false);
+                }}
+                className={`${input} ${linkuriAuto ? "border-emerald-400 bg-emerald-50/40" : ""}`}
+                placeholder={"service auto Botoșani → https://firma.ro\nprogramare online → https://firma.ro/contact"}
+              />
+              {linkuriAuto && (
+                <p className="mt-1 text-xs font-medium text-emerald-700">
+                  Am pus linkul site-ului tău pe aceste cuvinte cheie din articol. Ești de acord? Dacă nu, schimbă cuvintele sau adresele aici.
+                </p>
+              )}
             </div>
             <button
               type="button"
@@ -518,7 +569,13 @@ export function ComandaForm({
             </div>
             <div>
               <label className={label}>Textul articolului *</label>
-              <textarea rows={varianta === "scrieti" ? 16 : 10} value={f.body} onChange={(e) => set("body", e.target.value)} className={input} />
+              <textarea
+                rows={varianta === "scrieti" ? 16 : 10}
+                value={f.body}
+                onChange={(e) => set("body", e.target.value)}
+                onPaste={(e) => prindeLinkuri(e.clipboardData.getData("text/html"))}
+                className={input}
+              />
               <p className="mt-1 text-xs text-slate-500">{f.body.length} caractere (minimum 100)</p>
             </div>
             {varianta === "am" && (

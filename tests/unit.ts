@@ -37,6 +37,7 @@ import { parseazaCuvinte, slugDin, curataHtml, numarCuvinte, eRandul, textPostar
 import { surseCaptura } from "@/lib/captura-site";
 import { normalizeCui } from "@/lib/anaf";
 import { esteRefComanda } from "@/lib/comanda-ref";
+import { cuvinteAlese, propuneLinkuri } from "@/lib/linkuri-propuse";
 import { textulZilei, pozaZilei, eRandulOfertei, parseazaTexte, TEXTE_IMPLICITE } from "@/lib/oferta-facebook";
 import { comandaPentruRetea, domeniulRaportului } from "@/lib/retea";
 import { autolink } from "@/lib/articol-html";
@@ -2121,6 +2122,8 @@ if (fails.length) console.log(fails.map((f) => "  x " + f).join("\n"));
   t("factura automata verifica firma la ANAF inainte", /lookupCui\(input\.cui\)/.test(citesteFisier("src/lib/invoicing.ts")));
   t("webhookul leaga plata de comanda salvata (orderRef)", /metadata\?\.orderRef/.test(citesteFisier("src/app/api/webhook/stripe/route.ts")));
   t("publicarea refuza orice comanda neincasata", /if \(row\.status === "pending_payment"\)/.test(citesteFisier("src/app/api/admin/materiale/[id]/route.ts")));
+  t("cuvinte cheie: virgula, maximum 3, fara cele prea scurte", JSON.stringify(cuvinteAlese("creare site, magazin online; ab, seo local, al patrulea")) === JSON.stringify(["creare site", "magazin online", "seo local"]));
+  t("linkuri propuse doar pe cuvinte care apar in text", propuneLinkuri(["creare site Botoșani", "inexistent aici", "magazin online"], "Oferim creare site Botoșani și magazin online.", "https://x.ro/") === "creare site Botoșani → https://x.ro/\nmagazin online → https://x.ro/");
   t("oferta 500 (plata unica) duce la formular", /\/comanda\/noua\?pachet=/.test(citesteFisier("src/components/comanda/comanda-promo.tsx")));
 }
 
