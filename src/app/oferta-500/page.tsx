@@ -28,6 +28,7 @@ import { ButonComanda } from "@/components/comanda/comanda-promo";
 import { promoDeadlineLabel } from "@/data/packages";
 import { nr, milioane } from "@/data/cifre";
 import { cifreLive, type CifreRetea } from "@/lib/cifre-live";
+import { firmeCareAuPublicat, PRAG_FIRME } from "@/lib/cifre-clienti";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 // 11.10.2026: termenul se citeste la fiecare randare, nu o data la pornirea
@@ -330,6 +331,7 @@ export default async function Oferta500Page() {
   // Cifrele retelei, citite din platforma de publicare (o data pe ora);
   // daca nu raspunde, cele din data/cifre.ts, cu data lor.
   const CIFRE = await cifreLive();
+  const firme = await firmeCareAuPublicat();
   const FAQ = buildFaq(CIFRE);
   const deadline = promoDeadlineLabel();
   // DA pe fiecare domeniu (Moz, citit de noi); fara baza, lista ramane fara scoruri.
@@ -413,6 +415,12 @@ export default async function Oferta500Page() {
             <Stat value="46" label="pagini de Facebook" />
             <Stat value="12 ore lucrătoare" label="până la publicare" />
           </div>
+          {/* 18.10.2026 — numarate din comenzi, nu scrise de mana (lib/cifre-clienti.ts). */}
+          {firme !== null && firme >= PRAG_FIRME && (
+            <p className="mt-8 text-center text-base font-semibold text-brand-navy">
+              <span className="text-brand-red">{firme}{firme % 100 >= 20 || firme % 100 === 0 ? " de" : ""} firme</span> și-au publicat deja articolul prin MediaExpres.
+            </p>
+          )}
         </div>
       </section>
 
