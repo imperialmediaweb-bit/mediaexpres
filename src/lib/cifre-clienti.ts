@@ -13,26 +13,33 @@ import { db } from "@/db";
  */
 export const PRAG_FIRME = 10;
 
-export const firmeCareAuPublicat = unstable_cache(
-  async (): Promise<number | null> => {
-    try {
-      const r = await db.execute(sql`
-        select count(distinct coalesce(
-          nullif(regexp_replace(lower(coalesce(company_cui, cui, '')), '[^0-9]', '', 'g'), ''),
-          lower(email)
-        ))::int as n
-        from order_submission
-        where status in ('paid', 'pending', 'published')
-          and stripe_session_id not like 'cs_test_%'
-      `);
-      const rows = (r as unknown as { rows?: { n: number }[] }).rows ?? (r as unknown as { n: number }[]);
-      const n = Number(rows?.[0]?.n ?? 0);
-      return Number.isFinite(n) ? n : null;
-    } catch (err) {
-      console.error("[cifre-clienti]", err);
-      return null;
-    }
+// Eroarea se arunca DIN cache, ca sa nu fie tinuta minte: la build baza nu e
+// accesibila (retea interna Railway), iar un „null" pastrat o ora ascundea
+// cifra si dupa pornire.
+const numaraCached = unstable_cache(
+  async (): Promise<number> => {
+    const r = await db.execute(sql`
+      select count(distinct coalesce(
+        nullif(regexp_replace(lower(coalesce(company_cui, cui, '')), '[^0-9]', '', 'g'), ''),
+        lower(email)
+      ))::int as n
+      from order_submission
+      where status in ('paid', 'pending', 'published')
+        and stripe_session_id not like 'cs_test_%'
+    `);
+    const rows = (r as unknown as { rows?: { n: number }[] }).rows ?? (r as unknown as { n: number }[]);
+    return Number(rows?.[0]?.n ?? 0);
   },
-  ["firme-care-au-publicat"],
+  ["firme-care-au-publicat-v2"],
   { revalidate: 3600 },
 );
+
+export async function firmeCareAuPublicat(): Promise<number | null> {
+  try {
+    const n = await numaraCached();
+    return Number.isFinite(n) ? n : null;
+  } catch (err) {
+    console.error("[cifre-clienti]", err instanceof Error ? err.message : err);
+    return null;
+  }
+}
