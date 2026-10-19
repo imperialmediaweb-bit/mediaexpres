@@ -11,6 +11,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { RequestListModal } from "@/components/forms/RequestListModal";
+import { NetworkTraffic } from "@/components/NetworkTraffic";
 
 export const metadata: Metadata = {
   title: "Ofertă publicare advertoriale și comunicate",
@@ -121,6 +122,7 @@ export default function OfertaPage() {
               label="urmăritori per pagină Facebook asociată"
             />
           </div>
+          <NetworkTraffic />
         </div>
       </section>
 
