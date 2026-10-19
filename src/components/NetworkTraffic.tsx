@@ -31,7 +31,7 @@ function roundDown(n: number) {
   return `${(Math.floor(n / 1000) * 1000).toLocaleString("ro-RO")}+`;
 }
 
-export async function NetworkTraffic() {
+export async function NetworkTraffic({ compact = false }: { compact?: boolean } = {}) {
   const stats = await getStats();
   if (!stats) return null;
 
@@ -41,6 +41,15 @@ export async function NetworkTraffic() {
     year: "numeric",
     timeZone: "Europe/Bucharest",
   });
+
+  if (compact) {
+    return (
+      <p className="mt-5 text-sm text-white/80">
+        <span className="font-bold text-brand-gold">{roundDown(stats.users)} cititori</span>{" "}
+        în ultimele {stats.days} de zile în rețea · Date Google Analytics, actualizat la {date}
+      </p>
+    );
+  }
 
   return (
     <div className="mt-10 rounded-xl border border-slate-200 bg-slate-50 p-6 text-center">

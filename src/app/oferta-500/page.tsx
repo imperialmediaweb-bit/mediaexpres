@@ -24,6 +24,7 @@ import {
   Check,
 } from "lucide-react";
 import { PromoOffer } from "./PromoOffer";
+import { NetworkTraffic } from "@/components/NetworkTraffic";
 import { ButonComanda } from "@/components/comanda/comanda-promo";
 import { promoDeadlineLabel } from "@/data/packages";
 import { nr, milioane } from "@/data/cifre";
@@ -378,6 +379,7 @@ export default async function Oferta500Page() {
               Rămâne permanent. Primești lista cu toate cele 50 de linkuri — le
               poți pune pe site, la „Apariții în presă”.
             </p>
+            <NetworkTraffic compact />
 
             <p className="mx-auto mt-4 max-w-2xl">
               <a
