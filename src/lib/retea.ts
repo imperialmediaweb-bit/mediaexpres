@@ -177,7 +177,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orderSubmissions, orders } from "@/db/schema";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { articolHtml } from "@/lib/articol-html";
+import { articolHtml, parseazaLinkuri } from "@/lib/articol-html";
 import { ritmDupaId } from "@/lib/ritm";
 import { etichetaSursa } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
@@ -219,7 +219,8 @@ function adresaCurata(u: string | null | undefined): string | null {
 
 /** Ce trimitem, construit din comanda de aici. Exportat pentru teste. */
 export function comandaPentruRetea(r: RandComanda, extra: { pretLei: number | null; reteaId?: number | null }): ComandaPentruRetea | { eroare: string } {
-  const link = adresaCurata(r.siteUrl);
+  // Fără site: primul link cerut de client (e deja pus în text și leagă campania în rețea)
+  const link = adresaCurata(r.siteUrl) ?? adresaCurata(parseazaLinkuri(r.linkNotes)[0]?.url);
   if (!link) return { eroare: "comanda nu are site-ul clientului; reteaua cere linkul clientului" };
 
   let poze: { url: string; capturaSite?: boolean }[] = [];
