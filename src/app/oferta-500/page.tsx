@@ -691,7 +691,7 @@ export default async function Oferta500Page() {
                 <div className="mt-1 text-xs text-slate-600">afișări în Google, {CIFRE.perioada}</div>
               </div>
             </div>
-            <div className="mt-4 grid gap-4 text-center sm:grid-cols-3">
+            <div className="mt-4 grid gap-4 text-center sm:grid-cols-2">
               <div className="rounded-xl bg-slate-50 p-4">
                 <div className="font-serif text-2xl font-bold text-brand-navy">{CIFRE.paginiFacebook}</div>
                 <div className="mt-1 text-xs text-slate-600">pagini de Facebook, {nr(CIFRE.urmaritoriFacebook)} urmăritori</div>
@@ -700,15 +700,10 @@ export default async function Oferta500Page() {
                 <div className="font-serif text-2xl font-bold text-brand-navy">~{CIFRE.articolePeZi}</div>
                 <div className="mt-1 text-xs text-slate-600">articole noi pe zi în rețea</div>
               </div>
-              <div className="rounded-xl bg-slate-50 p-4">
-                <div className="font-serif text-2xl font-bold text-brand-navy">{CIFRE.domainAuthority} / {CIFRE.pageAuthority}</div>
-                <div className="mt-1 text-xs text-slate-600">Domain Authority / Page Authority (Moz)</div>
-              </div>
             </div>
             <p className="mt-5 text-center text-sm text-slate-600">
               Măsurat 6 septembrie 2026 — Google Search Console, statistici Meta și
-              statisticile proprii ale publicațiilor. Scorul Moz e public: îl poți
-              verifica singur pentru oricare domeniu din listă.
+              statisticile proprii ale publicațiilor.
             </p>
           </div>
 
