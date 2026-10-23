@@ -217,6 +217,8 @@ export const PROMO_PACKAGES: Package[] = [
       "Lista cu toate linkurile (PDF + Excel)",
       "Permanent online",
       "50 de linkuri către site-ul tău, permanente",
+      // 23.10.2026 (user: flyer-ul ofertei) — bonusul inclus în pachetul de 500 lei
+      "Bonus: reclamă plătită 3 zile pe Facebook, pe o postare la alegere",
     ],
   },
   {
