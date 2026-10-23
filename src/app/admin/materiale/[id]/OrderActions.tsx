@@ -120,7 +120,7 @@ function sabloane(articleTitle: string, raportUrl?: string | null) {
         "",
         "Vă mulțumim pentru comandă!",
         "",
-        `Campania pentru articolul „${articleTitle}" a început. Puteți urmări în timp real publicarea în cele 50 de ziare și promovarea pe Facebook aici:`,
+        `Campania pentru articolul „${articleTitle}" a început. Aici puteți vedea în timp real linkurile articolelor publicate în cele 50 de ziare și postările de pe paginile de Facebook:`,
         raportUrl ? pePaginaRomaniaExpres(raportUrl) : link,
         "",
         "Când campania se termină, veți primi un email de confirmare.",
