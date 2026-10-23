@@ -110,7 +110,39 @@ function sabloane(articleTitle: string, raportUrl?: string | null) {
         "Echipa MediaExpres",
       ].join("\n"),
     },
+    {
+      // 23.10.2026 — proprietarul: anuntul de start nu are factura; doar ca
+      // a inceput campania si linkul de urmarit, mereu pe romaniaexpres.ro.
+      eticheta: "Campanie începută",
+      subiect: `Campania dumneavoastră a început — ${articleTitle}`.slice(0, 120),
+      text: [
+        "Bună ziua,",
+        "",
+        "Vă mulțumim pentru comandă!",
+        "",
+        `Campania pentru articolul „${articleTitle}" a început. Puteți urmări în timp real publicarea în cele 50 de ziare și promovarea pe Facebook aici:`,
+        raportUrl ? pePaginaRomaniaExpres(raportUrl) : link,
+        "",
+        "Când campania se termină, veți primi un email de confirmare.",
+        "",
+        "Cu stimă,",
+        "Echipa MediaExpres",
+      ].join("\n"),
+    },
   ];
+}
+
+/** Acelasi raport, servit de pe romaniaexpres.ro, cu toate aparitiile afisate. */
+function pePaginaRomaniaExpres(raportUrl: string): string {
+  try {
+    const u = new URL(raportUrl);
+    u.protocol = "https:";
+    u.host = "romaniaexpres.ro";
+    u.searchParams.set("tot", "1");
+    return u.toString();
+  } catch {
+    return raportUrl;
+  }
 }
 
 export function OrderActions({
