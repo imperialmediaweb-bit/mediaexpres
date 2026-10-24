@@ -10,6 +10,7 @@ Citește asta la începutul fiecărei sesiuni noi.
 
 ## Conturi
 - Contul de reclame 1177839782858400 (…8400) e al Parohiei „Sf. Cuv. Teodora de la Sihla" – Botoșani, plătit cu cardul Revolut al parohiei. DOAR reclame pentru parohie. Niciodată Sarami, MediaExpres, clienți sau alte pagini.
+- 24.10: reclama parohiei (ad 120251969497140623) e OPRITĂ de Facebook: „Numărul de WhatsApp este obligatoriu". S-a oprit după ce Claude a schimbat publicul (setările vechi au fost puse înapoi). claude-ads NU are acces la pagina parohiei (147207128482281), deci nu o poate repara: trebuie debifat WhatsApp din reclamă în Ads Manager de cineva cu acces la pagină, sau aprobată cererea Legio de acces la pagină de un admin al portofoliului parohiei. Nu mai modifica nimic la ea fără „da".
 - Facebook: cont reclame act_1111402126360867, pixel 1200982607382394 (MediaExpres, Sarami, Media Chief). Utilizatorul de sistem „claude-ads" are nevoie de acces la fiecare pagină ca să creeze reclame.
 - Google Ads prin Supermetrics (plătit, Starter, echipa „Team aionitoaie.ionut31"): 7420901091 (MediaExpres) și 6730806837 (Savyn / Clinica Sf. Gheorghe).
 - Search Console prin Supermetrics (botosaniexpres@gmail.com): toate ziarele + mediaexpress.ro.
