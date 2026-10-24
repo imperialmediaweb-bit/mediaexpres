@@ -9,6 +9,7 @@ Citește asta la începutul fiecărei sesiuni noi.
 - Imaginile pentru clienți: fără sume și bugete.
 
 ## Conturi
+- Contul de reclame 1177839782858400 (…8400) e al Parohiei „Sf. Cuv. Teodora de la Sihla" – Botoșani, plătit cu cardul Revolut al parohiei. DOAR reclame pentru parohie. Niciodată Sarami, MediaExpres, clienți sau alte pagini.
 - Facebook: cont reclame act_1111402126360867, pixel 1200982607382394 (MediaExpres, Sarami, Media Chief). Utilizatorul de sistem „claude-ads" are nevoie de acces la fiecare pagină ca să creeze reclame.
 - Google Ads prin Supermetrics (plătit, Starter, echipa „Team aionitoaie.ionut31"): 7420901091 (MediaExpres) și 6730806837 (Savyn / Clinica Sf. Gheorghe).
 - Search Console prin Supermetrics (botosaniexpres@gmail.com): toate ziarele + mediaexpress.ro.
