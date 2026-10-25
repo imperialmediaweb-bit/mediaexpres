@@ -24,6 +24,8 @@ Citește asta la începutul fiecărei sesiuni noi.
 - Vânzarea din 19.10 (SEO Digital, 500 lei) a venit din Google organic. Stripe salvează sursa în metadata „sursa".
 - Linkul de raport admin (/api/admin/comenzi?...) cere parolă (401), nu se trimite clienților. Raportul public are forma /raport/<token>?tot=1.
 
+- 25.10: reclama nouă „Oferta 500 v2" (campania 120251041182160297, 70 lei/zi, link pe /oferta-500) a adus prima comandă: 500 lei, venită pe WhatsApp, după ~128 lei cheltuiți. Comenzile pe WhatsApp NU apar în Facebook — întreabă proprietarul înainte să declari reclama fără rezultat.
+
 ## Media Chief
 - Nu rulează nimic. Facebook (vizite, apoi comenzi) și Google SUA: 0 vânzări, oprite.
 - În cod: plata întâi și articolul întâi au fost încercate amândouă, niciuna n-a vândut.
