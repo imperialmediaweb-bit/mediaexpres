@@ -5,6 +5,7 @@ Citește asta la începutul fiecărei sesiuni noi.
 ## Reguli de lucru
 - Nu schimba reclame, site-uri sau emailuri fără „da" explicit. Spune exact ce schimbi.
 - Înainte de orice campanie nouă: arată ce urmărește, publicul și bugetul. După creare, verifică în Facebook/Google și arată.
+- REGULĂ FERMĂ (25.10): orice reclamă nouă se creează PE PAUZĂ, se trimite captura (preview) aici, și se pornește DOAR după „pornește"/„da" scris după captură. Niciodată pornită direct.
 - Răspunsuri scurte, în română. Mesajele pentru clienți: într-un bloc de cod, gata de copiat, cu „dumneavoastră".
 - Imaginile pentru clienți: fără sume și bugete.
 
