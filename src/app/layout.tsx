@@ -9,6 +9,8 @@ import {
   ConversionWidgets,
 } from "@/components/conversion/ConversionWidgets";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { SourceCapture } from "@/components/analytics/SourceCapture";
+import { TrackVisit } from "@/components/analytics/TrackVisit";
 import "./globals.css";
 
 const playfair = Playfair_Display({
@@ -101,6 +103,8 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen font-sans flex flex-col">
         <MetaPixel />
+        <SourceCapture />
+        <TrackVisit />
         <StructuredData />
         <ConversionBanner />
         <Navbar />

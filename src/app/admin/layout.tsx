@@ -10,6 +10,7 @@ import {
   ShoppingBag,
   Repeat,
   Newspaper,
+  TrendingUp,
   Send,
   Mail,
 } from "lucide-react";
@@ -29,6 +30,7 @@ const NAV = [
   { href: "/admin/abonamente", label: "Abonamente", icon: Repeat },
   { href: "/admin/prospecti", label: "Prospecți B2B", icon: Send },
   { href: "/admin/emailuri", label: "Emailuri", icon: Mail },
+  { href: "/admin/surse", label: "De unde vin", icon: TrendingUp },
   { href: "/admin/ziare", label: "Ziare", icon: Newspaper },
 ];
 

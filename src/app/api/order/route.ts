@@ -7,6 +7,8 @@ import { sendCapiEvent, extractRequestUserData, splitName } from "@/lib/meta-cap
 import { db } from "@/db";
 import { users, orders, articles } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { SOURCE_COOKIE } from "@/lib/sursa";
+import { ensureSursaSchema } from "@/lib/sursa-db";
 
 export const runtime = "nodejs";
 
@@ -169,6 +171,9 @@ export async function POST(req: NextRequest) {
       userId = inserted[0].id;
     }
 
+    // Coloana `source` nu e creată de pasul de migrare — vezi sursa-db.ts.
+    await ensureSursaSchema();
+
     // Create order record
     const insertedOrders = await db
       .insert(orders)
@@ -178,6 +183,8 @@ export async function POST(req: NextRequest) {
         packageId: data.packageId,
         amount: packageValue ? packageValue * 100 : 0,
         status: "pending_payment",
+        // Citită din cookie pe server, nu luată pe cuvânt din browser.
+        source: req.cookies.get(SOURCE_COOKIE)?.value || null,
       })
       .returning({ id: orders.id });
     const orderId = insertedOrders[0].id;

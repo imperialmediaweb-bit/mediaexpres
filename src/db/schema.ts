@@ -85,6 +85,9 @@ export const orders = pgTable("order", {
   stripePaymentIntentId: text("stripe_payment_intent_id"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   paidAt: timestamp("paid_at"),
+  // De unde a venit clientul (lib/sursa.ts): "google|organic|", "facebook|paid|".
+  // Creată de sursa-db.ts, nu de pasul de migrare.
+  source: text("source"),
 });
 
 export const articles = pgTable("article", {
