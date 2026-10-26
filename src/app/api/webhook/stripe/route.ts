@@ -244,6 +244,16 @@ async function handleCheckoutCompleted(
       console.log("[stripe-webhook] insert concurent pierdut, ignor:", session.id);
       return;
     }
+    // 26.10.2026 — plata rezervata (capture_method manual): banii sunt doar
+    // blocati pe card. Comanda merge mai departe ca una platita (publicare,
+    // emailuri), dar factura asteapta incasarea — lib/plata-rezervata.ts.
+    const rezervata = session.payment_status === "unpaid";
+    if (rezervata) {
+      await db
+        .update(orders)
+        .set({ incasare: "rezervat", rezervatLa: new Date() })
+        .where(eq(orders.id, inserted[0].id));
+    }
 
     // 17.10.2026 — comanda trimisa INAINTE de plata (/comanda/noua): articolul
     // si firma (verificata la ANAF) sunt deja salvate sub referinta cmd_…;
@@ -314,6 +324,7 @@ async function handleCheckoutCompleted(
       // sunt cele trei, iar publicarea ramane pe ghicite.
       publicatii: numeleZiarelor((session.metadata?.ziare as string) || ""),
       materialePrimite: Boolean(comandaLegata && comandaLegata.body !== ARTICOL_DUPA_PLATA),
+      rezervata,
     });
 
     // Facturarea nu trebuie sa poata darama webhookul — issueInvoiceForOrder
@@ -321,7 +332,7 @@ async function handleCheckoutCompleted(
     const billing = session.customer_details?.address;
     // La comanda trimisa inainte de plata, firma vine din formular (deja
     // verificata la ANAF), nu din casutele optionale de pe pagina Stripe.
-    await issueInvoiceForOrder({
+    const dateFactura = {
       email,
       currency: session.currency || "ron",
       customerName: comandaLegata?.companyName || session.customer_details?.name || null,
@@ -341,7 +352,16 @@ async function handleCheckoutCompleted(
       amount: amount / 100,
       packageLabel: packageId,
       orderReference: session.id,
-    });
+    };
+    if (rezervata) {
+      // Factura pleaca la incasare, cu exact aceste date.
+      await db
+        .update(orders)
+        .set({ facturaDate: JSON.stringify(dateFactura) })
+        .where(eq(orders.id, inserted[0].id));
+    } else {
+      await issueInvoiceForOrder(dateFactura);
+    }
 
     // Upsell: cine a cumparat oferta o singura data afla ca abonamentul lunar
     // e mai ieftin. Programat la 3 zile — dupa ce si-a vazut articolul publicat.
@@ -700,8 +720,10 @@ async function sendConfirmationEmails(args: {
   publicatii?: string | null;
   /** 17.10.2026 — articolul a venit deja, in formularul de dinainte de plata. */
   materialePrimite?: boolean;
+  /** 26.10.2026 — suma doar rezervata pe card; se incaseaza la trimiterea raportului. */
+  rezervata?: boolean;
 }) {
-  const { kind, email, customerName, amount, label, sessionId, source, publicatii, materialePrimite } =
+  const { kind, email, customerName, amount, label, sessionId, source, publicatii, materialePrimite, rezervata } =
     args;
   // Clientii din strainatate (pachetul de pe /en) platesc in euro si primesc emailul in engleza.
   const strain = kind === "payment" && findPackageById(label)?.currency === "EUR";
@@ -711,7 +733,7 @@ async function sendConfirmationEmails(args: {
   const firstName = escapeHtml((customerName || "").split(" ")[0] || "");
 
   const adminHtml = wrapEmail(
-    kind === "payment" ? "Plata primita — Stripe" : "Abonament nou — Stripe",
+    kind === "payment" ? (rezervata ? "Plata REZERVATA — Stripe (se incaseaza la trimiterea raportului)" : "Plata primita — Stripe") : "Abonament nou — Stripe",
     `
     <p>${kind === "payment" ? "O plata" : "Un abonament"} a fost procesat${kind === "payment" ? "a" : ""} cu succes prin Stripe.</p>
     <table style="width:100%;border-collapse:collapse;">
@@ -757,7 +779,7 @@ async function sendConfirmationEmails(args: {
         html: wrapEmail(
           "Payment confirmed",
           `<p>Hello${firstName ? " " + firstName : ""},</p>
-      <p>Thank you! We received <strong>${amount.toFixed(2)} EUR</strong> for your press release on 50 Romanian news sites.</p>
+      <p>Thank you! ${rezervata ? `We reserved <strong>${amount.toFixed(2)} EUR</strong> on your card for your press release on 50 Romanian news sites. You are charged only when you receive your publication report; if we don't publish within 72 hours of receiving your press release, the hold is released automatically.` : `We received <strong>${amount.toFixed(2)} EUR</strong> for your press release on 50 Romanian news sites.`}</p>
       <p>Next step: send us your press release in English, plus any images and links. We translate it into Romanian and publish it within 12 working hours.</p>
       <p style="margin:16px 0;"><a href="${articleUrl}" style="background:#c1121f;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Send your press release →</a></p>
       <p style="color:#64748b;font-size:13px;">The form is in Romanian (your browser can translate it); you can fill it in English. Or simply reply to this email with the press release and your company details for the invoice.</p>
@@ -772,9 +794,13 @@ async function sendConfirmationEmails(args: {
       kind === "payment" ? "Plata confirmata — MediaExpres" : "Abonament activ — MediaExpres",
       `
       <p>Bună ziua${firstName ? " " + firstName : ""},</p>
-      <p>Multumim pentru plata! Am primit <strong>${amount.toFixed(2)} RON</strong>${
-        kind === "subscription" ? " pentru primul ciclu al abonamentului" : ""
-      }.</p>
+      ${
+        rezervata
+          ? `<p>Mulțumim pentru comandă! Suma de <strong>${amount.toFixed(2)} RON</strong> e doar <strong>rezervată</strong> pe cardul tău, nu încasată. Banii se iau abia când primești pe email linkul cu raportul de publicare. Dacă nu publicăm în 72 de ore de la primirea articolului, rezervarea se anulează automat și banii rămân la tine.</p>`
+          : `<p>Multumim pentru plata! Am primit <strong>${amount.toFixed(2)} RON</strong>${
+              kind === "subscription" ? " pentru primul ciclu al abonamentului" : ""
+            }.</p>`
+      }
       ${
         publicatii
           ? `<p>Publicațiile alese de tine: <strong>${escapeHtml(publicatii)}</strong>.</p>`
@@ -782,7 +808,7 @@ async function sendConfirmationEmails(args: {
       }
       ${
         materialePrimite
-          ? `<p>Avem deja articolul și datele firmei — nu mai ai nimic de trimis. <strong>Publicăm în maximum 12 ore lucrătoare</strong> și îți trimitem raportul cu toate linkurile. Factura fiscală vine într-un email separat, în câteva minute.</p>`
+          ? `<p>Avem deja articolul și datele firmei — nu mai ai nimic de trimis. <strong>Publicăm în maximum 12 ore lucrătoare</strong> și îți trimitem raportul cu toate linkurile. ${rezervata ? "Factura fiscală vine odată cu încasarea, când primești raportul." : "Factura fiscală vine într-un email separat, în câteva minute."}</p>`
           : articleUrl
           ? `<p>Următorul pas: trimite-ne articolul și pozele. Durează 2 minute, iar dacă nu ai textul scris, îl redactăm noi din datele firmei tale.</p>
       <p style="margin:16px 0;">

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
+import { incaseazaRezervarile } from "@/lib/plata-rezervata";
 import {
   sendEmail,
   wrapEmail,
@@ -122,6 +123,13 @@ export async function POST(req: NextRequest) {
 
   const sent = results.filter((r) => r.ok).length;
   const failed = results.filter((r) => !r.ok);
+
+  // 26.10.2026 — plata rezervata: emailul cu linkul de raport („Campanie
+  // începută", „Am publicat") e momentul in care se incaseaza banii. Un email
+  // programat pentru mai tarziu nu incaseaza acum.
+  if (!d.scheduledAt && d.body.includes("/raport/")) {
+    for (const r of results) if (r.ok) await incaseazaRezervarile(r.to);
+  }
 
   return NextResponse.json({
     ok: failed.length === 0,

@@ -32,9 +32,13 @@ async function resolveOutcome(sessionId: string): Promise<Outcome> {
     const session = await stripe.checkout.sessions.retrieve(sessionId);
     // allow_promotion_codes e activ la checkout: un cod de 100% lasa sesiunea
     // pe "no_payment_required" — tot o comanda valida este.
+    // 26.10.2026 — plata rezervata: sesiunea finalizata ramane „unpaid"
+    // pana la incasare (lib/plata-rezervata.ts), dar comanda e valida.
+    const rezervata = session.status === "complete" && session.payment_status === "unpaid";
     if (
       session.payment_status !== "paid" &&
-      session.payment_status !== "no_payment_required"
+      session.payment_status !== "no_payment_required" &&
+      !rezervata
     ) {
       return { kind: "generic" };
     }

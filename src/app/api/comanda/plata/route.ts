@@ -136,6 +136,9 @@ export async function POST(req: NextRequest) {
         },
       ],
       payment_intent_data: {
+        // 26.10.2026 — plata rezervata: banii se blocheaza acum si se incaseaza
+        // abia cand pleaca linkul de raport (lib/plata-rezervata.ts).
+        capture_method: "manual",
         description: `${pkg.name} — ${row.companyName || row.email} (CUI ${row.companyCui || row.cui || "-"})`,
         metadata: {
           orderRef: ref,

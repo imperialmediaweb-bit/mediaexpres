@@ -267,6 +267,15 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </span>
           </li>
         </ol>
+        {/* 26.10.2026 — plata rezervata: banii se iau abia la raport (lib/plata-rezervata.ts). */}
+        {!monthly && (
+          <p className="mt-3 rounded-lg bg-emerald-500/15 p-3 text-sm text-white/90">
+            🔒 <strong className="text-white">Plătești doar după ce articolul e publicat.</strong>{" "}
+            Cu cardul, suma doar se rezervă, nu se încasează. Banii se iau abia când primești pe
+            email linkul cu raportul de publicare. Dacă nu publicăm în 72 de ore, rezervarea se
+            anulează automat și banii rămân la tine.
+          </p>
+        )}
       </div>
 
     </div>

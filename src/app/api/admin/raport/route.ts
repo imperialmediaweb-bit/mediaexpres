@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import { incaseazaRezervarile } from "@/lib/plata-rezervata";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { publicationReports, users } from "@/db/schema";
@@ -324,6 +325,9 @@ export async function POST(req: NextRequest) {
       { status: 500 },
     );
   }
+
+  // 26.10.2026 — plata rezervata: raportul trimis = momentul incasarii.
+  if (!scheduledAt) await incaseazaRezervarile(email);
 
   return NextResponse.json({
     ok: true,

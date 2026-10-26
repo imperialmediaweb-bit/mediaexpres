@@ -166,6 +166,9 @@ export async function POST(req: NextRequest) {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        // 26.10.2026 — plata rezervata: banii se blocheaza acum si se incaseaza
+        // abia cand pleaca linkul de raport (lib/plata-rezervata.ts).
+        payment_intent_data: { capture_method: "manual" },
         // 16.10.2026 — fără „Alegeți moneda” (USD/RON): Stripe le arăta
         // românilor prețul și în dolari, cu „banca poate aplica comisioane”.
         // Încă o decizie chiar înainte de card; prețul rămâne doar în moneda
@@ -257,6 +260,9 @@ export async function POST(req: NextRequest) {
       const checkout = await stripe.checkout.sessions.create({
         mode: "payment",
         payment_method_types: ["card"],
+        // 26.10.2026 — plata rezervata: banii se blocheaza acum si se incaseaza
+        // abia cand pleaca linkul de raport (lib/plata-rezervata.ts).
+        payment_intent_data: { capture_method: "manual" },
         // 16.10.2026 — fără „Alegeți moneda” (USD/RON): Stripe le arăta
         // românilor prețul și în dolari, cu „banca poate aplica comisioane”.
         // Încă o decizie chiar înainte de card; prețul rămâne doar în moneda

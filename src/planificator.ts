@@ -38,5 +38,7 @@ export async function pornestePlanificator() {
   // Reamintirea dinainte de reinnoirea abonamentelor (11.10.2026): o data pe ora.
   setTimeout(() => ruleaza("/api/cron/abonamente-reamintire"), 6 * MIN);
   setInterval(() => ruleaza("/api/cron/abonamente-reamintire"), 60 * MIN);
-  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic, autoblog la 30 de minute, reamintire abonamente la o ora");
+  setTimeout(() => ruleaza("/api/cron/plata-rezervata"), 7 * MIN);
+  setInterval(() => ruleaza("/api/cron/plata-rezervata"), 60 * MIN);
+  console.log("[planificator] pornit: materiale-lipsa la 5 minute, promo-announce la 6 ore, autoritate-retea zilnic, autoblog la 30 de minute, reamintire abonamente si plata rezervata la o ora");
 }

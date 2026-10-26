@@ -106,6 +106,15 @@ export const orders = pgTable("order", {
   // separate prin virgula. Pana acum ajungeau doar in emailul de plata.
   newspapers: text("newspapers"),
   partnerIds: text("partner_ids"),
+  // 26.10.2026 — plata rezervata: banii se blocheaza pe card la comanda si se
+  // incaseaza abia cand pleaca linkul de raport (lib/plata-rezervata.ts).
+  // null = comanda veche / platita direct; „rezervat" | „incasat" | „anulat".
+  // status ramane „paid", ca adminul sa vada comanda si sa lucreze pe ea.
+  incasare: text("incasare"),
+  rezervatLa: timestamp("rezervat_la"),
+  /** Datele pentru factura, pastrate pana la incasare (JSON). */
+  facturaDate: text("factura_date"),
+  rezervareAlertaAt: timestamp("rezervare_alerta_at"),
 });
 
 export const articles = pgTable("article", {
