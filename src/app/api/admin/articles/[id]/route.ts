@@ -6,6 +6,7 @@ import { articles, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { sendEmail, wrapEmail, kv } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { sendEmailPublicare } from "@/lib/email-publicare";
 
 export const runtime = "nodejs";
 
@@ -76,22 +77,12 @@ export async function PATCH(
   if (clientUser?.email) {
     const first = (clientUser.name || "").split(" ")[0] || "";
     if (d.action === "publish") {
-      const html = wrapEmail(
-        "Articolul tău a fost publicat",
-        `
-        <p>Salut${first ? " " + first : ""},</p>
-        <p>Articolul <strong>${article.title}</strong> a fost publicat pe rețeaua MediaExpres.</p>
-        <p><strong>Link-uri publicate:</strong></p>
-        <ul>${(d.publishedUrls || [])
-          .map((u) => `<li><a href="${u}">${u}</a></li>`)
-          .join("")}</ul>
-        <p style="margin-top:16px;"><a href="${SITE.url}/cont/articole/${article.id}" style="background:#E4002B;color:#fff;padding:10px 20px;border-radius:6px;text-decoration:none;">Vezi in cont</a></p>
-      `
-      );
-      await sendEmail({
+      await sendEmailPublicare({
         to: clientUser.email,
-        subject: `Articolul tău "${article.title}" a fost publicat`,
-        html,
+        name: clientUser.name,
+        articleId: article.id,
+        title: article.title,
+        urls: d.publishedUrls || [],
       });
     } else if (d.action === "reject") {
       const html = wrapEmail(
