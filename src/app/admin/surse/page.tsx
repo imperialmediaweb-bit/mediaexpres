@@ -35,30 +35,41 @@ export default async function SursePage() {
 
   await ensureSursaSchema();
 
+  // Un rând per canal, din lista canalelor existente și două left join-uri.
+  // Forma evidentă — FULL OUTER JOIN ... ON a IS NOT DISTINCT FROM b — e
+  // refuzată din start de Postgres: un full join trebuie să fie mergeable sau
+  // hashable, iar IS NOT DISTINCT FROM nu e nici una. Cu null adus la '',
+  // cheia devine egalitate simplă, pe care ambele join-uri o pot planifica.
   const result = await db.execute(sql`
-    WITH vizite AS (
-      SELECT source,
+    WITH canale AS (
+      SELECT DISTINCT COALESCE(source, '') AS cheie FROM "visit"
+      UNION
+      SELECT DISTINCT COALESCE(source, '') AS cheie FROM "order"
+    ),
+    vizite AS (
+      SELECT COALESCE(source, '') AS cheie,
              COUNT(DISTINCT visitor_id) FILTER (WHERE path LIKE '/oferta%' OR path LIKE '/pachete%') AS reached,
              COUNT(DISTINCT visitor_id) FILTER (WHERE path LIKE '/comanda%') AS started
         FROM "visit"
-       GROUP BY source
+       GROUP BY 1
     ),
     vanzari AS (
-      SELECT source,
+      SELECT COALESCE(source, '') AS cheie,
              COUNT(*)::int AS orders,
              COUNT(*) FILTER (WHERE status = 'paid')::int AS paid,
              COALESCE(SUM(amount) FILTER (WHERE status = 'paid'), 0)::int AS revenue
         FROM "order"
-       GROUP BY source
+       GROUP BY 1
     )
-    SELECT COALESCE(v.source, s.source) AS source,
+    SELECT NULLIF(c.cheie, '')          AS source,
            COALESCE(v.reached, 0)::int  AS reached,
            COALESCE(v.started, 0)::int  AS started,
            COALESCE(s.orders, 0)::int   AS orders,
            COALESCE(s.paid, 0)::int     AS paid,
            COALESCE(s.revenue, 0)::int  AS revenue
-      FROM vizite v
-      FULL OUTER JOIN vanzari s ON s.source IS NOT DISTINCT FROM v.source
+      FROM canale c
+      LEFT JOIN vizite  v ON v.cheie = c.cheie
+      LEFT JOIN vanzari s ON s.cheie = c.cheie
      ORDER BY 6 DESC, 5 DESC, 2 DESC
   `);
 
