@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, AlertCircle, Lock } from "lucide-react";
@@ -11,9 +11,12 @@ import { Button } from "@/components/ui/button";
 import { adminLoginSchema, type AdminLoginInput } from "@/lib/validators";
 
 export function AdminLoginForm() {
-  const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from") || "/admin/ziare";
+  // Doar căi de la noi: "from" vine din query string, iar trimiterea
+  // browserului oriunde spune el ar face din pagina de login un redirect
+  // deschis pentru oricine.
+  const safeFrom = /^\/(?!\/)/.test(from) ? from : "/admin/ziare";
   const [status, setStatus] = useState<"idle" | "submitting" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
   const {
@@ -33,8 +36,13 @@ export function AdminLoginForm() {
       });
       const body = await res.json();
       if (!res.ok || !body.ok) throw new Error(body.error || "Credențiale greșite");
-      router.push(from);
-      router.refresh();
+      // Navigare reală, nu schimbare de rută în client.
+      //
+      // Chrome oferă salvarea parolei doar când după credențiale urmează o
+      // încărcare adevărată de pagină. router.push schimba vederea fără una,
+      // deci browserul nu observa niciodată că s-a făcut login, iar parola
+      // trebuia tastată de fiecare dată.
+      window.location.assign(safeFrom);
     } catch (e: unknown) {
       setStatus("error");
       setErrorMsg(e instanceof Error ? e.message : "Eroare");
