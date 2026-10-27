@@ -162,7 +162,7 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
         <div className="mt-6 flex flex-col items-center gap-3">
           <button
             type="button"
-            onClick={start}
+            onClick={() => start()}
             disabled={loading}
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-brand-red px-8 py-4 text-lg font-bold text-white shadow-xl shadow-brand-red/30 transition hover:bg-brand-red/90 disabled:opacity-60 sm:w-auto"
           >
@@ -171,6 +171,20 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
               ? (monthly ? "Se deschide plata..." : "Se deschide comanda...")
               : `${monthly ? "Abonează-te" : "Comandă acum"} — ${offer.price.toLocaleString("ro")} lei${offer.suffix}`}
           </button>
+          {/* 28.10.2026 — de pe telefon nimeni nu trecea de formular (CUI-ul
+              era primul camp). Varianta care vindea pana pe 17.10: plata
+              intai, articolul dupa. */}
+          {!monthly && (
+            <button
+              type="button"
+              onClick={() => start(true)}
+              disabled={loading}
+              className="inline-flex w-full items-center justify-center gap-2 rounded-lg border-2 border-white/80 bg-white/10 px-6 py-3 text-base font-bold text-white transition hover:bg-white/20 disabled:opacity-60 sm:w-auto"
+            >
+              <CreditCard className="h-5 w-5" />
+              Plătesc acum cu cardul, trimit articolul după
+            </button>
+          )}
           {/* Singura promisiune cu bani inapoi de pe pagina — pana acum
               existau doar mentiuni negative ("fara rambursare"). Riscul e al
               nostru si e mic: publicarea o controlam noi. Frica pe care o

@@ -46,14 +46,17 @@ export function useComandaPromo() {
   const [error, setError] = useState<string | null>(null);
   const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
-  async function go() {
+  async function go(direct = false) {
     if (loading) return;
     setLoading(true);
     setError(null);
     // 17.10.2026 — plata unica: intai formularul (firma, articol, poze), abia
     // apoi alegerea platii (card / OP / WhatsApp), pe /comanda/plata/[ref].
     // Abonamentul ramane direct pe Stripe.
-    if (!monthly) {
+    // 28.10.2026 — „Platesc acum, trimit articolul dupa": direct la card, ca
+    // pana pe 17.10. Formularul il completeaza dupa plata, iar daca nu-l
+    // trimite, pleaca reamintirile pe email (cron materiale-lipsa).
+    if (!monthly && !direct) {
       window.location.href = `/comanda/noua?pachet=${encodeURIComponent(offer.packageId)}`;
       return;
     }
@@ -75,7 +78,7 @@ export function useComandaPromo() {
     }
   }
 
-  function start() {
+  function start(direct = false) {
     if (loading) return;
     setError(null);
     // Evenimentul de pixel pleaca la intentia reala de comanda, nu dupa email —
@@ -89,7 +92,7 @@ export function useComandaPromo() {
     // Oglinda in GA4 — fara ea, Analytics arata "Evenimente importante: 0"
     // si rata de conversie a reclamei nu se poate citi nicaieri.
     trackGaEvent("begin_checkout", { value: offer.price, currency: "RON" });
-    void go();
+    void go(direct);
   }
 
   return { start, loading, error, offer, isCasino, monthly };
@@ -119,7 +122,7 @@ export function ButonComanda({
         bula de chat stie sa se dea la o parte cat timp un buton de comanda e
         pe ecran: pe telefon statea exact peste el (vezi OfferChatBubble).
       */}
-      <button type="button" data-comanda="1" onClick={start} disabled={loading} className={className}>
+      <button type="button" data-comanda="1" onClick={() => start()} disabled={loading} className={className}>
         {loading ? <Loader2 className="h-5 w-5 animate-spin" /> : <CreditCard className="h-5 w-5" />}
         {loading
           ? "Se deschide plata..."
