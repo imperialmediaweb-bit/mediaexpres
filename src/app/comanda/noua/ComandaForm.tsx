@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Loader2, Upload, X, Search, CheckCircle2, Sparkles, RefreshCw, Camera, FileText, Clock } from "lucide-react";
 import { RitmSelect } from "@/components/forms/RitmSelect";
 import { RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
@@ -268,17 +268,36 @@ export function ComandaForm({
     }
   }
 
+  // Cand emailul si telefonul sunt scrise, proprietarul afla imediat (o singura
+  // data), ca sa poata suna chiar daca omul nu termina comanda.
+  const contactTrimis = useRef(false);
+  useEffect(() => {
+    if (contactTrimis.current) return;
+    const email = f.email.trim();
+    const phone = f.contactPhone.trim();
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email) || phone.replace(/\D/g, "").length < 10) return;
+    const t = setTimeout(() => {
+      contactTrimis.current = true;
+      void fetch("/api/comanda/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, phone, packageId }),
+      }).catch(() => {});
+    }, 2500);
+    return () => clearTimeout(t);
+  }, [f.email, f.contactPhone, packageId]);
+
   async function submit() {
     if (busy) return;
     const dupa = varianta === "dupa";
     const verificari: [boolean, string][] = [
+      [!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim()),
+        "Scrie o adresă de email validă — acolo primești factura și raportul."],
+      [f.contactPhone.replace(/\D/g, "").length < 9, "Scrie numărul de telefon."],
       [f.companyCui.replace(/\D/g, "").length < 2, "Scrie CUI-ul firmei și apasă „Caută firma”."],
       [!firma && !anafManual, "Apasă „Caută firma”, ca să completăm datele de facturare de la ANAF."],
       [f.companyName.trim().length < 2, "Scrie denumirea firmei, pentru factură."],
       [f.companyAddress.trim().length < 5, "Scrie adresa de facturare."],
-      [!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim()),
-        "Scrie o adresă de email validă — acolo primești factura și raportul."],
-      [f.contactPhone.replace(/\D/g, "").length < 9, "Scrie numărul de telefon."],
       [!dupa && varianta === "scrieti" && f.body.trim().length < 100,
         "Apasă „Scrie-mi articolul” și verifică textul — sau alege „Îl trimit după plată”."],
       [!dupa && f.body.trim().length < 100,
@@ -354,7 +373,21 @@ export function ComandaForm({
       )}
 
       <section className="rounded-xl border border-slate-200 bg-white p-6">
-        <h2 className="font-serif text-lg font-bold text-brand-navy">1. Firma ta</h2>
+        {/* 28.10.2026 — emailul si telefonul primele: din 23.10, nimeni venit
+            de pe telefon n-a trecut de CUI, care era primul camp. */}
+        <h2 className="font-serif text-lg font-bold text-brand-navy">1. Datele tale</h2>
+        <div className="mt-3 grid gap-4 sm:grid-cols-2">
+          <div>
+            <label className={label}>Email *</label>
+            <input type="email" value={f.email} onChange={(e) => set("email", e.target.value)} className={input} placeholder="nume@firma.ro" />
+            <p className="mt-1 text-xs text-slate-500">Aici primești factura și raportul cu linkurile.</p>
+          </div>
+          <div>
+            <label className={label}>Telefon *</label>
+            <input type="tel" value={f.contactPhone} onChange={(e) => set("contactPhone", e.target.value)} className={input} placeholder="07xx xxx xxx" />
+          </div>
+        </div>
+        <h3 className="mt-6 text-sm font-bold text-brand-navy">Firma, pentru factură</h3>
         <p className="mt-1 text-sm text-slate-600">
           Scrie CUI-ul și apasă „Caută firma” — numele și adresa le luăm de la ANAF.{" "}
           <strong>Factura se emite automat pe aceste date</strong>, deci verifică-le.
@@ -415,17 +448,6 @@ export function ComandaForm({
             </div>
           </div>
         )}
-        <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={label}>Email *</label>
-            <input type="email" value={f.email} onChange={(e) => set("email", e.target.value)} className={input} placeholder="nume@firma.ro" />
-            <p className="mt-1 text-xs text-slate-500">Aici primești factura și raportul cu linkurile.</p>
-          </div>
-          <div>
-            <label className={label}>Telefon *</label>
-            <input type="tel" value={f.contactPhone} onChange={(e) => set("contactPhone", e.target.value)} className={input} placeholder="07xx xxx xxx" />
-          </div>
-        </div>
       </section>
 
       <section className="rounded-xl border border-slate-200 bg-white p-6">

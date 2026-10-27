@@ -175,7 +175,9 @@ export function OfferChatBubble() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           packageId: packageIdOf(d),
-          mode: "payment",
+          // 28.10.2026 — era "payment", pe care /api/checkout nu-l accepta:
+          // plata cu cardul din chat dadea mereu eroare (400).
+          mode: "package",
           email: d.email.trim() || undefined,
         }),
       });
