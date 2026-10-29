@@ -143,7 +143,7 @@ export function OfferChatBubble() {
         {
           role: "assistant",
           content:
-            "Am o problemă tehnică acum. Scrie-ne pe WhatsApp la +40 758 169 388 și îți răspundem imediat.",
+            "Am o problemă tehnică acum. Scrie-ne pe WhatsApp la +40 741 970 247 și îți răspundem imediat.",
         },
       ]);
     } finally {
@@ -188,7 +188,7 @@ export function OfferChatBubble() {
     } catch {
       setLoading(false);
       say(
-        "Nu am putut deschide plata cu cardul acum. Alege transfer bancar mai jos, sau scrie-ne pe WhatsApp la +40 758 169 388.",
+        "Nu am putut deschide plata cu cardul acum. Alege transfer bancar mai jos, sau scrie-ne pe WhatsApp la +40 741 970 247.",
       );
       // Il lasam sa aleaga din nou metoda, ca sa nu ramana blocat.
       const methodIdx = STEPS.findIndex((s) => s.id === "method");

@@ -56,7 +56,7 @@ const SABLOANE: { eticheta: string; subiect: string; text: string }[] = [
       "",
       "De la primirea materialelor, în maximum 12 ore lucrătoare public pe toate cele 50 de ziare și revin cu raportul complet, cu toate linkurile.",
       "",
-      "Îmi puteți răspunde direct la acest email sau pe WhatsApp: https://wa.me/40758169388",
+      "Îmi puteți răspunde direct la acest email sau pe WhatsApp: https://wa.me/40741970247",
       "",
       "Cu stimă,",
       "Ionuț Aioniţoaie — MediaExpres",

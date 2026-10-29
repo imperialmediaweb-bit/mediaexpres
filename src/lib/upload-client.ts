@@ -95,4 +95,4 @@ export function reportUploadError(
 
 /** Ce ii spunem clientului cand incarcarea nu merge: o cale care functioneaza. */
 export const UPLOAD_FALLBACK_HINT =
-  "Dacă pozele tot nu se încarcă, trimite-le pe WhatsApp la +40 758 169 388 sau răspunde la emailul de confirmare — le adăugăm noi la articol. Comanda nu se blochează din cauza pozelor.";
+  "Dacă pozele tot nu se încarcă, trimite-le pe WhatsApp la +40 741 970 247 sau răspunde la emailul de confirmare — le adăugăm noi la articol. Comanda nu se blochează din cauza pozelor.";

@@ -6,9 +6,9 @@ export const SITE = {
   description:
     "Serviciu de distribuție comunicate de presă pe 50 de ziare românești + 46 de pagini de Facebook. Livrare în 12 ore lucrătoare, raport PDF, linkuri permanente.",
   email: "contact@mediaexpress.ro",
-  phone: "+40 758 169 388",
+  phone: "+40 741 970 247",
   // Acelasi numar, in formatul cerut de wa.me: prefix de tara fara "+" si fara spatii.
-  whatsapp: "40758169388",
+  whatsapp: "40741970247",
   // Sediul social e in Botosani, nu in Bucuresti. Pana in 07.09.2026 aici scria
   // „Bucuresti, Romania" — aparea in footer si pe /contact la „Sediu", adica o
   // firma din Botosani se prezenta ca fiind din Bucuresti. Afisam doar orasul:

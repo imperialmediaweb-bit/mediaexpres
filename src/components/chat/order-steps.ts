@@ -130,7 +130,7 @@ export const STEPS: Step[] = [
     ask: () => "Un număr de telefon, în caz că trebuie să te sunăm despre comandă.",
     placeholder: "07xx xxx xxx",
     validate: (v) =>
-      RO_PHONE.test(v.trim()) ? null : "Scrie un număr de telefon românesc valid (ex. 0758 169 388).",
+      RO_PHONE.test(v.trim()) ? null : "Scrie un număr de telefon românesc valid (ex. 0741 970 247).",
   },
   {
     id: "companyName",
