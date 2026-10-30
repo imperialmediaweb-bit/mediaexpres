@@ -4,6 +4,7 @@ import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { creeazaLimita, ipDinCerere } from "@/lib/limita-ip";
+import { salveazaComandaInceputa } from "@/lib/comanda-inceputa";
 
 export const runtime = "nodejs";
 
@@ -36,6 +37,8 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
   const { email, phone, packageId } = parsed.data;
+  // Pentru emailul automat de dupa o ora (lib/comanda-inceputa.ts).
+  await salveazaComandaInceputa(email, phone, packageId).catch((e) => console.error("[comanda/contact] salvare", e));
   const pachet = (packageId && findPackageById(packageId)?.name) || packageId || "—";
   await sendEmail({
     to: ADMIN_EMAIL,
@@ -43,7 +46,7 @@ export async function POST(req: NextRequest) {
     subject: `[Început de comandă] ${phone} — ${email}`,
     html: wrapEmail(
       "Cineva a început o comandă",
-      `<p>A scris emailul și telefonul în formularul de comandă. Dacă nu primești comanda în câteva minute, sună-l.</p>
+      `<p>A scris emailul și telefonul în formularul de comandă. Dacă nu termină comanda într-o oră, primește automat un email de reamintire.</p>
       <table style="width:100%;border-collapse:collapse;">
         ${kv("Telefon", phone)}
         ${kv("Email", email)}

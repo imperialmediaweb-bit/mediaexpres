@@ -20,6 +20,7 @@ import { waLink } from "@/lib/whatsapp";
 import { ruleazaPazaLinkuri } from "@/lib/ruleaza-paza";
 import { ruleazaTermene } from "@/lib/termene-parteneri";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
+import { trimiteReamintiriComandaInceputa } from "@/lib/comanda-inceputa";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -346,8 +347,17 @@ export async function POST(req: NextRequest) {
     erori.push(`termene parteneri: ${e instanceof Error ? e.message : e}`);
   }
 
+  // Comenzile incepute si neterminate: un email dupa o ora (lib/comanda-inceputa.ts).
+  let comenziIncepute = 0;
+  try {
+    comenziIncepute = await trimiteReamintiriComandaInceputa();
+  } catch (e) {
+    erori.push(`comenzi incepute: ${e instanceof Error ? e.message : e}`);
+  }
+
   return NextResponse.json({
     ok: true,
+    comenziIncepute,
     reamintiri,
     alerte,
     reamintiriPlata,
