@@ -36,7 +36,7 @@ import { waLink } from "@/lib/whatsapp";
  * inainte de publicare), ramane un loc vizibil de completat, ca linkul sa
  * nu fie uitat, nu o promisiune de raport separat.
  */
-function sabloane(articleTitle: string, raportUrl?: string | null) {
+function sabloane(articleTitle: string, raportUrl?: string | null, awaitingPayment = false) {
   const link = raportUrl || "[LINK RAPORT — din „Campania în rețea”, după ce începe publicarea]";
   return [
     {
@@ -123,6 +123,16 @@ function sabloane(articleTitle: string, raportUrl?: string | null) {
         `Campania pentru articolul „${articleTitle}" a început. Aici puteți vedea în timp real linkurile articolelor publicate în cele 50 de ziare și postările de pe paginile de Facebook:`,
         raportUrl ? pePaginaRomaniaExpres(raportUrl) : link,
         "",
+        // 30.10.2026 — proprietarul: anuntul spune si de promovarea platita pe
+        // Facebook, iar la OP neplatit cere dovada transferului.
+        "Linkurile se actualizează pe măsură ce apar articolele, toate în maximum 12 ore. În plus, postarea de pe pagina de Facebook a ziarului este promovată plătit timp de 3 zile.",
+        "",
+        ...(awaitingPayment
+          ? [
+              "Dacă vă este posibil, vă rugăm să ne confirmați transferul și să atașați dovada plății, ca răspuns la acest email.",
+              "",
+            ]
+          : []),
         "Când campania se termină, veți primi un email de confirmare.",
         "",
         "Cu stimă,",
@@ -179,7 +189,7 @@ export function OrderActions({
   const mailFilesRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState<null | "publish" | "confirm" | "report" | "mail">(null);
   const [msg, setMsg] = useState<{ kind: "ok" | "err"; text: string } | null>(null);
-  const SABLOANE = sabloane(articleTitle, raportUrl);
+  const SABLOANE = sabloane(articleTitle, raportUrl, awaitingPayment);
   // Sablonul potrivit momentului: publicata -> anuntul; fara poze -> cererea
   // de poze (fara ele articolul nu poate fi publicat, deci e primul pas);
   // altfel -> factura.
