@@ -182,7 +182,10 @@ export async function issueInvoiceForOrder(
           ${
             dePlata
               ? `<p style="margin-top:16px;">Dă factura la contabilitate și fă transferul — la detalii scrie <strong>Factura ${invoice.series} ${invoice.number}</strong>. Imediat ce vedem încasarea, publicăm articolul în maximum 12 ore lucrătoare și primești raportul cu toate cele 50 de linkuri.</p>
-                 ${bankTransferEmailBox(`${input.amount.toFixed(2)} RON`, `Factura ${invoice.series} ${invoice.number}`)}`
+                 ${bankTransferEmailBox(`${input.amount.toFixed(2)} RON`, `Factura ${invoice.series} ${invoice.number}`)}
+                 <p style="margin-top:16px;">După plată, vă rugăm să ne trimiteți <strong>dovada plății pe WhatsApp</strong>, ca să începem publicarea imediat, fără să așteptăm extrasul bancar:</p>
+                 <p style="margin:12px 0;"><a href="https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua, vă trimit dovada plății pentru Factura ${invoice.series} ${invoice.number}.`)}" style="background:#25D366;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimit dovada pe WhatsApp</a></p>
+                 <p style="color:#64748b;font-size:13px;">WhatsApp: ${SITE.phone}</p>`
               : `<p style="margin-top:16px;color:#64748b;font-size:13px;">Linkul e permanent — il poti da contabilitatii oricand.</p>`
           }
           <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>

@@ -129,7 +129,7 @@ function sabloane(articleTitle: string, raportUrl?: string | null, awaitingPayme
         "",
         ...(awaitingPayment
           ? [
-              "Dacă vă este posibil, vă rugăm să ne confirmați transferul și să atașați dovada plății, ca răspuns la acest email.",
+              "Dacă vă este posibil, vă rugăm să ne trimiteți dovada plății pe WhatsApp, la 0741 970 247, sau ca răspuns la acest email.",
               "",
             ]
           : []),
