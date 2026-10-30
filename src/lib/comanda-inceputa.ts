@@ -59,6 +59,7 @@ export async function trimiteReamintiriComandaInceputa(): Promise<number> {
     await db.execute(sql`UPDATE "comanda_inceputa" SET "reamintire_at" = now() WHERE "email" = ${row.email}`);
     const pachet = row.package_id || "promo-50";
     const nume = findPackageById(pachet)?.name || "Oferta 50 de ziare";
+    const wa = `https://wa.me/${WHATSAPP}?text=${encodeURIComponent(`Bună ziua, aș dori să comand ${nume}. Email: ${row.email}`)}`;
     const link = `${SITE.url}/comanda/noua?pachet=${encodeURIComponent(pachet)}&email=${encodeURIComponent(row.email)}`;
     try {
       await sendEmail({
@@ -68,9 +69,11 @@ export async function trimiteReamintiriComandaInceputa(): Promise<number> {
           "Comanda dumneavoastră vă așteaptă",
           `<p>Bună ziua,</p>
           <p>Ați început o comandă pe MediaExpres (<strong>${esc(nume)}</strong>), dar nu a fost finalizată. Am păstrat-o pentru dumneavoastră.</p>
-          <p style="margin:24px 0;"><a href="${link}" style="background:#0f172a;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;">Finalizez comanda</a></p>
+          <p style="margin:24px 0;"><a href="${link}" style="background:#0f172a;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;">Finalizez comanda pe site</a></p>
+          <p style="margin:0 0 24px;"><a href="${wa}" style="background:#25D366;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;">Comand pe WhatsApp</a></p>
+          <p>Dacă vă este mai ușor, ne scrieți pe WhatsApp și preluăm comanda de acolo: ne trimiteți articolul, iar noi vă trimitem linkul de plată sau factura.</p>
           <p>Puteți plăti acum cu cardul și trimite articolul după, când este gata.</p>
-          <p>Aveți întrebări? Scrieți-ne pe <a href="https://wa.me/${WHATSAPP}">WhatsApp: 0741 970 247</a> sau răspundeți la acest email.</p>
+          <p>Aveți întrebări? WhatsApp: 0741 970 247 sau răspundeți la acest email.</p>
           <p>Cu stimă,<br/>Echipa MediaExpres</p>`,
         ),
       });
