@@ -193,6 +193,9 @@ export function etichetaSursa(v: string | null | undefined): string {
     case "whatsapp":
       nume = "WhatsApp";
       break;
+    // 31.10.2026 — programul de recomandari (lib/afiliati.ts).
+    case "partener":
+      return `Partener: ${s.campaign || "necunoscut"}`;
     default:
       nume = s.medium === "referral" ? `Link de pe ${s.source}` : `${s.source} (${s.medium})`;
   }
