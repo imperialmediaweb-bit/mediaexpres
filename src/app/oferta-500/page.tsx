@@ -310,6 +310,11 @@ function buildFaq(CIFRE: CifreRetea) {
     a: "Conținutul din zona iGaming are cerințe suplimentare de conformitate (ONJN, mențiuni despre joc responsabil) și un risc editorial mai mare pentru publicații. De aceea tariful este 1.000 lei în loc de 500. Bifezi declarația la comandă. Dacă un articol de cazino este trimis nedeclarat, publicarea se oprește și suma nu se rambursează.",
   },
   {
+    // 01.11.2026 — tariful pentru continut politic, stabilit de proprietar.
+    q: "Publicați și conținut politic?",
+    a: "Da, comunicate și articole ale partidelor sau ale politicienilor, în afara campaniei electorale: 1.000 lei pe toate cele 50 de ziare sau 400 lei pe un singur ziar ales din listă. Acceptăm prezentări ale activității și proiectelor, fără atacuri la adversari, iar articolul e marcat ca publicitate. Promovarea plătită pe Facebook nu e inclusă, pentru că Facebook nu permite reclame cu conținut politic. Pentru conținut politic ne scrii înainte de comandă; în campania electorală tariful se stabilește separat.",
+  },
+  {
     q: "Ce fel de conținut acceptați?",
     a: "Conținut comercial legal: lansări de produs, comunicate, advertoriale, articole de brand. Nu publicăm articole despre cauzele sau tratarea bolilor — inclusiv cancer sau afecțiuni grave — nici produse sau terapii prezentate ca alternativă la tratamentul medical, și nici atacuri la persoană. La comandă bifezi o declarație că articolul nu intră în aceste categorii: dacă declarația se dovedește falsă, comanda se anulează, articolul se retrage și suma nu se restituie. Dacă noi refuzăm dintr-un alt motiv, returnăm integral în 3 zile lucrătoare.",
   },
