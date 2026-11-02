@@ -3,15 +3,15 @@
 import { useState } from "react";
 
 const BANNERE = [
-  { f: "banner-300x250.png", w: 300, h: 250, unde: "Lângă articole (300×250)" },
-  { f: "banner-728x90.png", w: 728, h: 90, unde: "Sus pe pagină (728×90)" },
-  { f: "banner-160x600.png", w: 160, h: 600, unde: "Pe lateral (160×600)" },
+  { f: "banner-300x250.jpg", w: 300, h: 250, unde: "Lângă articole (300×250)" },
+  { f: "banner-728x90.jpg", w: 728, h: 90, unde: "Sus pe pagină (728×90)" },
+  { f: "banner-160x600.jpg", w: 160, h: 480, unde: "Pe lateral (160×480)" },
   { f: "banner-320x50.png", w: 320, h: 50, unde: "Pe telefon (320×50)" },
 ];
 
 const IMAGINI = [
-  { f: "postare-patrat.png", unde: "Postare Facebook / Instagram (pătrat)" },
-  { f: "postare-story.png", unde: "Story / TikTok (vertical)" },
+  { f: "postare-patrat.jpg", unde: "Postare Facebook / Instagram (pătrat)" },
+  { f: "postare-story.jpg", unde: "Story / TikTok (vertical)" },
 ];
 
 /**
