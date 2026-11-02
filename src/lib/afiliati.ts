@@ -20,6 +20,8 @@ import { findPackageById } from "@/data/packages";
  */
 
 export const COMISION_LEI = 100;
+/** 02.11.2026 — primul client platit aduce mai mult: primul succes ii tine motivati. */
+export const COMISION_PRIMUL_LEI = 150;
 
 export interface Afiliat {
   id: number;
@@ -113,6 +115,8 @@ export interface ComandaAfiliat {
   pachet: string;
   sumaLei: number;
   platita: boolean;
+  /** Comisionul pentru comanda asta: 0 pana e platita, 150 la prima platita, apoi 100. */
+  comision: number;
 }
 
 /**
@@ -136,13 +140,23 @@ export async function comenziAfiliat(cod: string): Promise<ComandaAfiliat[]> {
       pachet: findPackageById(c.package_id)?.name || c.package_id,
       sumaLei: Math.round(Number(c.amount) / 100),
       platita: true,
+      comision: 0,
     })),
     ...op.map((o) => ({
       data: o.created_at,
       pachet: findPackageById(o.package_id)?.name || o.package_id,
       sumaLei: findPackageById(o.package_id)?.price ?? 0,
       platita: o.status === "paid" || o.status === "published",
+      comision: 0,
     })),
   ];
+  // Prima comanda platita, in ordinea in care au venit, primeste bonusul.
+  const cronologic = [...toate].sort((a, b) => new Date(a.data).getTime() - new Date(b.data).getTime());
+  let primaGasita = false;
+  for (const c of cronologic) {
+    if (!c.platita) continue;
+    c.comision = primaGasita ? COMISION_LEI : COMISION_PRIMUL_LEI;
+    primaGasita = true;
+  }
   return toate.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
 }

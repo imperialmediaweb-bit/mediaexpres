@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { afiliatDupaToken, comenziAfiliat, COMISION_LEI } from "@/lib/afiliati";
+import { afiliatDupaToken, comenziAfiliat, COMISION_PRIMUL_LEI } from "@/lib/afiliati";
+import { KitPartener } from "./KitPartener";
 import { SITE } from "@/data/site";
 
 export const dynamic = "force-dynamic";
@@ -14,17 +15,19 @@ export default async function ContPartener({ params }: { params: { token: string
   const platite = comenzi.filter((c) => c.platita).length;
   const link = `${SITE.url}/p/${a.cod}`;
   const lunaAsta = new Date().toLocaleDateString("ro-RO", { month: "long", timeZone: "Europe/Bucharest" });
-  const inLunaAsta = comenzi.filter((c) => {
-    const d = new Date(c.data);
-    const acum = new Date();
-    return c.platita && d.getMonth() === acum.getMonth() && d.getFullYear() === acum.getFullYear();
-  }).length;
+  const castigLuna = comenzi
+    .filter((c) => {
+      const d = new Date(c.data);
+      const acum = new Date();
+      return c.platita && d.getMonth() === acum.getMonth() && d.getFullYear() === acum.getFullYear();
+    })
+    .reduce((s, c) => s + c.comision, 0);
 
   const carduri = [
     { e: "Clickuri pe link", v: String(a.clickuri) },
     { e: "Comenzi aduse", v: String(comenzi.length) },
     { e: "Comenzi plătite", v: String(platite) },
-    { e: `Comision în ${lunaAsta}`, v: `${inLunaAsta * COMISION_LEI} lei` },
+    { e: `Comision în ${lunaAsta}`, v: `${castigLuna} lei` },
   ];
 
   return (
@@ -56,7 +59,10 @@ export default async function ContPartener({ params }: { params: { token: string
         <div className="mt-6 rounded-xl border border-slate-200 bg-white p-5">
           <p className="font-semibold text-brand-navy">Comenzi aduse</p>
           {comenzi.length === 0 ? (
-            <p className="mt-3 text-sm text-slate-500">Încă nicio comandă. Prima apare aici imediat ce este plasată.</p>
+            <p className="mt-3 text-sm text-slate-500">
+              Încă nicio comandă. Prima apare aici imediat ce este plasată, iar primul client plătit îți aduce{" "}
+              <strong>{COMISION_PRIMUL_LEI} lei</strong>.
+            </p>
           ) : (
             <table className="mt-3 w-full text-sm">
               <thead className="text-left text-xs text-slate-500">
@@ -75,13 +81,15 @@ export default async function ContPartener({ params }: { params: { token: string
                     </td>
                     <td>{c.pachet}</td>
                     <td>{c.platita ? "✅ plătită" : "⏳ așteaptă plata"}</td>
-                    <td className="text-right font-semibold">{c.platita ? `${COMISION_LEI} lei` : "—"}</td>
+                    <td className="text-right font-semibold">{c.platita ? `${c.comision} lei` : "—"}</td>
                   </tr>
                 ))}
               </tbody>
             </table>
           )}
         </div>
+
+        <KitPartener link={link} site={SITE.url} />
 
         <div className="mt-6 rounded-xl bg-white p-5 text-sm text-slate-700">
           <p className="font-semibold text-brand-navy">Plata comisionului</p>

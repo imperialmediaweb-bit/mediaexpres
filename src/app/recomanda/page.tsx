@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { InscriereForm } from "./InscriereForm";
-import { COMISION_LEI } from "@/lib/afiliati";
+import { COMISION_LEI, COMISION_PRIMUL_LEI } from "@/lib/afiliati";
 
 export const metadata: Metadata = {
   title: "Câștigă recomandând MediaExpres — program de parteneri",
@@ -10,8 +10,8 @@ export const metadata: Metadata = {
 
 const PASI = [
   { t: "Vă înscrieți", d: "Durează un minut. Primiți pe loc linkul personal." },
-  { t: "Recomandați", d: "Pe blog, pe canal, în postări sau direct clienților dumneavoastră." },
-  { t: "Câștigați", d: `${COMISION_LEI} lei pentru fiecare client care comandă prin link și plătește.` },
+  { t: "Recomandați", d: "Cu un click: WhatsApp, Facebook, LinkedIn, bannere și texte gata scrise, toate în contul dumneavoastră." },
+  { t: "Câștigați", d: `${COMISION_PRIMUL_LEI} lei pentru primul client, apoi ${COMISION_LEI} lei pentru fiecare client care comandă prin link și plătește.` },
 ];
 
 const CINE = [

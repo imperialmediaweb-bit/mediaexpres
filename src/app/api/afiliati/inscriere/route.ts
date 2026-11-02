@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
-import { creeazaAfiliat, COMISION_LEI } from "@/lib/afiliati";
+import { creeazaAfiliat, COMISION_LEI, COMISION_PRIMUL_LEI } from "@/lib/afiliati";
 import { lookupCui } from "@/lib/anaf";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
@@ -62,9 +62,9 @@ export async function POST(req: NextRequest) {
       html: wrapEmail(
         "Bine ați venit în programul de parteneri",
         `<p>Bună ziua${a.nume ? " " + esc(a.nume.split(/\s+/)[0]) : ""},</p>
-        <p>Acesta este linkul dumneavoastră personal. Pentru fiecare client care comandă prin el și plătește, primiți <strong>${COMISION_LEI} lei</strong>.</p>
+        <p>Acesta este linkul dumneavoastră personal. Pentru primul client care comandă prin el și plătește primiți <strong>${COMISION_PRIMUL_LEI} lei</strong>, apoi <strong>${COMISION_LEI} lei</strong> pentru fiecare client.</p>
         <p style="font-size:16px;font-weight:700;margin:16px 0;"><a href="${link}">${link}</a></p>
-        <p>Clienții, comisioanele și materialele de promovare le găsiți în contul dumneavoastră:</p>
+        <p>În contul dumneavoastră găsiți butoane de distribuire pe WhatsApp, Facebook și LinkedIn, texte gata scrise, bannere pentru site și imagini pentru postări, toate cu linkul dumneavoastră inclus:</p>
         <p style="margin:20px 0;"><a href="${cont}" style="background:#0f172a;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:600;">Contul meu de partener</a></p>
         <p style="color:#64748b;font-size:13px;">Păstrați acest email: linkul contului este personal. Comisioanele se plătesc lunar, pe baza facturii dumneavoastră, pentru comenzile încasate în luna anterioară.</p>`,
       ),
