@@ -57,6 +57,12 @@ const schema = z.object({
   source: z.string().max(80).optional(),
   /** Ritmul de publicare cerut de client pe WhatsApp: rapid / zile3 / sapt2. */
   ritm: z.enum(RITM_IDS).default("rapid"),
+  /**
+   * 03.11.2026 — comanda e deja publicata in retea (facuta acolo direct) si o
+   * trecem aici doar ca sa apara la client si in statistici: intra platita si
+   * publicata, fara trimitere in retea si fara niciun email.
+   */
+  doarStatistica: z.boolean().default(false),
 });
 
 export async function POST(req: NextRequest) {
@@ -126,13 +132,14 @@ export async function POST(req: NextRequest) {
           isCasino: pkg.category === "casino",
           paymentMethod: "op",
           fbBoostPaper: d.fbBoostPaper?.trim() || null,
-          status: d.paid ? "paid" : "pending_payment",
+          status: d.doarStatistica ? "published" : d.paid ? "paid" : "pending_payment",
+          ...(d.doarStatistica ? { publishedAt: new Date() } : {}),
         })
         .returning({ id: orderSubmissions.id });
       ids.push(row.id);
     }
     // 04.10.2026 — comenzile deja incasate pleaca in retea pe loc (lib/retea.ts).
-    if (d.paid) for (const id of ids) await trimiteAutomatInRetea(id, "comanda noua din admin");
+    if (d.paid && !d.doarStatistica) for (const id of ids) await trimiteAutomatInRetea(id, "comanda noua din admin");
 
     const [existing] = await db
       .select({ id: users.id })
