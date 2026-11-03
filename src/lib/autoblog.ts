@@ -52,6 +52,54 @@ const SETARI_IMPLICITE: SetariAutoblog = { activ: process.env.AUTOBLOG_PORNIT ==
  * Cuvintele cu care porneste, din cautarile reale in Romania (Ubersuggest,
  * 08.10.2026). Se pun singure doar daca lista e goala si AUTOBLOG_PORNIT=1.
  */
+/**
+ * 03.11.2026 — lista se golise pe 29.10 si blogul s-a oprit cinci zile fara
+ * sa observe nimeni. Cand nu mai e niciun cuvant in asteptare, se adauga
+ * lotul de mai jos (o singura data: adaugaCuvinte sare peste ce exista deja).
+ */
+export const CUVINTE_LOT_NOIEMBRIE = [
+  "cât costă un comunicat de presă",
+  "publicare comunicat de presă în ziare online",
+  "anunț de mediu în ziar: ce trebuie să conțină",
+  "advertorial: ce este și cât costă",
+  "cum scrii un comunicat de presă pentru firma ta",
+  "promovare firmă în ziare locale",
+  "publicitate în presa locală pentru afaceri mici",
+  "backlinkuri din site-uri de știri: merită?",
+  "articol sponsorizat în ziar online: avantaje",
+  "cum anunți lansarea unui produs în presă",
+  "comunicat de presă pentru deschiderea unui magazin",
+  "publicitate pentru clinici medicale în presa online",
+  "cum promovezi un eveniment în ziare locale",
+  "comunicat de presă pentru proiecte cu fonduri europene",
+  "obligațiile de publicitate ale proiectelor finanțate din fonduri UE",
+  "cum apari în Google cu numele firmei",
+  "articole în presă pentru încredere și reputație online",
+  "promovare imobiliară în ziare online",
+  "cât costă publicitatea în ziare din România",
+  "diferența dintre advertorial și comunicat de presă",
+  "promovare pentru ONG-uri în presa online",
+  "cum promovezi un cabinet de avocatură",
+  "promovare online pentru restaurante și cafenele",
+  "cum îți faci cunoscută afacerea într-un oraș nou",
+  "publicitate pentru firme de construcții",
+  "promovare pentru saloane de înfrumusețare",
+  "cum obții recenzii de la clienți",
+  "PR pentru firme mici fără agenție",
+  "cum scrii titlul unui comunicat de presă",
+  "greșeli frecvente în comunicatele de presă",
+  "cum folosești presa locală în campanii de marketing",
+  "promovare pentru magazine online noi",
+  "articole despre firmă: cum le folosești în vânzări",
+  "SEO local pentru firme din România",
+  "cum promovezi un produs nou cu buget mic",
+  "comunicat de presă pentru angajări",
+  "cum anunți un parteneriat în presă",
+  "promovare pentru agenții de turism",
+  "comunicat de presă pentru aniversarea firmei",
+  "cum măsori rezultatele unei campanii de presă",
+];
+
 export const CUVINTE_DE_START = [
   "ce este un advertorial",
   "model comunicat de presă",
@@ -482,6 +530,14 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
   if (process.env.AUTOBLOG_PORNIT === "1" && !opt.keywordId) {
     const [{ n }] = await db.select({ n: sql<number>`count(*)::int` }).from(blogKeywords);
     if (n === 0) await adaugaCuvinte(CUVINTE_DE_START.join("\n"));
+  }
+
+  if (!opt.keywordId) {
+    const [{ n }] = await db
+      .select({ n: sql<number>`count(*)::int` })
+      .from(blogKeywords)
+      .where(eq(blogKeywords.status, "pending"));
+    if (n === 0) await adaugaCuvinte(CUVINTE_LOT_NOIEMBRIE.join("\n"));
   }
 
   const [cuvant] = opt.keywordId
