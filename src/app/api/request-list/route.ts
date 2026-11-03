@@ -14,6 +14,9 @@ export const runtime = "nodejs";
 
 const DAY_MS = 86_400_000;
 
+/** Adrese care au cerut lista recent (pe proces): opreste trimiterea dubla. */
+const cereriRecente = new Map<string, number>();
+
 export async function POST(req: NextRequest) {
   let body: unknown;
   try {
@@ -30,6 +33,15 @@ export async function POST(req: NextRequest) {
   }
   const data = parsed.data;
   if (data.website) return NextResponse.json({ ok: true });
+
+  // 03.11.2026 — un client a apasat de doua ori in doua minute si a primit
+  // lista de doua ori, plus 4 emailuri programate in loc de 2 (si a raspuns
+  // STOP). Aceeasi adresa in 30 de minute = o singura trimitere.
+  const cheieDublura = data.email.trim().toLowerCase();
+  const ultima = cereriRecente.get(cheieDublura);
+  if (ultima && Date.now() - ultima < 30 * 60_000) return NextResponse.json({ ok: true });
+  cereriRecente.set(cheieDublura, Date.now());
+  if (cereriRecente.size > 2000) cereriRecente.clear();
 
   // Salveaza lead-ul ca user in DB (find-or-create). Nu blocam request-ul daca pica DB-ul.
   try {

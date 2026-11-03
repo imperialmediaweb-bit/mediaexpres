@@ -37,6 +37,33 @@ export async function GET(req: NextRequest) {
   }
   return NextResponse.json({
     ok: true,
-    emailuri: gasite.map((e) => ({ catre: e.to, subiect: e.subject, data: e.created_at, stare: e.last_event ?? null })),
+    emailuri: gasite.map((e) => ({ id: e.id, catre: e.to, subiect: e.subject, data: e.created_at, stare: e.last_event ?? null })),
   });
+}
+
+/**
+ * Anuleaza emailuri PROGRAMATE (cineva a cerut STOP inainte sa plece
+ * follow-upurile). Primeste { ids: [...] }; Resend refuza singur ce a plecat deja.
+ */
+export async function POST(req: NextRequest) {
+  const eroare = verifyExtensionKey(req);
+  if (eroare) return eroare;
+  const key = process.env.RESEND_API_KEY;
+  if (!key) return NextResponse.json({ ok: false, error: "RESEND_API_KEY lipseste" }, { status: 500 });
+  let ids: string[] = [];
+  try {
+    const j = (await req.json()) as { ids?: unknown };
+    ids = Array.isArray(j.ids) ? j.ids.filter((x): x is string => typeof x === "string").slice(0, 50) : [];
+  } catch {
+    return NextResponse.json({ ok: false, error: "JSON invalid" }, { status: 400 });
+  }
+  const rezultate = [];
+  for (const id of ids) {
+    const r = await fetch(`https://api.resend.com/emails/${encodeURIComponent(id)}/cancel`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${key}` },
+    });
+    rezultate.push({ id, ok: r.ok, status: r.status });
+  }
+  return NextResponse.json({ ok: true, rezultate });
 }
