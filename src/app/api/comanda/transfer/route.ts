@@ -161,7 +161,8 @@ export async function POST(req: NextRequest) {
       uniquePerSite: d.uniquePerSite,
       ritm: d.ritm,
       isCasino: d.isCasino,
-      paymentMethod: laPlata ? "nedecis" : "op",
+      // 04.11.2026 — factura pleaca automat imediat dupa formular (cerut de proprietar).
+      paymentMethod: "op",
       ziareAlese: alegerea.eticheta,
       paymentProof: d.paymentProof ? JSON.stringify(d.paymentProof) : null,
       status: "pending_payment",
@@ -208,9 +209,9 @@ export async function POST(req: NextRequest) {
       ? `📝 Comandă nouă, încă neplătită — ${d.companyName} (${pkg.price} lei)`
       : `🏦 Comandă prin OP — ${d.companyName} (${pkg.price} lei)`,
     html: wrapEmail(
-      laPlata ? "Comandă nouă — alege acum cum plătește" : "Comandă nouă prin transfer bancar",
+      laPlata ? "Comandă nouă — factura a plecat automat" : "Comandă nouă prin transfer bancar",
       `
-      ${laPlata ? `<p style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;color:#1e3a8a;">Clientul a completat formularul și e pe pagina de plată (card / OP / WhatsApp). <strong>Încă n-a plătit și nu s-a emis nicio factură.</strong> Dacă nu plătește în câteva ore, merită un telefon: ${esc(d.contactPhone)}.</p>` : ""}
+      ${laPlata ? `<p style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;color:#1e3a8a;">Clientul a completat formularul. <strong>Factura a plecat automat pe email (OP), încă n-a plătit.</strong> Dacă nu plătește în câteva ore, merită un telefon: ${esc(d.contactPhone)}.</p>` : ""}
       ${d.articolDupa ? '<p style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;"><strong>Articolul vine după plată</strong> — clientul l-a lăsat pentru mai târziu.</p>' : ""}
       ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, factura a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
       ${laPlata ? "" : '<p>Factura se emite automat în StartCo pe datele de mai jos (verificate la ANAF). Dacă nu reușește, primești un email separat „Factura de emis manual”. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>'}
@@ -242,24 +243,8 @@ export async function POST(req: NextRequest) {
     ),
   });
 
-  if (laPlata) {
-    sendEmail({
-      to: email,
-      subject: "Comanda ta e salvată — alege cum plătești",
-      html: wrapEmail(
-        "Comanda ta e salvată",
-        `
-      <p>Bună ziua,</p>
-      <p>Am salvat comanda pentru <strong>${esc(pkg.name)}</strong> — ${pkg.price} lei, pe firma <strong>${esc(d.companyName)}</strong>.</p>
-      <p>Dacă n-ai apucat să plătești, o poți face oricând de aici — cu cardul sau prin ordin de plată:</p>
-      <p style="margin:16px 0;"><a href="${SITE.url}/comanda/plata/${reference}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Alege cum plătești →</a></p>
-      <p>Factura fiscală o primești automat pe email: la card imediat după plată, la OP imediat ce alegi transferul bancar.</p>
-      <p>Întrebări? Răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
-      <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
-      `,
-      ),
-    }).catch((e) => console.error("[comanda/transfer] mail client:", e));
-  }
+  // Emailul „alege cum plătești" nu mai pleaca: pornestePlataOp trimite
+  // emailul cu pasii si factura.
 
   // Factura (la OP) pleaca la final, prin pornestePlataOp — vezi lib/comanda-op.ts.
   if (screening.flagged) {
@@ -291,7 +276,7 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.error("[comanda/transfer] alerta continut:", e));
   }
 
-  if (!laPlata) {
+  {
     await pornestePlataOp({
       email,
       companyName: d.companyName,
