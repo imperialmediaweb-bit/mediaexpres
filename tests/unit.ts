@@ -2056,8 +2056,9 @@ console.log("\n########## S. RECENZII ##########");
   t("linkul modificat e refuzat", R.verificaOprire(tok.slice(0, -2) + "00", acum) === null);
   t("linkul expira dupa 45 de zile", R.verificaOprire(tok, acum + 46 * 86400000) === null);
   const zece = Date.parse("2026-11-10T10:00:00+02:00");
-  t("cu 3 zile inainte de 10 noiembrie e timpul", R.eTimpulPentruReamintire(zece, acum));
-  t("cu 5 zile inainte inca nu", !R.eTimpulPentruReamintire(zece, acum - 2 * 86400000));
+  // 06.11.2026 (user): reamintirea pleaca cu o zi inainte, nu cu 3.
+  t("cu o zi inainte de 10 noiembrie e timpul", R.eTimpulPentruReamintire(zece, zece - 20 * 3600000));
+  t("cu 3 zile inainte inca nu", !R.eTimpulPentruReamintire(zece, acum));
   t("dupa reinnoire nu se mai trimite", !R.eTimpulPentruReamintire(zece, zece + 1000));
   const m = R.emailReamintire("Ion", "400 lei", "10 noiembrie 2026", "https://mediaexpress.ro/abonament/opreste?t=x");
   t("emailul spune suma, data, ca nu trebuie facut nimic pentru continuare si are butonul de oprire", /400 lei/.test(m.html) && /10 noiembrie 2026/.test(m.subiect) && /Nu trebuie să faci nimic/.test(m.html) && /abonament\/opreste\?t=x/.test(m.html));

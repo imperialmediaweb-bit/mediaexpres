@@ -9,7 +9,7 @@ import { SITE } from "@/data/site";
  * Separata ca sa poata fi testata; cronul e in abonament-reamintire.ts.
  */
 
-export const ZILE_INAINTE = 3;
+export const ZILE_INAINTE = 1;
 const ZI = 86_400_000;
 
 function secret(): string {
