@@ -61,13 +61,6 @@ function staticCifre(): CifreRetea {
   };
 }
 
-function dataRo(iso: string | undefined): string {
-  if (!iso) return CIFRE.laData;
-  const d = new Date(iso);
-  if (Number.isNaN(d.getTime())) return CIFRE.laData;
-  return d.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Bucharest" });
-}
-
 export async function cifreLive(): Promise<CifreRetea> {
   const rezerva = staticCifre();
   try {
@@ -84,16 +77,20 @@ export async function cifreLive(): Promise<CifreRetea> {
     if (peLuna < 1000) return rezerva;
     return {
       ...rezerva,
-      laData: dataRo(r.actualizat_la),
-      perioada: "ultimele 30 de zile",
+      // 06.11.2026 (user: „datele se bat cap în cap"): laData/perioada descriu
+      // cifrele de Facebook și Google din data/cifre.ts, măsurate atunci —
+      // rămân cele statice. La fel paginile și urmăritorii: cronul rețelei
+      // dădea 57 de pagini / 388.861 de urmăritori, greșit (~37.000 real).
+      laData: rezerva.laData,
+      perioada: rezerva.perioada,
       // Numarul de publicatii NU se ia din retea (acolo e 51, cu Sibiu fara
       // domeniu); ramane cifra oficiala de pe site, 50.
       publicatii: rezerva.publicatii,
       articolePeLuna: peLuna,
       articoleInArhiva: Number(r.articole_total || rezerva.articoleInArhiva),
       articolePeZi: Math.round(peLuna / 30),
-      paginiFacebook: Number(r.pagini || rezerva.paginiFacebook),
-      urmaritoriFacebook: Number(r.urmaritori || rezerva.urmaritoriFacebook),
+      paginiFacebook: rezerva.paginiFacebook,
+      urmaritoriFacebook: rezerva.urmaritoriFacebook,
       reachRetea30z: typeof r.reach_30z === "number" && r.reach_30z > 0 ? r.reach_30z : null,
       sursa: "live",
     };

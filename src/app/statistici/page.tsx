@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { TraficRetea } from "@/components/TraficRetea";
+import { ZiareRetea } from "@/components/ZiareRetea";
 
 export const revalidate = 3600;
 
@@ -21,6 +22,9 @@ export default function StatisticiPage() {
       </p>
       <div className="mt-8">
         <TraficRetea />
+      </div>
+      <div className="mt-8">
+        <ZiareRetea />
       </div>
       <p className="mt-8">
         <Link
