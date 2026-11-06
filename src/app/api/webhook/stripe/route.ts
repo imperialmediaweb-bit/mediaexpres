@@ -8,7 +8,7 @@ import { db } from "@/db";
 import { users, orders, subscriptions, orderSubmissions } from "@/db/schema";
 import { ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
 import { trimiteAutomatInRetea } from "@/lib/retea";
-import { and, eq, gte } from "drizzle-orm";
+import { and, desc, eq, gte } from "drizzle-orm";
 import { etichetaSursa } from "@/lib/sursa";
 import { findSubscriptionPlanById } from "@/data/packages";
 import { sendCapiEvent, splitName } from "@/lib/meta-capi";
@@ -575,7 +575,7 @@ async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
       // articolul. Reamintirea e emailul de mai sus, deci o marcam trimisa;
       // daca in 3 zile nu vine nimic, proprietarul primeste alerta (cron).
       await ensureOrderColumns();
-      await db
+      const inserate = await db
         .insert(orders)
         .values({
           email,
@@ -588,7 +588,38 @@ async function handleInvoicePaid(stripe: Stripe, invoice: Stripe.Invoice) {
           materialReminderAt: new Date(),
         })
         .onConflictDoNothing({ target: orders.stripeSessionId })
-        .catch((e) => console.error("[stripe-webhook] comanda luna noua:", e));
+        .returning({ id: orders.id })
+        .catch((e) => {
+          console.error("[stripe-webhook] comanda luna noua:", e);
+          return [] as { id: string }[];
+        });
+
+      // 06.11.2026 (user: „da") — factura fiscala si la fiecare reinnoire lunara.
+      // Doar cand comanda lunii s-a inserat ACUM: invoice.paid si
+      // invoice.payment_succeeded vin amandoua, iar relivrarile nu dubleaza factura.
+      // CUI-ul si adresa: din ultimul formular al clientului (orderSubmissions).
+      if (inserate.length) {
+        const [ultim] = await db
+          .select({ cui: orderSubmissions.cui, adresa: orderSubmissions.billingAddress })
+          .from(orderSubmissions)
+          .where(eq(orderSubmissions.email, email))
+          .orderBy(desc(orderSubmissions.createdAt))
+          .limit(1)
+          .catch(() => [] as { cui: string | null; adresa: string | null }[]);
+        const adr = invoice.customer_address;
+        await issueInvoiceForOrder({
+          email,
+          customerName: invoice.customer_name || null,
+          cui: ultim?.cui || invoice.customer_tax_ids?.[0]?.value || null,
+          address: ultim?.adresa || (adr ? [adr.line1, adr.line2].filter(Boolean).join(", ") : null),
+          city: adr?.city || null,
+          phone: invoice.customer_phone || null,
+          amount: (invoice.amount_paid || 0) / 100,
+          currency: (invoice.currency || "ron").toLowerCase(),
+          packageLabel: `${planIdLuna} (reînnoire lunară)`,
+          orderReference: invoice.id,
+        });
+      }
     }
   }
   const planId = (sub.metadata?.planId as string) || "";
