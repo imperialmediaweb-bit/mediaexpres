@@ -26,6 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     // Clientul bifeaza singur publicatiile si plateste exact cat a bifat.
     { url: `${base}/alege-ziarele`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     { url: `${base}/exemple`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.8 },
+    { url: `${base}/statistici`, lastModified: now, changeFrequency: "daily" as const, priority: 0.7 },
     { url: `${base}/transparenta`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.75 },
     { url: `${base}/ritm-publicare`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.6 },
     { url: `${base}/generator-comunicat`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },

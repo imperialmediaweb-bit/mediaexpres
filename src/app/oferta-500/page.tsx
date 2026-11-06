@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { TraficRetea } from "@/components/TraficRetea";
 import Link from "next/link";
 import { ClientiStrip } from "@/components/ClientiStrip";
 import { DovadaRaport } from "@/components/DovadaRaport";
@@ -606,6 +607,11 @@ export default async function Oferta500Page() {
 
           {/* Live: cate ziare au publicat azi, cu ultimul articol pe fiecare. */}
           <StareRetea compact />
+
+          {/* 06.11.2026 — traficul real al rețelei (GA4, până ieri), cu grafic și surse. */}
+          <div className="mx-auto mt-12 max-w-4xl">
+            <TraficRetea cuLink />
+          </div>
 
           {/*
             Cifrele rețelei, cu data si sursa langa ele. Nu promit clientului
