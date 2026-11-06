@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { CIFRE, nr as nrCifre } from "@/data/cifre";
+
+const milioane = (n: number) => `${(n / 1_000_000).toLocaleString("ro-RO", { maximumFractionDigits: 1 })} milioane`;
 
 /**
  * 06.11.2026 (user: „pe site să fie date în timp real… zilnic… cu grafic…
@@ -144,9 +147,15 @@ export async function TraficRetea({ cuLink = false }: { cuLink?: boolean }) {
           })}
         </div>
         <div className="grid gap-3">
-          {t.urmaritori ? (
-            <Cifra titlu="Urmăritori pe paginile de Facebook ale rețelei" valoare={nr(t.urmaritori)} />
-          ) : null}
+          {/* 06.11.2026 (user: „nu sunt așa mulți"): urmăritorii din cronul rețelei (388.861)
+              erau greșiți; cifrele verificate stau în data/cifre.ts. */}
+          <Cifra
+            titlu={`Botoșani Expres pe Facebook, ${CIFRE.perioada}`}
+            valoare={`${milioane(CIFRE.botosani.afisari)} de afișări`}
+          />
+          <p className="-mt-1 text-xs text-slate-500">
+            {nrCifre(CIFRE.botosani.interactiuni)} de interacțiuni · cea mai citită pagină din rețea · măsurat la {CIFRE.laData}
+          </p>
           {medieArticole ? (
             <Cifra
               titlu="Articole publicate"
