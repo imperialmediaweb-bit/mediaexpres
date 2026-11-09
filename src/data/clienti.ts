@@ -32,8 +32,6 @@ export const CLIENTI: ClientAfisat[] = [
     logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_make_transparent:30/e_trim/c_fit,h_120,q_auto,f_png/v1789148188/Screenshot_1820_q1xj4n.png", site: "https://bilete.sublime.ro/", ce: "campania de presă pentru turneul „Atenție, vin urșii!” cu Micutzu, în 13 orașe" },
   { nume: "Toma Enache", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_negate/e_make_transparent:30/e_trim/c_fit,h_120,q_auto,f_png/v1789148188/Screenshot_1825_ffcrra.png", site: "https://tomaenache.ro/", ce: "promovarea turneului în presa locală" },
   { nume: "RomCut.ro", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1824_mlb1jq.png", ce: "optimizare debitare panouri" },
-  { nume: "June", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1823_i7a9p6.png", site: "https://www.junecom.ro/" },
-  { nume: "Emblema Group", ce: "agenție de comunicare — comunicatele clienților", logo: "https://res.cloudinary.com/dghmoelly/image/upload/e_trim/c_fit,h_120,q_auto,f_auto/v1789148188/Screenshot_1822_vgu6wi.png", site: "https://emblemasolutions.ro/" },
 
   // 16.09.2026 — restul clientilor care au cumparat, fara logo si fara link
   // catre site-ul lor. Rostul lor e altul decat al celor cinci de sus: aceia

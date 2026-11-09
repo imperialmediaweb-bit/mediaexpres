@@ -10,16 +10,6 @@ export interface Partner {
 
 export const EXISTING_PARTNERS: Partner[] = [
   // PR agencies cu care colaborăm activ
-  {
-    name: "June",
-    type: "pr-agency",
-    website: "https://june.ro",
-  },
-  {
-    name: "Emblema Grup",
-    type: "pr-agency",
-    website: "https://emblemagroup.ro",
-  },
 
   // Platforme distribuție / press release
   {

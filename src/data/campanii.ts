@@ -48,30 +48,6 @@ export const CAMPANII: Campanie[] = [
     data: "2026",
   },
   {
-    client: "Emblema Group",
-    categorie: "Agenție de comunicare",
-    scop: "Comunicatele de presă ale clienților agenției, publicate rapid și pe toată țara, cu dovada aparițiilor pentru fiecare client.",
-    livrat: [
-      "comunicate publicate în cele 50 de publicații din rețea, cu formulare proprie pe fiecare ziar",
-      "publicare în ore, nu în zile, ca știrea să prindă momentul",
-      "raport cu toate linkurile, pe care agenția îl dă mai departe clientului",
-      "colaborare recurentă, comunicat după comunicat",
-    ],
-    data: "2026",
-  },
-  {
-    client: "June",
-    categorie: "Agenție de comunicare",
-    scop: "Un canal de presă sigur pentru comunicatele clienților agenției, cu apariții garantate și raport pentru fiecare campanie.",
-    livrat: [
-      "comunicatele clienților, publicate în toată rețeaua, fiecare cu titlu și text propriu",
-      "distribuire pe paginile de Facebook ale ziarelor",
-      "trimitere la indexare imediat după publicare",
-      "raport de publicare, gata de trimis clientului final",
-    ],
-    data: "2026",
-  },
-  {
     client: "C.A.R. Bistrița IFN",
     categorie: "Servicii financiare",
     scop: "Să facă cunoscut, în toată țara, primul C.A.R. 100% online din România pentru salariați și pensionari.",
