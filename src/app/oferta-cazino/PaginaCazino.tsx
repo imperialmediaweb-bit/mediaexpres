@@ -183,6 +183,103 @@ function Comanda({ mare }: { mare?: boolean }) {
   );
 }
 
+/* ───────── păcănele: 3 role care se opresc pe 50 · 150 · 2.000 ───────── */
+const SIMBOLURI = ["🍒", "💎", "7", "🔔", "⭐", "🍋", "BAR"];
+function Rola({ final, intarziere }: { final: string; intarziere: number }) {
+  const [rulez, setRulez] = useState(true);
+  const [idx, setIdx] = useState(0);
+  const ref = useRef<HTMLDivElement>(null);
+  const vazut = useInView(ref, { once: true });
+  useEffect(() => {
+    if (!vazut) return;
+    const t = window.setInterval(() => setIdx((i) => (i + 1) % SIMBOLURI.length), 70);
+    const s = window.setTimeout(() => {
+      window.clearInterval(t);
+      setRulez(false);
+    }, 1400 + intarziere);
+    return () => {
+      window.clearInterval(t);
+      window.clearTimeout(s);
+    };
+  }, [vazut, intarziere]);
+  return (
+    <div ref={ref} className="flex h-28 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-[#e8b23a]/60 bg-gradient-to-b from-white to-[#f3e7c8] shadow-inner md:h-36 md:w-32">
+      <motion.span
+        key={rulez ? idx : "final"}
+        initial={{ y: rulez ? -30 : -60, opacity: rulez ? 0.6 : 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        transition={rulez ? { duration: 0.06 } : { type: "spring", stiffness: 300, damping: 12 }}
+        className={`font-serif font-extrabold ${rulez ? "text-4xl text-[#c1121f]" : "text-3xl text-[#1a1030] md:text-4xl"}`}
+      >
+        {rulez ? SIMBOLURI[idx] : final}
+      </motion.span>
+    </div>
+  );
+}
+
+function Pacanele() {
+  return (
+    <div className="relative mx-auto w-fit rounded-[28px] border-4 border-[#e8b23a] bg-gradient-to-b from-[#7a0f1c] via-[#4a0812] to-[#2a050b] p-5 shadow-[0_0_60px_-10px_rgba(232,178,58,0.8)] md:p-7">
+      <div className="mb-4 flex justify-center gap-2">
+        {Array.from({ length: 9 }).map((_, i) => (
+          <motion.span
+            key={i}
+            className="h-2.5 w-2.5 rounded-full bg-[#f7d774]"
+            animate={{ opacity: [0.2, 1, 0.2] }}
+            transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
+          />
+        ))}
+      </div>
+      <div className="flex gap-2 md:gap-3">
+        <Rola final="50" intarziere={0} />
+        <Rola final="150" intarziere={400} />
+        <Rola final="2.000" intarziere={800} />
+      </div>
+      <div className="mt-3 grid grid-cols-3 text-center text-[11px] font-bold uppercase tracking-wider text-[#f7d774] md:text-xs">
+        <span>ziare</span>
+        <span>linkuri</span>
+        <span>lei</span>
+      </div>
+    </div>
+  );
+}
+
+/* ───────── monede care cad ───────── */
+function Monede() {
+  const monede = Array.from({ length: 14 }).map((_, i) => ({
+    left: `${(i * 37) % 100}%`,
+    d: (i % 7) * 1.1,
+    dur: 6 + (i % 5),
+    size: 14 + (i % 4) * 6,
+  }));
+  return (
+    <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
+      {monede.map((m, i) => (
+        <motion.div
+          key={i}
+          className="absolute rounded-full"
+          style={{
+            left: m.left,
+            top: -40,
+            width: m.size,
+            height: m.size,
+            background: "radial-gradient(circle at 35% 35%, #fff6c8, #f7d774 40%, #b8860b 100%)",
+            boxShadow: "0 0 12px rgba(247,215,116,0.6)",
+          }}
+          animate={{ y: ["0vh", "120vh"], rotateY: [0, 720], opacity: [0, 1, 1, 0] }}
+          transition={{ duration: m.dur, repeat: Infinity, delay: m.d, ease: "linear" }}
+        />
+      ))}
+    </div>
+  );
+}
+
+const DOVEZI = [
+  { ziar: "Legio News", titlu: "La Napoleon Games, cel mai nou casino online din România…", url: "https://legionews.ro/monden/la-napoleon-games-cel-mai-nou-casino-online-din-romania-victoria-e-de-partea-ta" },
+  { ziar: "Acu News", titlu: "De ce tot mai multe celebrități aleg platforma Don.ro…", url: "https://acunews.ro/monden/p-de-ce-tot-mai-multe-celebritati-aleg-sa-si-petreaca-timpul-liber-pe-platforma-don-ro-jocuri-casino" },
+  { ziar: "Metro News", titlu: "Cele mai populare jocuri de live casino în 2026", url: "https://metronews.ro/monden/p-cele-mai-populare-jocuri-de-live-casino-in-2026" },
+];
+
 const INCLUS = [
   { icon: Newspaper, t: "50 de ziare online", d: "Articolul tău, în variantă unică pe fiecare ziar. Rămâne online permanent." },
   { icon: Link2, t: "3 linkuri dofollow pe articol", d: "Cu ancorele alese de tine, diferite pe fiecare ziar. 150 de linkuri spre site-ul tău." },
@@ -212,9 +309,10 @@ type Ziar = { nume: string; url: string; tip: string };
 export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) {
   const bandaZiare = [...ziare, ...ziare];
   return (
-    <div className="relative overflow-hidden bg-[#07060d] text-white">
+    <div className="relative overflow-hidden bg-[#07060d] pb-20 text-white md:pb-0">
       <style>{`@keyframes stralucire{0%{transform:translateX(-120%)}60%,100%{transform:translateX(120%)}}
-@keyframes banda{from{transform:translateX(0)}to{transform:translateX(-50%)}}`}</style>
+@keyframes banda{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@keyframes roteste{to{transform:rotate(360deg)}}`}</style>
 
       {/* fundal: lumini */}
       <div aria-hidden className="pointer-events-none absolute inset-0">
@@ -223,6 +321,7 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
         <div className="absolute bottom-0 left-1/3 h-[420px] w-[420px] rounded-full bg-[#e8b23a]/15 blur-[120px]" />
       </div>
 
+      <Monede />
       {/* ───── HERO ───── */}
       <section className="relative mx-auto grid max-w-6xl items-center gap-10 px-4 pb-20 pt-16 md:grid-cols-2 md:pt-24">
         <Fisa x="6%" y="10%" d={0} culoare="#c1121f" />
@@ -266,13 +365,15 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             transition={{ delay: 0.45, type: "spring" }}
-            className="mt-8 inline-flex items-end gap-4 rounded-2xl border border-white/10 bg-white/5 px-6 py-4 backdrop-blur"
+            className="relative mt-8 inline-flex items-end gap-4 overflow-hidden rounded-2xl px-6 py-4"
           >
-            <div>
+            <span aria-hidden className="absolute inset-[-150%] animate-[roteste_4s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_0deg,#f7d774_60deg,#ff6b6b_120deg,transparent_180deg,transparent_360deg)]" />
+            <span aria-hidden className="absolute inset-[2px] rounded-[14px] bg-[#120d1f]" />
+            <div className="relative">
               <p className="whitespace-nowrap text-xs uppercase tracking-widest text-white/50">Preț normal</p>
               <p className="whitespace-nowrap font-serif text-xl font-bold text-white/40 line-through md:text-2xl">4.000 lei</p>
             </div>
-            <div>
+            <div className="relative">
               <p className="text-xs uppercase tracking-widest text-[#f7d774]">Acum</p>
               <p className="whitespace-nowrap font-serif text-4xl font-extrabold text-[#f7d774] md:text-6xl">2.000 lei</p>
             </div>
@@ -319,6 +420,71 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
           ))}
         </div>
       </div>
+
+      {/* ───── jackpot ───── */}
+      <section className="relative mx-auto max-w-5xl px-4 pt-20 text-center">
+        <motion.h2
+          initial={{ opacity: 0, scale: 0.9 }}
+          whileInView={{ opacity: 1, scale: 1 }}
+          viewport={{ once: true }}
+          className="font-serif text-3xl font-extrabold md:text-5xl"
+        >
+          <span className="bg-gradient-to-r from-[#f7d774] to-[#ff6b6b] bg-clip-text text-transparent">JACKPOT</span> pentru SEO
+        </motion.h2>
+        <p className="mx-auto mt-3 max-w-xl text-white/70">50 de ziare, 150 de linkuri dofollow, 2.000 de lei. O singură plată.</p>
+        <div className="mt-10">
+          <Pacanele />
+        </div>
+      </section>
+
+      {/* ───── comparatie ───── */}
+      <section className="relative mx-auto max-w-4xl px-4 pt-20">
+        <div className="grid gap-4 md:grid-cols-2">
+          <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-6">
+            <p className="text-sm font-bold uppercase tracking-widest text-white/50">De obicei</p>
+            <p className="mt-3 font-serif text-4xl font-bold text-white/40 line-through">300–1.000 lei</p>
+            <p className="mt-1 text-white/60">pentru UN link dintr-un site de știri</p>
+          </div>
+          <motion.div
+            initial={{ opacity: 0, x: 30 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl border-2 border-[#e8b23a] bg-gradient-to-br from-[#e8b23a]/20 to-[#c1121f]/10 p-6 shadow-[0_0_40px_-10px_rgba(232,178,58,0.7)]"
+          >
+            <p className="text-sm font-bold uppercase tracking-widest text-[#f7d774]">La noi</p>
+            <p className="mt-3 font-serif text-5xl font-extrabold text-[#f7d774]">13 lei</p>
+            <p className="mt-1 text-white/80">pe link · 150 de linkuri dofollow, permanente</p>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* ───── dovezi ───── */}
+      <section className="relative mx-auto max-w-5xl px-4 pt-20">
+        <h2 className="text-center font-serif text-3xl font-bold md:text-4xl">Operatorii iGaming publică deja la noi</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-white/65">Articole reale, live acum în rețea. Dă clic și vezi.</p>
+        <div className="mt-8 grid gap-4 md:grid-cols-3">
+          {DOVEZI.map((d, i) => (
+            <motion.a
+              key={d.url}
+              href={d.url}
+              target="_blank"
+              rel="noopener"
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true }}
+              transition={{ delay: i * 0.12 }}
+              whileHover={{ y: -6, rotate: -0.5 }}
+              className="group block rounded-2xl border border-white/10 bg-gradient-to-b from-white/[0.08] to-white/[0.02] p-5"
+            >
+              <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#e8b23a]">
+                <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Live · {d.ziar}
+              </div>
+              <p className="mt-3 font-semibold leading-snug group-hover:text-[#f7d774]">{d.titlu}</p>
+              <p className="mt-3 text-sm text-white/50">Vezi articolul →</p>
+            </motion.a>
+          ))}
+        </div>
+      </section>
 
       {/* ───── cifre ───── */}
       <section className="relative mx-auto max-w-6xl px-4 py-20">
@@ -479,6 +645,16 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
           </p>
         </motion.div>
       </section>
+      {/* bara fixă de comandă pe telefon */}
+      <div className="fixed inset-x-0 bottom-0 z-40 border-t border-[#e8b23a]/40 bg-[#0d0a17]/95 py-3 pl-3 pr-20 backdrop-blur md:hidden">
+        <a
+          href={`/comanda/noua?pachet=${PACHET}`}
+          onClick={() => trackPixelEvent("InitiateCheckout", { content_name: "Oferta cazino — bara jos", value: PRET, currency: "RON" })}
+          className="flex items-center justify-center gap-2 rounded-xl bg-gradient-to-r from-[#f7d774] via-[#e8b23a] to-[#f7d774] py-3.5 font-extrabold text-[#2a1a00]"
+        >
+          <Trophy className="h-5 w-5" /> Comandă — 2.000 lei
+        </a>
+      </div>
     </div>
   );
 }
