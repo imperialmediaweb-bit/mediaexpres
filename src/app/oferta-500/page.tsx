@@ -603,6 +603,9 @@ export default async function Oferta500Page() {
           </div>
           <div className="mt-10">
             <NewspaperDirectory autoritate={autoritateRetea} />
+            <p className="mx-auto mt-4 max-w-3xl text-center text-xs text-slate-500">
+              DA = Domain Authority, PA = Page Authority — scoruri Moz, preluate din Moz. Sunt fapte despre domenii, nu o promisiune de poziții în Google.
+            </p>
           </div>
 
           {/* Live: cate ziare au publicat azi, cu ultimul articol pe fiecare. */}

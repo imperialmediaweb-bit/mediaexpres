@@ -64,7 +64,7 @@ export function NewspaperDirectory({ autoritate }: { autoritate?: Record<string,
                       </span>
                       {autoritate?.[domeniu(p.url)] && (
                         <span
-                          title="Domain Authority · Page Authority (Moz), măsurate de noi"
+                          title="Domain Authority · Page Authority — scoruri Moz, preluate din Moz"
                           className={`shrink-0 whitespace-nowrap rounded-md px-1.5 py-0.5 text-[11px] font-semibold ring-1 ${clasaScor(autoritate[domeniu(p.url)].da)}`}
                         >
                           DA {autoritate[domeniu(p.url)].da}
