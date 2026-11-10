@@ -12,6 +12,9 @@ export const OFFERS = {
     standard: { packageId: "promo-50", price: 500, listPrice: "1.500 lei", suffix: "" },
     casino: { packageId: "promo-50-cazino", price: 1000, listPrice: "2.500 lei", suffix: "" },
   },
+  // 10.11.2026 — treptele cazino (doar plată unică)
+  cazinoPro: { packageId: "promo-50-cazino-pro", price: 2000, listPrice: "4.000 lei", suffix: "" },
+  cazinoX2: { packageId: "promo-50-cazino-x2", price: 3500, listPrice: "7.000 lei", suffix: "" },
   monthly: {
     standard: { packageId: "promo-lunar", price: 400, listPrice: "1.300 lei/lună", suffix: "/lună" },
     casino: { packageId: "promo-lunar", price: 800, listPrice: "2.300 lei/lună", suffix: "/lună" },
@@ -21,7 +24,8 @@ export const OFFERS = {
 // Optiunile sunt afisate in MAI MULTE locuri pe pagina (hero, mijlocul paginii,
 // CTA final, bara fixa de jos). Starea traieste la nivel de modul ca toate sa o
 // vada la fel — altfel clientul alege sus si plateste jos pe alta varianta.
-export type Selection = { isCasino: boolean; monthly: boolean };
+export type TreaptaCazino = "start" | "pro" | "x2";
+export type Selection = { isCasino: boolean; monthly: boolean; treapta?: TreaptaCazino };
 let selection: Selection = { isCasino: false, monthly: false };
 const listeners = new Set<() => void>();
 const serverSnapshot: Selection = { isCasino: false, monthly: false };
@@ -41,10 +45,15 @@ export function useSelection(): Selection {
 // Drumul spre plata, intr-un singur loc. Orice buton „Comanda acum" de pe
 // pagina il foloseste — nu mai exista butoane care doar deruleaza inapoi sus.
 export function useComandaPromo() {
-  const { isCasino, monthly } = useSelection();
+  const { isCasino, monthly, treapta } = useSelection();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const offer = OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
+  const offer =
+    isCasino && !monthly && treapta === "pro"
+      ? OFFERS.cazinoPro
+      : isCasino && !monthly && treapta === "x2"
+        ? OFFERS.cazinoX2
+        : OFFERS[monthly ? "monthly" : "once"][isCasino ? "casino" : "standard"];
 
   async function go(direct = false) {
     if (loading) return;
@@ -95,7 +104,7 @@ export function useComandaPromo() {
     void go(direct);
   }
 
-  return { start, loading, error, offer, isCasino, monthly };
+  return { start, loading, error, offer, isCasino, monthly, treapta: treapta ?? "start" };
 }
 
 // 13.09.2026 — un client a scris pe WhatsApp ca „nu functioneaza butonul de

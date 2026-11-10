@@ -18,7 +18,7 @@ import { setSelection, useComandaPromo } from "@/components/comanda/comanda-prom
 // Emailul il cere Stripe oricum; declaratia se bifeaza la trimiterea
 // articolului (formularul de dupa plata o are), inainte de publicare.
 export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
-  const { start, loading, error, offer, isCasino, monthly } = useComandaPromo();
+  const { start, loading, error, offer, isCasino, monthly, treapta } = useComandaPromo();
 
   // Mesajul pre-scris E comanda: ii spune omului exact ce sa trimita, ca
   // prima lui interactiune pe WhatsApp sa fie o comanda completa, nu un
@@ -156,6 +156,31 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </span>
           </span>
         </label>
+        {isCasino && !monthly && (
+          <div className="grid gap-2 px-4 pb-4">
+            {(
+              [
+                ["start", "Cazino Start — 1.000 lei", "1 articol, 50 de ziare, 1 link"],
+                ["pro", "Cazino Pro — 2.000 lei", "3 linkuri dofollow cu ancorele tale, indexare grăbită în Google, 7 zile pe prima pagină"],
+                ["x2", "Cazino x2 — 3.500 lei", "Ca Pro, dar 2 articole (100 de linkuri), al doilea la 2 săptămâni"],
+              ] as const
+            ).map(([cheie, titlu, detalii]) => (
+              <button
+                key={cheie}
+                type="button"
+                onClick={() => setSelection({ treapta: cheie })}
+                className={`rounded-lg border px-3 py-2 text-left text-sm transition ${
+                  treapta === cheie
+                    ? "border-brand-gold bg-brand-gold/15 text-white"
+                    : "border-white/15 text-white/75 hover:border-white/40"
+                }`}
+              >
+                <strong className="block">{titlu}</strong>
+                <span className="text-white/60">{detalii}</span>
+              </button>
+            ))}
+          </div>
+        )}
       </details>
 
       {(

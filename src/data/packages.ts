@@ -240,6 +240,48 @@ export const PROMO_PACKAGES: Package[] = [
       "50 de linkuri către site-ul tău, permanente",
     ],
   },
+  // 10.11.2026 (user: „e bine așa") — trepte pentru cazino, alese pe /oferta-500
+  // după bifa de cazino. Livrarea în plus o face omul (notița din highlights apare la comandă).
+  {
+    id: "promo-50-cazino-pro",
+    name: "Ofertă 50 de ziare — Cazino Pro",
+    tagline: "iGaming / pariuri — 3 linkuri, indexare, prima pagină",
+    price: 2000,
+    currency: "RON",
+    newspapers: 50,
+    reach: "41 ziare locale + 9 naționale",
+    category: "casino",
+    highlights: [
+      "1 articol pe 50 de ziare (41 locale + 9 naționale)",
+      "3 linkuri dofollow pe articol, cu ancorele tale",
+      "Indexare grăbită în Google",
+      "7 zile pe prima pagină a ziarelor",
+      "Variantă unică pe fiecare ziar",
+      "Distribuție pe paginile de Facebook ale ziarelor",
+      "Raport cu toate publicările",
+      "Permanent online",
+    ],
+  },
+  {
+    id: "promo-50-cazino-x2",
+    name: "Ofertă 50 de ziare — Cazino x2",
+    tagline: "iGaming / pariuri — 2 articole, 100 de linkuri",
+    price: 3500,
+    currency: "RON",
+    newspapers: 50,
+    reach: "41 ziare locale + 9 naționale",
+    category: "casino",
+    highlights: [
+      "2 articole pe 50 de ziare (al doilea la 2 săptămâni)",
+      "3 linkuri dofollow pe articol, cu ancorele tale",
+      "Indexare grăbită în Google",
+      "7 zile pe prima pagină a ziarelor",
+      "Variantă unică pe fiecare ziar",
+      "Distribuție pe paginile de Facebook ale ziarelor",
+      "Raport cu toate publicările",
+      "Permanent online",
+    ],
+  },
 ];
 
 export const SUBSCRIPTION_PLANS: SubscriptionPlan[] = [
