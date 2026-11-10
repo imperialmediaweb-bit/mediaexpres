@@ -20,6 +20,7 @@ import {
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { SITE } from "@/data/site";
+import { RequestListForm } from "@/components/forms/RequestListForm";
 
 const PACHET = "promo-50-cazino-pro";
 const PRET = 2000;
@@ -419,6 +420,9 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
             = {Math.round(PRET / 150)} lei pe link · 150 de linkuri dofollow, permanente
           </p>
           <Comanda />
+          <a href="#lista-email" className="mt-4 inline-flex items-center gap-2 text-sm font-semibold text-[#f7d774] underline-offset-4 hover:underline">
+            <Newspaper className="h-4 w-4" /> Primește lista celor 50 de ziare pe e-mail
+          </a>
         </div>
 
         <motion.div
@@ -705,6 +709,13 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
             </div>
           </div>
         ))}
+        <div id="lista-email" className="mx-auto mt-10 max-w-xl scroll-mt-24 rounded-2xl border-2 border-[#e8b23a]/50 bg-white p-6 text-slate-900 shadow-[0_0_60px_rgba(232,178,58,0.25)]">
+          <h3 className="text-center text-xl font-bold">Primește lista celor 50 de ziare pe e-mail</h3>
+          <p className="mt-1 text-center text-sm text-slate-600">Cu toate linkurile, ca s-o arăți echipei. După trimitere o poți și descărca în PDF.</p>
+          <div className="mt-4">
+            <RequestListForm successHref="#comanda" successCtaLabel="Comandă acum — 2.000 lei" />
+          </div>
+        </div>
       </section>
 
       {/* ───── FAQ ───── */}
@@ -729,7 +740,7 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
           initial={{ opacity: 0, y: 30 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          className="relative overflow-hidden rounded-3xl border border-[#e8b23a]/30 bg-gradient-to-br from-[#1a1030] via-[#120b1f] to-[#2a0c12] p-10"
+          id="comanda" className="relative scroll-mt-24 overflow-hidden rounded-3xl border border-[#e8b23a]/30 bg-gradient-to-br from-[#1a1030] via-[#120b1f] to-[#2a0c12] p-10"
         >
           <Clock className="mx-auto h-10 w-10 text-[#f7d774]" />
           <h2 className="mt-4 font-serif text-3xl font-extrabold md:text-4xl">150 de linkuri dofollow din presă, la 2.000 lei</h2>
