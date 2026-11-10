@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 };
 
 export default function Page() {
-  const ziare = NEWSPAPERS.map((n) => n.name);
+  const ziare = NEWSPAPERS.map((n) => ({ nume: n.name, url: n.url, tip: n.type }));
   return (
     <PaginaCazino
       ziare={ziare}

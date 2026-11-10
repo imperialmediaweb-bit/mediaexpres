@@ -207,7 +207,9 @@ const FAQ = [
   { q: "În cât timp se publică?", a: "Începem în 12 ore lucrătoare de la primirea articolului. Eșalonarea o alegeți voi." },
 ];
 
-export function PaginaCazino({ ziare, cifre }: { ziare: string[]; cifre: Cifre }) {
+type Ziar = { nume: string; url: string; tip: string };
+
+export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) {
   const bandaZiare = [...ziare, ...ziare];
   return (
     <div className="relative overflow-hidden bg-[#07060d] text-white">
@@ -310,10 +312,10 @@ export function PaginaCazino({ ziare, cifre }: { ziare: string[]; cifre: Cifre }
       {/* ───── banda cu ziare ───── */}
       <div className="relative mt-10 border-y border-white/10 bg-white/[0.03] py-4">
         <div className="flex w-max animate-[banda_60s_linear_infinite] gap-8 whitespace-nowrap">
-          {bandaZiare.map((n, i) => (
-            <span key={i} className="inline-flex items-center gap-2 text-sm font-semibold text-white/60">
-              <Newspaper className="h-4 w-4 text-[#e8b23a]" /> {n}
-            </span>
+          {bandaZiare.map((z, i) => (
+            <a key={i} href={z.url} target="_blank" rel="noopener" className="inline-flex items-center gap-2 text-sm font-semibold text-white/60 hover:text-[#f7d774]">
+              <Newspaper className="h-4 w-4 text-[#e8b23a]" /> {z.nume}
+            </a>
           ))}
         </div>
       </div>
@@ -399,6 +401,47 @@ export function PaginaCazino({ ziare, cifre }: { ziare: string[]; cifre: Cifre }
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* ───── toate ziarele, cu linkuri ───── */}
+      <section id="ziare" className="relative mx-auto max-w-6xl px-4 py-16">
+        <h2 className="text-center font-serif text-3xl font-bold md:text-4xl">Verifică singur fiecare ziar</h2>
+        <p className="mx-auto mt-3 max-w-2xl text-center text-white/65">
+          Toate cele 50 de ziare sunt online acum, cu știri publicate zilnic. Deschide oricare și vezi cu ochii tăi.
+        </p>
+        <div className="mt-6 text-center">
+          <a
+            href="https://botosaniexpres.ro/stare"
+            target="_blank"
+            rel="noopener"
+            className="inline-flex items-center gap-2 rounded-full border border-emerald-400/40 bg-emerald-400/10 px-5 py-2 text-sm font-semibold text-emerald-300 hover:bg-emerald-400/20"
+          >
+            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-400" /> Starea rețelei, live: articole publicate azi
+          </a>
+        </div>
+        {(["national", "local"] as const).map((tip) => (
+          <div key={tip} className="mt-10">
+            <h3 className="mb-4 text-sm font-bold uppercase tracking-widest text-[#e8b23a]">
+              {tip === "national" ? "Ziare naționale" : "Ziare județene"}
+            </h3>
+            <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+              {ziare
+                .filter((z) => (tip === "national" ? z.tip !== "local" : z.tip === "local"))
+                .map((z) => (
+                  <a
+                    key={z.url}
+                    href={z.url}
+                    target="_blank"
+                    rel="noopener"
+                    className="group rounded-lg border border-white/10 bg-white/[0.03] px-3 py-2.5 transition hover:border-[#e8b23a]/60 hover:bg-white/[0.07]"
+                  >
+                    <span className="block text-sm font-semibold text-white group-hover:text-[#f7d774]">{z.nume}</span>
+                    <span className="block truncate text-xs text-white/45">{z.url.replace(/^https?:\/\//, "")}</span>
+                  </a>
+                ))}
+            </div>
+          </div>
+        ))}
       </section>
 
       {/* ───── FAQ ───── */}
