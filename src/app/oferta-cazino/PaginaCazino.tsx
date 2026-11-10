@@ -203,13 +203,13 @@ function Rola({ final, intarziere }: { final: string; intarziere: number }) {
     };
   }, [vazut, intarziere]);
   return (
-    <div ref={ref} className="flex h-28 w-24 items-center justify-center overflow-hidden rounded-xl border-2 border-[#e8b23a]/60 bg-gradient-to-b from-white to-[#f3e7c8] shadow-inner md:h-36 md:w-32">
+    <div ref={ref} className="flex h-24 w-[4.5rem] items-center justify-center overflow-hidden rounded-xl border-2 border-[#e8b23a]/60 bg-gradient-to-b from-white to-[#f3e7c8] shadow-inner md:h-36 md:w-32">
       <motion.span
         key={rulez ? idx : "final"}
         initial={{ y: rulez ? -30 : -60, opacity: rulez ? 0.6 : 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={rulez ? { duration: 0.06 } : { type: "spring", stiffness: 300, damping: 12 }}
-        className={`font-serif font-extrabold ${rulez ? "text-4xl text-[#c1121f]" : "text-3xl text-[#1a1030] md:text-4xl"}`}
+        className={`font-serif font-extrabold ${rulez ? "text-4xl text-[#c1121f]" : "text-6xl text-[#d6203a] drop-shadow-[0_2px_0_#7a0f1c] md:text-7xl"}`}
       >
         {rulez ? SIMBOLURI[idx] : final}
       </motion.span>
@@ -218,28 +218,65 @@ function Rola({ final, intarziere }: { final: string; intarziere: number }) {
 }
 
 function Pacanele() {
+  const ref = useRef<HTMLDivElement>(null);
+  const vazut = useInView(ref, { once: true });
+  const [castig, setCastig] = useState(false);
+  useEffect(() => {
+    if (!vazut) return;
+    const t = window.setTimeout(() => setCastig(true), 1400 + 3 * 450 + 300);
+    return () => window.clearTimeout(t);
+  }, [vazut]);
   return (
-    <div className="relative mx-auto w-fit rounded-[28px] border-4 border-[#e8b23a] bg-gradient-to-b from-[#7a0f1c] via-[#4a0812] to-[#2a050b] p-5 shadow-[0_0_60px_-10px_rgba(232,178,58,0.8)] md:p-7">
-      <div className="mb-4 flex justify-center gap-2">
-        {Array.from({ length: 9 }).map((_, i) => (
-          <motion.span
-            key={i}
-            className="h-2.5 w-2.5 rounded-full bg-[#f7d774]"
-            animate={{ opacity: [0.2, 1, 0.2] }}
-            transition={{ duration: 1, repeat: Infinity, delay: i * 0.1 }}
-          />
-        ))}
-      </div>
-      <div className="flex gap-2 md:gap-3">
-        <Rola final="50" intarziere={0} />
-        <Rola final="150" intarziere={400} />
-        <Rola final="2.000" intarziere={800} />
-      </div>
-      <div className="mt-3 grid grid-cols-3 text-center text-[11px] font-bold uppercase tracking-wider text-[#f7d774] md:text-xs">
-        <span>ziare</span>
-        <span>linkuri</span>
-        <span>lei</span>
-      </div>
+    <div ref={ref} className="relative mx-auto w-fit">
+      <motion.div
+        animate={castig ? { boxShadow: ["0 0 40px -10px rgba(232,178,58,0.8)", "0 0 90px 10px rgba(255,215,90,1)", "0 0 40px -10px rgba(232,178,58,0.8)"] } : {}}
+        transition={{ duration: 1.2, repeat: castig ? Infinity : 0 }}
+        className="relative rounded-[28px] border-4 border-[#e8b23a] bg-gradient-to-b from-[#7a0f1c] via-[#4a0812] to-[#2a050b] p-4 md:p-7"
+      >
+        <div className="mb-4 flex justify-center gap-2">
+          {Array.from({ length: 11 }).map((_, i) => (
+            <motion.span
+              key={i}
+              className="h-2.5 w-2.5 rounded-full bg-[#f7d774]"
+              animate={{ opacity: [0.2, 1, 0.2] }}
+              transition={{ duration: castig ? 0.4 : 1, repeat: Infinity, delay: i * 0.08 }}
+            />
+          ))}
+        </div>
+        <div className="flex gap-1.5 md:gap-3">
+          {[0, 1, 2, 3].map((k) => (
+            <Rola key={k} final="7" intarziere={k * 450} />
+          ))}
+        </div>
+        <motion.div
+          initial={{ opacity: 0, scale: 0.3, y: 20 }}
+          animate={castig ? { opacity: 1, scale: 1, y: 0 } : {}}
+          transition={{ type: "spring", stiffness: 260, damping: 12 }}
+          className="mt-5 rounded-2xl bg-gradient-to-r from-[#f7d774] via-[#fff1b8] to-[#f7d774] px-4 py-3 text-center text-[#2a1a00]"
+        >
+          <p className="font-serif text-2xl font-extrabold tracking-wide md:text-3xl">7777 · JACKPOT!</p>
+          <p className="mt-1 text-sm font-bold md:text-base">50 de ziare · 150 de linkuri · doar 2.000 lei</p>
+        </motion.div>
+      </motion.div>
+      {castig && (
+        <div aria-hidden className="pointer-events-none absolute inset-0">
+          {Array.from({ length: 18 }).map((_, i) => (
+            <motion.span
+              key={i}
+              className="absolute left-1/2 top-1/2 h-4 w-4 rounded-full"
+              style={{ background: "radial-gradient(circle at 35% 35%, #fff6c8, #f7d774 40%, #b8860b 100%)" }}
+              initial={{ x: 0, y: 0, opacity: 1, scale: 0.6 }}
+              animate={{
+                x: Math.cos((i / 18) * Math.PI * 2) * (160 + (i % 3) * 40),
+                y: Math.sin((i / 18) * Math.PI * 2) * (120 + (i % 3) * 30),
+                opacity: 0,
+                scale: 1.2,
+              }}
+              transition={{ duration: 1.4, ease: "easeOut" }}
+            />
+          ))}
+        </div>
+      )}
     </div>
   );
 }
@@ -431,7 +468,7 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
         >
           <span className="bg-gradient-to-r from-[#f7d774] to-[#ff6b6b] bg-clip-text text-transparent">JACKPOT</span> pentru SEO
         </motion.h2>
-        <p className="mx-auto mt-3 max-w-xl text-white/70">50 de ziare, 150 de linkuri dofollow, 2.000 de lei. O singură plată.</p>
+        <p className="mx-auto mt-3 max-w-xl text-white/70">Patru de 7 la rând: 50 de ziare, 150 de linkuri dofollow, 2.000 de lei.</p>
         <div className="mt-10">
           <Pacanele />
         </div>
@@ -544,6 +581,66 @@ export function PaginaCazino({ ziare, cifre }: { ziare: Ziar[]; cifre: Cifre }) 
             </motion.div>
           ))}
         </div>
+      </section>
+
+      {/* ───── eșalonare + rescriere ───── */}
+      <section className="relative mx-auto max-w-5xl px-4 py-16">
+        <div className="grid gap-5 md:grid-cols-2">
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"
+          >
+            <Clock className="h-8 w-8 text-[#f7d774]" />
+            <h3 className="mt-3 text-xl font-bold">Publicare eșalonată, cum vrei tu</h3>
+            <p className="mt-2 text-sm text-white/65">Alegi ritmul în care apar articolele pe cele 50 de ziare:</p>
+            <div className="mt-4 flex flex-wrap gap-2">
+              {["la 1 oră", "la 3 ore", "la 12 ore", "pe 2 săptămâni", "cât timp vrei"].map((x) => (
+                <span key={x} className="rounded-full border border-[#e8b23a]/50 bg-[#e8b23a]/10 px-3 py-1.5 text-sm font-semibold text-[#f7d774]">
+                  {x}
+                </span>
+              ))}
+            </div>
+          </motion.div>
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.12 }}
+            className="rounded-2xl border border-white/10 bg-white/[0.04] p-6"
+          >
+            <Sparkles className="h-8 w-8 text-[#f7d774]" />
+            <h3 className="mt-3 text-xl font-bold">Articol rescris pe fiecare ziar</h3>
+            <p className="mt-2 text-sm text-white/65">
+              Fiecare din cele 50 de ziare primește o variantă unică a articolului, nu același text copiat. Linkurile tale rămân exact unde le-ai pus, cu ancorele alese.
+            </p>
+          </motion.div>
+        </div>
+
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          className="mt-5 rounded-2xl border-2 border-[#e8b23a]/50 bg-gradient-to-br from-[#e8b23a]/10 to-transparent p-6"
+        >
+          <h3 className="text-xl font-bold">Ce ne trimiți ca să începem</h3>
+          <ul className="mt-4 grid gap-3 text-sm text-white/80 md:grid-cols-2">
+            {[
+              "Articolul (Word, PDF sau text) — sau doar site-ul și câteva informații, iar noi îl scriem și ți-l arătăm înainte",
+              "Linkurile spre site-ul tău și ancorele dorite (până la 3 pe articol)",
+              "1–3 poze, dintre care una principală",
+              "Ritmul de publicare: 1 oră, 3 ore, 12 ore, 2 săptămâni sau cât vrei",
+              "Numărul licenței ONJN",
+              "Datele firmei (CUI) pentru factură",
+            ].map((x) => (
+              <li key={x} className="flex gap-2">
+                <ShieldCheck className="mt-0.5 h-4 w-4 shrink-0 text-emerald-300" />
+                <span>{x}</span>
+              </li>
+            ))}
+          </ul>
+        </motion.div>
       </section>
 
       {/* ───── pași ───── */}
