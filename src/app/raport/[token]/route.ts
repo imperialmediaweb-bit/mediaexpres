@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
 import { idDinRaportToken } from "@/lib/raport-link";
 import { RETEA_URL, campaniileDinRetea } from "@/lib/retea";
+import { campaniaComenzii } from "@/lib/raport-retea";
 import { SITE } from "@/data/site";
 
 export const dynamic = "force-dynamic";
@@ -23,9 +24,35 @@ function text(msg: string, status: number) {
   return new NextResponse(msg, { status, headers: { "Content-Type": "text/plain; charset=utf-8", "X-Robots-Tag": "noindex, nofollow" } });
 }
 
+async function proxy(netToken: string, tokenAici: string, qs: string): Promise<NextResponse | null> {
+  const res = await fetch(`${RETEA_URL}/raport/${encodeURIComponent(netToken)}${qs ? `?${qs}` : ""}`, { cache: "no-store" }).catch(() => null);
+  if (!res || !res.ok) return null;
+  const tip = res.headers.get("content-type") || "";
+  if (!tip.includes("text/html")) {
+    // Excel: trece neatins, cu numele fișierului.
+    const h = new Headers({ "Content-Type": tip, "X-Robots-Tag": "noindex, nofollow" });
+    const cd = res.headers.get("content-disposition");
+    if (cd) h.set("Content-Disposition", cd);
+    return new NextResponse(await res.arrayBuffer(), { headers: h });
+  }
+  // Adresele relative ale raportului (Excel) arată spre linkul nostru.
+  const html = (await res.text()).split(`/raport/${netToken}`).join(`/raport/${tokenAici}`);
+  return new NextResponse(html, {
+    headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" },
+  });
+}
+
 export async function GET(req: NextRequest, { params }: { params: { token: string } }) {
   const id = idDinRaportToken(params.token);
-  if (!id) return text("Raport inexistent.", 404);
+  // Tokenul raportului din rețea (din e-mailul „campania e publicată"): același
+  // raport, servit tot de aici.
+  if (!id) {
+    if (/^[A-Za-z0-9_-]{16,80}$/.test(params.token)) {
+      const r = await proxy(params.token, params.token, req.nextUrl.searchParams.toString());
+      if (r) return r;
+    }
+    return text("Raport inexistent.", 404);
+  }
 
   const [c] = await db
     .select({
@@ -41,42 +68,13 @@ export async function GET(req: NextRequest, { params }: { params: { token: strin
     .limit(1);
   if (!c) return text("Raport inexistent.", 404);
 
-  // Campania din rețea: întâi după referința comenzii; altfel după email, dar
-  // doar una creată DUPĂ comanda asta (să nu arătăm o campanie mai veche a
-  // aceluiași client).
   const toate = await campaniileDinRetea();
-  let netToken: string | null = null;
-  if (toate) {
-    const exact = toate.find((x) => x.comanda_externa && x.comanda_externa === c.ref && x.token);
-    if (exact) netToken = exact.token;
-    else {
-      const e = c.email.trim().toLowerCase();
-      const dupa = c.createdAt.getTime() - 60 * 60 * 1000;
-      const cand = toate
-        .filter((x) => x.token && (x.email || "").trim().toLowerCase() === e && x.creata_la && new Date(x.creata_la).getTime() >= dupa)
-        .sort((a, b) => (a.creata_la || "").localeCompare(b.creata_la || ""));
-      if (cand[0]) netToken = cand[0].token;
-    }
-  }
+  const gasita = toate ? campaniaComenzii(c, toate) : null;
+  const netToken = gasita?.rand.token ?? null;
 
   if (netToken) {
-    const qs = req.nextUrl.searchParams.toString();
-    const res = await fetch(`${RETEA_URL}/raport/${encodeURIComponent(netToken)}${qs ? `?${qs}` : ""}`, { cache: "no-store" }).catch(() => null);
-    if (res && res.ok) {
-      const tip = res.headers.get("content-type") || "";
-      if (!tip.includes("text/html")) {
-        // Excel / PDF: trece neatins, cu numele fișierului.
-        const h = new Headers({ "Content-Type": tip, "X-Robots-Tag": "noindex, nofollow" });
-        const cd = res.headers.get("content-disposition");
-        if (cd) h.set("Content-Disposition", cd);
-        return new NextResponse(await res.arrayBuffer(), { headers: h });
-      }
-      // Adresele relative ale raportului (Excel) arată spre linkul nostru.
-      const html = (await res.text()).split(`/raport/${netToken}`).join(`/raport/${params.token}`);
-      return new NextResponse(html, {
-        headers: { "Content-Type": "text/html; charset=utf-8", "X-Robots-Tag": "noindex, nofollow", "Cache-Control": "no-store" },
-      });
-    }
+    const r = await proxy(netToken, params.token, req.nextUrl.searchParams.toString());
+    if (r) return r;
     // Campanie fără niciun articol încă (sau rețeaua nu răspunde): pașii de mai jos.
   }
 

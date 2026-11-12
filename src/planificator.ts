@@ -35,6 +35,9 @@ export async function pornestePlanificator() {
   // Autoblogul: la 30 de minute; publica doar cand ii vine randul (lib/autoblog.ts).
   setTimeout(() => ruleaza("/api/cron/autoblog"), 4 * MIN);
   setInterval(() => ruleaza("/api/cron/autoblog"), 30 * MIN);
+  // E-mailul „campania a pornit" (12.11.2026): la 10 minute, o singura data pe comanda.
+  setTimeout(() => ruleaza("/api/cron/campanie-pornita"), 7 * MIN);
+  setInterval(() => ruleaza("/api/cron/campanie-pornita"), 10 * MIN);
   // Reamintirea dinainte de reinnoirea abonamentelor (11.10.2026): o data pe ora.
   setTimeout(() => ruleaza("/api/cron/abonamente-reamintire"), 6 * MIN);
   setInterval(() => ruleaza("/api/cron/abonamente-reamintire"), 60 * MIN);
