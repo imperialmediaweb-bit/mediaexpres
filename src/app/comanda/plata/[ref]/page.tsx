@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { idDinRaportToken, raportToken } from "@/lib/raport-link";
 import { CheckCircle2, ShieldCheck } from "lucide-react";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
@@ -25,12 +26,19 @@ export default async function PlataPage({
   searchParams,
 }: {
   params: { ref: string };
-  searchParams: { platit?: string };
+  searchParams: { platit?: string; raport?: string };
 }) {
   const row = await gasesteComanda(params.ref);
   // Dupa plata cu cardul, webhookul muta comanda pe sesiunea Stripe — referinta
   // nu mai exista. Intoarcerea din Stripe (?platit=1) arata confirmarea.
   if (!row && searchParams.platit !== "1") notFound();
+
+  // 12.11.2026 — linkul raportului pe mediaexpress.ro, din momentul comenzii.
+  const tokRaport = row
+    ? raportToken(row.id)
+    : searchParams.raport && idDinRaportToken(searchParams.raport)
+      ? searchParams.raport
+      : null;
 
   if (!row || row.status !== "pending_payment") {
     return (
@@ -42,6 +50,19 @@ export default async function PlataPage({
             Mulțumim! Factura fiscală vine pe email în câteva minute. Publicăm în maximum
             12 ore lucrătoare și îți trimitem raportul cu toate cele 50 de linkuri.
           </p>
+          {tokRaport && (
+            <div className="mx-auto mt-6 max-w-lg rounded-xl border border-slate-200 bg-white p-4">
+              <a
+                href={`/raport/${tokRaport}`}
+                className="inline-block rounded-lg bg-[#E4002B] px-6 py-3 text-sm font-semibold text-white"
+              >
+                Urmărește publicarea în timp real
+              </a>
+              <p className="mt-2 break-all text-xs text-slate-500">
+                Linkul tău de raport (permanent): {SITE.url}/raport/{tokRaport}
+              </p>
+            </div>
+          )}
           <p className="mt-6 text-sm text-slate-500">
             Întrebări? Scrie-ne pe WhatsApp la <strong className="text-brand-navy">{SITE.phone}</strong>.
           </p>

@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { raportUrl } from "@/lib/raport-link";
 import { verifyOrderToken } from "@/lib/order-token";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
@@ -501,6 +502,8 @@ export async function POST(req: NextRequest) {
   try {
     const r = await campaniaPentruComanda(order.sessionId, order.email, d.fbBoostPaper);
     if (r.stare === "gasita") linkRaport = r.campanie.raportUrl;
+    // 12.11.2026 — mereu pe mediaexpress.ro, de la comandă la final.
+    if (submissionId) linkRaport = raportUrl(submissionId);
   } catch (err) {
     console.error("[articol/submit] nu am putut citi campania din retea:", err);
   }

@@ -8,6 +8,10 @@ import {
   INVOICE_PRODUCT_NAME,
 } from "@/lib/startco";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL, bankTransferEmailBox } from "@/lib/email";
+import { db } from "@/db";
+import { orderSubmissions } from "@/db/schema";
+import { eq } from "drizzle-orm";
+import { raportUrl } from "@/lib/raport-link";
 import { SITE } from "@/data/site";
 import { lookupCui, type AnafCompany } from "@/lib/anaf";
 
@@ -166,6 +170,18 @@ export async function issueInvoiceForOrder(
       // o da contabilitatii si abia atunci pleaca banii. Emailul trebuie sa
       // spuna asta si sa aiba IBAN-ul la indemana.
       const dePlata = input.markPaid === false;
+      // 12.11.2026 — linkul raportului pe mediaexpress.ro, din momentul comenzii.
+      let linkRaport: string | null = null;
+      try {
+        const [s] = await db
+          .select({ id: orderSubmissions.id })
+          .from(orderSubmissions)
+          .where(eq(orderSubmissions.stripeSessionId, input.orderReference))
+          .limit(1);
+        if (s) linkRaport = raportUrl(s.id);
+      } catch {
+        /* fara link, emailul pleaca la fel */
+      }
       await sendEmail({
         to: input.email,
         subject: dePlata
@@ -187,6 +203,11 @@ export async function issueInvoiceForOrder(
                  <p style="margin:12px 0;"><a href="https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua, vă trimit dovada plății pentru Factura ${invoice.series} ${invoice.number}.`)}" style="background:#25D366;color:#fff;padding:12px 22px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Trimit dovada pe WhatsApp</a></p>
                  <p style="color:#64748b;font-size:13px;">WhatsApp: ${SITE.phone}</p>`
               : `<p style="margin-top:16px;color:#64748b;font-size:13px;">Linkul e permanent — il poti da contabilitatii oricand.</p>`
+          }
+          ${
+            linkRaport
+              ? `<p style="margin-top:16px;"><strong>Raportul comenzii, în timp real:</strong> <a href="${linkRaport}">${linkRaport}</a><br/><span style="color:#64748b;font-size:13px;">Aici vezi fiecare ziar în care apare articolul, cu data, ora și linkul, apoi promovarea pe Facebook. Linkul e permanent.</span></p>`
+              : ""
           }
           <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
           `,

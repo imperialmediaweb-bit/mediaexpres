@@ -147,7 +147,8 @@ function pePaginaRomaniaExpres(raportUrl: string): string {
   try {
     const u = new URL(raportUrl);
     u.protocol = "https:";
-    u.host = "romaniaexpres.ro";
+    // 12.11.2026 — linkul de pe mediaexpress.ro rămâne pe mediaexpress.ro.
+    if (!/mediaexpress\.ro$/.test(u.host)) u.host = "romaniaexpres.ro";
     u.searchParams.set("tot", "1");
     return u.toString();
   } catch {

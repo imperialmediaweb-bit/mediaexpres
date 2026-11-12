@@ -1,5 +1,6 @@
 import { redirect, notFound } from "next/navigation";
 import Link from "next/link";
+import { raportUrl as raportUrlMe } from "@/lib/raport-link";
 import { desc, eq } from "drizzle-orm";
 import { ArrowLeft, Paperclip, ExternalLink } from "lucide-react";
 import { getSession } from "@/lib/auth";
@@ -321,7 +322,7 @@ export default async function MaterialDetailPage({
             isPublished={isPublished}
             awaitingPayment={awaitingPay}
             hasImages={images.length > 0}
-            raportUrl={retea.stare === "gasita" ? retea.campanie.raportUrl : null}
+            raportUrl={raportUrlMe(r.id)}
           />
         </div>
 

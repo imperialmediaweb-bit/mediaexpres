@@ -7,6 +7,7 @@ import { getStripe } from "@/lib/stripe";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
 import { gasesteComanda } from "@/lib/comanda-ref";
+import { raportToken } from "@/lib/raport-link";
 import { pornestePlataOp } from "@/lib/comanda-op";
 import { extractRequestUserData } from "@/lib/meta-capi";
 import { sursaDinCerere } from "@/lib/sursa";
@@ -143,7 +144,7 @@ export async function POST(req: NextRequest) {
           cui: (row.companyCui || row.cui || "").slice(0, 40),
         },
       },
-      success_url: `${SITE.url}/comanda/plata/${ref}?platit=1`,
+      success_url: `${SITE.url}/comanda/plata/${ref}?platit=1&raport=${encodeURIComponent(raportToken(row.id))}`,
       cancel_url: `${SITE.url}/comanda/plata/${ref}`,
       locale: "ro",
       allow_promotion_codes: true,
