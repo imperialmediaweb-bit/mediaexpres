@@ -29,7 +29,7 @@ const DE_LA = new Date("2026-11-12T00:00:00+02:00");
 let coloana = false;
 async function asiguraColoana() {
   if (coloana) return;
-  await db.execute(sql`ALTER TABLE order_submissions ADD COLUMN IF NOT EXISTS campanie_pornita_anuntat_la timestamp`);
+  await db.execute(sql`ALTER TABLE order_submission ADD COLUMN IF NOT EXISTS campanie_pornita_anuntat_la timestamp`);
   coloana = true;
 }
 
@@ -83,7 +83,7 @@ async function ruleaza(req: NextRequest) {
       ),
     });
     if (!r.ok) continue;
-    await db.execute(sql`UPDATE order_submissions SET campanie_pornita_anuntat_la = NOW() WHERE id = ${c.id}`);
+    await db.execute(sql`UPDATE order_submission SET campanie_pornita_anuntat_la = NOW() WHERE id = ${c.id}`);
     trimise.push(c.id);
   }
   return NextResponse.json({ ok: true, trimise: trimise.length });
