@@ -4,6 +4,8 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { orderSubmissions } from "@/db/schema";
 import { trimiteAutomatInRetea } from "@/lib/retea";
+import { sendCapiEvent } from "@/lib/meta-capi";
+import { findPackageById } from "@/data/packages";
 
 export const runtime = "nodejs";
 
@@ -58,6 +60,35 @@ export async function PATCH(
     }
     // 04.10.2026 — banii au intrat: comanda pleaca in retea (lib/retea.ts).
     await trimiteAutomatInRetea(params.id, "plata OP confirmata");
+    // 13.11.2026 — Purchase si pentru OP (Conversions API). Pana azi Meta vedea
+    // doar platile cu cardul (3 din 14 comenzi in 30 de zile), deci reclamele
+    // optimizate pe vanzari invatau din prea putine comenzi. event_id = "op_<id>":
+    // o a doua confirmare a aceleiasi comenzi e deduplicata de Meta.
+    try {
+      const [c] = await db
+        .select({
+          email: orderSubmissions.email,
+          phone: orderSubmissions.contactPhone,
+          packageId: orderSubmissions.packageId,
+        })
+        .from(orderSubmissions)
+        .where(eq(orderSubmissions.id, params.id))
+        .limit(1);
+      const pachet = c ? findPackageById(c.packageId) : undefined;
+      if (c && pachet) {
+        await sendCapiEvent({
+          eventName: "Purchase",
+          eventId: `op_${params.id}`,
+          eventSourceUrl: "https://mediaexpress.ro/comanda",
+          value: pachet.price,
+          currency: "RON",
+          user: { email: c.email || undefined, phone: c.phone || undefined },
+          customData: { content_name: c.packageId, content_category: "package", payment: "op" },
+        });
+      }
+    } catch (err) {
+      console.error("[confirm_payment] capi purchase:", err);
+    }
     return NextResponse.json({ ok: true });
   }
 
