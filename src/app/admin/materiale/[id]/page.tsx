@@ -430,7 +430,7 @@ export default async function MaterialDetailPage({
               ) : (
                 <span className="text-slate-500">Încă netrimisă în rețea.</span>
               )}
-              <TrimiteInRetea id={r.id} trimisa={Boolean(r.reteaId)} />
+              <TrimiteInRetea id={r.id} trimisa={Boolean(r.reteaId)} faraSite={!r.siteUrl && !/https?:\/\//i.test(r.linkNotes || "")} />
             </div>
             {retea.stare === "gasita" ? (
               <div className="mt-2">

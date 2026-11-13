@@ -19,11 +19,28 @@ export async function PATCH(
   // Doua actiuni pe aceeasi ruta: confirmarea incasarii si publicarea.
   // Corpul e optional ca apelurile vechi (fara body = publish) sa mearga la fel.
   let action = "publish";
+  let siteNou = "";
   try {
     const body = await req.json();
     if (body && typeof body.action === "string") action = body.action;
+    if (body && typeof body.siteUrl === "string") siteNou = body.siteUrl.trim();
   } catch {
     /* fara corp = publish, compatibil cu ce exista */
+  }
+
+  // 13.11.2026 — clientul fără site: adminul pune linkul lui (pagina de
+  // Facebook, Google Maps…), ca rețeaua să poată primi comanda.
+  if (action === "site") {
+    if (!/^https?:\/\/[^\s]+\.[^\s]+$/i.test(siteNou)) {
+      return NextResponse.json({ ok: false, error: "Linkul trebuie să înceapă cu https://" }, { status: 400 });
+    }
+    const [updated] = await db
+      .update(orderSubmissions)
+      .set({ siteUrl: siteNou })
+      .where(eq(orderSubmissions.id, params.id))
+      .returning({ id: orderSubmissions.id });
+    if (!updated) return NextResponse.json({ ok: false, error: "Nu există" }, { status: 404 });
+    return NextResponse.json({ ok: true });
   }
 
   if (action === "confirm_payment") {
