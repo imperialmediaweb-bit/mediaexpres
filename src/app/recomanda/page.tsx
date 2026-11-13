@@ -35,8 +35,8 @@ export default function Recomanda() {
           </h1>
           <p className="mt-5 text-lg text-slate-600">
             Clienții dumneavoastră primesc un articol publicat în 50 de ziare online, cu raport în timp real și
-            promovare pe Facebook. Dumneavoastră primiți comisionul, fără să vindeți, să facturați sau să
-            livrați ceva: ne ocupăm noi de tot.
+            promovare pe Facebook. Dumneavoastră primiți comisionul, fără să vindeți sau să livrați ceva: ne ocupăm
+            noi de tot. Poate participa oricine: fără firmă primiți vouchere eMAG, cu PFA sau firmă primiți bani.
           </p>
 
           <ol className="mt-8 space-y-4">
@@ -63,9 +63,14 @@ export default function Recomanda() {
           <div className="mt-8 rounded-xl bg-slate-50 p-5 text-sm text-slate-700">
             <p className="font-semibold text-brand-navy">Cum se plătește</p>
             <p className="mt-1">
-              În contul de partener vedeți fiecare client adus și comisionul. La începutul lunii ne trimiteți factura
-              pentru comenzile încasate luna trecută, iar noi plătim prin transfer bancar.
+              <strong>Fără firmă:</strong> după ce clientul adus a plătit, vă trimitem pe email un{" "}
+              <strong>voucher eMAG</strong> cu valoarea câștigată.
             </p>
+            <p className="mt-2">
+              <strong>Cu PFA sau firmă:</strong> la începutul lunii ne trimiteți factura pentru comenzile încasate
+              luna trecută, iar noi plătim prin transfer bancar.
+            </p>
+            <p className="mt-2">În contul de partener vedeți fiecare client adus și cât ați câștigat.</p>
           </div>
         </div>
 

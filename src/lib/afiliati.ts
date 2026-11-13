@@ -11,7 +11,7 @@ import { findPackageById } from "@/data/packages";
  * utm_source=partener&utm_campaign=<cod>. Sistemul de surse (lib/sursa.ts)
  * retine asta 90 de zile si o scrie pe comanda, deci nu e nevoie de nicio
  * coloana noua pe comenzi: o comanda e a partenerului daca sursa ei e
- * `partener|afiliat|<cod>`.
+ * `partener|afiliat|<cod>` (din 13.11.2026 poate urma `|/pagina-de-intrare`, vezi lib/sursa.ts).
  *
  * Comisionul: 100 de lei pentru fiecare comanda PLATITA. Se plateste lunar,
  * pe factura partenerului, doar din banii deja incasati.
@@ -35,6 +35,8 @@ export interface Afiliat {
   token: string;
   clickuri: number;
   created_at: Date;
+  /** 13.11.2026: "firma" (PFA/firma, bani pe factura) sau "persoana" (vouchere eMAG). */
+  tip: string;
 }
 
 let gata: Promise<unknown> | null = null;
@@ -53,6 +55,19 @@ function asiguraTabel() {
       "clickuri" integer NOT NULL DEFAULT 0,
       "created_at" timestamp NOT NULL DEFAULT now()
     )`);
+    gata = gata.then(() =>
+      Promise.all([
+        db.execute(sql`ALTER TABLE "afiliat" ADD COLUMN IF NOT EXISTS "tip" text NOT NULL DEFAULT 'firma'`),
+        db.execute(sql`CREATE TABLE IF NOT EXISTS "afiliat_voucher" (
+          "id" serial PRIMARY KEY,
+          "afiliat_id" integer NOT NULL,
+          "suma" integer NOT NULL,
+          "cod" text NOT NULL,
+          "nota" text,
+          "trimis_la" timestamp NOT NULL DEFAULT now()
+        )`),
+      ]),
+    );
     gata.catch(() => (gata = null));
   }
   return gata;
@@ -81,6 +96,7 @@ export async function creeazaAfiliat(d: {
   iban: string;
   email: string;
   telefon: string;
+  tip?: "firma" | "persoana";
 }): Promise<{ ok: true; afiliat: Afiliat } | { ok: false; eroare: string }> {
   await asiguraTabel();
   const email = d.email.trim().toLowerCase();
@@ -88,8 +104,8 @@ export async function creeazaAfiliat(d: {
   if (exista.length) return { ok: false, eroare: "Există deja un partener cu acest email." };
   const token = randomBytes(24).toString("base64url");
   const r = randuri<Afiliat>(
-    await db.execute(sql`INSERT INTO "afiliat" ("cod", "nume", "firma", "cui", "iban", "email", "telefon", "token")
-      VALUES (${codDin(d.nume)}, ${d.nume.trim()}, ${d.firma.trim()}, ${d.cui.trim()}, ${d.iban.replace(/\s+/g, "").toUpperCase()}, ${email}, ${d.telefon.trim()}, ${token})
+    await db.execute(sql`INSERT INTO "afiliat" ("cod", "nume", "firma", "cui", "iban", "email", "telefon", "token", "tip")
+      VALUES (${codDin(d.nume)}, ${d.nume.trim()}, ${d.firma.trim()}, ${d.cui.trim()}, ${d.iban.replace(/\s+/g, "").toUpperCase()}, ${email}, ${d.telefon.trim()}, ${token}, ${d.tip || "firma"})
       RETURNING *`),
   );
   return { ok: true, afiliat: r[0] };
@@ -128,11 +144,11 @@ export async function comenziAfiliat(cod: string): Promise<ComandaAfiliat[]> {
   const sursa = `partener|afiliat|${cod}`;
   const card = randuri<{ created_at: Date; package_id: string; amount: number }>(
     await db.execute(sql`SELECT "created_at", "package_id", "amount" FROM "order"
-      WHERE "source" = ${sursa} AND "status" = 'paid'`),
+      WHERE ("source" = ${sursa} OR "source" LIKE ${sursa + "|%"}) AND "status" = 'paid'`),
   );
   const op = randuri<{ created_at: Date; package_id: string; status: string }>(
     await db.execute(sql`SELECT "created_at", "package_id", "status" FROM "order_submission"
-      WHERE "source" = ${sursa} AND "payment_method" = 'op'`),
+      WHERE ("source" = ${sursa} OR "source" LIKE ${sursa + "|%"}) AND "payment_method" = 'op'`),
   );
   const toate: ComandaAfiliat[] = [
     ...card.map((c) => ({
@@ -159,4 +175,61 @@ export async function comenziAfiliat(cod: string): Promise<ComandaAfiliat[]> {
     primaGasita = true;
   }
   return toate.sort((a, b) => new Date(b.data).getTime() - new Date(a.data).getTime());
+}
+
+/* ------------------------------------------------------------------ */
+/* 13.11.2026 — vouchere eMAG pentru partenerii persoane fizice.        */
+/* Proprietarul cumpara cardurile cadou de pe eMAG (pe firma, cu        */
+/* factura) si trimite codul din admin; aici doar tinem socoteala.      */
+/* ------------------------------------------------------------------ */
+
+export interface VoucherTrimis {
+  id: number;
+  afiliat_id: number;
+  suma: number;
+  cod: string;
+  nota: string | null;
+  trimis_la: Date;
+}
+
+export async function voucherePartener(afiliatId: number): Promise<VoucherTrimis[]> {
+  await asiguraTabel();
+  return randuri<VoucherTrimis>(
+    await db.execute(sql`SELECT * FROM "afiliat_voucher" WHERE "afiliat_id" = ${afiliatId} ORDER BY "trimis_la" DESC`),
+  );
+}
+
+export interface SituatiePartener {
+  afiliat: Afiliat;
+  clienti: number;
+  castigat: number;
+  trimis: number;
+  deTrimis: number;
+}
+
+/** Toti partenerii, cu cat au castigat, cat li s-a dat si cat mai e de dat. */
+export async function situatieParteneri(): Promise<SituatiePartener[]> {
+  await asiguraTabel();
+  const toti = randuri<Afiliat>(await db.execute(sql`SELECT * FROM "afiliat" ORDER BY "created_at" DESC`));
+  const out: SituatiePartener[] = [];
+  for (const a of toti) {
+    const comenzi = await comenziAfiliat(a.cod);
+    const castigat = comenzi.reduce((s, c) => s + c.comision, 0);
+    const trimis = (await voucherePartener(a.id)).reduce((s, v) => s + v.suma, 0);
+    out.push({ afiliat: a, clienti: comenzi.filter((c) => c.platita).length, castigat, trimis, deTrimis: Math.max(0, castigat - trimis) });
+  }
+  return out;
+}
+
+export async function afiliatDupaId(id: number): Promise<Afiliat | null> {
+  await asiguraTabel();
+  return randuri<Afiliat>(await db.execute(sql`SELECT * FROM "afiliat" WHERE "id" = ${id}`))[0] ?? null;
+}
+
+export async function inregistreazaVoucher(afiliatId: number, suma: number, cod: string, nota?: string) {
+  await asiguraTabel();
+  return randuri<VoucherTrimis>(
+    await db.execute(sql`INSERT INTO "afiliat_voucher" ("afiliat_id", "suma", "cod", "nota")
+      VALUES (${afiliatId}, ${suma}, ${cod}, ${nota || null}) RETURNING *`),
+  )[0];
 }

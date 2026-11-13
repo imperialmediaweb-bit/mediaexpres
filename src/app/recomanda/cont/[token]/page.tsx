@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { afiliatDupaToken, comenziAfiliat, COMISION_PRIMUL_LEI } from "@/lib/afiliati";
+import { afiliatDupaToken, comenziAfiliat, voucherePartener, COMISION_PRIMUL_LEI } from "@/lib/afiliati";
 import { KitPartener } from "./KitPartener";
 import { SITE } from "@/data/site";
 
@@ -23,11 +23,18 @@ export default async function ContPartener({ params }: { params: { token: string
     })
     .reduce((s, c) => s + c.comision, 0);
 
+  const ePersoana = a.tip === "persoana";
+  const vouchere = ePersoana ? await voucherePartener(a.id).catch(() => []) : [];
+  const castigTotal = comenzi.reduce((s, c) => s + c.comision, 0);
+  const primit = vouchere.reduce((s, v) => s + v.suma, 0);
+
   const carduri = [
     { e: "Clickuri pe link", v: String(a.clickuri) },
     { e: "Comenzi aduse", v: String(comenzi.length) },
     { e: "Comenzi plătite", v: String(platite) },
-    { e: `Comision în ${lunaAsta}`, v: `${castigLuna} lei` },
+    ePersoana
+      ? { e: "Vouchere eMAG de primit", v: `${Math.max(0, castigTotal - primit)} lei` }
+      : { e: `Comision în ${lunaAsta}`, v: `${castigLuna} lei` },
   ];
 
   return (
@@ -91,7 +98,26 @@ export default async function ContPartener({ params }: { params: { token: string
 
         <KitPartener link={link} site={SITE.url} />
 
-        <div className="mt-6 rounded-xl bg-white p-5 text-sm text-slate-700">
+        {ePersoana ? (
+          <div className="mt-6 rounded-xl bg-white p-5 text-sm text-slate-700">
+            <p className="font-semibold text-brand-navy">Voucherele dumneavoastră eMAG</p>
+            <p className="mt-1">
+              Câștigat în total: <strong>{castigTotal} lei</strong> · primit: <strong>{primit} lei</strong>. După ce un
+              client adus plătește, vă trimitem pe email un voucher eMAG cu valoarea câștigată.
+            </p>
+            {vouchere.length > 0 && (
+              <ul className="mt-3 space-y-1">
+                {vouchere.map((v) => (
+                  <li key={v.id}>
+                    {new Date(v.trimis_la).toLocaleDateString("ro-RO", { timeZone: "Europe/Bucharest" })} — voucher eMAG de{" "}
+                    <strong>{v.suma} lei</strong>, trimis pe email
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+        ) : (
+          <div className="mt-6 rounded-xl bg-white p-5 text-sm text-slate-700">
           <p className="font-semibold text-brand-navy">Plata comisionului</p>
           <p className="mt-1">
             La începutul fiecărei luni ne trimiteți factura pentru comenzile plătite luna trecută, pe{" "}
@@ -101,6 +127,7 @@ export default async function ContPartener({ params }: { params: { token: string
             . Plătim prin transfer bancar în contul {a.iban}.
           </p>
         </div>
+        )}
       </div>
     </section>
   );

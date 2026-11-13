@@ -7,7 +7,7 @@ const camp =
 
 /** Formularul de inscriere in programul de recomandari (api/afiliati/inscriere). */
 export function InscriereForm() {
-  const [f, setF] = useState({ nume: "", cui: "", iban: "", email: "", telefon: "" });
+  const [f, setF] = useState({ tip: "persoana" as "persoana" | "firma", nume: "", cui: "", iban: "", email: "", telefon: "" });
   const [stare, setStare] = useState<"liber" | "trimit" | { link: string; cont: string }>("liber");
   const [eroare, setEroare] = useState("");
 
@@ -53,14 +53,34 @@ export function InscriereForm() {
     );
   }
 
-  const set = (k: keyof typeof f) => (e: React.ChangeEvent<HTMLInputElement>) =>
+  const set = (k: "nume" | "cui" | "iban" | "email" | "telefon") => (e: React.ChangeEvent<HTMLInputElement>) =>
     setF({ ...f, [k]: e.target.value });
 
   return (
     <form onSubmit={trimite} className="space-y-4">
+      <div className="grid gap-2 sm:grid-cols-2">
+        {([
+          ["persoana", "Persoană fizică", "Primesc vouchere eMAG"],
+          ["firma", "PFA sau firmă", "Primesc bani, pe factură"],
+        ] as const).map(([v, t, d]) => (
+          <button
+            key={v}
+            type="button"
+            onClick={() => setF({ ...f, tip: v })}
+            className={`rounded-lg border px-3 py-3 text-left text-sm ${f.tip === v ? "border-brand-red bg-red-50" : "border-slate-300"}`}
+          >
+            <span className="block font-semibold text-brand-navy">{t}</span>
+            <span className="text-slate-600">{d}</span>
+          </button>
+        ))}
+      </div>
       <input className={camp} placeholder="Nume și prenume" value={f.nume} onChange={set("nume")} required />
-      <input className={camp} placeholder="CUI firmă sau PFA" value={f.cui} onChange={set("cui")} required />
-      <input className={camp} placeholder="IBAN (pentru plata comisioanelor)" value={f.iban} onChange={set("iban")} required />
+      {f.tip === "firma" && (
+        <>
+          <input className={camp} placeholder="CUI firmă sau PFA" value={f.cui} onChange={set("cui")} required />
+          <input className={camp} placeholder="IBAN (pentru plata comisioanelor)" value={f.iban} onChange={set("iban")} required />
+        </>
+      )}
       <div className="grid gap-4 sm:grid-cols-2">
         <input className={camp} type="email" placeholder="Email" value={f.email} onChange={set("email")} required />
         <input className={camp} type="tel" placeholder="Telefon" value={f.telefon} onChange={set("telefon")} required />
@@ -71,10 +91,12 @@ export function InscriereForm() {
         disabled={stare === "trimit"}
         className="w-full rounded-lg bg-brand-red px-6 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-60"
       >
-        {stare === "trimit" ? "Se verifică la ANAF…" : "Vreau linkul meu de partener"}
+        {stare === "trimit" ? (f.tip === "firma" ? "Se verifică la ANAF…" : "Se trimite…") : "Vreau linkul meu de partener"}
       </button>
       <p className="text-xs text-slate-500">
-        Programul este pentru PFA și firme: comisionul se plătește lunar, pe baza facturii dumneavoastră.
+        {f.tip === "firma"
+          ? "PFA și firme: comisionul se plătește lunar, pe baza facturii dumneavoastră."
+          : "Fără firmă: primiți comisionul în vouchere eMAG, pe email, după ce clientul adus a plătit."}
       </p>
     </form>
   );
