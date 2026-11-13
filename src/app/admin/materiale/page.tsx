@@ -8,7 +8,7 @@ import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, orders, users } from "@/db/schema";
 import { signOrderToken } from "@/lib/order-token";
 import { SITE } from "@/data/site";
-import { etichetaSursa } from "@/lib/sursa";
+import { etichetaSursa, paginaDeIntrare } from "@/lib/sursa";
 import { etichetaRitm } from "@/lib/ritm";
 import { findPackageById } from "@/data/packages";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
@@ -318,7 +318,7 @@ export default async function MaterialePage() {
                       "card (Stripe)"
                     )}
                   </p>
-                  <p><span className="text-slate-500">Sursă:</span> {etichetaSursa(r.source)}</p>
+                  <p><span className="text-slate-500">Sursă:</span> {etichetaSursa(r.source)}{paginaDeIntrare(r.source) ? ` · a intrat pe ${paginaDeIntrare(r.source)}` : ""}</p>
                   <p>
                     <span className="text-slate-500">Ritm:</span>{" "}
                     {r.ritm === "rapid" ? etichetaRitm(r.ritm) : <strong className="text-amber-700">{etichetaRitm(r.ritm)}</strong>}

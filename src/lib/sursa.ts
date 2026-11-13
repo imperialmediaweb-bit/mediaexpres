@@ -29,6 +29,13 @@ export interface Sursa {
   source: string;
   medium: string;
   campaign: string;
+  /**
+   * 13.11.2026 — prima pagina deschisa pe site cand s-a retinut sursa
+   * (ex. „/oferta-500", „/blog/cum-apari-in-presa"). Proprietarul vrea sa stie
+   * pe ce pagina intra clientii organici: blog sau direct pe oferta.
+   * Optionala: comenzile vechi au doar 3 parti.
+   */
+  page?: string;
 }
 
 /** Ce poate contine fiecare parte: fara `|`, fara `;`, fara spatii ciudate. */
@@ -127,16 +134,28 @@ export function sursaDinUrl(
   return null;
 }
 
+/** Calea paginii: doar litere mici, cifre, / . _ - ; fara query. */
+function curataPagina(v: string | null | undefined): string {
+  return (v || "")
+    .split("?")[0]
+    .toLowerCase()
+    .replace(/[^a-z0-9/._-]+/g, "-")
+    .slice(0, 90);
+}
+
 export function serializeazaSursa(s: Sursa): string {
-  return [curata(s.source, 60), curata(s.medium), curata(s.campaign, 60)].join("|");
+  const parti = [curata(s.source, 60), curata(s.medium), curata(s.campaign, 60)];
+  const pagina = curataPagina(s.page);
+  if (pagina) parti.push(pagina);
+  return parti.join("|");
 }
 
 /** Din cookie sau din baza. Null daca textul nu e in formatul nostru. */
 export function parseazaSursa(v: string | null | undefined): Sursa | null {
-  if (!v || v.length > 200 || !/^[a-z0-9._|-]*$/.test(v)) return null;
-  const [source = "", medium = "", campaign = ""] = v.split("|");
-  if (!source) return null;
-  return { source, medium, campaign };
+  if (!v || v.length > 300 || !/^[a-z0-9._|/-]*$/.test(v)) return null;
+  const [source = "", medium = "", campaign = "", page = ""] = v.split("|");
+  if (!source || source.includes("/")) return null;
+  return page ? { source, medium, campaign, page } : { source, medium, campaign };
 }
 
 /** Valoarea cookie-ului `me_src` dintr-un header Cookie brut. */
@@ -200,6 +219,16 @@ export function etichetaSursa(v: string | null | undefined): string {
       nume = s.medium === "referral" ? `Link de pe ${s.source}` : `${s.source} (${s.medium})`;
   }
   return s.campaign ? `${nume} — ${s.campaign}` : nume;
+}
+
+/** Sursa fara pagina de intrare — cheia pentru socotelile pe canale. */
+export function sursaFaraPagina(v: string | null | undefined): string {
+  return (v || "").split("|").slice(0, 3).join("|");
+}
+
+/** Pagina pe care a intrat omul (ex. „/oferta-500"), sau "" la comenzile vechi. */
+export function paginaDeIntrare(v: string | null | undefined): string {
+  return parseazaSursa(v)?.page || "";
 }
 
 /**

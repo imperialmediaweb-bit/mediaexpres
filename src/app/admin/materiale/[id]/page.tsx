@@ -7,7 +7,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, publicationReports, clientMessages } from "@/db/schema";
-import { etichetaSursa } from "@/lib/sursa";
+import { etichetaSursa, paginaDeIntrare } from "@/lib/sursa";
 import { etichetaRitm, ritmDupaId } from "@/lib/ritm";
 import { campaniaPentruComanda, etichetaStareRetea, RETEA_URL } from "@/lib/retea";
 import { TrimiteInRetea } from "./TrimiteInRetea";
@@ -519,6 +519,7 @@ export default async function MaterialDetailPage({
                 }
               />
               <Row label="Sursă" value={etichetaSursa(r.source)} />
+              <Row label="A intrat pe" value={paginaDeIntrare(r.source) || "— (nereținut, comandă veche)"} />
               <Row
                 label="Publicare"
                 value={

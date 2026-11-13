@@ -26,8 +26,10 @@ export function SourceCapture() {
       if (!rezultat) return;
       const existent = citesteSursaDinBrowser();
       if (existent && !rezultat.suprascrie) return;
-      const valoare = serializeazaSursa(rezultat.sursa);
+      const valoare = serializeazaSursa({ ...rezultat.sursa, page: window.location.pathname });
       if (valoare === existent) return;
+      // aceeasi sursa, alta pagina: pastram prima pagina de intrare
+      if (existent && existent.split("|").slice(0, 3).join("|") === valoare.split("|").slice(0, 3).join("|")) return;
       const secure = window.location.protocol === "https:" ? "; Secure" : "";
       document.cookie = `${SURSA_COOKIE}=${encodeURIComponent(valoare)}; Path=/; Max-Age=${
         SURSA_ZILE * 86400

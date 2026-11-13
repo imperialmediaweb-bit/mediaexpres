@@ -6,7 +6,7 @@ import { users, orders, subscriptions, articles, publishers, orderSubmissions } 
 import { count, eq, sql, desc, and, or, gte } from "drizzle-orm";
 import { findPackageById } from "@/data/packages";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
-import { etichetaSursa } from "@/lib/sursa";
+import { etichetaSursa, sursaFaraPagina } from "@/lib/sursa";
 
 export const dynamic = "force-dynamic";
 
@@ -112,7 +112,7 @@ export default async function AdminHome() {
   const de30 = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
   const peSursa = new Map<string, { total: number; comenzi: number; total30: number; comenzi30: number }>();
   function adauga(sursa: string | null, cents: number, cand: Date | null) {
-    const cheie = sursa || "";
+    const cheie = sursaFaraPagina(sursa);
     const r = peSursa.get(cheie) || { total: 0, comenzi: 0, total30: 0, comenzi30: 0 };
     r.total += cents;
     r.comenzi += 1;

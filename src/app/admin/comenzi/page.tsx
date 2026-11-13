@@ -4,7 +4,7 @@ import { getSession } from "@/lib/auth";
 import { db } from "@/db";
 import { orders, users, orderSubmissions } from "@/db/schema";
 import { and, desc, eq, or } from "drizzle-orm";
-import { etichetaSursa } from "@/lib/sursa";
+import { etichetaSursa, paginaDeIntrare } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 
@@ -152,7 +152,7 @@ export default async function AdminComenziPage() {
                       o.status === "paid" ? "bg-green-100 text-green-800" : "bg-slate-100 text-slate-700"
                     }`}>{o.status}</span>
                   </td>
-                  <td className="px-4 py-3 text-xs text-slate-600">{etichetaSursa(o.source)}</td>
+                  <td className="px-4 py-3 text-xs text-slate-600">{etichetaSursa(o.source)}{paginaDeIntrare(o.source) ? ` · ${paginaDeIntrare(o.source)}` : ""}</td>
                   <td className="px-4 py-3 font-mono text-xs text-slate-400 truncate max-w-[180px]">
                     {o.stripeSessionId || "—"}
                   </td>
