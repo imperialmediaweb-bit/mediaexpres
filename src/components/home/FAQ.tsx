@@ -18,7 +18,7 @@ export const FAQS = [
   },
   {
     q: "Cât costă un advertorial sau un comunicat de presă?",
-    a: "La MediaExpres, un articol într-un ziar local costă 150 de lei, în 10 ziare dintr-o regiune 500 de lei, iar în toate cele 50 de ziare online oferta curentă este tot 500 de lei (preț de listă 1.500 de lei). Pentru cazino și pariuri, publicarea în 50 de ziare costă 1.000 de lei. Prețurile sunt finale, cu factură; firma nu este plătitoare de TVA.",
+    a: "La MediaExpres, un articol într-un ziar local costă 150 de lei, în 10 ziare dintr-o regiune 500 de lei, iar în toate cele 50 de ziare online tot 500 de lei. Pentru cazino și pariuri, publicarea în 50 de ziare costă 1.000 de lei. Prețurile sunt finale, cu factură; firma nu este plătitoare de TVA.",
   },
   {
     q: "Unde public un comunicat de presă în România?",

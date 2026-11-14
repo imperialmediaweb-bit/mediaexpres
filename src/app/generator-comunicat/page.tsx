@@ -37,7 +37,7 @@ const FAQ = [
   },
   {
     q: "Cum publici comunicatul după ce îl ai?",
-    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 46 de pagini de Facebook în 12 ore lucrătoare. Costă 1500 RON, plătit o singură dată, rămâne online permanent.",
+    a: "Cea mai simplă variantă: pachetul Național MediaExpres îl publică pe 41 ziare locale + 9 naționale + 46 de pagini de Facebook în 12 ore lucrătoare. Costă 500 de lei, plătit o singură dată, rămâne online permanent.",
   },
   {
     q: "AI-ul scrie text duplicat? E penalizat de Google?",
