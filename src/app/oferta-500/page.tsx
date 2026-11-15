@@ -892,7 +892,7 @@ export default async function Oferta500Page() {
       </section>
 
       {/* Cum functioneaza */}
-      <section className="section bg-slate-50">
+      <section id="cum-functioneaza" className="section scroll-mt-20 bg-slate-50">
         <div className="container">
           <div className="mx-auto max-w-2xl text-center">
             <p className="eyebrow">Cum funcționează</p>
