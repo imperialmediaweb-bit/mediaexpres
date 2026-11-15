@@ -22,6 +22,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${base}/en`, lastModified: now, changeFrequency: "weekly" as const, priority: 0.9 },
     // /oferta-500 e noindex intentionat (linkurile spre cele 50 de ziare), deci nu sta in sitemap.
     // Lista celor 50 de publicatii: pagina cu cel mai mult continut unic din site.
+    // 15.11.2026 — ghidul de comanda (clip + capturi).
+    { url: `${base}/cum-comanzi`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.8 },
     { url: `${base}/reteaua-noastra`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },
     // Clientul bifeaza singur publicatiile si plateste exact cat a bifat.
     { url: `${base}/alege-ziarele`, lastModified: now, changeFrequency: "monthly" as const, priority: 0.85 },

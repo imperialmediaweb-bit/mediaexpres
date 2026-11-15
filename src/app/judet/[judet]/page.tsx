@@ -311,6 +311,73 @@ export default async function CountyPage({
           </div>
         </div>
       </section>
+      {/* 15.11.2026 — text pe cautarile reale din oras (Google Ads, RO): publicitate,
+          agentie de publicitate / marketing, promovare firma, ziar <oras>. Plus date
+          structurate Service, ca motoarele si AI-urile (ChatGPT, Gemini, Perplexity)
+          sa citeasca clar: ce, unde, cat costa. */}
+      <section className="bg-white py-16">
+        <div className="container max-w-3xl space-y-8 text-slate-700">
+          <div>
+            <h2 className="h2">Publicitate în {county.capital}, prin ziarul local</h2>
+            <p className="mt-3">
+              Pentru o firmă din {county.capital}, cea mai directă formă de publicitate este un articol în ziarul
+              online al județului{ziar ? `, ${ziar}` : ""}. Articolul rămâne online permanent, are până la 3 linkuri
+              spre site-ul tău și este distribuit pe pagina de Facebook a ziarului, unde îl văd oamenii din
+              {" "}{county.capital} și din tot județul {county.name}.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-serif text-xl font-bold text-brand-navy">Agenție de publicitate în {county.capital} sau articol în ziar?</h3>
+            <p className="mt-2">
+              O agenție de publicitate sau de marketing din {county.capital} îți face o campanie cu abonament lunar.
+              Un articol în ziarul local costă o singură dată 150 lei și lucrează pentru tine ani de zile: apare în
+              Google la căutările despre firma ta, aduce vizite pe site și îți dă un link din presă pe care îl poți
+              arăta clienților. Pentru acoperire în toată țara, același articol apare în toate cele 50 de ziare ale
+              rețelei, la 500 lei.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-serif text-xl font-bold text-brand-navy">Promovarea firmei tale în {county.capital}, pas cu pas</h3>
+            <ol className="mt-2 list-decimal space-y-1 pl-5">
+              <li>Trimiți articolul (Word sau text) sau doar site-ul, și îl scriem noi.</li>
+              <li>Adaugi până la 3 poze și până la 3 linkuri spre site.</li>
+              <li>Plătești cu cardul, prin ordin de plată sau ne scrii pe WhatsApp.</li>
+              <li>Articolul apare în maximum 12 ore lucrătoare și primești linkul de raport, în timp real.</li>
+            </ol>
+            <p className="mt-2">
+              Detalii, cu clip și capturi: <Link href="/cum-comanzi" className="underline">cum comanzi</Link>.
+            </p>
+          </div>
+          <div>
+            <h3 className="font-serif text-xl font-bold text-brand-navy">Publicitate și în alte orașe din {regionLabel[county.region]}</h3>
+            <p className="mt-2 flex flex-wrap gap-x-3 gap-y-1">
+              {COUNTIES.filter((c) => c.region === county.region && c.slug !== county.slug).map((c) => (
+                <Link key={c.slug} href={`/publicare-comunicat-${c.slug}`} className="underline">
+                  {c.capital}
+                </Link>
+              ))}
+            </p>
+          </div>
+        </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "Service",
+              name: `Publicitate în ${county.capital}: articol în ziarul local${ziar ? ` ${ziar}` : ""}`,
+              serviceType: "Publicare articol și comunicat de presă în ziar online",
+              areaServed: { "@type": "City", name: county.capital, containedInPlace: { "@type": "AdministrativeArea", name: `Județul ${county.name}` } },
+              provider: { "@type": "Organization", name: "MediaExpres", url: "https://mediaexpress.ro" },
+              offers: [
+                { "@type": "Offer", name: `Articol în ziarul local${ziar ? ` ${ziar}` : ""}`, price: "150", priceCurrency: "RON" },
+                { "@type": "Offer", name: "Articol în toate cele 50 de ziare", price: "500", priceCurrency: "RON", url: "https://mediaexpress.ro/oferta-500" },
+              ],
+            }),
+          }}
+        />
+      </section>
+
       <section className="bg-white py-16">
         <div className="container max-w-3xl">
           <p className="eyebrow">Întrebări frecvente</p>
