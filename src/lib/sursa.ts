@@ -80,7 +80,13 @@ export function sursaDinUrl(
   const p = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search);
   const utmSource = curata(p.get("utm_source"));
   const utmMedium = curata(p.get("utm_medium"));
-  const utmCampaign = curata(p.get("utm_campaign"), 60);
+  // 15.11.2026 — si utm_content (ex. „video"), ca sa stim din ce reclama vine
+  // omul care scrie pe WhatsApp. Lipit de campanie: „oferta500_v2--video".
+  const utmContent = curata(p.get("utm_content"), 20);
+  const utmCampaign = (utmContent
+    ? `${curata(p.get("utm_campaign"), 38)}--${utmContent}`
+    : curata(p.get("utm_campaign"), 60)
+  ).slice(0, 60);
 
   // 1. Click de reclama sau link cu UTM: sursa cea mai sigura, o retinem mereu.
   if (p.get("gclid") || p.get("gbraid") || p.get("wbraid")) {
@@ -244,6 +250,9 @@ export function propozitieSursaWhatsApp(v: string | null | undefined): string {
     case "google":
       return "Am văzut oferta pe Google.";
     case "facebook":
+      // 15.11.2026 — fraza difera dupa reclama, ca proprietarul sa stie sursa.
+      if (s.campaign.startsWith("oferta500_video")) return "Am văzut reclama video pe Facebook.";
+      if (s.campaign.endsWith("--video")) return "Am văzut clipul cu oferta pe Facebook.";
       return "Am văzut oferta pe Facebook.";
     case "instagram":
       return "Am văzut oferta pe Instagram.";
