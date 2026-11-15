@@ -11,6 +11,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { COUNTIES, findCountyBySlug } from "@/data/counties";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
+import { ZiarulJudetului, numeZiarJudet } from "@/components/ZiareCuPoze";
+import { citesteAutoritateaRetelei, type ScorRetea } from "@/lib/autoritate-retea";
+
+// 15.11.2026 — cifrele live ale ziarului (articole, DA) se reimprospateaza.
+export const revalidate = 1800;
 
 export function generateStaticParams() {
   return COUNTIES.map((c) => ({ judet: c.slug }));
@@ -24,18 +29,26 @@ export async function generateMetadata({
   const county = findCountyBySlug(params.judet);
   if (!county) return { title: "Pagina nu există" };
 
-  const title = `Publicare comunicat de presă în ${county.name} — MediaExpres`;
-  const description = `Comunicatul tău pe ziarele din județul ${county.name}, în 12 ore lucrătoare. Local de la 150 lei, Regional 500 lei, Național pe 50 de ziare. Card sau OP.`;
+  // 15.11.2026 — titlurile pe cautarile reale (Google Ads, RO): „publicitate <oras>",
+  // „agentie de publicitate/marketing <oras>", „ziar <oras>"; „comunicat de presa <oras>"
+  // are ~0 cautari, ramane in text.
+  const ziar = numeZiarJudet(county.name);
+  const title = ziar
+    ? `Publicitate în ${county.capital}: articol în ziarul local ${ziar}, de la 150 lei`
+    : `Publicitate în ${county.capital}: articol și comunicat de presă, de la 150 lei`;
+  const description = `Promovare pentru firme din ${county.capital} și județul ${county.name}: articol sau comunicat de presă în ziarul local${ziar ? ` ${ziar}` : ""}, cu link și distribuire pe Facebook, publicat în 12 ore lucrătoare. 150 lei un ziar, 500 lei toate cele 50.`;
 
   return {
     title,
     description,
     alternates: { canonical: `/publicare-comunicat-${county.slug}` },
     keywords: [
-      `publicare comunicat presa ${county.name}`,
-      `comunicat presa ${county.capital}`,
-      `articole presa ${county.name}`,
-      `pr ${county.name}`,
+      `publicitate ${county.capital}`,
+      `agentie de publicitate ${county.capital}`,
+      `agentie marketing ${county.capital}`,
+      `promovare firma ${county.capital}`,
+      `ziar ${county.capital}`,
+      `comunicat de presa ${county.name}`,
       `advertorial ${county.name}`,
     ],
     openGraph: {
@@ -64,13 +77,40 @@ const STEPS = [
   },
 ];
 
-export default function CountyPage({
+export default async function CountyPage({
   params,
 }: {
   params: { judet: string };
 }) {
   const county = findCountyBySlug(params.judet);
   if (!county) notFound();
+  const ziar = numeZiarJudet(county.name);
+  // La build nu exista baza (Railway); scorurile vin la prima regenerare (revalidate).
+  const scoruri = process.env.NEXT_PHASE === "phase-production-build" ? new Map() : await citesteAutoritateaRetelei();
+  const autoritate: ScorRetea = {};
+  for (const [d, a] of scoruri) if (a.da != null) autoritate[d] = { da: a.da, pa: a.pa };
+  const faq = [
+    {
+      q: `Cât costă publicitatea în ${county.capital}?`,
+      a: `Un articol în ziarul local${ziar ? ` ${ziar}` : ""} costă 150 lei. Același articol în toate cele 50 de ziare ale rețelei (41 județene și 9 naționale) costă 500 lei. Prețuri finale, cu factură.`,
+    },
+    {
+      q: "În cât timp apare articolul?",
+      a: "În maximum 12 ore lucrătoare de la plată. Poți alege și publicare eșalonată, pe 3 zile sau pe 2 săptămâni.",
+    },
+    {
+      q: "Ce primesc după publicare?",
+      a: "Un link de raport, pe email, unde vezi în timp real fiecare articol cu linkul lui. Raportul se descarcă și în PDF și Excel. Articolele rămân online permanent.",
+    },
+    {
+      q: "Trebuie să am articolul scris?",
+      a: "Nu. Ne trimiți site-ul și ce vrei să promovezi, îl scriem noi și ți-l arătăm înainte de publicare. Dacă îl ai, îl trimiți în Word sau ca text, cu până la 3 poze și 3 linkuri.",
+    },
+    {
+      q: `Sunteți o agenție de publicitate din ${county.capital}?`,
+      a: `Suntem o rețea de 50 de ziare online, cu câte un ziar în fiecare județ${ziar ? `; în județul ${county.name} ziarul este ${ziar}` : ""}. Publicăm direct, fără intermediari, și distribuim articolul pe pagina de Facebook a ziarului.`,
+    },
+  ];
 
   const regionLabel: Record<typeof county.region, string> = {
     Moldova: "Moldova",
@@ -89,12 +129,12 @@ export default function CountyPage({
               <MapPin className="h-3.5 w-3.5" /> Județul {county.name}
             </div>
             <h1 className="h1 mt-4 text-white">
-              Publicare comunicat de presă în {county.name}
+              Publicitate în {county.capital}: articol în ziarul local{ziar ? ` ${ziar}` : ""}
             </h1>
             <p className="lead mt-4 text-white/85">
-              Articolul tău apare pe ziarele din {county.capital} și împrejurimi
-              în maximum 12 ore lucrătoare. Plată online cu cardul, fără negocieri,
-              prețuri fixe și transparente.
+              Promovare pentru firmele din {county.capital} și județul {county.name}: articolul sau
+              comunicatul tău de presă apare în ziarul local, cu link spre site și distribuire pe
+              Facebook, în maximum 12 ore lucrătoare. Prețuri fixe: 150 lei un ziar, 500 lei toate cele 50.
             </p>
             <div className="mt-8 flex flex-wrap gap-3">
               <Button variant="gold" size="lg" asChild>
@@ -138,6 +178,31 @@ export default function CountyPage({
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section className="bg-slate-50 py-16">
+        <div className="container grid items-start gap-10 md:grid-cols-2">
+          <div>
+            <p className="eyebrow">Ziarul local din {county.capital}</p>
+            <h2 className="h2 mt-2">{ziar ?? `Ziarul din județul ${county.name}`}</h2>
+            <p className="mt-4 text-slate-600">
+              Aici apare articolul tău. Prima pagină de azi, autoritatea în Google (DA și PA, Moz) și câte
+              articole a publicat ziarul în ultimele 24 de ore. Apasă și verifică.
+            </p>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <Button asChild variant="accent" size="lg">
+                <Link href="/oferta-500">Toate cele 50 de ziare — 500 lei</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/cum-comanzi">Cum comanzi</Link>
+              </Button>
+            </div>
+            <p className="mt-4 text-sm text-slate-500">
+              Vrei să vezi toate ziarele? <Link href="/reteaua-noastra" className="underline">Lista celor 50 de ziare</Link>
+            </p>
+          </div>
+          <ZiarulJudetului judet={county.name} autoritate={autoritate} />
         </div>
       </section>
 
@@ -245,6 +310,30 @@ export default function CountyPage({
             </Button>
           </div>
         </div>
+      </section>
+      <section className="bg-white py-16">
+        <div className="container max-w-3xl">
+          <p className="eyebrow">Întrebări frecvente</p>
+          <h2 className="h2 mt-2">Publicitate în {county.capital}: ce trebuie să știi</h2>
+          <div className="mt-8 divide-y divide-slate-200 rounded-xl border border-slate-200">
+            {faq.map((f) => (
+              <details key={f.q} className="group p-5">
+                <summary className="cursor-pointer font-semibold text-brand-navy">{f.q}</summary>
+                <p className="mt-2 text-slate-600">{f.a}</p>
+              </details>
+            ))}
+          </div>
+        </div>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify({
+              "@context": "https://schema.org",
+              "@type": "FAQPage",
+              mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+            }),
+          }}
+        />
       </section>
     </>
   );

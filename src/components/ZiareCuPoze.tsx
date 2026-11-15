@@ -50,11 +50,20 @@ export async function ZiareCuPoze({ autoritate }: { autoritate: ScorRetea }) {
         </p>
       )}
       <ul className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {ziare.map(({ n, h }) => {
-          const z = live.get(h);
-          const a = autoritate[h];
-          return (
-            <li key={h} className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
+        {ziare.map(({ n, h }) => (
+          <CardZiar key={h} n={n} h={h} z={live.get(h)} a={autoritate[h]} fata={fata} />
+        ))}
+      </ul>
+    </div>
+  );
+}
+
+type Ziar = (typeof NEWSPAPERS)[number];
+type Live = NonNullable<Awaited<ReturnType<typeof stareRetea>>>["ziare"][number];
+
+function CardZiar({ n, h, z, a, fata }: { n: Ziar; h: string; z?: Live; a?: { da: number; pa: number | null }; fata: Date }) {
+  return (
+            <li className="flex flex-col overflow-hidden rounded-xl border border-slate-200 bg-white shadow-sm">
               <a href={n.url} target="_blank" rel="noopener" className="block border-b border-slate-200 bg-slate-100">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -108,9 +117,25 @@ export async function ZiareCuPoze({ autoritate }: { autoritate: ScorRetea }) {
                 </div>
               </div>
             </li>
-          );
-        })}
-      </ul>
-    </div>
   );
+}
+
+/** Ziarul unui judet, pentru paginile /publicare-comunicat-<judet>. */
+export async function ZiarulJudetului({ judet, autoritate }: { judet: string; autoritate: ScorRetea }) {
+  const n = NEWSPAPERS.find((x) => x.type === "local" && x.county === judet);
+  if (!n) return null;
+  const h = gazda(n.url);
+  if (!CU_POZA.has(h)) return null;
+  const s = await stareRetea();
+  const z = (s?.ziare ?? []).find((x) => gazda(x.url) === h);
+  return (
+    <ul className="max-w-sm">
+      <CardZiar n={n} h={h} z={z} a={autoritate[h]} fata={new Date()} />
+    </ul>
+  );
+}
+
+/** Numele ziarului local al unui judet (ex. „Iași Expres"), pentru titluri. */
+export function numeZiarJudet(judet: string): string | null {
+  return NEWSPAPERS.find((x) => x.type === "local" && x.county === judet)?.name ?? null;
 }
