@@ -7,6 +7,7 @@ import { REGION_COUNTS } from "@/data/newspapers";
 import { CountyGrid } from "@/components/CountyGrid";
 import { NewspaperDirectory } from "@/components/NewspaperDirectory";
 import { StareRetea } from "@/components/StareRetea";
+import { ZiareCuPoze } from "@/components/ZiareCuPoze";
 import { citesteAutoritateaRetelei, rezumatAutoritate, type ScorRetea } from "@/lib/autoritate-retea";
 
 // Scorurile Moz se citesc din baza la fiecare cerere (la build Railway nu are baza,
@@ -65,6 +66,29 @@ export default async function ReteauaPage() {
             fiecare zi</strong> — site-uri vii, cu trafic real, pe care le poți deschide
             chiar acum, mai jos.
           </p>
+        </div>
+      </section>
+
+      {/* 15.11.2026 — cele 50 de ziare cu prima pagina, linkul, DA si articolele live. */}
+      <section className="section bg-slate-50">
+        <div className="container">
+          <div className="mx-auto mb-10 max-w-2xl text-center">
+            <p className="eyebrow">Toate ziarele, cu dovezi</p>
+            <h2 className="h2 mt-2">Cele 50 de ziare, așa cum arată azi</h2>
+            <p className="lead mt-4">
+              Prima pagină a fiecărui ziar, linkul, autoritatea în Google (DA și PA, Moz) și câte
+              articole a publicat în ultimele 24 de ore. Apasă pe oricare și verifică.
+            </p>
+            <div className="mt-6 flex flex-col items-center justify-center gap-3 sm:flex-row">
+              <Button asChild variant="accent" size="lg">
+                <Link href="/oferta-500">Comandă — 500 lei, toate cele 50</Link>
+              </Button>
+              <Button asChild variant="outline" size="lg">
+                <Link href="/cum-comanzi">Cum comanzi, pas cu pas</Link>
+              </Button>
+            </div>
+          </div>
+          <ZiareCuPoze autoritate={autoritate} />
         </div>
       </section>
 
