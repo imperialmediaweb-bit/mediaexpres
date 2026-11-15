@@ -28,5 +28,6 @@ export async function POST(req: NextRequest) {
   }).catch((e) => e as Error);
   if (res instanceof Error) return NextResponse.json({ ok: false, error: res.message }, { status: 502 });
   const j = await res.json().catch(() => ({ ok: false, error: `HTTP ${res.status}` }));
-  return NextResponse.json(j, { status: res.status });
+  // Statusul de sus merge in corp: Cloudflare inlocuieste 502 cu pagina lui si se pierde mesajul.
+  return NextResponse.json({ ...j, http_retea: res.status });
 }
