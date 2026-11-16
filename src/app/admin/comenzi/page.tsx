@@ -7,6 +7,7 @@ import { and, desc, eq, or } from "drizzle-orm";
 import { etichetaSursa, paginaDeIntrare } from "@/lib/sursa";
 import { findPackageById } from "@/data/packages";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
+import { facturiStartco, surseDupaFirma, sursaFacturii } from "@/lib/facturi-startco";
 
 export const dynamic = "force-dynamic";
 
@@ -72,6 +73,21 @@ export default async function AdminComenziPage() {
   const sumarSurse = [...peSursa.entries()].sort((a, b) => b[1].cents - a[1].cents);
   const opCents = opRows.reduce((s, r) => s + (findPackageById(r.packageId)?.price ?? 0) * 100, 0);
 
+  // 16.11.2026 — facturile lunii din StartCo, cu sursa comenzii (doar citire).
+  const lunaAcum = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Bucharest", year: "numeric", month: "2-digit" }).format(new Date());
+  const [toateFacturile, surse] = await Promise.all([facturiStartco(), surseDupaFirma()]);
+  const facturiLuna = toateFacturile
+    .filter((f) => (f.dateEmitted || "").slice(0, 7) === lunaAcum)
+    .map((f) => ({ ...f, sursa: sursaFacturii(f, surse) }));
+  const totalFacturi = facturiLuna.reduce((s2, f) => s2 + (Number(f.total) || 0), 0);
+  const facturiPeSursa = new Map<string, { n: number; lei: number }>();
+  for (const f of facturiLuna) {
+    const k = f.sursa ? etichetaSursa(f.sursa) : "WhatsApp / direct (din reclama Facebook)";
+    const c = facturiPeSursa.get(k) || { n: 0, lei: 0 };
+    facturiPeSursa.set(k, { n: c.n + 1, lei: c.lei + (Number(f.total) || 0) });
+  }
+  const lei = (v: number) => v.toLocaleString("ro-RO", { style: "currency", currency: "RON" });
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">Comenzi</h1>
@@ -109,6 +125,57 @@ export default async function AdminComenziPage() {
           </div>
         )}
       </div>
+
+
+      {facturiLuna.length > 0 && (
+        <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
+          <div className="border-b border-slate-200 bg-slate-50 p-4 text-sm">
+            <p className="font-semibold text-brand-navy">
+              Facturi StartCo luna aceasta: {facturiLuna.length} facturi, {lei(totalFacturi)}
+            </p>
+            <ul className="mt-1 space-y-0.5 text-slate-600">
+              {[...facturiPeSursa.entries()].sort((a, b) => b[1].lei - a[1].lei).map(([k, v]) => (
+                <li key={k}>
+                  {k}: <strong>{lei(v.lei)}</strong> din {v.n} {v.n === 1 ? "factură" : "facturi"}
+                </li>
+              ))}
+            </ul>
+            <p className="mt-2 text-xs text-slate-500">
+              „Emisă” = nebifată ca încasată în StartCo (plățile prin OP nu se bifează singure). Sursa se potrivește după CUI sau numele firmei.
+            </p>
+          </div>
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-4 py-2">Data</th>
+                <th className="px-4 py-2">Nr.</th>
+                <th className="px-4 py-2">Client</th>
+                <th className="px-4 py-2">Sumă</th>
+                <th className="px-4 py-2">Stare</th>
+                <th className="px-4 py-2">Sursă</th>
+              </tr>
+            </thead>
+            <tbody>
+              {facturiLuna.map((f) => (
+                <tr key={f.id} className="border-t border-slate-100">
+                  <td className="px-4 py-2 text-xs text-slate-600">{f.dateEmitted}</td>
+                  <td className="px-4 py-2 font-mono text-xs">{f.number}</td>
+                  <td className="px-4 py-2">{f.client?.name}</td>
+                  <td className="px-4 py-2 font-semibold">{lei(Number(f.total) || 0)}</td>
+                  <td className="px-4 py-2 text-xs">
+                    <span className={f.status === "Incasata" ? "text-green-700" : "text-amber-700"}>
+                      {f.status === "Incasata" ? "Încasată" : f.status === "Emisa" ? "Emisă" : f.status}
+                    </span>
+                  </td>
+                  <td className="px-4 py-2 text-xs text-slate-600">
+                    {f.sursa ? etichetaSursa(f.sursa) : "WhatsApp / direct (din reclama Facebook)"}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
 
       <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
         <table className="w-full text-sm">

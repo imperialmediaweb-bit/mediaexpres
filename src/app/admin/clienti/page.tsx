@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import { facturiStartco, cheieCui, cheieNume, surseDupaFirma, sursaFacturii } from "@/lib/facturi-startco";
 import Link from "next/link";
 import { getSession } from "@/lib/auth";
 import { db } from "@/db";
@@ -141,6 +142,23 @@ export default async function AdminClientiPage() {
     };
   });
 
+  // 16.11.2026 — toți clienții din facturile StartCo (și cei veniți pe WhatsApp, fără cont pe site).
+  const [facturi, surseF] = await Promise.all([facturiStartco(), surseDupaFirma()]);
+  const peClient = new Map<string, { nume: string; cui: string; n: number; lei: number; ultima: string; sursa: string | null; neincasate: number }>();
+  for (const f of facturi) {
+    if ((Number(f.total) || 0) <= 0) continue;
+    const k = cheieCui(f.client?.identifier) || cheieNume(f.client?.name);
+    const c = peClient.get(k) || { nume: f.client?.name || "—", cui: f.client?.identifier || "", n: 0, lei: 0, ultima: "", sursa: null, neincasate: 0 };
+    c.n += 1;
+    c.lei += Number(f.total) || 0;
+    if (f.dateEmitted > c.ultima) c.ultima = f.dateEmitted;
+    if (f.status === "Emisa") c.neincasate += 1;
+    c.sursa = c.sursa || sursaFacturii(f, surseF);
+    peClient.set(k, c);
+  }
+  const clientiFacturi = [...peClient.values()].sort((a, b) => (a.ultima < b.ultima ? 1 : -1));
+  const leiF = (v: number) => v.toLocaleString("ro-RO", { style: "currency", currency: "RON" });
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">Clienti</h1>
@@ -155,6 +173,43 @@ export default async function AdminClientiPage() {
       <div className="mt-3">
         <RecoverLeadsButton />
       </div>
+
+
+      {clientiFacturi.length > 0 && (
+        <details className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white" open>
+          <summary className="cursor-pointer bg-slate-50 p-4 text-sm font-semibold text-brand-navy">
+            Clienți din facturi (StartCo): {clientiFacturi.length} firme, {leiF(clientiFacturi.reduce((s2, c) => s2 + c.lei, 0))} facturat
+          </summary>
+          <table className="w-full text-sm">
+            <thead className="text-left text-xs uppercase tracking-wider text-slate-500">
+              <tr>
+                <th className="px-4 py-2">Firma</th>
+                <th className="px-4 py-2">Facturi</th>
+                <th className="px-4 py-2">Total</th>
+                <th className="px-4 py-2">Ultima</th>
+                <th className="px-4 py-2">Sursă</th>
+              </tr>
+            </thead>
+            <tbody>
+              {clientiFacturi.map((c) => (
+                <tr key={c.nume + c.cui} className="border-t border-slate-100">
+                  <td className="px-4 py-2">
+                    <p className="font-medium text-brand-navy">{c.nume}</p>
+                    {c.cui && <p className="text-xs text-slate-400">{c.cui}</p>}
+                  </td>
+                  <td className="px-4 py-2 text-slate-600">
+                    {c.n}
+                    {c.neincasate > 0 && <span className="ml-1 text-xs text-amber-700">({c.neincasate} nebifate încasate)</span>}
+                  </td>
+                  <td className="px-4 py-2 font-semibold">{leiF(c.lei)}</td>
+                  <td className="px-4 py-2 text-xs text-slate-600">{c.ultima}</td>
+                  <td className="px-4 py-2 text-xs text-slate-600">{c.sursa ? etichetaSursa(c.sursa) : "WhatsApp / direct (din reclama Facebook)"}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </details>
+      )}
 
       <div className="my-6">
         <SendListToAnyone />
