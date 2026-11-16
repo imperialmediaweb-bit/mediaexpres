@@ -80,6 +80,12 @@ export function buildListEmail(firstName: string): string {
     `
     <p>Bună ziua, ${firstName},</p>
     <p><strong>Ai lista și atașată în PDF</strong>, la finalul acestui email — o poți salva sau trimite mai departe colegilor.</p>
+    <div style="margin:18px 0;padding:16px;border:1px solid #e5e5e5;border-left:4px solid #c1121f;border-radius:8px;background:#fafafa;">
+      <p style="margin:0 0 8px;font-weight:600;color:#111111;">Vezi toate ziarele pe o singură pagină, cu poze</p>
+      <p style="margin:0 0 12px;font-size:14px;color:#334155;">Pentru fiecare ziar: cum arată prima pagină, linkul, autoritatea în Google (DA/PA), câte articole a publicat în ultimele 24 de ore și pagina de Facebook — date live, actualizate la câteva minute.</p>
+      <a href="${SITE.url}/reteaua-noastra?utm_source=email&utm_medium=lista&utm_campaign=lista_ziare" style="display:inline-block;background:#111111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Vezi cele 50 de ziare →</a>
+      <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Cum se comandă, pas cu pas (cu clip): <a href="${SITE.url}/cum-comanzi" style="color:#c1121f;">${SITE.domain}/cum-comanzi</a></p>
+    </div>
     <p>Mai jos ai <strong>toate publicațiile</strong> din rețeaua MediaExpres — dă click pe oricare să o vezi live. Fiecare are și pagină de Facebook asociată.${
       bonus > 0
         ? ` În listă sunt ${NEWSPAPERS.length}: promitem ${OFFICIAL_TOTAL}, publicăm pe toate — ${bonus === 1 ? "una e" : `${bonus} sunt`} bonus.`
