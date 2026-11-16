@@ -83,6 +83,7 @@ export function buildListEmail(firstName: string): string {
     <div style="margin:18px 0;padding:16px;border:1px solid #e5e5e5;border-left:4px solid #c1121f;border-radius:8px;background:#fafafa;">
       <p style="margin:0 0 8px;font-weight:600;color:#111111;">Vezi toate ziarele pe o singură pagină, cu poze</p>
       <p style="margin:0 0 12px;font-size:14px;color:#334155;">Pentru fiecare ziar: cum arată prima pagină, linkul, autoritatea în Google (DA/PA), câte articole a publicat în ultimele 24 de ore și pagina de Facebook — date live, actualizate la câteva minute.</p>
+      <a href="${SITE.url}/reteaua-noastra?utm_source=email&utm_medium=lista&utm_campaign=lista_ziare" style="display:block;margin:0 0 12px;"><img src="${SITE.url}/email/reteaua-ziare-v1.jpg" alt="Cum arată pagina cu cele 50 de ziare: prima pagină, DA/PA, articole în 24 h, Facebook" width="560" style="display:block;width:100%;max-width:560px;height:auto;border:1px solid #e5e5e5;border-radius:6px;" /></a>
       <a href="${SITE.url}/reteaua-noastra?utm_source=email&utm_medium=lista&utm_campaign=lista_ziare" style="display:inline-block;background:#111111;color:#fff;padding:10px 18px;border-radius:8px;text-decoration:none;font-weight:600;font-size:14px;">Vezi cele 50 de ziare →</a>
       <p style="margin:12px 0 0;font-size:13px;color:#64748b;">Cum se comandă, pas cu pas (cu clip): <a href="${SITE.url}/cum-comanzi" style="color:#c1121f;">${SITE.domain}/cum-comanzi</a></p>
     </div>
