@@ -11,10 +11,14 @@ import { PricingTeaser } from "@/components/home/PricingTeaser";
 import { Testimonials } from "@/components/home/Testimonials";
 import { FAQ } from "@/components/home/FAQ";
 import { CtaBanner } from "@/components/home/CtaBanner";
+import { UltimeleArticole } from "@/components/home/UltimeleArticole";
 
 // Canonical pe prima pagina (audit SEO 09.10.2026: lipsea).
 // Titlul tinteste „advertorial" (Ubersuggest RO: ~1.000 cautari/luna,
 // dificultate 11/100) si „comunicat de presa", fara sa repete brandul.
+// 18.11.2026 — ultimele articole de pe blog se reimprospateaza la o ora.
+export const revalidate = 3600;
+
 export const metadata: Metadata = {
   title: "Advertorial și comunicat de presă în 50 de ziare",
   description:
@@ -55,6 +59,7 @@ export default function HomePage() {
       <Stats />
       <PricingTeaser />
       <Testimonials />
+      <UltimeleArticole />
       <FAQ />
       <CtaBanner />
     </>

@@ -16,7 +16,7 @@ export const SITE = {
   address: "Botoșani, România",
   schedule: "Luni – Vineri, 09:00 – 18:00",
   social: {
-    facebook: "https://facebook.com/mediaexpres",
+    facebook: "https://www.facebook.com/mediaexpress.ro",
     linkedin: "https://linkedin.com/company/mediaexpres",
   },
   // Datele de plata prin transfer bancar (OP). Apar in emailul cu lista si

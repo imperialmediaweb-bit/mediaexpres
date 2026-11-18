@@ -100,6 +100,28 @@ export const CUVINTE_LOT_NOIEMBRIE = [
   "cum măsori rezultatele unei campanii de presă",
 ];
 
+/**
+ * 18.11.2026 — cuvintele pe care WhitePress ia trafic in Romania (blogul lor e
+ * pe locul 1-6). Trec in fata cozii (pozitii negative), o singura data.
+ */
+export const CUVINTE_LOT_WHITEPRESS = [
+  "ce este SEO și de ce are nevoie firma ta",
+  "marketing digital pentru firme mici",
+  "content marketing: ghid pentru afaceri din România",
+  "Google Business Profile (Compania mea pe Google): cum îl configurezi",
+  "optimizare site pentru Google: pașii de bază",
+  "link building: cum obții linkuri din presă",
+  "copywriting pentru firme: cum scrii texte care vând",
+  "Google Discover: cum apare firma ta acolo",
+  "motoarele de căutare: cum te găsesc clienții",
+  "linkuri interne și externe: ce contează pentru SEO",
+  "social media marketing vs articole în presă",
+  "agenție de marketing sau publicare directă în presă?",
+  "alternativă la platformele de articole sponsorizate",
+  "advertoriale: cum alegi site-urile potrivite",
+  "KPI în marketing: cum măsori o campanie de presă",
+];
+
 export const CUVINTE_DE_START = [
   "ce este un advertorial",
   "model comunicat de presă",
@@ -538,6 +560,16 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
       .from(blogKeywords)
       .where(eq(blogKeywords.status, "pending"));
     if (n === 0) await adaugaCuvinte(CUVINTE_LOT_NOIEMBRIE.join("\n"));
+  }
+
+  // Lotul WhitePress: o singura data, in fata cozii.
+  if (!opt.keywordId) {
+    const existente = await db.select({ keyword: blogKeywords.keyword }).from(blogKeywords);
+    const deja = new Set(existente.map((x) => x.keyword.toLowerCase()));
+    const noi = CUVINTE_LOT_WHITEPRESS.filter((c) => !deja.has(c.toLowerCase()));
+    if (noi.length) {
+      await db.insert(blogKeywords).values(noi.map((keyword, i) => ({ keyword, position: -1000 + i })));
+    }
   }
 
   const [cuvant] = opt.keywordId
