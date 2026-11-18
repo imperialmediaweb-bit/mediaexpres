@@ -31,6 +31,7 @@ import { promoDeadlineLabel } from "@/data/packages";
 import { nr, milioane } from "@/data/cifre";
 import { cifreLive, type CifreRetea } from "@/lib/cifre-live";
 import { firmeCareAuPublicat, PRAG_FIRME } from "@/lib/cifre-clienti";
+import { ultimaComanda, textUltimaComanda } from "@/lib/ultima-comanda";
 
 // Termenul rulant al ofertei — null dupa 31 decembrie (atunci nu se mai afiseaza).
 // 11.10.2026: termenul se citeste la fiecare randare, nu o data la pornirea
@@ -339,6 +340,8 @@ export default async function Oferta500Page() {
   // daca nu raspunde, cele din data/cifre.ts, cu data lor.
   const CIFRE = await cifreLive();
   const firme = await firmeCareAuPublicat();
+  // 18.11.2026 — „Ultima comandă: azi la …", din comenzi și facturi reale.
+  const ultima = process.env.NEXT_PHASE === "phase-production-build" ? null : await ultimaComanda();
   const FAQ = buildFaq(CIFRE);
   const deadline = promoDeadlineLabel();
   // DA pe fiecare domeniu (Moz, citit de noi); fara baza, lista ramane fara scoruri.
@@ -399,6 +402,12 @@ export default async function Oferta500Page() {
             <div className="mt-10">
               <PromoOffer />
             </div>
+            {ultima && (
+              <p className="mt-4 inline-flex items-center gap-2 text-sm text-white/80">
+                <span className="h-2 w-2 rounded-full bg-emerald-400" aria-hidden />
+                Ultima comandă: <strong className="text-white">{textUltimaComanda(ultima)}</strong>
+              </p>
+            )}
             <p className="mt-4 text-sm text-white/60">
               Card sau ordin de plată • factură fiscală • 500 lei, preț final
             </p>
