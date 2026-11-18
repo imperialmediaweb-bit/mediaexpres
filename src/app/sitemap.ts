@@ -63,7 +63,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const counties = COUNTIES.map((c) => ({
     url: `${base}/publicare-comunicat-${c.slug}`,
     lastModified: now,
-    changeFrequency: "monthly" as const,
+    // 18.11.2026: au stirile zilnice din ziarul local.
+    changeFrequency: "daily" as const,
     priority: 0.7,
   }));
 

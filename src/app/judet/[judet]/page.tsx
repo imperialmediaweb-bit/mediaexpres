@@ -13,6 +13,8 @@ import { COUNTIES, findCountyBySlug } from "@/data/counties";
 import { CheckoutButton } from "@/components/pricing/CheckoutButton";
 import { ZiarulJudetului, numeZiarJudet } from "@/components/ZiareCuPoze";
 import { citesteAutoritateaRetelei, type ScorRetea } from "@/lib/autoritate-retea";
+import { NEWSPAPERS } from "@/data/newspapers";
+import { stiriZiar } from "@/lib/stiri-judet";
 
 // 15.11.2026 — cifrele live ale ziarului (articole, DA) se reimprospateaza.
 export const revalidate = 1800;
@@ -89,6 +91,12 @@ export default async function CountyPage({
   const scoruri = process.env.NEXT_PHASE === "phase-production-build" ? new Map() : await citesteAutoritateaRetelei();
   const autoritate: ScorRetea = {};
   for (const [d, a] of scoruri) if (a.da != null) autoritate[d] = { da: a.da, pa: a.pa };
+  // 18.11.2026 — ultimele stiri din ziarul local, jos pe pagina: pagina se schimba zilnic.
+  const ziarLocal = NEWSPAPERS.find((x) => x.type === "local" && x.county === county.name);
+  const stiri =
+    ziarLocal && process.env.NEXT_PHASE !== "phase-production-build" ? await stiriZiar(ziarLocal.url) : [];
+  const zi = (d: Date) =>
+    d.toLocaleDateString("ro-RO", { day: "numeric", month: "long", year: "numeric", timeZone: "Europe/Bucharest" });
   const faq = [
     {
       q: `Cât costă publicitatea în ${county.capital}?`,
@@ -402,6 +410,29 @@ export default async function CountyPage({
           }}
         />
       </section>
+
+      {ziarLocal && stiri.length > 0 && (
+        <section className="bg-slate-50 py-10">
+          <div className="container max-w-3xl">
+            <h2 className="text-base font-semibold text-brand-navy">Ultimele știri din {ziarLocal.name}</h2>
+            <ul className="mt-3 divide-y divide-slate-200 text-sm">
+              {stiri.map((s) => (
+                <li key={s.link} className="flex items-baseline justify-between gap-4 py-2">
+                  <a href={s.link} target="_blank" rel="noopener" className="text-slate-700 hover:text-brand-navy hover:underline">
+                    {s.titlu}
+                  </a>
+                  {s.data && <span className="shrink-0 text-xs text-slate-500">{zi(s.data)}</span>}
+                </li>
+              ))}
+            </ul>
+            {stiri[0].data && (
+              <p className="mt-3 text-xs text-slate-500">
+                Pagină actualizată la {zi(stiri[0].data)}. Știrile vin direct din {ziarLocal.name}.
+              </p>
+            )}
+          </div>
+        </section>
+      )}
     </>
   );
 }

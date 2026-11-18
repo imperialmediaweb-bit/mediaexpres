@@ -38,6 +38,9 @@ export async function pornestePlanificator() {
   // E-mailul „campania a pornit" (12.11.2026): la 10 minute, o singura data pe comanda.
   setTimeout(() => ruleaza("/api/cron/campanie-pornita"), 7 * MIN);
   setInterval(() => ruleaza("/api/cron/campanie-pornita"), 10 * MIN);
+  // Paginile pe judet anuntate la IndexNow (18.11.2026): zilnic, dar trimite doar lunea.
+  setTimeout(() => ruleaza("/api/cron/indexnow-judete"), 8 * MIN);
+  setInterval(() => ruleaza("/api/cron/indexnow-judete"), 24 * 60 * MIN);
   // Reamintirea dinainte de reinnoirea abonamentelor (11.10.2026): o data pe ora.
   setTimeout(() => ruleaza("/api/cron/abonamente-reamintire"), 6 * MIN);
   setInterval(() => ruleaza("/api/cron/abonamente-reamintire"), 60 * MIN);
