@@ -1,7 +1,7 @@
 import { unstable_cache } from "next/cache";
 import { sql } from "drizzle-orm";
 import { db } from "@/db";
-import { facturiStartco } from "@/lib/facturi-startco";
+
 
 /**
  * 18.11.2026 — „Ultima comandă: azi la 08:44" pe /oferta-500, din date reale:
@@ -27,6 +27,25 @@ const dinSite = unstable_cache(
   { revalidate: 600 },
 );
 
+/**
+ * Ziua facturilor din StartCo. Cerere proprie cu cache de 10 minute (NU prin
+ * startcoFetch, care e no-store si facea pagina /oferta-500 dinamica: eroarea
+ * „static to dynamic at runtime" din 18.11.2026).
+ */
+async function ziileFacturilor(): Promise<string[]> {
+  const token = process.env.STARTCO_TOKEN;
+  if (!token) return [];
+  const r = await fetch("https://api.cloud.startco.ro/developer/invoice", {
+    headers: { Authorization: token, Accept: "application/json" },
+    next: { revalidate: 600 },
+    signal: AbortSignal.timeout(8000),
+  });
+  if (!r.ok) return [];
+  const j = (await r.json().catch(() => null)) as unknown;
+  const lista = Array.isArray(j) ? j : Array.isArray((j as { data?: unknown })?.data) ? (j as { data: unknown[] }).data : [];
+  return lista.map((f) => String((f as { dateEmitted?: unknown })?.dateEmitted || ""));
+}
+
 export async function ultimaComanda(): Promise<UltimaComanda | null> {
   let site: Date | null = null;
   try {
@@ -37,7 +56,7 @@ export async function ultimaComanda(): Promise<UltimaComanda | null> {
   }
   let factura: Date | null = null;
   try {
-    const zile = (await facturiStartco()).map((f) => f.dateEmitted).filter(Boolean).sort();
+    const zile = (await ziileFacturilor()).filter(Boolean).sort();
     const z = zile[zile.length - 1];
     // Ziua facturii, la pranz ora Romaniei, ca sa cada sigur in ziua corecta.
     if (z) factura = new Date(`${z}T10:00:00Z`);
