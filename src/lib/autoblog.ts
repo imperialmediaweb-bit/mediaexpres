@@ -498,7 +498,7 @@ export async function posteazaPeFacebook(postId: string): Promise<{ ok: boolean;
   const [p] = await db.select().from(blogPosts).where(eq(blogPosts.id, postId)).limit(1);
   if (!p) return { ok: false, motiv: "Articolul nu exista" };
   if (p.fbPostId) return { ok: true };
-  const r = await posteazaPePagina({ mesaj: textPostareFacebook(p), link: `${SITE.url}/blog/${p.slug}` });
+  const r = await posteazaPePagina({ mesaj: textPostareFacebook(p), link: `${SITE.url}/blog/${p.slug}`, poza: p.coverUrl });
   if (!r.ok) {
     await db.update(blogPosts).set({ fbError: r.motiv.slice(0, 300) }).where(eq(blogPosts.id, p.id));
     return { ok: false, motiv: r.motiv };

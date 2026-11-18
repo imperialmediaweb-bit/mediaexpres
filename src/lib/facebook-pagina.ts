@@ -44,11 +44,11 @@ export async function posteazaPePagina(d: { mesaj: string; link?: string; poza?:
       const id = j.post_id || j.id;
       return r.ok && id ? { ok: true, id } : { ok: false, motiv: j.error?.message || `Facebook ${r.status}` };
     }
-    // Prin retea: doar text + link (previzualizarea linkului aduce poza paginii).
+    // Prin retea: cu poza (18.11.2026: postare foto, linkul in text); fara poza, text + link.
     const r = await fetch(`${RETEA_URL}/api/facebook/post`, {
       method: "POST",
       headers: { "content-type": "application/json", Authorization: `Bearer ${process.env.RETEA_KEY!.trim()}` },
-      body: JSON.stringify({ page_id: cfg.pageId, message: d.mesaj, ...(d.link ? { link: d.link } : {}) }),
+      body: JSON.stringify({ page_id: cfg.pageId, message: d.mesaj, ...(d.link ? { link: d.link } : {}), ...(d.poza ? { image_url: d.poza } : {}) }),
     });
     const j = (await r.json().catch(() => ({}))) as { ok?: boolean; fb_post_id?: string; error?: string };
     if (r.ok && j.fb_post_id) return { ok: true, id: j.fb_post_id };
