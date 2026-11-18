@@ -5,6 +5,7 @@ import { ensureBlogTables } from "@/lib/ensure-columns";
 import { getCloudinaryConfig, signUploadParams } from "@/lib/cloudinary";
 import { SITE } from "@/data/site";
 import { pingIndexNowUrl } from "@/lib/indexnow";
+import { RETEA_URL } from "@/lib/retea";
 import { posteazaPePagina } from "@/lib/facebook-pagina";
 
 /**
@@ -298,6 +299,23 @@ export interface ArticolGenerat {
   tags: string[];
   imageQuery: string;
   sources?: { title: string; url: string }[];
+}
+
+/** Adrese mediaexpress.ro trimise la indexare Google (Rapid Indexer, prin retea). Nu arunca. */
+export async function trimiteLaIndexareGoogle(urls: string[]): Promise<boolean> {
+  const key = process.env.RETEA_KEY?.trim();
+  if (!key || !urls.length) return false;
+  try {
+    const r = await fetch(`${RETEA_URL}/api/admin/speedy-urls?key=${encodeURIComponent(key)}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ urls, title: "MediaExpres blog" }),
+      signal: AbortSignal.timeout(30000),
+    });
+    return r.ok;
+  } catch {
+    return false;
+  }
 }
 
 function escHtml(t: string): string {
@@ -669,6 +687,8 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
     // imediat motoarelor (IndexNow: Bing, Yandex, Seznam; Google il ia din
     // sitemap-ul dinamic). Nu blocheaza publicarea daca pica.
     await pingIndexNowUrl(`${SITE.url}/blog/${slug}`).catch(() => undefined);
+    // 18.11.2026 — si la Google, prin Rapid Indexer (cheia sta in platforma retelei).
+    await trimiteLaIndexareGoogle([`${SITE.url}/blog/${slug}`]).catch(() => undefined);
     console.log(`[autoblog] publicat „${art.title}" (${slug}); facebook: ${facebook}`);
     return { facut: true, id: inserat.id, slug, title: art.title, facebook };
   } catch (e) {

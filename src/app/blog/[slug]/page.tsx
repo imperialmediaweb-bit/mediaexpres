@@ -7,7 +7,7 @@ import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import remarkGfm from "remark-gfm";
 import { getPostBySlug, type PostMeta } from "@/lib/mdx";
-import { postDupaSlug, minuteCitire } from "@/lib/autoblog";
+import { postDupaSlug, minuteCitire, numarCuvinte } from "@/lib/autoblog";
 import { formatDate } from "@/lib/utils";
 import { BlogCard } from "@/components/blog/BlogCard";
 import { CtaBanner } from "@/components/home/CtaBanner";
@@ -16,6 +16,23 @@ import { toatePosturile } from "@/lib/blog-posts";
 
 // Articolele autoblogului sunt in baza: pagina se randeaza la cerere.
 export const dynamic = "force-dynamic";
+
+/** Intrebarile frecvente din articol (<h3> + paragraful de dupa), pentru FAQPage. */
+function intrebariFrecvente(html: string): { q: string; a: string }[] {
+  const i = html.search(/<h2[^>]*>\s*Întrebări frecvente/i);
+  if (i === -1) return [];
+  const rest = html.slice(i).split(/<h2[^>]*>/i)[1] || "";
+  const curat = (t: string) => t.replace(/<[^>]+>/g, "").replace(/\s+/g, " ").trim();
+  const out: { q: string; a: string }[] = [];
+  const re = /<h3[^>]*>([\s\S]*?)<\/h3>\s*<p[^>]*>([\s\S]*?)<\/p>/gi;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(rest)) && out.length < 8) {
+    const q = curat(m[1]);
+    const a = curat(m[2]);
+    if (q && a) out.push({ q, a });
+  }
+  return out;
+}
 
 /** Un articol, de oriunde ar veni: fisier MDX sau autoblog. */
 async function incarcaArticol(slug: string): Promise<(PostMeta & { mdx?: string; html?: string; coverCredit?: string | null }) | null> {
@@ -44,9 +61,16 @@ export async function generateMetadata({ params }: { params: { slug: string } })
     title: post.title,
     description: post.excerpt,
     alternates: { canonical: `/blog/${post.slug}` },
+    keywords: post.tags,
+    twitter: { card: "summary_large_image", title: post.title, description: post.excerpt, images: post.cover ? [post.cover] : undefined },
     openGraph: {
       type: "article",
+      url: `/blog/${post.slug}`,
+      locale: "ro_RO",
+      siteName: SITE.name,
       publishedTime: post.date,
+      modifiedTime: post.date,
+      tags: post.tags,
       authors: [post.author || SITE.name],
       title: post.title,
       description: post.excerpt,
@@ -75,7 +99,30 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
       logo: { "@type": "ImageObject", url: `${SITE.url}/logo.svg` },
     },
     mainEntityOfPage: `${SITE.url}/blog/${post.slug}`,
+    // 18.11.2026 — date complete pentru Google.
+    dateModified: post.date,
+    inLanguage: "ro-RO",
+    keywords: (post.tags || []).join(", "),
+    articleSection: "Blog",
+    ...(post.html ? { wordCount: numarCuvinte(post.html) } : {}),
   };
+  const breadcrumbJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Acasă", item: SITE.url },
+      { "@type": "ListItem", position: 2, name: "Blog", item: `${SITE.url}/blog` },
+      { "@type": "ListItem", position: 3, name: post.title, item: `${SITE.url}/blog/${post.slug}` },
+    ],
+  };
+  const faq = post.html ? intrebariFrecvente(post.html) : [];
+  const faqJsonLd = faq.length
+    ? {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        mainEntity: faq.map((f) => ({ "@type": "Question", name: f.q, acceptedAnswer: { "@type": "Answer", text: f.a } })),
+      }
+    : null;
 
   const prose = `prose prose-lg prose-slate max-w-none
               prose-headings:font-serif prose-headings:text-brand-navy
@@ -91,6 +138,8 @@ export default async function BlogPostPage({ params }: { params: { slug: string 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleJsonLd) }}
       />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }} />
+      {faqJsonLd && <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }} />}
 
       <article>
         <header className="bg-brand-navy text-white">
