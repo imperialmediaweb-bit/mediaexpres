@@ -297,6 +297,34 @@ export interface ArticolGenerat {
   html: string;
   tags: string[];
   imageQuery: string;
+  sources?: { title: string; url: string }[];
+}
+
+function escHtml(t: string): string {
+  return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+}
+
+/** Pastreaza doar sursele cu URL https care raspunde (2xx/3xx). Maxim 4. */
+export async function surseVerificate(lista: unknown): Promise<{ title: string; url: string }[]> {
+  if (!Array.isArray(lista)) return [];
+  const candidati = lista
+    .map((x) => ({ title: String((x as { title?: unknown })?.title || "").trim(), url: String((x as { url?: unknown })?.url || "").trim() }))
+    .filter((x) => x.title && /^https:\/\/[^\s"<>]+$/i.test(x.url) && !x.url.includes("mediaexpress.ro"))
+    .slice(0, 6);
+  const ok = await Promise.all(
+    candidati.map(async (x) => {
+      try {
+        const r = await fetch(x.url, { method: "GET", redirect: "follow", signal: AbortSignal.timeout(8000), headers: { "user-agent": "Mozilla/5.0 (compatible; MediaExpresBot/1.0)" } });
+        return r.status >= 200 && r.status < 400;
+      } catch {
+        return false;
+      }
+    }),
+  );
+  return candidati
+    .filter((_, i) => ok[i])
+    .slice(0, 4)
+    .map((x) => ({ title: escHtml(x.title.slice(0, 140)), url: escHtml(x.url) }));
 }
 
 export async function genereazaArticolBlog(keyword: string, titluriExistente: string[]): Promise<ArticolGenerat> {
@@ -327,7 +355,7 @@ Stil, sa nu para scris de AI:
 Pagini interne permise:
 ${PAGINI_INTERNE.map((p) => `- ${p.cale} — ${p.ce}`).join("\n")}
 
-Raspunzi STRICT cu JSON: {"title": string, "excerpt": string (1-2 propozitii, max 155 caractere, cu cuvantul cheie, pentru meta description), "html": string, "tags": string[] (2-4 etichete scurte), "imageQuery": string (2-4 cuvinte in engleza pentru o poza stock relevanta, fara nume de firme)}.`;
+Raspunzi STRICT cu JSON: {"title": string, "excerpt": string (1-2 propozitii, max 155 caractere, cu cuvantul cheie, pentru meta description), "html": string, "tags": string[] (2-4 etichete scurte), "imageQuery": string (2-4 cuvinte in engleza pentru o poza stock relevanta, fara nume de firme), "sources": [{"title": string, "url": string}] (2-4 surse REALE pe care te bazezi: pagini oficiale si stabile — legislatie.just.ro, mfe.gov.ro, anaf.ro, ec.europa.eu, developers.google.com, support.google.com, ro.wikipedia.org, ins.ro sau studii cunoscute; doar URL-uri pe care esti sigur ca exista; nu inventa, mai bine mai putine)}.`;
 
   const user = `Cuvant cheie: ${keyword}
 Titluri deja publicate (nu le repeta): ${titluriExistente.slice(0, 40).join(" | ") || "—"}
@@ -377,6 +405,13 @@ Scrie articolul.`;
       },
     ]));
     html = curataHtml(String(j.html || ""));
+  }
+  // 18.11.2026 — „Surse" jos in articol: doar linkurile care chiar raspund.
+  const surse = await surseVerificate((j as { sources?: unknown }).sources);
+  if (surse.length) {
+    html += `\n<h2>Surse</h2>\n<ul>${surse
+      .map((x) => `<li><a href="${x.url}" target="_blank" rel="nofollow noopener">${x.title}</a></li>`)
+      .join("")}</ul>`;
   }
   const title = String(j.title || "").trim();
   if (!title || numarCuvinte(html) < 400) throw new Error(`Articol prea scurt sau fara titlu (${numarCuvinte(html)} cuvinte)`);
