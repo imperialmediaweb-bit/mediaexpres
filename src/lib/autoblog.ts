@@ -687,8 +687,7 @@ export async function publicaUrmatorul(opt: { fortat?: boolean; keywordId?: stri
     // imediat motoarelor (IndexNow: Bing, Yandex, Seznam; Google il ia din
     // sitemap-ul dinamic). Nu blocheaza publicarea daca pica.
     await pingIndexNowUrl(`${SITE.url}/blog/${slug}`).catch(() => undefined);
-    // 18.11.2026 — si la Google, prin Rapid Indexer (cheia sta in platforma retelei).
-    await trimiteLaIndexareGoogle([`${SITE.url}/blog/${slug}`]).catch(() => undefined);
+    // 18.11.2026 — Rapid Indexer NU: creditele lui sunt pentru comenzi (user). Doar IndexNow + sitemap.
     console.log(`[autoblog] publicat „${art.title}" (${slug}); facebook: ${facebook}`);
     return { facut: true, id: inserat.id, slug, title: art.title, facebook };
   } catch (e) {
