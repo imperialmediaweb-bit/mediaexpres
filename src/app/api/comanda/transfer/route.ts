@@ -13,6 +13,7 @@ import { lookupCui } from "@/lib/anaf";
 import { CONTENT_DECLARATION_ERROR, screenContent, TITLU_DE_PROPUS, ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
 import { cleanArticleText, cleanTitle } from "@/lib/clean-text";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
+import { salveazaAflatDeLa } from "@/lib/aflat-de-la";
 import { RITM_IDS, etichetaRitm } from "@/lib/ritm";
 
 export const runtime = "nodejs";
@@ -64,6 +65,8 @@ const schema = z.object({
     errorMap: () => ({ message: CONTENT_DECLARATION_ERROR }),
   }),
   isCasino: z.boolean().default(false),
+  // 19.11.2026 — „De unde ați aflat de noi?" (bifat in formular).
+  aflatDeLa: z.string().max(120).optional(),
   // Ziarul din lista pe care promovam postarea 3 zile; gol = alegem noi.
   fbBoostPaper: z.string().max(120).optional(),
   // 08.10.2026 — zona (Regional) sau ziarul (Local), lib/zona-pachet.ts.
@@ -141,6 +144,7 @@ export async function POST(req: NextRequest) {
 
   try {
     await ensureOrderColumns();
+    if (d.aflatDeLa) await salveazaAflatDeLa(reference, d.aflatDeLa);
     await db.insert(orderSubmissions).values({
       stripeSessionId: reference,
       source: sursa,
@@ -232,6 +236,7 @@ export async function POST(req: NextRequest) {
         ${kv("Ritm ales de client", etichetaRitm(d.ritm))}
         ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
         ${kv("De unde a venit", etichetaSursa(sursa))}
+        ${kv("Ne-a găsit (spune clientul)", d.aflatDeLa || "—")}
       </table>
       ${d.paymentProof ? `<p><strong>Dovada plății:</strong> <a href="${esc(d.paymentProof.url)}">${esc(d.paymentProof.name)}</a></p>` : ""}
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">${esc(d.title)}</h3>

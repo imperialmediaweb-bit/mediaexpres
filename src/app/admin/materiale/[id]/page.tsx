@@ -1,4 +1,5 @@
 import { redirect, notFound } from "next/navigation";
+import { citesteAflatDeLa } from "@/lib/aflat-de-la";
 import Link from "next/link";
 import { raportUrl as raportUrlMe } from "@/lib/raport-link";
 import { desc, eq } from "drizzle-orm";
@@ -105,6 +106,7 @@ export default async function MaterialDetailPage({
   // Campania din platforma de publicare, cautata dupa referinta comenzii sau
   // dupa email. Daca reteaua nu raspunde, pagina spune asta si merge mai departe.
   const retea = await campaniaPentruComanda(r.stripeSessionId, r.email, r.fbBoostPaper);
+  const aflat = await citesteAflatDeLa(r.stripeSessionId);
 
   return (
     <div>
@@ -520,6 +522,7 @@ export default async function MaterialDetailPage({
               />
               <Row label="Sursă" value={etichetaSursa(r.source)} />
               <Row label="A intrat pe" value={paginaDeIntrare(r.source) || "— (nereținut, comandă veche)"} />
+              <Row label="Ne-a găsit (spune clientul)" value={aflat || "—"} />
               <Row
                 label="Publicare"
                 value={

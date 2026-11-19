@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { VARIANTE_AFLAT } from "@/lib/aflat-de-la-variante";
 import { Loader2, Upload, X, Search, CheckCircle2, Sparkles, RefreshCw, Camera, FileText, Clock } from "lucide-react";
 import { RitmSelect } from "@/components/forms/RitmSelect";
 import { RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
@@ -84,6 +85,8 @@ export function ComandaForm({
   const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
+  // 19.11.2026 — „De unde ați aflat de noi?", obligatoriu.
+  const [aflatDeLa, setAflatDeLa] = useState("");
   const [faraPozeConfirmat, setFaraPozeConfirmat] = useState(false);
   const [busy, setBusy] = useState(false);
   const [uploading, setUploading] = useState(false);
@@ -302,6 +305,7 @@ export function ComandaForm({
         "Apasă „Scrie-mi articolul” și verifică textul — sau alege „Îl trimit după plată”."],
       [!dupa && f.body.trim().length < 100,
         "Articolul trebuie să aibă minimum 100 de caractere — sau alege „Îl trimit după plată”."],
+      [!aflatDeLa, "Bifează de unde ai aflat de noi."],
       [!contentDeclaration, CONTENT_DECLARATION_ERROR],
       [fel !== null && !alegere, fel === "zona" ? "Alege zona în care vrei ziarele." : "Alege ziarul județean."],
     ];
@@ -341,6 +345,7 @@ export function ComandaForm({
           uniquePerSite,
           ritm,
           contentDeclaration,
+          aflatDeLa,
           fbBoostPaper,
           articolDupa: dupa,
           plata: "later",
@@ -671,6 +676,18 @@ export function ComandaForm({
             <span className="text-slate-700">Distribuiți articolul și pe paginile de Facebook asociate.</span>
           </label>
           {facebookOptIn && <FbBoostSelect value={fbBoostPaper} onChange={setFbBoostPaper} className="pt-2" />}
+        </div>
+      </section>
+
+      <section className="rounded-xl border border-slate-200 bg-white p-5">
+        <p className="font-semibold text-brand-navy">De unde ați aflat de noi? <span className="text-red-600">*</span></p>
+        <div className="mt-3 grid gap-2 sm:grid-cols-2">
+          {VARIANTE_AFLAT.map((v) => (
+            <label key={v} className="flex cursor-pointer items-center gap-2 rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-700 has-[:checked]:border-brand-red has-[:checked]:bg-red-50">
+              <input type="radio" name="aflat-de-la" value={v} checked={aflatDeLa === v} onChange={() => setAflatDeLa(v)} />
+              {v}
+            </label>
+          ))}
         </div>
       </section>
 
