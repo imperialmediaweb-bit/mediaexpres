@@ -63,23 +63,35 @@ function oraRomaniei(d = new Date()): number {
 function continut(f: FacturaStartco, reamintire: boolean): { subiect: string; html: string; text: string } {
   const suma = `${f.total} lei`;
   const subiect = reamintire
-    ? `Reamintire: confirmarea plății pentru factura nr. ${f.number}`
-    : `Confirmați plata pentru factura nr. ${f.number}, ca să programăm publicarea`;
+    ? `Un mic semn de la dumneavoastră și pornim comanda (factura nr. ${f.number})`
+    : `Vă mulțumim pentru comandă! Un singur pas și pornim (factura nr. ${f.number})`;
+  const wa = `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua, am făcut plata pentru factura nr. ${f.number}.`)}`;
   const intro = reamintire
-    ? `<p>Revenim cu privire la factura nr. <strong>${f.number}</strong> (${suma}), care nu apare încă încasată la noi.</p>`
-    : `<p>Vă mulțumim pentru comandă! Ați primit factura nr. <strong>${f.number}</strong>, în valoare de <strong>${suma}</strong>.</p>`;
+    ? `<p>Bună ziua,</p>
+<p>Revenim cu drag în legătură cu factura nr. <strong>${f.number}</strong> (${suma}). La noi nu apare încă plata, și nu vrem să vă țină nimic pe loc.</p>`
+    : `<p>Bună ziua,</p>
+<p>Vă mulțumim din suflet că ați ales MediaExpres! Ați primit factura nr. <strong>${f.number}</strong>, în valoare de <strong>${suma}</strong>.</p>`;
   const body = `${intro}
-<p>Ca să programăm publicarea, vă rugăm să ne <strong>confirmați că ați făcut transferul</strong>: un simplu răspuns la acest e-mail („am plătit”) sau dovada plății (captura ordinului de plată).</p>
-<p>Datele pentru transfer:<br>
+<p>Când faceți transferul, <strong>dați-ne de veste</strong> cum vă e mai ușor:</p>
+<ul>
+<li>un răspuns scurt la acest e-mail, de exemplu „am plătit”;</li>
+<li>un mesaj pe WhatsApp: <a href="${wa}">${SITE.phone}</a>;</li>
+<li>sau dovada plății (captura ordinului de plată), atașată aici sau pe WhatsApp.</li>
+</ul>
+<p>Imediat ce primim confirmarea, <strong>pornim comanda</strong> și vă publicăm articolul în maximum 12 ore lucrătoare.</p>
+<p style="background:#faf7f2;border-radius:8px;padding:12px 14px;">Datele pentru transfer:<br>
 ${SITE.billing.company}<br>
 IBAN: <strong>${SITE.billing.iban}</strong> (${SITE.billing.bank})<br>
-Detalii plată: factura nr. ${f.number}</p>
-<p>Puteți trimite confirmarea și pe WhatsApp: <a href="https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent(`Bună ziua, confirm plata pentru factura nr. ${f.number}.`)}">${SITE.phone}</a>.</p>
-<p>Publicăm în maximum 12 ore lucrătoare de la confirmarea plății. Dacă ați plătit deja, vă mulțumim și ignorați acest mesaj.</p>`;
-  const text = `${reamintire ? `Revenim cu privire la factura nr. ${f.number} (${suma}), care nu apare încă încasată.` : `Vă mulțumim pentru comandă! Ați primit factura nr. ${f.number}, în valoare de ${suma}.`}
-Ca să programăm publicarea, vă rugăm să ne confirmați că ați făcut transferul: un răspuns la acest e-mail („am plătit”) sau dovada plății.
-${SITE.billing.company}, IBAN ${SITE.billing.iban} (${SITE.billing.bank}), detalii: factura nr. ${f.number}.
-WhatsApp: ${SITE.phone}. Dacă ați plătit deja, ignorați acest mesaj.`;
+La detalii: factura nr. ${f.number}</p>
+<p>Dacă ați plătit deja, vă mulțumim frumos și vă rugăm să ignorați acest mesaj.</p>
+<p>Cu drag,<br>Echipa MediaExpres</p>`;
+  const text = `Bună ziua,
+${reamintire ? `Revenim cu drag în legătură cu factura nr. ${f.number} (${suma}). La noi nu apare încă plata.` : `Vă mulțumim din suflet că ați ales MediaExpres! Ați primit factura nr. ${f.number}, în valoare de ${suma}.`}
+Când faceți transferul, dați-ne de veste: un răspuns la acest e-mail („am plătit”), un mesaj pe WhatsApp la ${SITE.phone} sau dovada plății.
+Imediat ce primim confirmarea, pornim comanda și vă publicăm articolul în maximum 12 ore lucrătoare.
+Transfer: ${SITE.billing.company}, IBAN ${SITE.billing.iban} (${SITE.billing.bank}), la detalii: factura nr. ${f.number}.
+Dacă ați plătit deja, vă mulțumim frumos și ignorați acest mesaj.
+Cu drag, Echipa MediaExpres`;
   return { subiect, html: wrapEmail(subiect, body), text };
 }
 
