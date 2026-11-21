@@ -11,6 +11,7 @@ import {
 } from "@/components/conversion/ConversionWidgets";
 import { WhatsAppButton } from "@/components/layout/WhatsAppButton";
 import { MetaPixel } from "@/components/analytics/MetaPixel";
+import { TikTokPixel } from "@/components/analytics/TikTokPixel";
 import { GoogleAnalytics } from "@/components/analytics/GoogleAnalytics";
 import { SourceCapture } from "@/components/analytics/SourceCapture";
 import { Clarity } from "@/components/analytics/Clarity";
@@ -113,6 +114,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     >
       <body className="min-h-screen font-sans flex flex-col">
         <MetaPixel />
+        <TikTokPixel />
         <GoogleAnalytics />
         <Clarity />
         <SourceCapture />

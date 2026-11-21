@@ -1,6 +1,7 @@
 "use client";
 
 import Script from "next/script";
+import { trackTikTok } from "./TikTokPixel";
 
 const PIXEL_ID = process.env.NEXT_PUBLIC_META_PIXEL_ID;
 
@@ -50,6 +51,11 @@ export function trackPixelEvent(
   data?: Record<string, unknown>,
   eventId?: string,
 ) {
+  // Aceleasi evenimente si la TikTok (Contact, InitiateCheckout), cand pixelul lui e pe site.
+  if (eventName === "Contact" || eventName === "InitiateCheckout") {
+    const { value, currency, content_name } = (data || {}) as Record<string, unknown>;
+    trackTikTok(eventName, { value, currency, content_name }, eventId);
+  }
   if (typeof window === "undefined" || !window.fbq) return;
   if (eventId) {
     window.fbq("track", eventName, data || {}, { eventID: eventId });

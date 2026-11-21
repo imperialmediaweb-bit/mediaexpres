@@ -2,6 +2,7 @@
 
 import { useEffect } from "react";
 import { ADS_ID } from "./GoogleAnalytics";
+import { trackTikTok } from "./TikTokPixel";
 
 /**
  * Conversia „Achizitie" pentru Google Ads — fragmentul pe care Ads il cere
@@ -43,6 +44,22 @@ export function AdsConversion({
       /* fara storage (mod privat) mergem mai departe: transaction_id dedupeaza oricum */
     }
 
+    // TikTok: plata confirmata (event_id = sesiunea Stripe, deduplicare).
+    let incercariTt = 0;
+    const timerTt = setInterval(() => {
+      incercariTt++;
+      if (window.ttq) {
+        clearInterval(timerTt);
+        trackTikTok(
+          "CompletePayment",
+          { content_name: "Comanda MediaExpres", ...(typeof value === "number" ? { value, currency } : {}) },
+          transactionId,
+        );
+      } else if (incercariTt >= 30) {
+        clearInterval(timerTt);
+      }
+    }, 200);
+
     let incercari = 0;
     const timer = setInterval(() => {
       incercari++;
@@ -62,7 +79,10 @@ export function AdsConversion({
         clearInterval(timer);
       }
     }, 200);
-    return () => clearInterval(timer);
+    return () => {
+      clearInterval(timer);
+      clearInterval(timerTt);
+    };
   }, [transactionId, value, currency]);
 
   return null;
