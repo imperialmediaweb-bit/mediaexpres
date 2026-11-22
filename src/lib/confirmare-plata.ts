@@ -56,6 +56,38 @@ async function emailDupaCui(): Promise<Map<string, string>> {
   return m;
 }
 
+/**
+ * 22.11.2026 — clientul a platit deja pe site (card Stripe sau OP cu dovada
+ * incarcata / confirmat in admin), dar factura din StartCo e inca „Emisa":
+ * NU primeste e-mailul (Gheorghitoi Marius: „ciudat, am primit confirmarea
+ * de plata odata cu comanda"). Cautam in ultimele 60 de zile dupa CUI si e-mail.
+ */
+async function platitiPeSite(): Promise<{ cui: Set<string>; email: Set<string> }> {
+  const cui = new Set<string>();
+  const email = new Set<string>();
+  const subs = await db
+    .execute(sql`SELECT "email", "cui", "company_cui" FROM "order_submission"
+      WHERE "created_at" > now() - interval '60 days'
+        AND ("payment_method" IS DISTINCT FROM 'op' OR "status" IN ('paid','published') OR "payment_proof" IS NOT NULL)`)
+    .catch(() => null);
+  const rs = ((subs as unknown as { rows?: unknown[] })?.rows ?? (subs as unknown as unknown[]) ?? []) as {
+    email: string | null;
+    cui: string | null;
+    company_cui: string | null;
+  }[];
+  for (const s of rs) {
+    const c = cheieCui(s.cui || s.company_cui);
+    if (c) cui.add(c);
+    if (s.email) email.add(s.email.trim().toLowerCase());
+  }
+  const plati = await db
+    .execute(sql`SELECT "email" FROM "order" WHERE "status" = 'paid' AND "created_at" > now() - interval '60 days'`)
+    .catch(() => null);
+  const rp = ((plati as unknown as { rows?: unknown[] })?.rows ?? (plati as unknown as unknown[]) ?? []) as { email: string | null }[];
+  for (const p of rp) if (p.email) email.add(p.email.trim().toLowerCase());
+  return { cui, email };
+}
+
 function oraRomaniei(d = new Date()): number {
   return Number(new Intl.DateTimeFormat("ro-RO", { hour: "numeric", hour12: false, timeZone: "Europe/Bucharest" }).format(d));
 }
@@ -101,17 +133,19 @@ export interface RezultatConfirmare {
   emise: number;
   trimise: { numar: number; email: string; tip: "prima" | "reamintire" }[];
   fara_email: number[];
+  /** Facturi sarite: clientul a platit deja pe site. */
+  deja_platite: number[];
   proba?: boolean;
 }
 
 export async function ruleazaConfirmarePlata(opt: { proba?: boolean } = {}): Promise<RezultatConfirmare> {
-  if (process.env.CONFIRMARE_PLATA === "0") return { oprit: true, emise: 0, trimise: [], fara_email: [] };
+  if (process.env.CONFIRMARE_PLATA === "0") return { oprit: true, emise: 0, trimise: [], fara_email: [], deja_platite: [] };
   await asiguraTabel();
   const toate = await facturiStartco();
   const emise = toate.filter(
     (f) => f.status === "Emisa" && Number(f.total) > 0 && String(f.dateEmitted || "") >= DE_LA,
   );
-  const rez: RezultatConfirmare = { emise: emise.length, trimise: [], fara_email: [], proba: opt.proba };
+  const rez: RezultatConfirmare = { emise: emise.length, trimise: [], fara_email: [], deja_platite: [], proba: opt.proba };
   if (!emise.length) return rez;
 
   // Prima data cand vedem factura = ceasul celor 30 de minute.
@@ -133,6 +167,7 @@ export async function ruleazaConfirmarePlata(opt: { proba?: boolean } = {}): Pro
   }[];
   const stare = new Map(rows.map((x) => [Number(x.factura_id), x]));
   const emailuri = await emailDupaCui();
+  const platiti = await platitiPeSite();
   const acum = Date.now();
 
   for (const f of emise) {
@@ -146,6 +181,10 @@ export async function ruleazaConfirmarePlata(opt: { proba?: boolean } = {}): Pro
     const email = (f.client?.email || "").trim() || emailuri.get(cheieCui(f.client?.identifier)) || "";
     if (!email) {
       rez.fara_email.push(f.number);
+      continue;
+    }
+    if (platiti.cui.has(cheieCui(f.client?.identifier)) || platiti.email.has(email.toLowerCase())) {
+      rez.deja_platite.push(f.number);
       continue;
     }
     rez.trimise.push({ numar: f.number, email, tip });
