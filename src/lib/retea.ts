@@ -173,6 +173,7 @@ export function etichetaStareRetea(stare: string): string {
 // ─────────────────────────────────────────────────────────────────────────────
 
 import { inLei } from "@/lib/suma";
+import { cuLinkGarantat } from "@/lib/link-garantat";
 import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { orderSubmissions, orders } from "@/db/schema";
@@ -234,7 +235,14 @@ export function comandaPentruRetea(r: RandComanda, extra: { pretLei: number | nu
   const ordonate = poze.length ? [poze[idx], ...poze.filter((_, i) => i !== idx)] : [];
 
   const ritm = ritmDupaId(r.ritm);
-  const { html, negasite } = articolHtml({ titlu: r.title, corp: r.body, linkNotes: r.linkNotes, dofollow: true });
+  const baza = articolHtml({ titlu: r.title, corp: r.body, linkNotes: r.linkNotes, dofollow: true });
+  const negasite = baza.negasite;
+  // 23.11.2026 (Aurul Albinelor): clientul a scris doar adresa, fara cuvinte —
+  // linkul nu se punea deloc. Linkul catre client pleaca ORICUM: pe numele
+  // brandului din text (aurulalbinelor.ro → „Aurul Albinelor"), pe numele
+  // firmei, iar daca nu le gasim, o fraza scurta la final cu adresa.
+  const html = cuLinkGarantat(baza.html, link, r.companyName);
+  const linkPusAutomat = html !== baza.html;
 
   const obs = [
     `Comandă MediaExpres ${r.stripeSessionId} (${etichetaSursa(r.source)}), ${r.paymentMethod === "op" ? "plată prin transfer" : "plată cu cardul"}.`,
@@ -244,7 +252,11 @@ export function comandaPentruRetea(r: RandComanda, extra: { pretLei: number | nu
     r.facebookOptIn
       ? `PROMOVARE FACEBOOK 3 zile pe: ${r.fbBoostPaper?.trim() || "ziarul din județul clientului (n-a ales)"}.`
       : "Fără postare pe Facebook (clientul a debifat).",
-    r.linkNotes?.trim() ? `LINKURI CERUTE (deja puse pe cuvinte în text):\n${r.linkNotes.trim()}` : "LINKURI: numele firmei → site, pus automat.",
+    r.linkNotes?.trim() && !negasite.length
+      ? `LINKURI CERUTE (deja puse pe cuvinte în text):\n${r.linkNotes.trim()}`
+      : linkPusAutomat
+        ? `LINK: pus automat în text spre ${link} (clientul n-a dat cuvintele exacte). Păstrează-l pe fiecare ziar.`
+        : `LINKURI: ${r.linkNotes?.trim() || link}`,
     negasite.length ? `ATENȚIE: ancore negăsite în text: ${negasite.map((l) => `${l.ancora || "?"} → ${l.url}`).join("; ")}` : "",
     r.keywords ? `Cuvinte cheie: ${r.keywords}` : "",
     r.metaDescription ? `Meta description: ${r.metaDescription}` : "",
