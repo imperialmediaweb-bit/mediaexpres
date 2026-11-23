@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { cronAutorizat } from "@/lib/cron-auth";
-import { publicaUrmatorul } from "@/lib/autoblog";
+import { publicaUrmatorul, posturiPublicate } from "@/lib/autoblog";
+import { posteazaUrmatorulPeLinkedIn, posteazaOfertaPeLinkedIn } from "@/lib/linkedin";
 import { posteazaOferta } from "@/lib/oferta-facebook";
 
 export const runtime = "nodejs";
@@ -17,7 +18,16 @@ export async function POST(req: NextRequest) {
   const r = await publicaUrmatorul();
   // Oferta zilnica pe Facebook (lib/oferta-facebook.ts): o data pe zi, la ora setata.
   const oferta = await posteazaOferta();
-  return NextResponse.json({ ok: true, ...r, oferta });
+  // 23.11.2026 — LinkedIn: o postare pe zi; o data la 4 zile Oferta 500, altfel
+  // cel mai nou articol de blog inca nepostat (lib/linkedin.ts).
+  let linkedin: unknown = null;
+  try {
+    const of = await posteazaOfertaPeLinkedIn();
+    linkedin = of.postat ? { oferta: true } : await posteazaUrmatorulPeLinkedIn(await posturiPublicate(200));
+  } catch (e) {
+    linkedin = { eroare: e instanceof Error ? e.message : String(e) };
+  }
+  return NextResponse.json({ ok: true, ...r, oferta, linkedin });
 }
 
 export async function GET(req: NextRequest) {
