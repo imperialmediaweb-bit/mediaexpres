@@ -187,9 +187,10 @@ export async function issueInvoiceForOrder(
       await sendEmail({
         to: input.email,
         replyTo: ADMIN_EMAIL,
-        attachments: invoice.downloadUrl
-          ? [{ filename: `Factura-${invoice.series}-${invoice.number}.pdf`, path: invoice.downloadUrl }]
-          : undefined,
+        attachments: await (async () => {
+          const url = (await pdfFacturaStartco(invoice.shareUrl)) || invoice.downloadUrl;
+          return url ? [{ filename: `Factura-${invoice.series}-${invoice.number}.pdf`, path: url }] : undefined;
+        })(),
         subject: dePlata
           ? `Factura ${invoice.series} ${invoice.number} — de plată prin transfer`
           : `Factura ${invoice.series} ${invoice.number} — MediaExpres`,
@@ -272,5 +273,25 @@ export async function issueInvoiceForOrder(
     await alertManualInvoice(input, reason).catch((e) =>
       console.error("[invoicing] nici alerta nu a plecat:", e),
     );
+  }
+}
+
+/**
+ * 23.11.2026 — PDF-ul facturii, din pagina publica StartCo (aceeasi pe care o
+ * deschide clientul): /public/invoice?invoiceId=<id din shareUrl> intoarce un
+ * link semnat catre PDF. Fara raspuns → null (emailul pleaca cu linkul).
+ */
+async function pdfFacturaStartco(shareUrl: string | null | undefined): Promise<string | null> {
+  const id = String(shareUrl || "").split("/").filter(Boolean).pop();
+  if (!id || !/^[0-9a-f-]{20,}$/i.test(id)) return null;
+  try {
+    const r = await fetch(`https://api.cloud.startco.ro/public/invoice?invoiceId=${id}`, {
+      signal: AbortSignal.timeout(15_000),
+    });
+    if (!r.ok) return null;
+    const j = (await r.json()) as { data?: { url?: string } };
+    return j.data?.url && /^https:\/\//.test(j.data.url) ? j.data.url : null;
+  } catch {
+    return null;
   }
 }
