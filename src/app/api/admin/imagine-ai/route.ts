@@ -1,4 +1,5 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
+import { verifyExtensionKey } from "@/lib/extension-auth";
 import { getSession } from "@/lib/auth";
 import { urcaPozaOferta } from "@/lib/oferta-facebook";
 
@@ -10,8 +11,9 @@ export const maxDuration = 180;
  * reclame si thumbnailuri, din admin. Cheia ramane pe server; raspunsul e doar
  * adresa pozei copiate in Cloudinary. Body: { prompt, size? }.
  */
-export async function POST(req: Request) {
-  if (!getSession()) return NextResponse.json({ ok: false, error: "Neautorizat" }, { status: 401 });
+export async function POST(req: NextRequest) {
+  // Adminul logat sau cheia extensiei (aceeasi ca la /api/extension/*).
+  if (!getSession() && verifyExtensionKey(req)) return NextResponse.json({ ok: false, error: "Neautorizat" }, { status: 401 });
   const key = process.env.OPENAI_API_KEY;
   if (!key) return NextResponse.json({ ok: false, error: "OPENAI_API_KEY lipseste" }, { status: 500 });
   const body = (await req.json().catch(() => ({}))) as { prompt?: string; size?: string };
