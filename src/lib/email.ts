@@ -154,19 +154,24 @@ export function defaultListUnsubscribe() {
 // email care ofera plata prin OP. Datele vin din SITE.billing — un singur loc.
 // Factura pentru OP se emite manual, dupa confirmarea platii; fara proforma.
 export function bankTransferEmailBox(amount: string, paymentDetails: string): string {
+  // 23.11.2026 (owner): datele firmei complete si IBAN-ul mare, pe randul lui,
+  // ca sa se copieze dintr-o atingere — fara sa caute in factura.
   return `
     <div style="margin:20px 0;padding:16px;background:#faf7f2;border:1px solid #e5e5e5;border-radius:8px;font-size:14px;">
       <p style="margin:0 0 10px;"><strong>Plata prin transfer bancar (OP)</strong> — direct în contul nostru:</p>
+      <p style="margin:0 0 4px;color:#64748b;font-size:13px;">IBAN (atingeți și copiați):</p>
+      <p style="margin:0 0 14px;padding:12px;background:#fff;border:2px dashed #E4002B;border-radius:8px;font-family:monospace;font-size:20px;font-weight:700;letter-spacing:1px;text-align:center;user-select:all;-webkit-user-select:all;">${SITE.billing.iban}</p>
       <table style="width:100%;border-collapse:collapse;font-size:14px;">
-        <tr><td style="padding:3px 0;color:#64748b;width:110px;">Beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.company}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">CUI beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.legal.cui}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">IBAN</td><td style="padding:3px 0;font-weight:600;font-family:monospace;">${SITE.billing.iban}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;width:120px;">Beneficiar</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.company}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">CUI</td><td style="padding:3px 0;font-weight:600;">${SITE.legal.cui}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Nr. Reg. Com.</td><td style="padding:3px 0;font-weight:600;">${SITE.legal.regCom}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Sediu</td><td style="padding:3px 0;font-weight:600;">${SITE.legal.address}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">Banca</td><td style="padding:3px 0;font-weight:600;">${SITE.billing.bank}</td></tr>
         <tr><td style="padding:3px 0;color:#64748b;">Suma</td><td style="padding:3px 0;font-weight:600;">${amount}</td></tr>
-        <tr><td style="padding:3px 0;color:#64748b;">Detalii plată</td><td style="padding:3px 0;">${paymentDetails}</td></tr>
+        <tr><td style="padding:3px 0;color:#64748b;">Detalii plată</td><td style="padding:3px 0;font-weight:600;">${paymentDetails}</td></tr>
       </table>
-      <p style="margin:10px 0 0;color:#64748b;">După plată nu trebuie să ne trimiți nimic — <strong>vedem încasarea în extras</strong> și publicăm în maximum 12 ore lucrătoare, cu raportul cu toate linkurile. Vrei să grăbim confirmarea? Răspunde la acest email cu ordinul de plată.</p>
-      <p style="margin:8px 0 0;color:#64748b;">Nu ai trimis încă comanda pe site? Scrie-ne aici datele firmei (denumire, CUI, adresă) și articolul, ca să emitem factura și să pornim.</p>
+      <p style="margin:10px 0 0;color:#64748b;">După plată, răspundeți la acest e-mail cu ordinul de plată, ca să pornim imediat. Dacă nu ajungeți să-l trimiteți, vedem oricum încasarea în extras și publicăm în maximum 12 ore lucrătoare, cu raportul cu toate linkurile.</p>
+      <p style="margin:8px 0 0;color:#64748b;">Nu ați trimis încă comanda pe site? Scrieți-ne aici datele firmei (denumire, CUI, adresă) și articolul, ca să emitem factura și să pornim.</p>
     </div>`;
 }
 
