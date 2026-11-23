@@ -21,6 +21,7 @@ import { ruleazaPazaLinkuri } from "@/lib/ruleaza-paza";
 import { ruleazaTermene } from "@/lib/termene-parteneri";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
 import { trimiteReamintiriComandaInceputa } from "@/lib/comanda-inceputa";
+import { pdfFacturaStartco } from "@/lib/invoicing";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -244,6 +245,8 @@ export async function POST(req: NextRequest) {
       createdAt: orderSubmissions.createdAt,
       trimise: orderSubmissions.paymentRemindersSent,
       ultima: orderSubmissions.paymentReminderAt,
+      facturaUrl: orderSubmissions.invoiceShareUrl,
+      facturaNr: orderSubmissions.invoiceLabel,
     })
     .from(orderSubmissions)
     .where(
@@ -296,8 +299,13 @@ export async function POST(req: NextRequest) {
         alertePlata++;
       } else {
         const alDoilea = c.trimise === 1;
+        // 23.11.2026 (owner): factura atasata si la reamintire, cu linkul ei.
+        const pdf = c.facturaUrl ? await pdfFacturaStartco(c.facturaUrl) : null;
+        const detalii = c.facturaNr ? `Factura ${c.facturaNr}` : "Detalii plată: numărul facturii primite pe email";
         await sendEmail({
           to: c.email,
+          replyTo: ADMIN_EMAIL,
+          attachments: pdf ? [{ filename: `Factura-${(c.facturaNr || "MediaExpres").replace(/\s+/g, "-")}.pdf`, path: pdf }] : undefined,
           subject: alDoilea
             ? "Comanda dumneavoastră așteaptă plata — nu am început încă publicarea"
             : "Am primit articolul — mai așteptăm doar plata ca să publicăm",
@@ -306,7 +314,8 @@ export async function POST(req: NextRequest) {
             `
       <p>Bună ziua${c.companyName ? `, ${esc(c.companyName)}` : ""},</p>
       <p>Am primit articolul dumneavoastră și v-am trimis factura pe email. <strong>Nu am început încă publicarea</strong>, fiindcă mai așteptăm plata.</p>
-      ${bankTransferEmailBox(`${suma} lei`, "Detalii plată: numărul facturii primite pe email")}
+      ${pdf ? `<p><strong>📎 ${esc(c.facturaNr ? `Factura ${c.facturaNr}` : "Factura")} e atașată din nou la acest e-mail, în format PDF.</strong>${c.facturaUrl ? ` O găsiți și online: <a href="${c.facturaUrl}">vezi factura</a>.` : ""}</p>` : c.facturaUrl ? `<p>Factura o găsiți aici: <a href="${c.facturaUrl}">vezi factura</a>.</p>` : ""}
+      ${bankTransferEmailBox(`${suma} lei`, detalii)}
       <p><strong>Ați plătit deja?</strong> Trimiteți-ne o dovadă — o captură din aplicația băncii sau ordinul de plată din contul firmei — ca răspuns la acest email sau pe WhatsApp, și confirmăm pe loc.</p>
       <p>Imediat ce vedem încasarea, pornim tot: publicăm pe cele 50 de ziare în maximum 12 ore lucrătoare, pornim și campania de promovare pe Facebook a postării cu articolul dumneavoastră, și vă trimitem raportul cu toate linkurile.</p>
       <p style="color:#64748b;font-size:13px;">Dacă e ceva neclar cu factura sau vreți să plătiți altfel, scrieți-ne pe WhatsApp la <a href="${waLink(SITE.phone) || "#"}" style="color:#c1121f;">${esc(SITE.phone)}</a>.</p>

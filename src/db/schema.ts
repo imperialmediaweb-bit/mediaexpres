@@ -243,6 +243,9 @@ export const orderSubmissions = pgTable("order_submission", {
   // au plecat (maximum doua) si cand a plecat ultima.
   paymentRemindersSent: integer("payment_reminders_sent").notNull().default(0),
   paymentReminderAt: timestamp("payment_reminder_at"),
+  /** 23.11.2026 — factura StartCo a comenzii (link public + „seria numar"). */
+  invoiceShareUrl: text("invoice_share_url"),
+  invoiceLabel: text("invoice_label"),
   generatedByAi: boolean("generated_by_ai").notNull().default(false),
   isCasino: boolean("is_casino").notNull().default(false),
   // "card" = platit prin Stripe (confirmarea vine din webhook);

@@ -6,6 +6,8 @@ import { orderSubmissions } from "@/db/schema";
 import { trimiteAutomatInRetea } from "@/lib/retea";
 import { sendCapiEvent } from "@/lib/meta-capi";
 import { findPackageById } from "@/data/packages";
+import { sendEmail, wrapEmail, escapeHtml, ADMIN_EMAIL } from "@/lib/email";
+import { raportUrl } from "@/lib/raport-link";
 
 export const runtime = "nodejs";
 
@@ -46,6 +48,13 @@ export async function PATCH(
   }
 
   if (action === "confirm_payment") {
+    // Un al doilea click nu mai trimite emailul de confirmare a platii.
+    const [inainte] = await db
+      .select({ status: orderSubmissions.status })
+      .from(orderSubmissions)
+      .where(eq(orderSubmissions.id, params.id))
+      .limit(1);
+    const primaConfirmare = inainte?.status === "pending_payment";
     // "paid" exista doar intre pending_payment si published: banii au intrat,
     // articolul inca nu e pe site. Fara starea asta, adminul nu avea unde sa
     // noteze ca a verificat extrasul, iar publicarea unei comenzi neincasate
@@ -88,6 +97,34 @@ export async function PATCH(
       }
     } catch (err) {
       console.error("[confirm_payment] capi purchase:", err);
+    }
+    // 23.11.2026 (owner): clientul afla pe loc ca plata a ajuns si ca pornim.
+    try {
+      const [c] = await db
+        .select({ email: orderSubmissions.email, firma: orderSubmissions.companyName, factura: orderSubmissions.invoiceLabel })
+        .from(orderSubmissions)
+        .where(eq(orderSubmissions.id, params.id))
+        .limit(1);
+      if (c?.email && primaConfirmare) {
+        const link = raportUrl(params.id);
+        await sendEmail({
+          to: c.email,
+          replyTo: ADMIN_EMAIL,
+          subject: "Am primit plata — pornim publicarea articolului dumneavoastră",
+          html: wrapEmail(
+            "Plata a fost confirmată",
+            `
+      <p>Bună ziua${c.firma ? `, ${escapeHtml(c.firma)}` : ""},</p>
+      <p>Am primit plata${c.factura ? ` pentru factura <strong>${escapeHtml(c.factura)}</strong>` : ""}. Vă mulțumim!</p>
+      <p><strong>Pornim acum publicarea:</strong> articolul dumneavoastră apare pe cele 50 de ziare în maximum 12 ore lucrătoare, iar promovarea pe Facebook pornește odată cu el.</p>
+      <p><strong>Urmăriți totul în timp real:</strong> <a href="${link}">${link}</a><br/><span style="color:#64748b;font-size:13px;">Aici apare fiecare ziar, cu data, ora și linkul articolului. La final primiți și e-mailul de încheiere.</span></p>
+      <p style="margin-top:24px;">Cu stimă,<br/><strong>Echipa MediaExpres</strong></p>
+    `,
+          ),
+        });
+      }
+    } catch (err) {
+      console.error("[confirm_payment] email client:", err);
     }
     return NextResponse.json({ ok: true });
   }

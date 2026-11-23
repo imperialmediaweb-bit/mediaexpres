@@ -165,7 +165,16 @@ export async function issueInvoiceForOrder(
       }
     }
 
+    if (invoice.shareUrl) {
+      await db
+        .update(orderSubmissions)
+        .set({ invoiceShareUrl: invoice.shareUrl, invoiceLabel: `${invoice.series} ${invoice.number}` })
+        .where(eq(orderSubmissions.stripeSessionId, input.orderReference))
+        .catch((e: unknown) => console.error("[invoicing] nu am salvat factura pe comanda:", e));
+    }
+
     if (input.email && invoice.shareUrl) {
+      const pdfUrl = (await pdfFacturaStartco(invoice.shareUrl)) || invoice.downloadUrl || null;
       // La card factura e chitanta; la OP e INSTRUMENTUL de plata — clientul
       // o da contabilitatii si abia atunci pleaca banii. Emailul trebuie sa
       // spuna asta si sa aiba IBAN-ul la indemana.
@@ -187,10 +196,9 @@ export async function issueInvoiceForOrder(
       await sendEmail({
         to: input.email,
         replyTo: ADMIN_EMAIL,
-        attachments: await (async () => {
-          const url = (await pdfFacturaStartco(invoice.shareUrl)) || invoice.downloadUrl;
-          return url ? [{ filename: `Factura-${invoice.series}-${invoice.number}.pdf`, path: url }] : undefined;
-        })(),
+        attachments: pdfUrl
+          ? [{ filename: `Factura-${invoice.series}-${invoice.number}.pdf`, path: pdfUrl }]
+          : undefined,
         subject: dePlata
           ? `Factura ${invoice.series} ${invoice.number} — de plată prin transfer`
           : `Factura ${invoice.series} ${invoice.number} — MediaExpres`,
@@ -199,6 +207,7 @@ export async function issueInvoiceForOrder(
           `
           <p>Bună ziua,</p>
           <p>Ai mai jos factura pentru <strong>${INVOICE_PRODUCT_NAME}</strong> — ${input.amount.toFixed(2)} RON.</p>
+          ${pdfUrl ? `<p><strong>📎 Factura ${invoice.series} ${invoice.number} e atașată la acest e-mail, în format PDF.</strong> O găsiți și online, la butonul de mai jos.</p>` : ""}
           <p style="margin-top:16px;">
             <a href="${invoice.shareUrl}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Vezi factura</a>
           </p>
@@ -281,7 +290,7 @@ export async function issueInvoiceForOrder(
  * deschide clientul): /public/invoice?invoiceId=<id din shareUrl> intoarce un
  * link semnat catre PDF. Fara raspuns → null (emailul pleaca cu linkul).
  */
-async function pdfFacturaStartco(shareUrl: string | null | undefined): Promise<string | null> {
+export async function pdfFacturaStartco(shareUrl: string | null | undefined): Promise<string | null> {
   const id = String(shareUrl || "").split("/").filter(Boolean).pop();
   if (!id || !/^[0-9a-f-]{20,}$/i.test(id)) return null;
   try {
