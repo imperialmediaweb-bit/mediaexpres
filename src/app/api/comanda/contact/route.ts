@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { emailFals } from "@/lib/comanda-falsa";
 import { sendEmail, wrapEmail, kv, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
@@ -37,6 +38,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
   const { email, phone, packageId } = parsed.data;
+  if (emailFals(email)) return NextResponse.json({ ok: false, error: "Scrie o adresă de email reală." }, { status: 400 });
   // Pentru emailul automat de dupa o ora (lib/comanda-inceputa.ts).
   await salveazaComandaInceputa(email, phone, packageId).catch((e) => console.error("[comanda/contact] salvare", e));
   const pachet = (packageId && findPackageById(packageId)?.name) || packageId || "—";

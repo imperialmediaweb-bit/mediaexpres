@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
+import { cuiPropriu, emailFals } from "@/lib/comanda-falsa";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { findPackageById } from "@/data/packages";
 import { SITE } from "@/data/site";
@@ -99,6 +100,12 @@ export async function POST(req: NextRequest) {
     );
   }
   const d = parsed.data;
+  if (cuiPropriu(d.companyCui) || emailFals(d.email)) {
+    return NextResponse.json(
+      { ok: false, error: "Comanda nu poate fi înregistrată cu aceste date. Scrie CUI-ul firmei tale și un email real." },
+      { status: 400 },
+    );
+  }
   if (d.articolDupa) {
     d.body = ARTICOL_DUPA_PLATA;
   } else if (d.body.trim().length < 100) {

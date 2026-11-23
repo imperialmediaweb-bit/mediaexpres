@@ -23,8 +23,25 @@ function verifyToken(token: string | undefined, secret: string): boolean {
   return true;
 }
 
+// 23.11.2026 — IP-uri banate (robotul cu comanda falsă pe CUI-ul nostru).
+// Schimbabil fără deploy: BLOCKED_IPS (separate prin virgulă).
+const BLOCKED_IPS = (process.env.BLOCKED_IPS || "82.76.139.8").split(",").map((s) => s.trim()).filter(Boolean);
+
 export function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
+
+  const ip = (req.headers.get("x-forwarded-for") || req.headers.get("x-real-ip") || "").split(",")[0].trim();
+  if (ip && BLOCKED_IPS.includes(ip)) {
+    return new NextResponse("Forbidden", { status: 403 });
+  }
+  // Roboții (browsere automate) nu pot trimite comenzi. Paginile rămân deschise,
+  // ca verificarea reclamelor TikTok/Facebook să nu fie respinsă.
+  if (pathname.startsWith("/api/comanda/")) {
+    const ua = req.headers.get("user-agent") || "";
+    if (!ua || /HeadlessChrome|PhantomJS|puppeteer|playwright|selenium|python-requests|curl\/|wget/i.test(ua)) {
+      return NextResponse.json({ ok: false, error: "Comanda nu poate fi trimisă din acest browser." }, { status: 403 });
+    }
+  }
 
   // Protect /admin/* except /admin/login
   if (pathname.startsWith("/admin") && !pathname.startsWith("/admin/login")) {
@@ -42,5 +59,5 @@ export function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/admin/:path*"],
+  matcher: ["/admin/:path*", "/api/comanda/:path*", "/comanda/:path*", "/oferta-500"],
 };
