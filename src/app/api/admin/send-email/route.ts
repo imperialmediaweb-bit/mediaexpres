@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { getSession } from "@/lib/auth";
+import { verifyExtensionKey } from "@/lib/extension-auth";
 import {
   sendEmail,
   wrapEmail,
@@ -46,8 +47,9 @@ function textToHtml(text: string): string {
 }
 
 export async function POST(req: NextRequest) {
+  // Adminul logat sau cheia extensiei (aceeasi ca la /api/extension/*).
   const session = getSession();
-  if (!session) {
+  if (!session && verifyExtensionKey(req)) {
     return NextResponse.json({ ok: false, error: "Neautentificat" }, { status: 401 });
   }
 
