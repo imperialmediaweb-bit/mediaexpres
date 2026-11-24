@@ -83,6 +83,7 @@ export function ComandaForm({
   const [uniquePerSite, setUniquePerSite] = useState(true);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
   const [vitrinaOk, setVitrinaOk] = useState(true);
+  const [linkuriSponsored, setLinkuriSponsored] = useState(false);
   const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
@@ -344,6 +345,7 @@ export function ComandaForm({
           featuredIndex: 0,
           facebookOptIn,
           vitrinaOk,
+          linkuriSponsored,
           uniquePerSite,
           ritm,
           contentDeclaration,
@@ -681,6 +683,15 @@ export function ComandaForm({
           <label className="flex items-start gap-2">
             <input type="checkbox" checked={vitrinaOk} onChange={(e) => setVitrinaOk(e.target.checked)} className="mt-1" />
             <span className="text-slate-700">Sunt de acord ca articolul să apară și ca exemplu de campanie pe MediaExpres (site, Facebook, LinkedIn).</span>
+          </label>
+          <label className="flex items-start gap-2">
+            <input type="checkbox" checked={linkuriSponsored} onChange={(e) => setLinkuriSponsored(e.target.checked)} className="mt-1" />
+            <span className="text-slate-700">
+              Vreau linkurile către site-ul meu marcate <code>rel=&quot;sponsored&quot;</code>.
+              <span className="mt-1 block text-xs text-slate-500">
+                Ce înseamnă: Google recomandă ca linkurile din articolele plătite să poarte eticheta tehnică „sponsored”. Cititorii nu văd nicio diferență, linkul funcționează la fel și aduce vizitatori la fel. Diferența e doar pentru Google: un link marcat „sponsored” nu transmite autoritate SEO site-ului dvs., dar nici nu riscă vreo penalizare. Bifați dacă vreți să respectați strict regulile Google; lăsați nebifat dacă vreți linkuri normale (dofollow).
+              </span>
+            </span>
           </label>
         </div>
       </section>

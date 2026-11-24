@@ -37,7 +37,7 @@ export function ensureOrderColumns(): Promise<void> {
       db.execute(sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "link_notes" text`),
       // 23.11.2026 — factura emisa pe comanda: reamintirile de plata o ataseaza.
       db.execute(
-        sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "invoice_share_url" text, ADD COLUMN IF NOT EXISTS "invoice_label" text, ADD COLUMN IF NOT EXISTS "vitrina_ok" boolean NOT NULL DEFAULT true`,
+        sql`ALTER TABLE "order_submission" ADD COLUMN IF NOT EXISTS "invoice_share_url" text, ADD COLUMN IF NOT EXISTS "invoice_label" text, ADD COLUMN IF NOT EXISTS "vitrina_ok" boolean NOT NULL DEFAULT true, ADD COLUMN IF NOT EXISTS "linkuri_sponsored" boolean NOT NULL DEFAULT false`,
       ),
       // 21.09.2026 — datele de facturare s-au mutat de pe pagina Stripe in
       // formularul de dupa plata. Fara coloanele astea, primul INSERT cade —

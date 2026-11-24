@@ -58,6 +58,7 @@ const schema = z.object({
   paymentProof: fileSchema.optional(),
   facebookOptIn: z.boolean().default(true),
   vitrinaOk: z.boolean().default(true),
+  linkuriSponsored: z.boolean().default(false),
   uniquePerSite: z.boolean().default(true),
   /** Ritmul de publicare ales: rapid / zile3 / sapt2 (lib/ritm.ts). */
   ritm: z.enum(RITM_IDS).default("rapid"),
@@ -171,6 +172,7 @@ export async function POST(req: NextRequest) {
       featuredIndex: d.featuredIndex,
       facebookOptIn: d.facebookOptIn,
       vitrinaOk: d.vitrinaOk,
+      linkuriSponsored: d.linkuriSponsored,
       uniquePerSite: d.uniquePerSite,
       ritm: d.ritm,
       isCasino: d.isCasino,
@@ -241,7 +243,7 @@ export async function POST(req: NextRequest) {
       <table style="width:100%;border-collapse:collapse;margin:16px 0;">
         ${kv("Telefon", d.contactPhone)}
         ${kv("Categorie", d.isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
-        ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}
+        ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}${d.linkuriSponsored ? kv("Linkuri", "marcate rel=\"sponsored\" (cerut de client)") : ""}
         ${kv("Ritm ales de client", etichetaRitm(d.ritm))}
         ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
         ${kv("De unde a venit", etichetaSursa(sursa))}

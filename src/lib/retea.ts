@@ -200,6 +200,7 @@ export interface ComandaPentruRetea {
   poze: string[];
   observatii: string;
   text_identic: boolean;
+  linkuri_sponsored: boolean;
   promovare_zile: number | null;
   promovare_public: string | null;
   categorie: "Publicitate";
@@ -284,6 +285,7 @@ export function comandaPentruRetea(r: RandComanda, extra: { pretLei: number | nu
     poze: ordonate.map((p) => p.url).filter(Boolean),
     observatii: obs,
     text_identic: !r.uniquePerSite,
+    linkuri_sponsored: r.linkuriSponsored === true,
     promovare_zile: r.facebookOptIn ? 3 : null,
     promovare_public: r.facebookOptIn ? `${r.fbBoostPaper?.trim() || "ziarul din județul clientului"} — 3 zile, inclusă în preț` : null,
     categorie: "Publicitate",

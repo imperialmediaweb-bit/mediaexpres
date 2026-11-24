@@ -225,6 +225,7 @@ export const orderSubmissions = pgTable("order_submission", {
   facebookOptIn: boolean("facebook_opt_in").notNull().default(true),
   /** 24.11.2026 — clientul accepta ca articolul sa apara ca exemplu pe MediaExpres (site, Facebook, LinkedIn). */
   vitrinaOk: boolean("vitrina_ok").notNull().default(true),
+  linkuriSponsored: boolean("linkuri_sponsored").notNull().default(false),
   // true = varianta rescrisa unic pe fiecare ziar (implicit); false = clientul
   // a cerut EXACT textul lui, identic peste tot (comunicat oficial/juridic).
   uniquePerSite: boolean("unique_per_site").notNull().default(true),
