@@ -281,6 +281,11 @@ export function PromoOffer({ showPrice = true }: { showPrice?: boolean }) {
             </span>
           </li>
         </ol>
+        <p className="mt-3 border-t border-white/10 pt-3 text-sm text-white/85">
+          <strong className="text-white">Linkuri după regulile Google:</strong> normale
+          (dofollow) sau, dacă vrei, marcate <code>rel=&quot;sponsored&quot;</code>, cum
+          recomandă Google pentru articolele plătite. Bifezi în formularul de comandă.
+        </p>
       </div>
 
     </div>

@@ -298,6 +298,12 @@ function buildFaq(CIFRE: CifreRetea) {
     a: "Primești 50 de linkuri către site-ul tău, de pe 50 de publicații de presă diferite — permanente și fără atribute care le anulează. Pentru cine cumpără exact pentru asta, facem lucrurile cum se fac: textul linkului variază de la un ziar la altul (numele brandului, adresa, câteva ancore descriptive alese de tine), iar articolele pot apărea întinse pe 2 săptămâni, nu toate în aceeași zi. Ce nu-ți promitem sunt poziții în Google: un link contează doar dacă pagina de pe care vine e indexată, iar asta o decide Google, nu noi. Cine îți garantează creșterea poziției nu spune adevărul.",
   },
   {
+    // 24.11.2026 — clientii atenti la politicile Google cer rel="sponsored";
+    // bifa e in formularul de comanda si ajunge pe comanda din retea.
+    q: "Pot cere linkuri marcate „sponsored”, după regulile Google?",
+    a: "Da. În formularul de comandă bifați „Vreau linkurile marcate rel=\"sponsored\"” și toate linkurile către site-ul dvs., pe toate cele 50 de ziare, primesc eticheta „sponsored”, cum recomandă Google pentru articolele plătite. Cititorii nu văd nicio diferență, iar linkul aduce vizitatori la fel. Dacă nu bifați, linkurile rămân normale (dofollow).",
+  },
+  {
     // 12.09.2026 — ritmul la alegere: clientul de SEO vrea intins, cel cu
     // eveniment vrea azi. Alegerea e in formularul de comanda.
     q: "Pot alege în cât timp apar articolele?",
