@@ -3,6 +3,7 @@ import { TraficRetea } from "@/components/TraficRetea";
 import Link from "next/link";
 import { ClientiStrip } from "@/components/ClientiStrip";
 import { DovadaRaport } from "@/components/DovadaRaport";
+import { CampaniiRecente } from "@/components/CampaniiRecente";
 import { VideoTutorial } from "@/components/VideoTutorial";
 import { StareRetea } from "@/components/StareRetea";
 import {
@@ -448,6 +449,7 @@ export default async function Oferta500Page() {
       */}
       <ClientiStrip />
       <DovadaRaport />
+      <CampaniiRecente />
 
       {/* Ce primesti */}
       <section className="section">
