@@ -16,7 +16,7 @@ export default async function AdminAbonamentePage() {
   const session = getSession();
   if (!session) redirect("/admin/login?from=/admin/abonamente");
 
-  const rows = await db
+  const rowsAll = await db
     .select({
       id: subscriptions.id,
       planId: subscriptions.planId,
@@ -35,11 +35,21 @@ export default async function AdminAbonamentePage() {
     .leftJoin(users, eq(subscriptions.userId, users.id))
     .orderBy(desc(subscriptions.createdAt));
 
+  // 24.11.2026 (owner: "dacă cineva renunță la abonament, îl scoți"): the ones that
+  // ended (canceled / expired) leave the list; only their number stays below it.
+  const now = Date.now();
+  const ended = (s: (typeof all)[number]) =>
+    ["canceled", "cancelled", "incomplete_expired", "unpaid"].includes(s.status) ||
+    (s.cancelAtPeriodEnd && s.currentPeriodEnd !== null && new Date(s.currentPeriodEnd).getTime() < now);
+  const all = rowsAll;
+  const rows = all.filter((s) => !ended(s));
+  const gone = all.length - rows.length;
+
   return (
     <div>
       <h1 className="font-serif text-3xl font-bold text-brand-navy">Abonamente</h1>
       <p className="mt-2 text-sm text-slate-600">
-        Toate abonamentele — active, în întârziere și anulate.
+        Abonamentele în curs. Cine renunță rămâne aici până la data de terminare, apoi dispare din listă.
       </p>
 
       <div className="mt-6 overflow-hidden rounded-xl border border-slate-200 bg-white">
@@ -52,7 +62,7 @@ export default async function AdminAbonamentePage() {
               <th className="px-4 py-3">Status</th>
               <th className="px-4 py-3">Ramase</th>
               <th className="px-4 py-3">Urmat. fact.</th>
-              <th className="px-4 py-3">Anulat?</th>
+              <th className="px-4 py-3">Se termină</th>
             </tr>
           </thead>
           <tbody>
@@ -88,14 +98,25 @@ export default async function AdminAbonamentePage() {
                   <td className="px-4 py-3 font-semibold">
                     {s.articlesRemaining}/{s.articlesIncludedPerMonth}
                   </td>
-                  <td className="px-4 py-3 text-slate-600 text-xs">{formatDate(s.currentPeriodEnd)}</td>
-                  <td className="px-4 py-3 text-xs">{s.cancelAtPeriodEnd ? "Da" : "—"}</td>
+                  <td className="px-4 py-3 text-slate-600 text-xs">{s.cancelAtPeriodEnd ? "— (a renunțat)" : formatDate(s.currentPeriodEnd)}</td>
+                  <td className="px-4 py-3 text-xs">
+                    {s.cancelAtPeriodEnd ? (
+                      <span className="font-semibold text-red-700">{formatDate(s.currentPeriodEnd)}</span>
+                    ) : (
+                      "—"
+                    )}
+                  </td>
                 </tr>
               ))
             )}
           </tbody>
         </table>
       </div>
+      {gone > 0 && (
+        <p className="mt-3 text-xs text-slate-500">
+          {gone} {gone === 1 ? "abonament încheiat ascuns" : "abonamente încheiate ascunse"} (anulate sau expirate).
+        </p>
+      )}
     </div>
   );
 }
