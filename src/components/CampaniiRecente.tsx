@@ -8,7 +8,14 @@ import { posturiPublicate } from "@/lib/autoblog";
  */
 export async function CampaniiRecente() {
   const toate = await posturiPublicate(200);
-  const campanii = toate.filter((p) => (p.keyword || "").startsWith("campanie:")).slice(0, 6);
+  const toateCampaniile = toate.filter((p) => (p.keyword || "").startsWith("campanie:"));
+  // Cate campanii are fiecare firma (owner: „clientul care a comandat 4 sa se vada").
+  const peFirma = new Map<string, number>();
+  for (const p of toateCampaniile) {
+    const f = (p.coverCredit || "").trim();
+    if (f) peFirma.set(f, (peFirma.get(f) || 0) + 1);
+  }
+  const campanii = toateCampaniile.slice(0, 6);
   if (!campanii.length) return null;
   return (
     <section className="section">
@@ -25,7 +32,12 @@ export async function CampaniiRecente() {
                 <img src={p.coverUrl} alt={p.title} className="aspect-[16/9] w-full object-cover" loading="lazy" />
               ) : null}
               <div className="p-4">
-                <p className="text-xs font-semibold uppercase tracking-wide text-[#E4002B]">Campanie · 50 de ziare</p>
+                <p className="text-xs font-semibold uppercase tracking-wide text-[#E4002B]">
+                  {p.coverCredit ? `${p.coverCredit} · ` : ""}
+                  {(peFirma.get((p.coverCredit || "").trim()) || 0) > 1
+                    ? `${peFirma.get((p.coverCredit || "").trim())} campanii`
+                    : "50 de ziare"}
+                </p>
                 <h3 className="mt-1 line-clamp-3 font-semibold text-slate-900">{p.title}</h3>
               </div>
             </Link>
