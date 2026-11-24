@@ -6,6 +6,7 @@ import { ensureBlogTables, ensureOrderColumns } from "@/lib/ensure-columns";
 import { slugDin, posteazaPeFacebook } from "@/lib/autoblog";
 import { posteazaPeLinkedIn } from "@/lib/linkedin";
 import { pingIndexNowUrl } from "@/lib/indexnow";
+import { RETEA_URL } from "@/lib/retea";
 
 /**
  * 24.11.2026 (owner): fiecare campanie publicata apare si pe MediaExpres —
@@ -83,6 +84,48 @@ ${d.corp.slice(0, 8000)}`;
   }
 }
 
+type CampanieSursa = { cheie: string; titlu: string; corp: string; firma: string; site: string; poza: string | null; noua: boolean };
+
+/** Campaniile introduse direct in Reteaua Express (nu prin MediaExpres), publicate, fara cazino. */
+async function campaniiDinRetea(): Promise<CampanieSursa[]> {
+  const key = process.env.RETEA_KEY;
+  if (!key) return [];
+  try {
+    const r = await fetch(`${RETEA_URL}/api/admin/comenzi`, { headers: { Authorization: `Bearer ${key}` }, cache: "no-store", signal: AbortSignal.timeout(15_000) });
+    if (!r.ok) return [];
+    const j = (await r.json()) as { comenzi?: Record<string, unknown>[] };
+    return (j.comenzi || [])
+      .filter((c) => Number(c.articole_live || 0) > 0 && !/cazino|casino|pariu/i.test(`${c.pachet || ""} ${c.observatii || ""} ${c.titlu || ""}`))
+      // Campaniile agentiilor (clientii lor nu sunt ai nostri de aratat): VITRINA_EXCLUDE, cuvinte cautate in client/email/observatii.
+      .filter((c) => {
+        const ex = (process.env.VITRINA_EXCLUDE || "emblema,june,whitepress,deep media").split(",").map((w) => w.trim().toLowerCase()).filter(Boolean);
+        const t = `${c.client || ""} ${c.email || ""} ${c.observatii || ""}`.toLowerCase();
+        return !ex.some((w) => t.includes(w));
+      })
+      .map((c) => {
+        let poza: string | null = null;
+        try {
+          const pz = typeof c.poze === "string" ? JSON.parse(c.poze) : c.poze;
+          poza = Array.isArray(pz) ? (typeof pz[0] === "string" ? pz[0] : (pz[0] as { url?: string })?.url) || null : null;
+        } catch {
+          /* fara poza */
+        }
+        return {
+          cheie: `retea:${c.id}`,
+          titlu: String(c.titlu || ""),
+          corp: text(String(c.material || "")),
+          firma: String(c.client || ""),
+          site: String(c.link_client || ""),
+          poza,
+          noua: new Date(String(c.creata_la || 0)) >= DE_LA,
+        };
+      })
+      .filter((c) => c.corp.length > 400 && c.titlu);
+  } catch {
+    return [];
+  }
+}
+
 export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; motiv?: string }> {
   if (process.env.VITRINA === "0") return { motiv: "oprit (VITRINA=0)" };
   await ensureOrderColumns();
@@ -110,36 +153,51 @@ export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; mot
     )
     .orderBy(desc(orderSubmissions.createdAt))
     .limit(300);
-  // Intai campaniile noi (de la DE_LA); in zilele fara ele, cele facute deja,
-  // pe rand, de la cele mai recente spre cele vechi (owner, 24.11.2026).
-  const bune = candidati.filter((x) => !st.facute.includes(x.id) && (x.body || "").trim().length > 400);
-  const c = bune.find((x) => x.createdAt >= DE_LA) || bune[0];
+  // Ordinea (owner, 24.11.2026): campaniile noi (MediaExpres, apoi cele puse
+  // direct in Reteaua Express), apoi, in zilele fara ele, cele facute deja.
+  const dinMe: CampanieSursa[] = candidati
+    .filter((x) => (x.body || "").trim().length > 400)
+    .map((x) => {
+      let poza: string | null = null;
+      try {
+        poza = (JSON.parse(x.images || "[]") as { url?: string }[])[0]?.url || null;
+      } catch {
+        /* fara poza */
+      }
+      return { cheie: x.id, titlu: x.title || "", corp: x.body || "", firma: x.companyName || "", site: x.siteUrl?.trim() || "", poza, noua: x.createdAt >= DE_LA };
+    });
+  const dinRetea = await campaniiDinRetea();
+  const toate = [...dinMe, ...dinRetea].filter((x) => !st.facute.includes(x.cheie));
+  // aceeasi campanie poate fi in ambele liste (comanda MediaExpres trimisa in retea): dupa titlu
+  const vazute = new Set<string>();
+  const unice = toate.filter((x) => {
+    const k = x.titlu.trim().toLowerCase();
+    if (vazute.has(k)) return false;
+    vazute.add(k);
+    return true;
+  });
+  const c = unice.find((x) => x.noua) || unice[0];
   if (!c) return { motiv: "nicio campanie noua" };
-  st.facute.push(c.id); // o singura incercare pe campanie, chiar daca pica
+  st.facute.push(c.cheie); // o singura incercare pe campanie, chiar daca pica
 
-  const firma = (c.companyName || "").replace(/\b(S\.?R\.?L\.?|S\.?A\.?|P\.?F\.?A\.?)\b/gi, "").trim() || "clientul nostru";
-  const site = c.siteUrl?.trim() || "";
-  const rescris = await rescrie({ titlu: c.title || "", corp: c.body || "", firma, site });
+  const firma = (c.firma || "").replace(/\b(S\.?R\.?L\.?|S\.?A\.?|P\.?F\.?A\.?)\b/gi, "").trim() || "clientul nostru";
+  const site = c.site;
+  const rescris = await rescrie({ titlu: c.titlu, corp: c.corp, firma, site });
   if (!rescris) {
     await scrieStare(st);
-    return { motiv: `rescrierea a esuat pentru ${c.id}` };
+    return { motiv: `rescrierea a esuat pentru ${c.cheie}` };
   }
-  let poza: string | null = null;
-  try {
-    poza = (JSON.parse(c.images || "[]") as { url?: string }[])[0]?.url || null;
-  } catch {
-    /* fara poza */
-  }
+  const poza = c.poza;
   const html = `${rescris.html}
 <p><em>Articolul a fost distribuit prin MediaExpres în 50 de ziare din România. Vrei și tu articolul firmei tale în 50 de ziare? <a href="${SITE.url}/oferta-500?utm_source=blog&utm_medium=campanie">Află mai multe</a>.</em></p>`;
   let slug = slugDin(rescris.title).slice(0, 90);
   const [exista] = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
-  if (exista) slug = `${slug}-${c.id.slice(0, 6)}`;
+  if (exista) slug = `${slug}-${Date.now().toString(36).slice(-5)}`;
   const [post] = await db
     .insert(blogPosts)
     .values({
       slug,
-      keyword: `campanie:${c.id}`,
+      keyword: `campanie:${c.cheie}`,
       title: rescris.title,
       excerpt: rescris.excerpt || text(rescris.html).slice(0, 170),
       bodyHtml: html,
