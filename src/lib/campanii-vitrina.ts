@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, isNotNull } from "drizzle-orm";
+import { and, desc, eq, inArray, isNotNull } from "drizzle-orm";
 import { db } from "@/db";
 import { appSettings, blogPosts, orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
@@ -13,7 +13,8 @@ import { pingIndexNowUrl } from "@/lib/indexnow";
  * cu un rand despre oferta noastra la final, plus postare pe pagina de Facebook
  * MediaExpres si pe LinkedIn („Un nou client ne-a ales"). Doar pentru comenzile
  * cu bifa „vitrina" (implicit da), fara cazino, din 24.11.2026 incoace.
- * Cel mult VITRINA_PE_ZI (2) pe zi. Oprire: VITRINA=0.
+ * Cel mult VITRINA_PE_ZI (2) pe zi; fara campanii noi, se iau cele vechi, pe rand.
+ * Oprire: VITRINA=0.
  */
 const STARE = "vitrina_campanii";
 const DE_LA = new Date(process.env.VITRINA_DE_LA || "2026-11-24T00:00:00Z");
@@ -105,11 +106,14 @@ export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; mot
         inArray(orderSubmissions.status, ["paid", "published"]),
         eq(orderSubmissions.vitrinaOk, true),
         eq(orderSubmissions.isCasino, false),
-        gte(orderSubmissions.createdAt, DE_LA),
       ),
     )
-    .limit(50);
-  const c = candidati.find((x) => !st.facute.includes(x.id) && (x.body || "").trim().length > 400);
+    .orderBy(desc(orderSubmissions.createdAt))
+    .limit(300);
+  // Intai campaniile noi (de la DE_LA); in zilele fara ele, cele facute deja,
+  // pe rand, de la cele mai recente spre cele vechi (owner, 24.11.2026).
+  const bune = candidati.filter((x) => !st.facute.includes(x.id) && (x.body || "").trim().length > 400);
+  const c = bune.find((x) => x.createdAt >= DE_LA) || bune[0];
   if (!c) return { motiv: "nicio campanie noua" };
   st.facute.push(c.id); // o singura incercare pe campanie, chiar daca pica
 
