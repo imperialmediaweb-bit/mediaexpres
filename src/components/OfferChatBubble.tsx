@@ -784,7 +784,6 @@ export function OfferChatBubble() {
               <Newspaper className="h-4 w-4" />
               Vezi lista celor 50 de ziare
             </a>
-            <OmButtons onLive={() => void startLive()} />
             {/* Clientul care a comandat deja isi gaseste drumul din prima,
                 fara sa scrie pe WhatsApp: dovada, articolul, starea comenzii. */}
             <div className="rounded-lg border border-slate-200 bg-white p-2">
@@ -817,6 +816,7 @@ export function OfferChatBubble() {
                 </button>
               ))}
             </div>
+            <OmButtons onLive={() => void startLive()} />
           </>
         ) : (
           messages.map((m, i) => (
