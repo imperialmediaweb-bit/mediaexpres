@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { cronAutorizat } from "@/lib/cron-auth";
 import { publicaUrmatorul, posturiPublicate } from "@/lib/autoblog";
 import { posteazaUrmatorulPeLinkedIn, posteazaOfertaPeLinkedIn } from "@/lib/linkedin";
+import { publicaUrmatoareaCampanie } from "@/lib/campanii-vitrina";
 import { posteazaOferta } from "@/lib/oferta-facebook";
 
 export const runtime = "nodejs";
@@ -27,7 +28,14 @@ export async function POST(req: NextRequest) {
   } catch (e) {
     linkedin = { eroare: e instanceof Error ? e.message : String(e) };
   }
-  return NextResponse.json({ ok: true, ...r, oferta, linkedin });
+  // 24.11.2026 — campaniile clientilor pe MediaExpres (site, Facebook, LinkedIn).
+  let vitrina: unknown = null;
+  try {
+    vitrina = await publicaUrmatoareaCampanie();
+  } catch (e) {
+    vitrina = { eroare: e instanceof Error ? e.message : String(e) };
+  }
+  return NextResponse.json({ ok: true, ...r, oferta, linkedin, vitrina });
 }
 
 export async function GET(req: NextRequest) {

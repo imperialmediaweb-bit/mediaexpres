@@ -82,6 +82,7 @@ export function ComandaForm({
   const [captura, setCaptura] = useState(false);
   const [uniquePerSite, setUniquePerSite] = useState(true);
   const [facebookOptIn, setFacebookOptIn] = useState(true);
+  const [vitrinaOk, setVitrinaOk] = useState(true);
   const [ritm, setRitm] = useState<RitmId>(RITM_IMPLICIT);
   const [fbBoostPaper, setFbBoostPaper] = useState("");
   const [contentDeclaration, setContentDeclaration] = useState(false);
@@ -342,6 +343,7 @@ export function ComandaForm({
           images,
           featuredIndex: 0,
           facebookOptIn,
+          vitrinaOk,
           uniquePerSite,
           ritm,
           contentDeclaration,
@@ -676,6 +678,10 @@ export function ComandaForm({
             <span className="text-slate-700">Distribuiți articolul și pe paginile de Facebook asociate.</span>
           </label>
           {facebookOptIn && <FbBoostSelect value={fbBoostPaper} onChange={setFbBoostPaper} className="pt-2" />}
+          <label className="flex items-start gap-2">
+            <input type="checkbox" checked={vitrinaOk} onChange={(e) => setVitrinaOk(e.target.checked)} className="mt-1" />
+            <span className="text-slate-700">Sunt de acord ca articolul să apară și ca exemplu de campanie pe MediaExpres (site, Facebook, LinkedIn).</span>
+          </label>
         </div>
       </section>
 

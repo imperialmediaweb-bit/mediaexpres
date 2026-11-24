@@ -57,6 +57,7 @@ const schema = z.object({
   // dovada ramane un accelerator pentru cine o are deja.
   paymentProof: fileSchema.optional(),
   facebookOptIn: z.boolean().default(true),
+  vitrinaOk: z.boolean().default(true),
   uniquePerSite: z.boolean().default(true),
   /** Ritmul de publicare ales: rapid / zile3 / sapt2 (lib/ritm.ts). */
   ritm: z.enum(RITM_IDS).default("rapid"),
@@ -169,6 +170,7 @@ export async function POST(req: NextRequest) {
       images: JSON.stringify(d.images),
       featuredIndex: d.featuredIndex,
       facebookOptIn: d.facebookOptIn,
+      vitrinaOk: d.vitrinaOk,
       uniquePerSite: d.uniquePerSite,
       ritm: d.ritm,
       isCasino: d.isCasino,

@@ -540,8 +540,12 @@ export async function urcaInCloudinary(url: string, publicId: string): Promise<s
 // ───────────────────────── Facebook ─────────────────────────
 
 /** Textul postarii: titlul, rezumatul si linkul. Fara hashtag-uri, fara emoji-uri in exces. */
-export function textPostareFacebook(p: { title: string; excerpt: string; slug: string }): string {
-  return `${p.title}\n\n${p.excerpt}\n\nCitește articolul: ${SITE.url}/blog/${p.slug}`;
+export function textPostareFacebook(p: { title: string; excerpt: string; slug: string; keyword?: string | null }): string {
+  const baza = `${p.title}\n\n${p.excerpt}\n\nCitește articolul: ${SITE.url}/blog/${p.slug}`;
+  // 24.11.2026 — campaniile clientilor (lib/campanii-vitrina.ts): si oferta noastra la final.
+  return p.keyword?.startsWith("campanie:")
+    ? `${baza}\n\nȘi firma ta poate apărea în 50 de ziare, 500 de lei: ${SITE.url}/oferta-500?utm_source=facebook&utm_medium=organic&utm_campaign=campanie_client`
+    : baza;
 }
 
 export { configFacebookPagina } from "@/lib/facebook-pagina";
