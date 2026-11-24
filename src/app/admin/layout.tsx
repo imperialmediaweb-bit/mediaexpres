@@ -34,6 +34,7 @@ const NAV = [
   { href: "/admin/clienti", label: "Clienti", icon: Users },
   { href: "/admin/materiale", label: "Materiale", icon: Inbox },
   { href: "/admin/mesaje", label: "Mesaje clienți", icon: MessageSquare },
+  { href: "/admin/chat", label: "Chat live", icon: MessageSquare },
   { href: "/admin/articole", label: "Articole", icon: FileText },
   { href: "/admin/comenzi", label: "Comenzi", icon: ShoppingBag },
   { href: "/admin/rapoarte", label: "Raport publicare", icon: ClipboardCheck },

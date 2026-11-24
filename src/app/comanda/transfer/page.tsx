@@ -1,3 +1,4 @@
+import { OfferChatBubble } from "@/components/OfferChatBubble";
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { FileText, Landmark, Send } from "lucide-react";
@@ -125,6 +126,8 @@ export default function TransferPage({
           <strong className="text-brand-navy">{SITE.phone}</strong> — ne ocupăm noi de rest.
         </p>
       </section>
+      {/* 24.11.2026 — chatul (dovada, intrebari, „vorbește cu un om" sau WhatsApp) si aici. */}
+      <OfferChatBubble />
     </div>
   );
 }

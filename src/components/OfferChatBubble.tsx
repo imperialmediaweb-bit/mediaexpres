@@ -38,6 +38,25 @@ import {
 interface Message {
   role: "user" | "assistant";
   content: string;
+  /** raspuns scris de noi din /admin/chat */
+  team?: boolean;
+}
+
+// 24.11.2026 (owner: „în admin să discutăm ca pe WhatsApp, dacă nu vrea pe WhatsApp"):
+// clientul alege — un om aici in chat, sau WhatsApp.
+const LIVE_KEY = "me-chat-live";
+const EMAIL_IN_TEXT = /[^\s@<>()]+@[^\s@<>()]+\.[a-z]{2,}/i;
+const LIVE_INTRO =
+  "Te pun în legătură cu un om din echipa MediaExpres. Scrie aici ce vrei să ne întrebi — îți răspundem chiar în acest chat, de obicei în câteva minute. Lasă și emailul sau telefonul, ca să te putem contacta dacă închizi pagina.";
+
+function newThreadId(): string {
+  const a = new Uint8Array(12);
+  crypto.getRandomValues(a);
+  return Array.from(a, (b) => b.toString(16).padStart(2, "0")).join("");
+}
+
+function linkWhatsApp(): string {
+  return `https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent("Bună ziua! Am o întrebare despre oferta MediaExpres.")}`;
 }
 
 // Intrebarile pe care le pune omul CHIAR INAINTE de plata. Nu "ce pachet aleg"
@@ -56,7 +75,7 @@ const GREETING =
   "Salut! Sunt consultantul MediaExpres. Întreabă-mă orice despre ofertă — plată, factură, unde apare articolul, ce trebuie să trimiți. Sau comandă direct de aici, fără să pleci din conversație.";
 
 // "return" = clientul care a comandat deja si revine: dovada, articol, stare.
-type Mode = "chat" | "order" | "sent" | "return";
+type Mode = "chat" | "order" | "sent" | "return" | "live";
 type ReturnStep = "email" | "pick" | "proof" | "title" | "body" | "images" | "variant";
 
 export function OfferChatBubble() {
@@ -106,6 +125,96 @@ export function OfferChatBubble() {
   const [lastAction, setLastAction] = useState<string | null>(null);
 
   const scrollRef = useRef<HTMLDivElement>(null);
+  // Chat cu un om: id-ul conversatiei sta in browser; serverul o tine pentru admin.
+  const [thread, setThread] = useState<string | null>(null);
+  const [liveEmail, setLiveEmail] = useState<string | null>(null);
+  const loadingRef = useRef(false);
+  loadingRef.current = loading;
+
+  // Revine pe site dupa ce a vorbit cu noi: conversatia continua de unde a ramas.
+  useEffect(() => {
+    let id: string | null = null;
+    try {
+      id = localStorage.getItem(LIVE_KEY);
+    } catch {}
+    if (!id) return;
+    setThread(id);
+    fetch(`/api/chat/live?thread=${id}`, { cache: "no-store" })
+      .then((r) => r.json())
+      .then((d: { messages?: Message[] }) => {
+        if (d.messages?.length) {
+          setMessages(d.messages);
+          setMode("live");
+        }
+      })
+      .catch(() => undefined);
+  }, []);
+
+  // Raspunsurile noastre apar singure: la 5 s cu chatul deschis, la 20 s inchis.
+  useEffect(() => {
+    if (mode !== "live" || !thread) return;
+    let stop = false;
+    const tick = async () => {
+      if (loadingRef.current) return;
+      try {
+        const d = (await fetch(`/api/chat/live?thread=${thread}`, { cache: "no-store" }).then((r) => r.json())) as { messages?: Message[] };
+        const server = d.messages || [];
+        if (stop || !server.length) return;
+        setMessages((cur) => {
+          if (server.length <= cur.length) return cur;
+          if (server.slice(cur.length).some((m) => m.team)) setOpen(true);
+          return server;
+        });
+      } catch {}
+    };
+    const iv = setInterval(tick, open ? 5_000 : 20_000);
+    return () => {
+      stop = true;
+      clearInterval(iv);
+    };
+  }, [mode, thread, open]);
+
+  async function postLive(history: Message[], start: boolean, id: string) {
+    const email = liveEmail || history.map((m) => (m.role === "user" ? m.content.match(EMAIL_IN_TEXT)?.[0] : null)).find(Boolean) || undefined;
+    if (email && email !== liveEmail) setLiveEmail(email);
+    const res = await fetch("/api/chat/live", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        thread: id,
+        messages: history.slice(-200),
+        email,
+        start: start || undefined,
+        page: typeof window !== "undefined" ? window.location.pathname : undefined,
+      }),
+    });
+    const d = await res.json().catch(() => ({}));
+    if (!res.ok || !d.ok) throw new Error(d.error || "Eroare");
+  }
+
+  async function startLive() {
+    let id = thread;
+    if (!id) {
+      id = newThreadId();
+      setThread(id);
+    }
+    try {
+      localStorage.setItem(LIVE_KEY, id);
+    } catch {}
+    setMode("live");
+    setLastAction(null);
+    const history: Message[] = [
+      ...messages,
+      { role: "user", content: "Vreau să vorbesc cu un om din echipă." },
+      { role: "assistant", content: LIVE_INTRO },
+    ];
+    setMessages(history);
+    try {
+      await postLive(history, true, id);
+    } catch {
+      say(`Nu am putut anunța echipa. Scrie-ne pe WhatsApp la ${SITE.phone}.`);
+    }
+  }
 
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
@@ -122,6 +231,20 @@ export function OfferChatBubble() {
   async function send(text: string) {
     const trimmed = text.trim();
     if (!trimmed || loading) return;
+    if (mode === "live" && thread) {
+      const history = [...messages, { role: "user" as const, content: trimmed }];
+      setMessages(history);
+      setInput("");
+      setLoading(true);
+      try {
+        await postLive(history, false, thread);
+      } catch {
+        say(`Mesajul nu a plecat. Scrie-ne pe WhatsApp la ${SITE.phone}.`);
+      } finally {
+        setLoading(false);
+      }
+      return;
+    }
     const history = [...messages, { role: "user" as const, content: trimmed }];
     setMessages(history);
     setInput("");
@@ -625,7 +748,7 @@ export function OfferChatBubble() {
         <MessageCircle className="h-5 w-5 text-brand-gold" />
         <p className="text-sm font-semibold">Consultant MediaExpres</p>
         <span className="ml-auto text-xs text-white/60">
-          {mode === "order" ? "comandă în curs" : mode === "return" ? "comandă existentă" : "online"}
+          {mode === "order" ? "comandă în curs" : mode === "return" ? "comandă existentă" : mode === "live" ? "vorbești cu echipa" : "online"}
         </span>
         <button
           type="button"
@@ -661,6 +784,7 @@ export function OfferChatBubble() {
               <Newspaper className="h-4 w-4" />
               Vezi lista celor 50 de ziare
             </a>
+            <OmButtons onLive={() => void startLive()} />
             {/* Clientul care a comandat deja isi gaseste drumul din prima,
                 fara sa scrie pe WhatsApp: dovada, articolul, starea comenzii. */}
             <div className="rounded-lg border border-slate-200 bg-white p-2">
@@ -701,9 +825,12 @@ export function OfferChatBubble() {
                 className={`max-w-[85%] whitespace-pre-wrap rounded-2xl px-3 py-2.5 text-sm shadow-sm ${
                   m.role === "user"
                     ? "rounded-tr-sm bg-brand-red text-white"
-                    : "rounded-tl-sm border border-slate-200 bg-white text-slate-800"
+                    : m.team
+                      ? "rounded-tl-sm border border-emerald-200 bg-emerald-50 text-slate-800"
+                      : "rounded-tl-sm border border-slate-200 bg-white text-slate-800"
                 }`}
               >
+                {m.team && <span className="mb-0.5 block text-[11px] font-semibold text-emerald-700">Echipa MediaExpres</span>}
                 {m.content}
               </div>
             </div>
@@ -916,6 +1043,17 @@ export function OfferChatBubble() {
           </form>
         )}
 
+        {mode === "live" && (
+          <a
+            href={linkWhatsApp()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-2 block text-center text-xs font-medium text-emerald-700 hover:underline"
+          >
+            Preferi WhatsApp? Scrie-ne la {SITE.phone}
+          </a>
+        )}
+
         {/* Cat timp doar discuta, butonul de comanda ramane la vedere —
             si, mai discret, drumurile clientului care a comandat deja. */}
         {mode === "chat" && messages.length > 0 && (
@@ -928,6 +1066,9 @@ export function OfferChatBubble() {
               <ShoppingCart className="h-4 w-4" />
               Comandă acum
             </button>
+            <div className="mt-2">
+              <OmButtons onLive={() => void startLive()} />
+            </div>
             <div className="mt-1.5 flex items-center justify-center gap-1 text-[11px] text-slate-500">
               <span>Ai comandat deja?</span>
               {(Object.keys(INTENT_LABEL) as ReturnIntent[]).map((i) => (
@@ -944,6 +1085,29 @@ export function OfferChatBubble() {
           </>
         )}
       </div>
+    </div>
+  );
+}
+
+/** Doua drumuri spre un om: aici in chat (raspundem din admin) sau WhatsApp. */
+function OmButtons({ onLive }: { onLive: () => void }) {
+  return (
+    <div className="grid grid-cols-2 gap-1.5">
+      <button
+        type="button"
+        onClick={onLive}
+        className="rounded-lg border border-slate-200 bg-white px-2 py-2 text-xs font-semibold text-brand-navy transition hover:border-brand-navy"
+      >
+        💬 Vorbește cu un om, aici
+      </button>
+      <a
+        href={linkWhatsApp()}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="rounded-lg border border-emerald-200 bg-emerald-50 px-2 py-2 text-center text-xs font-semibold text-emerald-800 transition hover:border-emerald-400"
+      >
+        Scrie-ne pe WhatsApp
+      </a>
     </div>
   );
 }
