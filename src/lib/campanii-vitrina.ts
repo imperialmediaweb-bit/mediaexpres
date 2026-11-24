@@ -7,6 +7,7 @@ import { slugDin, posteazaPeFacebook } from "@/lib/autoblog";
 import { posteazaPeLinkedIn } from "@/lib/linkedin";
 import { pingIndexNowUrl } from "@/lib/indexnow";
 import { RETEA_URL } from "@/lib/retea";
+import { cuLinkGarantat } from "@/lib/link-garantat";
 
 /**
  * 24.11.2026 (owner): fiecare campanie publicata apare si pe MediaExpres —
@@ -188,7 +189,9 @@ export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; mot
     return { motiv: `rescrierea a esuat pentru ${c.cheie}` };
   }
   const poza = c.poza;
-  const html = `${rescris.html}
+  // Linkul clientului garantat (AI-ul il mai uita): brand → firma → fraza la final.
+  const corpCuLink = site && /^https?:\/\//.test(site) ? cuLinkGarantat(rescris.html, site, c.firma) : rescris.html;
+  const html = `${corpCuLink}
 <p><em>Articolul a fost distribuit prin MediaExpres în 50 de ziare din România. Vrei și tu articolul firmei tale în 50 de ziare? <a href="${SITE.url}/oferta-500?utm_source=blog&utm_medium=campanie">Află mai multe</a>.</em></p>`;
   let slug = slugDin(rescris.title).slice(0, 90);
   const [exista] = await db.select({ id: blogPosts.id }).from(blogPosts).where(eq(blogPosts.slug, slug)).limit(1);
