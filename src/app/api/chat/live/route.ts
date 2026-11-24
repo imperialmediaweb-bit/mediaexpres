@@ -3,6 +3,7 @@ import { z } from "zod";
 import { getThread, saveThread, type ChatMsg } from "@/lib/chat-live";
 import { sendEmail, wrapEmail, kv, escapeHtml as esc, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { trimitePushAdmin } from "@/lib/admin-push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -63,6 +64,11 @@ export async function POST(req: NextRequest) {
       <p style="margin-top:16px;color:#64748b;">Ce scrii din admin apare pe loc în chatul clientului${email ? ", și pe email" : ""}.</p>`
     ),
   }).catch((e: unknown) => console.error("[chat live] email:", e));
+  await trimitePushAdmin(
+    start ? "💬 Client vrea să vorbească cu un om" : `💬 Mesaj nou${email ? ` — ${email}` : ""}`,
+    last || "Chat site",
+    `/admin/chat?id=${thread}`
+  ).catch((e: unknown) => console.error("[chat live] push:", e));
   return NextResponse.json({ ok: true });
 }
 
