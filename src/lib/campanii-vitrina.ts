@@ -4,7 +4,7 @@ import { appSettings, blogPosts, orderSubmissions } from "@/db/schema";
 import { SITE } from "@/data/site";
 import { ensureBlogTables, ensureOrderColumns } from "@/lib/ensure-columns";
 import { slugDin, posteazaPeFacebook } from "@/lib/autoblog";
-import { posteazaPeLinkedIn } from "@/lib/linkedin";
+import { posteazaPeLinkedIn, oreDeLaUltimaPostare } from "@/lib/linkedin";
 import { pingIndexNowUrl } from "@/lib/indexnow";
 import { RETEA_URL } from "@/lib/retea";
 import { cuLinkGarantat } from "@/lib/link-garantat";
@@ -21,7 +21,7 @@ import { cuLinkGarantat } from "@/lib/link-garantat";
 const STARE = "vitrina_campanii";
 const DE_LA = new Date(process.env.VITRINA_DE_LA || "2026-11-24T00:00:00Z");
 
-type Stare = { facute: string[]; azi: string; nrAzi: number };
+type Stare = { facute: string[]; azi: string; nrAzi: number; ultima?: number };
 
 async function citesteStare(): Promise<Stare> {
   const [r] = await db.select().from(appSettings).where(eq(appSettings.key, STARE)).limit(1);
@@ -140,6 +140,9 @@ export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; mot
   if (st.nrAzi >= Number(process.env.VITRINA_PE_ZI || 2)) return { motiv: "plafonul zilei atins" };
   const ora = Number(new Intl.DateTimeFormat("ro-RO", { hour: "numeric", hour12: false, timeZone: "Europe/Bucharest" }).format(new Date()));
   if (ora < 9 || ora >= 20) return { motiv: "in afara orelor 09-20" };
+  // 24.11.2026 (owner: „nu le pune asa aproape"): cel putin VITRINA_ORE_INTRE (5) ore intre campanii.
+  const oreIntre = Number(process.env.VITRINA_ORE_INTRE || 5);
+  if (st.ultima && Date.now() - st.ultima < oreIntre * 3600_000) return { motiv: `ultima campanie acum mai putin de ${oreIntre}h` };
 
   const candidati = await db
     .select()
@@ -215,13 +218,15 @@ export async function publicaUrmatoareaCampanie(): Promise<{ facut?: string; mot
   const url = `${SITE.url}/blog/${slug}`;
   await pingIndexNowUrl(url).catch(() => undefined);
   const fb = await posteazaPeFacebook(post.id).catch((e: unknown) => ({ ok: false, motiv: String(e) }));
-  const li = await posteazaPeLinkedIn({
+  // Pe LinkedIn, la cel putin 3 ore de orice alta postare automata; altfel doar site + Facebook.
+  const li = (await oreDeLaUltimaPostare()) < 3 ? { ok: false as const, motiv: "prea aproape de alta postare LinkedIn" } : await posteazaPeLinkedIn({
     text: `Un nou client ne-a ales: ${firma}.\n\n${rescris.title}\n\nArticolul firmei a apărut în 50 de ziare din România. Povestea completă: ${url}\n\nVrei și tu articolul firmei tale în 50 de ziare? ${SITE.url}/oferta-500?utm_source=linkedin&utm_medium=social&utm_campaign=client_nou`,
     link: url,
     titlu: rescris.title,
     descriere: rescris.excerpt,
   }).catch((e: unknown) => ({ ok: false as const, motiv: String(e) }));
   st.nrAzi += 1;
+  st.ultima = Date.now();
   await scrieStare(st);
   return { facut: `${slug} | facebook: ${fb.ok ? "da" : "nu"} | linkedin: ${li.ok ? "da" : `nu (${"motiv" in li ? li.motiv : ""})`}` };
 }

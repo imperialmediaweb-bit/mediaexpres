@@ -257,3 +257,9 @@ export async function posteazaOfertaPeLinkedIn(opt: { fortat?: boolean } = {}): 
     .onConflictDoUpdate({ target: appSettings.key, set: { value: vv, updatedAt: new Date() } });
   return { postat: true };
 }
+
+/** Cate ore au trecut de la ultima postare automata pe LinkedIn (articol sau oferta). */
+export async function oreDeLaUltimaPostare(): Promise<number> {
+  const l = await listaPostate();
+  return l.ultima ? (Date.now() - l.ultima) / 3600_000 : 999;
+}
