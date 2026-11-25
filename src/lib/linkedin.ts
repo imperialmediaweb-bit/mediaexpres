@@ -12,13 +12,27 @@ import { SITE } from "@/data/site";
  * celui care s-a conectat. Oprire: LINKEDIN_POSTARE=0.
  */
 const CHEIE = "linkedin";
-const VERSIUNE = process.env.LINKEDIN_VERSION || "202411";
+// LinkedIn opreste versiunile mai vechi de ~1 an (202411 nu mai e acceptata in 11.2026).
+const VERSIUNE = process.env.LINKEDIN_VERSION || "202605";
 export const LINKEDIN_REDIRECT = `${SITE.url}/api/linkedin/callback`;
 
 type StareLinkedIn = { token: string; expira: number; persoana: string | null; nume?: string | null };
 
+/**
+ * Doar scope-urile aprobate in aplicatie: Sign In (openid profile email) +
+ * Share on LinkedIn (w_member_social). w_organization_social cere Community
+ * Management API — il cerem doar cand exista LINKEDIN_ORG_ID; altfel LinkedIn
+ * refuza toata conectarea („unauthorized_scope_error").
+ */
 export function scopuriLinkedIn(): string {
-  return process.env.LINKEDIN_SCOPES || "openid profile w_member_social w_organization_social";
+  if (process.env.LINKEDIN_SCOPES) return process.env.LINKEDIN_SCOPES;
+  return `openid profile email w_member_social${process.env.LINKEDIN_ORG_ID ? " w_organization_social" : ""}`;
+}
+
+/** Ce lipseste pe server ca sa se poata face conectarea (null = nimic). */
+export function lipsaConfigLinkedIn(): string | null {
+  const lipsa = ["LINKEDIN_CLIENT_ID", "LINKEDIN_CLIENT_SECRET"].filter((k) => !process.env[k]);
+  return lipsa.length ? `${lipsa.join(" și ")} lipsește pe server (Railway, serviciul mediaexpres)` : null;
 }
 
 export function urlConectare(state: string): string | null {
@@ -56,7 +70,8 @@ async function scrie(s: StareLinkedIn): Promise<void> {
 export async function finalizeazaConectarea(code: string): Promise<{ ok: boolean; motiv?: string; nume?: string | null }> {
   const id = process.env.LINKEDIN_CLIENT_ID;
   const secret = process.env.LINKEDIN_CLIENT_SECRET;
-  if (!id || !secret) return { ok: false, motiv: "LINKEDIN_CLIENT_ID / LINKEDIN_CLIENT_SECRET lipsesc pe server" };
+  const lipsa = lipsaConfigLinkedIn();
+  if (!id || !secret || lipsa) return { ok: false, motiv: lipsa || "configurare LinkedIn lipsă" };
   const r = await fetch("https://www.linkedin.com/oauth/v2/accessToken", {
     method: "POST",
     headers: { "content-type": "application/x-www-form-urlencoded" },
@@ -86,12 +101,13 @@ export async function finalizeazaConectarea(code: string): Promise<{ ok: boolean
   return { ok: true, nume };
 }
 
-export async function stareLinkedIn(): Promise<{ conectat: boolean; expira?: string; nume?: string | null; tinta: string | null }> {
+export async function stareLinkedIn(): Promise<{ conectat: boolean; expira?: string; nume?: string | null; tinta: string | null; configurare?: string }> {
   const s = await citeste();
+  const lipsa = lipsaConfigLinkedIn();
   const org = process.env.LINKEDIN_ORG_ID;
   const tinta = org ? `urn:li:organization:${org}` : s?.persoana || null;
-  if (!s || s.expira < Date.now()) return { conectat: false, tinta };
-  return { conectat: true, expira: new Date(s.expira).toISOString(), nume: s.nume, tinta };
+  if (!s || s.expira < Date.now()) return { conectat: false, tinta, ...(lipsa ? { configurare: lipsa } : {}) };
+  return { conectat: true, expira: new Date(s.expira).toISOString(), nume: s.nume, tinta, ...(lipsa ? { configurare: lipsa } : {}) };
 }
 
 /** Textul postarii pe LinkedIn: titlul, ideea, linkul, cateva hashtag-uri. */
