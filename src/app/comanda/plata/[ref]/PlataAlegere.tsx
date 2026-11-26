@@ -4,6 +4,7 @@ import { useState } from "react";
 import { CreditCard, Landmark, Loader2, MessageCircle, CheckCircle2 } from "lucide-react";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
 import { FormError } from "@/components/forms/FormError";
+import { DovadaPlata } from "./DovadaPlata";
 
 export function PlataAlegere({
   refComanda,
@@ -13,6 +14,7 @@ export function PlataAlegere({
   iban,
   beneficiar,
   banca,
+  areDovada = false,
 }: {
   refComanda: string;
   price: number;
@@ -21,6 +23,7 @@ export function PlataAlegere({
   iban: string;
   beneficiar: string;
   banca: string;
+  areDovada?: boolean;
 }) {
   const [busy, setBusy] = useState<"card" | "op" | null>(null);
   const [op, setOp] = useState(opAles);
@@ -52,39 +55,60 @@ export function PlataAlegere({
   }
 
   if (op) {
+    const pas = "flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-sm font-bold text-white";
     return (
       <div className="mt-6 rounded-2xl border-2 border-emerald-200 bg-emerald-50 p-6">
         <div className="flex items-start gap-3">
-          <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
+          <CheckCircle2 className="mt-0.5 h-7 w-7 shrink-0 text-emerald-600" />
           <div>
             <h2 className="font-serif text-xl font-bold text-emerald-900">Gata! Comanda dumneavoastră a fost trimisă</h2>
-            <p className="mt-1 text-sm font-semibold text-emerald-900">
-              Am primit-o cu bine. Nu este nevoie să completați formularul încă o dată.
-            </p>
-            <p className="mt-2 text-sm text-emerald-900/90">
-              În câteva minute primiți pe email factura și confirmarea comenzii. O dați la contabilitate și faceți
-              transferul; la detalii scrieți numărul facturii. Publicăm în maximum 12 ore lucrătoare de la încasare,
-              iar după pornire primiți un link unde urmăriți campania în timp real.
-            </p>
-            <p className="mt-2 text-sm text-emerald-900/90">
-              Aveți o întrebare? Scrieți-ne pe{" "}
-              <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
-                WhatsApp
-              </a>{" "}
-              sau în chatul live din colțul paginii.
-            </p>
+            <p className="mt-1 text-sm font-semibold text-emerald-900">Am primit-o cu bine. Nu este nevoie să completați formularul încă o dată.</p>
           </div>
         </div>
-        <dl className="mt-4 grid gap-x-6 gap-y-1.5 rounded-lg bg-white p-4 text-sm sm:grid-cols-[auto_1fr]">
-          <dt className="text-slate-500">Beneficiar</dt>
-          <dd className="font-semibold text-brand-navy">{beneficiar}</dd>
-          <dt className="text-slate-500">IBAN</dt>
-          <dd className="break-all font-mono font-semibold text-brand-navy">{iban}</dd>
-          <dt className="text-slate-500">Banca</dt>
-          <dd className="font-semibold text-brand-navy">{banca}</dd>
-          <dt className="text-slate-500">Suma</dt>
-          <dd className="font-semibold text-brand-navy">{price.toLocaleString("ro")} lei</dd>
-        </dl>
+        <h3 className="mt-5 text-sm font-bold uppercase tracking-wide text-emerald-900">Ce urmează</h3>
+        <ol className="mt-3 space-y-4 text-sm text-emerald-950">
+          <li className="flex gap-3">
+            <span className={pas}>1</span>
+            <span>În câteva minute primiți pe email <strong>confirmarea comenzii și factura</strong>.</span>
+          </li>
+          <li className="flex gap-3">
+            <span className={pas}>2</span>
+            <div className="w-full">
+              Faceți plata prin OP, din contul firmei. La detalii scrieți numărul facturii.
+              <dl className="mt-2 grid gap-x-6 gap-y-1.5 rounded-lg bg-white p-4 text-sm sm:grid-cols-[auto_1fr]">
+                <dt className="text-slate-500">Beneficiar</dt>
+                <dd className="font-semibold text-brand-navy">{beneficiar}</dd>
+                <dt className="text-slate-500">IBAN</dt>
+                <dd className="break-all font-mono font-semibold text-brand-navy">{iban}</dd>
+                <dt className="text-slate-500">Banca</dt>
+                <dd className="font-semibold text-brand-navy">{banca}</dd>
+                <dt className="text-slate-500">Suma</dt>
+                <dd className="font-semibold text-brand-navy">{price.toLocaleString("ro")} lei</dd>
+              </dl>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className={pas}>3</span>
+            <div>
+              Trimiteți-ne <strong>dovada plății</strong>, direct aici:
+              <DovadaPlata refComanda={refComanda} dejaTrimisa={areDovada} />
+              <p className="mt-2 text-xs text-emerald-900/80">
+                Sau pe{" "}
+                <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>,
+                ca răspuns la emailul cu factura, ori în chatul live din colțul paginii. Pagina o puteți deschide oricând din linkul primit pe email.
+              </p>
+            </div>
+          </li>
+          <li className="flex gap-3">
+            <span className={pas}>4</span>
+            <span>Cum vedem plata, pornim campania (în maximum 12 ore lucrătoare) și primiți pe email <strong>linkul unde urmăriți publicarea în timp real</strong>.</span>
+          </li>
+        </ol>
+        <p className="mt-5 text-sm text-emerald-900/90">
+          Aveți o întrebare? Scrieți-ne pe{" "}
+          <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>{" "}
+          sau în chatul live.
+        </p>
       </div>
     );
   }

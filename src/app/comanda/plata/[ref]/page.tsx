@@ -47,10 +47,18 @@ export default async function PlataPage({
         <section className="container max-w-2xl py-16 text-center">
           <CheckCircle2 className="mx-auto h-14 w-14 text-emerald-600" />
           <h1 className="mt-4 font-serif text-3xl font-bold text-brand-navy">Plata a fost primită</h1>
-          <p className="mx-auto mt-3 max-w-lg text-slate-700">
-            Mulțumim! Factura fiscală vine pe email în câteva minute. Publicăm în maximum
-            12 ore lucrătoare și îți trimitem raportul cu toate cele 50 de linkuri.
+          <p className="mx-auto mt-2 max-w-lg font-semibold text-slate-800">
+            Mulțumim! Comanda este completă, nu mai trebuie să faceți nimic.
           </p>
+          <div className="mx-auto mt-6 max-w-lg rounded-xl border border-slate-200 bg-white p-5 text-left">
+            <h2 className="text-sm font-bold uppercase tracking-wide text-brand-navy">Ce urmează</h2>
+            <ol className="mt-3 space-y-3 text-sm text-slate-700">
+              <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">1</span><span>În câteva minute primiți pe email <strong>confirmarea comenzii și factura</strong>.</span></li>
+              <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">2</span><span>Publicăm articolul în maximum <strong>12 ore lucrătoare</strong>.</span></li>
+              <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">3</span><span>Urmăriți publicarea <strong>în timp real</strong>, din linkul de mai jos (îl primiți și pe email).</span></li>
+              <li className="flex gap-3"><span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-emerald-600 text-xs font-bold text-white">4</span><span>La final primiți <strong>raportul</strong> cu toate articolele și linkurile.</span></li>
+            </ol>
+          </div>
           {tokRaport && (
             <div className="mx-auto mt-6 max-w-lg rounded-xl border border-slate-200 bg-white p-4">
               <a
@@ -65,9 +73,10 @@ export default async function PlataPage({
             </div>
           )}
           <p className="mt-6 text-sm text-slate-500">
-            Întrebări? Scrie-ne pe WhatsApp la <strong className="text-brand-navy">{SITE.phone}</strong>.
+            Aveți o întrebare? Scrieți-ne pe WhatsApp la <strong className="text-brand-navy">{SITE.phone}</strong> sau în chatul live.
           </p>
         </section>
+        <OfferChatBubble />
       </div>
     );
   }
@@ -114,6 +123,7 @@ export default async function PlataPage({
           iban={SITE.billing.iban}
           beneficiar={SITE.billing.company}
           banca={SITE.billing.bank}
+          areDovada={Boolean(row.paymentProof)}
         />
 
         <p className="mt-6 flex items-center justify-center gap-2 text-center text-sm text-slate-600">
