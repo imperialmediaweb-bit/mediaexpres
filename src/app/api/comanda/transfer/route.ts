@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { eticheteazaAlegerea } from "@/lib/zona-pachet";
 import { z } from "zod";
-import { eq } from "drizzle-orm";
+import { and, desc, eq, gt } from "drizzle-orm";
 import { db } from "@/db";
 import { ensureOrderColumns } from "@/lib/ensure-columns";
 import { orderSubmissions, users } from "@/db/schema";
@@ -150,6 +150,45 @@ export async function POST(req: NextRequest) {
   const laPlata = d.plata === "later";
   const reference = `${laPlata ? "cmd" : "op"}_${crypto.randomUUID()}`;
   const sursa = sursaDinCerere(req);
+
+  // 26.11.2026 (MARIANA SERBAN COLORS: 2 comenzi + 2 facturi, 208 si 209, la
+  // cateva minute): aceeasi firma, acelasi pachet, inca neplatita, in ultimele
+  // COMANDA_DUBLA_ORE (2) ore = aceeasi comanda trimisa din nou. Nu se face alta
+  // si nu pleaca alta factura; textul si pozele noi le inlocuiesc pe cele vechi.
+  try {
+    await ensureOrderColumns();
+    const ore = Number(process.env.COMANDA_DUBLA_ORE || 2);
+    const [dubla] = await db
+      .select({ id: orderSubmissions.id, ref: orderSubmissions.stripeSessionId })
+      .from(orderSubmissions)
+      .where(
+        and(
+          eq(orderSubmissions.email, email),
+          eq(orderSubmissions.packageId, d.packageId),
+          eq(orderSubmissions.status, "pending_payment"),
+          gt(orderSubmissions.createdAt, new Date(Date.now() - ore * 3600_000)),
+        ),
+      )
+      .orderBy(desc(orderSubmissions.createdAt))
+      .limit(1);
+    if (dubla?.ref && ore > 0) {
+      await db
+        .update(orderSubmissions)
+        .set({
+          title: d.title,
+          body: d.body,
+          images: JSON.stringify(d.images),
+          featuredIndex: d.featuredIndex,
+          siteUrl: d.siteUrl || null,
+          linkNotes: d.linkNotes?.trim() || null,
+        })
+        .where(eq(orderSubmissions.id, dubla.id));
+      console.warn("[comanda/transfer] comanda trimisa din nou, folosesc", dubla.ref);
+      return NextResponse.json({ ok: true, ref: dubla.ref, dejaPrimita: true });
+    }
+  } catch (e) {
+    console.error("[comanda/transfer] verificare dubla:", e);
+  }
 
   try {
     await ensureOrderColumns();
