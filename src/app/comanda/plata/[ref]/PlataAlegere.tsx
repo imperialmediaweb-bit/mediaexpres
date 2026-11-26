@@ -57,10 +57,21 @@ export function PlataAlegere({
         <div className="flex items-start gap-3">
           <CheckCircle2 className="mt-0.5 h-6 w-6 shrink-0 text-emerald-600" />
           <div>
-            <h2 className="font-serif text-xl font-bold text-emerald-900">Factura vine pe email în câteva minute</h2>
-            <p className="mt-1 text-sm text-emerald-900/90">
-              O dai la contabilitate și faci transferul. La detalii scrie numărul facturii.
-              Publicăm în maximum 12 ore lucrătoare de la încasare.
+            <h2 className="font-serif text-xl font-bold text-emerald-900">Gata! Comanda dumneavoastră a fost trimisă</h2>
+            <p className="mt-1 text-sm font-semibold text-emerald-900">
+              Am primit-o cu bine. Nu este nevoie să completați formularul încă o dată.
+            </p>
+            <p className="mt-2 text-sm text-emerald-900/90">
+              În câteva minute primiți pe email factura și confirmarea comenzii. O dați la contabilitate și faceți
+              transferul; la detalii scrieți numărul facturii. Publicăm în maximum 12 ore lucrătoare de la încasare,
+              iar după pornire primiți un link unde urmăriți campania în timp real.
+            </p>
+            <p className="mt-2 text-sm text-emerald-900/90">
+              Aveți o întrebare? Scrieți-ne pe{" "}
+              <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">
+                WhatsApp
+              </a>{" "}
+              sau în chatul live din colțul paginii.
             </p>
           </div>
         </div>

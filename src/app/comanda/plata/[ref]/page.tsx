@@ -9,6 +9,7 @@ import { gasesteComanda } from "@/lib/comanda-ref";
 import { waLink } from "@/lib/whatsapp";
 import { ARTICOL_DUPA_PLATA } from "@/lib/content-policy";
 import { PlataAlegere } from "./PlataAlegere";
+import { OfferChatBubble } from "@/components/OfferChatBubble";
 
 export const dynamic = "force-dynamic";
 export const metadata: Metadata = {
@@ -84,9 +85,9 @@ export default async function PlataPage({
       <section className="bg-brand-navy text-white">
         <div className="container max-w-3xl py-10 text-center">
           <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
-          <h1 className="mt-3 font-serif text-3xl font-bold md:text-4xl">Comanda ta e salvată</h1>
+          <h1 className="mt-3 font-serif text-3xl font-bold md:text-4xl">Comanda ta a fost primită</h1>
           <p className="mx-auto mt-2 max-w-xl text-white/85">
-            Ultimul pas: alege cum plătești. Factura fiscală o primești automat pe email.
+            Nu mai completa formularul încă o dată. Ultimul pas: alege cum plătești, iar factura o primești automat pe email.
           </p>
         </div>
       </section>
@@ -122,6 +123,7 @@ export default async function PlataPage({
 
         <DateFirma className="mt-8" />
       </section>
+      <OfferChatBubble />
     </div>
   );
 }
