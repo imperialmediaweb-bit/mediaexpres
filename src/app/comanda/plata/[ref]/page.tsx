@@ -96,7 +96,9 @@ export default async function PlataPage({
           <CheckCircle2 className="mx-auto h-10 w-10 text-emerald-400" />
           <h1 className="mt-3 font-serif text-3xl font-bold md:text-4xl">Comanda ta a fost primită</h1>
           <p className="mx-auto mt-2 max-w-xl text-white/85">
-            Nu mai completa formularul încă o dată. Ultimul pas: alege cum plătești, iar factura o primești automat pe email.
+            {row.paymentMethod === "op"
+              ? "Nu mai completa formularul încă o dată. Mai jos vezi pașii următori."
+              : "Nu mai completa formularul încă o dată. Ultimul pas: alege cum plătești, iar factura o primești automat pe email."}
           </p>
         </div>
       </section>
