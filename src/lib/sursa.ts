@@ -248,6 +248,8 @@ export function propozitieSursaWhatsApp(v: string | null | undefined): string {
   if (!s) return "Am intrat direct pe site.";
   switch (s.source) {
     case "google":
+      // 27.11.2026 — campania video Demand Gen (YouTube, site-uri, Gmail): utm_campaign=demandgen_*.
+      if (s.campaign.startsWith("demandgen") || s.medium === "video") return "Am văzut clipul cu oferta pe YouTube.";
       return "Am văzut oferta pe Google.";
     case "facebook":
       // 15.11.2026 — fraza difera dupa reclama, ca proprietarul sa stie sursa.
