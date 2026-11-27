@@ -52,6 +52,11 @@ interface SendArgs {
 }
 
 export async function sendEmail(args: SendArgs) {
+  // 27.11.2026 — emailurile de promovare (cele cu List-Unsubscribe) nu mai pleaca la dezabonati.
+  if (args.listUnsubscribe) {
+    const { esteDezabonat } = await import("@/lib/dezabonare");
+    if (await esteDezabonat(args.to)) return { ok: true, dezabonat: true };
+  }
   const resend = getResend();
   if (!resend) {
     console.warn("[email] RESEND_API_KEY missing — logging instead:", args.subject);

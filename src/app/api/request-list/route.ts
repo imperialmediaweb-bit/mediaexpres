@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { antetDezabonare, subsolDezabonare } from "@/lib/dezabonare";
 import { eq } from "drizzle-orm";
 import { requestListSchema } from "@/lib/validators";
 import { db } from "@/db";
@@ -120,6 +121,7 @@ export async function POST(req: NextRequest) {
     subject: "Toate cele 50 de ziare, pentru 500 de lei",
     scheduledAt: day3,
     replyTo: ADMIN_EMAIL,
+    listUnsubscribe: antetDezabonare(data.email),
     html: wrapEmail(
       "Toate cele 50 de ziare, pentru 500 de lei",
       `
@@ -136,6 +138,7 @@ export async function POST(req: NextRequest) {
       <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">Vezi oferta de 500 lei</a></p>
       <p>Ai o întrebare înainte să comanzi? Răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      ${subsolDezabonare(data.email)}
       `
     ),
   });
@@ -150,6 +153,7 @@ export async function POST(req: NextRequest) {
       : "Oferta de 500 lei — ultima chemare",
     scheduledAt: day7,
     replyTo: ADMIN_EMAIL,
+    listUnsubscribe: antetDezabonare(data.email),
     html: wrapEmail(
       deadlineLabel ? `Expiră pe ${deadlineLabel}` : "Ultima chemare",
       `
@@ -160,6 +164,7 @@ export async function POST(req: NextRequest) {
       <p style="margin:24px 0;text-align:center;"><a href="${SITE.url}/oferta-500" style="display:inline-block;background:#c1121f;color:#fff;padding:14px 28px;border-radius:8px;text-decoration:none;font-weight:600;font-size:16px;">Comandă acum — 500 lei</a></p>
       <p style="font-size:14px;color:#64748b;">Preferi transfer bancar? Ai datele și formularul aici: <a href="${SITE.url}/comanda/transfer?pachet=promo-50" style="color:#c1121f;">${SITE.domain}/comanda/transfer</a></p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
+      ${subsolDezabonare(data.email)}
       `
     ),
   });
