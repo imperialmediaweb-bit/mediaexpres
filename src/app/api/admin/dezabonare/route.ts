@@ -13,3 +13,6 @@ export async function POST(req: NextRequest) {
   const r = await dezaboneaza(email);
   return NextResponse.json({ ok: true, email, emailuri_programate_anulate: r.anulate });
 }
+
+/** La fel, din browser (adminul logat deschide linkul): GET ?email=... */
+export const GET = POST;
