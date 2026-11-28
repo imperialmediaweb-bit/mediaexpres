@@ -1,10 +1,13 @@
-import { sendEmail, wrapEmail, escapeHtml as esc, bankTransferEmailBox } from "@/lib/email";
-import { issueInvoiceForOrder } from "@/lib/invoicing";
+import { sendEmail, wrapEmail, escapeHtml as esc, bankTransferEmailBox, ADMIN_EMAIL } from "@/lib/email";
 import { SITE } from "@/data/site";
+import { gasesteComanda } from "@/lib/comanda-ref";
+import { linkProforma, numarProforma } from "@/lib/proforma";
 
 /**
- * Pasul „platesc prin OP": emailul catre client cu pasii si contul, plus
- * factura automata NEINCASATA. Folosit si de /api/comanda/transfer (comanda
+ * Pasul „platesc prin OP": emailul catre client cu PROFORMA (facuta de noi) si
+ * contul. 28.11.2026 (owner): factura StartCo nu mai pleaca aici, ci la
+ * confirmarea incasarii (/api/admin/materiale/[id], confirm_payment) — altfel
+ * ramaneau facturi pentru comenzi neplatite. Folosit si de /api/comanda/transfer (comanda
  * direct prin OP), si de /api/comanda/plata (clientul a trimis intai
  * formularul si alege OP abia pe pagina de plata).
  */
@@ -19,44 +22,34 @@ export async function pornestePlataOp(args: {
   reference: string;
   hasProof?: boolean;
 }) {
-  const { email, companyName, cui, address, phone, pkgName, price, reference } = args;
+  const { email, companyName, pkgName, price, reference } = args;
+  const row = await gasesteComanda(reference).catch(() => null);
+  const nr = row ? numarProforma(row.id, row.createdAt) : reference.slice(0, 12).toUpperCase();
+  const link = linkProforma(reference);
 
-  sendEmail({
+  await sendEmail({
     to: email,
-    subject: "Am primit comanda ta — MediaExpres",
+    replyTo: ADMIN_EMAIL,
+    subject: `Proforma ${nr} — ${price} lei, plata prin transfer`,
     html: wrapEmail(
-      "Comandă primită",
+      "Proforma comenzii tale",
       `
-      <p>Salut,</p>
-      <p>Am primit comanda și materialele pentru <strong>${esc(pkgName)}</strong> — ${price} lei.</p>
+      <p>Bună ziua${companyName ? `, ${esc(companyName)}` : ""},</p>
+      <p>Am primit comanda pentru <strong>${esc(pkgName)}</strong> — ${price} lei. Mai jos aveți proforma și datele pentru plată.</p>
+      <p style="margin:16px 0;"><a href="${link}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Vezi și descarcă proforma ${nr}</a></p>
       <p><strong>Ce urmează, în ordine:</strong></p>
       <ol style="padding-left:20px;margin:8px 0 16px;">
-        <li style="margin:6px 0;"><strong>Îți trimitem factura fiscală</strong> pe acest email, în câteva minute.</li>
-        <li style="margin:6px 0;"><strong>Plătești prin transfer bancar</strong> — datele contului sunt mai jos, ca să le ai la îndemână.</li>
-        <li style="margin:6px 0;"><strong>Publicăm în maximum 12 ore lucrătoare</strong> de la încasare și primești raportul cu toate cele 50 de linkuri.</li>
+        <li style="margin:6px 0;"><strong>Plătiți prin transfer bancar</strong>, cu <strong>${nr}</strong> la detalii plată.</li>
+        <li style="margin:6px 0;"><strong>Urcați dovada plății</strong> pe pagina proformei (sau răspundeți la acest email cu ea), ca să pornim imediat.</li>
+        <li style="margin:6px 0;"><strong>Publicăm în maximum 12 ore lucrătoare</strong> de la încasare și primiți raportul cu toate linkurile.</li>
+        <li style="margin:6px 0;"><strong>Factura fiscală</strong> vine pe email imediat după încasare.</li>
       </ol>
-      ${args.hasProof ? '<p>Dovada plății pe care ai atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
-      ${bankTransferEmailBox(`${price} lei`, `${esc(pkgName)} — ${esc(companyName)}`)}
-      <p style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:13px;color:#78350f;"><strong>De reținut:</strong> la comandă ai declarat că articolul nu prezintă tratamente sau metode de vindecare pentru boli și nu conține alt conținut interzis. Dacă la verificare se dovedește altfel, comanda se anulează, articolul nu se publică <strong>și suma plătită nu se restituie</strong> (art. 4 din <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>). Dacă ai un dubiu, întreabă-ne ÎNAINTE să plătești — răspundem repede.</p>
-      <p>Dacă între timp ai întrebări, răspunde la acest email sau scrie-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
+      ${args.hasProof ? '<p>Dovada plății pe care ați atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
+      ${bankTransferEmailBox(`${price} lei`, nr)}
+      <p style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:13px;color:#78350f;"><strong>De reținut:</strong> la comandă ați declarat că articolul nu prezintă tratamente sau metode de vindecare pentru boli și nu conține alt conținut interzis. Dacă la verificare se dovedește altfel, comanda se anulează, articolul nu se publică <strong>și suma plătită nu se restituie</strong> (art. 4 din <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>). Dacă aveți un dubiu, întrebați-ne ÎNAINTE să plătiți — răspundem repede.</p>
+      <p>Întrebări? Răspundeți la acest email sau scrieți-ne pe WhatsApp la <strong>${SITE.phone}</strong>.</p>
       <p style="margin-top:24px;">Cu respect,<br/><strong>Echipa MediaExpres</strong></p>
       `,
     ),
-  }).catch((e) => console.error("[comanda-op] mail client:", e));
-
-  // Factura pleaca AUTOMAT, neincasata (markPaid: false): clientul nu poate
-  // plati fara document. Best-effort — issueInvoiceForOrder isi inghite
-  // erorile si alerteaza adminul.
-  void issueInvoiceForOrder({
-    email,
-    customerName: companyName,
-    cui,
-    address,
-    phone,
-    amount: price,
-    packageLabel: pkgName,
-    orderReference: reference,
-    markPaid: false,
-    mentions: `Plata prin transfer bancar (OP). Ref: ${reference}`,
-  }).catch((e) => console.error("[comanda-op] factura automata:", e));
+  }).catch((e) => console.error("[comanda-op] mail proforma:", e));
 }

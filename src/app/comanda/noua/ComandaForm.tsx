@@ -396,7 +396,34 @@ export function ComandaForm({
             <input type="tel" value={f.contactPhone} onChange={(e) => set("contactPhone", e.target.value)} className={input} placeholder="07xx xxx xxx" />
           </div>
         </div>
-        <h3 className="mt-6 text-sm font-bold text-brand-navy">Firma, pentru factură</h3>
+        {/* 28.11.2026 — cine scria emailul si telefonul se oprea la articol
+            (FreshPhone). Imediat dupa contact: plata intai, articolul dupa. */}
+        {/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim()) && f.contactPhone.replace(/\D/g, "").length >= 10 && (
+          varianta === "dupa" ? (
+            <p className="mt-4 rounded-lg border border-emerald-200 bg-emerald-50 p-3 text-sm text-emerald-900">
+              ✓ Ai ales: plătești acum, iar articolul și pozele ni le trimiți după plată, pe email sau pe WhatsApp.
+              Mai scrie doar CUI-ul firmei, pentru factură.
+            </p>
+          ) : (
+            <div className="mt-4 rounded-lg border-2 border-brand-red bg-red-50 p-4">
+              <p className="text-sm font-semibold text-brand-navy">Nu ai articolul la tine acum?</p>
+              <p className="mt-1 text-sm text-slate-700">
+                Plătești acum, iar articolul și pozele ni le trimiți după, pe email sau pe WhatsApp.
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  setVarianta("dupa");
+                  document.getElementById("firma-factura")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                }}
+                className="mt-3 w-full rounded-lg bg-brand-red px-4 py-3 text-base font-bold text-white shadow transition hover:bg-brand-red/90"
+              >
+                Plătesc acum, trimit articolul după
+              </button>
+            </div>
+          )
+        )}
+        <h3 id="firma-factura" className="mt-6 scroll-mt-24 text-sm font-bold text-brand-navy">Firma, pentru factură</h3>
         <p className="mt-1 text-sm text-slate-600">
           Scrie CUI-ul și apasă „Caută firma” — numele și adresa le luăm de la ANAF.{" "}
           <strong>Factura se emite automat pe aceste date</strong>, deci verifică-le.

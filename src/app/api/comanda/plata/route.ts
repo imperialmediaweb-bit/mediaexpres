@@ -72,7 +72,10 @@ export async function POST(req: NextRequest) {
   }
 
   // La card: o factura OP deja emisa ar insemna doua facturi pe aceeasi comanda.
-  if (row.paymentMethod === "op") {
+  // 28.11.2026 — la OP pleaca acum proforma, nu factura: cine a ales OP poate
+  // plati totusi cu cardul. Doar o factura StartCo deja emisa (comenzile
+  // vechi) ar dubla documentul.
+  if (row.paymentMethod === "op" && row.invoiceLabel) {
     return NextResponse.json(
       { ok: false, error: "Ai ales deja plata prin OP și factura a plecat pe email. Pentru card, scrie-ne pe WhatsApp." },
       { status: 409 },

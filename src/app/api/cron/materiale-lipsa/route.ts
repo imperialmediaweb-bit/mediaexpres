@@ -22,6 +22,8 @@ import { ruleazaTermene } from "@/lib/termene-parteneri";
 import { recupereazaAbonamente } from "@/lib/abonamente-comenzi";
 import { trimiteReamintiriComandaInceputa } from "@/lib/comanda-inceputa";
 import { pdfFacturaStartco } from "@/lib/invoicing";
+import { linkProforma, numarProforma } from "@/lib/proforma";
+import { trimitePushAdmin } from "@/lib/admin-push";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -62,7 +64,9 @@ const PRAG_ALERTA = 3 * ZI;
 // dar n-a platit. Prima impingere dupa 2 zile (contabilitatea lor are nevoie
 // de timp), a doua dupa inca 3, apoi ne oprim si te anuntam pe tine —
 // mai mult de doua reamintiri automate devine sacaiala.
-const PRAG_PLATA_1 = 2 * ZI;
+// 28.11.2026 (owner): la OP pleaca acum proforma; prima amintire dupa 3 ore,
+// cat omul inca isi aminteste de comanda (plus notificare la admin, sa sune).
+const PRAG_PLATA_1 = 3 * 60 * MINUTE;
 const PRAG_PLATA_2 = 3 * ZI;
 const MAX_REAMINTIRI_PLATA = 2;
 
@@ -247,6 +251,7 @@ export async function POST(req: NextRequest) {
       ultima: orderSubmissions.paymentReminderAt,
       facturaUrl: orderSubmissions.invoiceShareUrl,
       facturaNr: orderSubmissions.invoiceLabel,
+      ref: orderSubmissions.stripeSessionId,
     })
     .from(orderSubmissions)
     .where(
@@ -266,7 +271,12 @@ export async function POST(req: NextRequest) {
   let reamintiriPlata = 0;
   let alertePlata = 0;
 
+  // Amintirea de 3 ore nu pleaca noaptea (21:00–08:00, ora Romaniei).
+  const oraRo = Number(new Date().toLocaleString("en-GB", { timeZone: "Europe/Bucharest", hour: "2-digit", hour12: false }));
+  const noapte = oraRo >= 21 || oraRo < 8;
+
   for (const c of neplatite) {
+    if (noapte) break;
     const dela = (c.ultima ?? c.createdAt).getTime();
     const prag = c.trimise === 0 ? PRAG_PLATA_1 : PRAG_PLATA_2;
     if (acum - dela < prag) continue;
@@ -301,29 +311,39 @@ export async function POST(req: NextRequest) {
         const alDoilea = c.trimise === 1;
         // 23.11.2026 (owner): factura atasata si la reamintire, cu linkul ei.
         const pdf = c.facturaUrl ? await pdfFacturaStartco(c.facturaUrl) : null;
-        const detalii = c.facturaNr ? `Factura ${c.facturaNr}` : "Detalii plată: numărul facturii primite pe email";
+        const nrPf = numarProforma(c.id, c.createdAt);
+        const linkPf = c.ref ? linkProforma(c.ref) : null;
+        const detalii = c.facturaNr ? `Factura ${c.facturaNr}` : nrPf;
         await sendEmail({
           to: c.email,
           replyTo: ADMIN_EMAIL,
           attachments: pdf ? [{ filename: `Factura-${(c.facturaNr || "MediaExpres").replace(/\s+/g, "-")}.pdf`, path: pdf }] : undefined,
           subject: alDoilea
             ? "Comanda dumneavoastră așteaptă plata — nu am început încă publicarea"
-            : "Am primit articolul — mai așteptăm doar plata ca să publicăm",
+            : "Am primit comanda — mai așteptăm doar plata ca să publicăm",
           html: wrapEmail(
             "Comanda așteaptă plata",
             `
       <p>Bună ziua${c.companyName ? `, ${esc(c.companyName)}` : ""},</p>
-      <p>Am primit articolul dumneavoastră și v-am trimis factura pe email. <strong>Nu am început încă publicarea</strong>, fiindcă mai așteptăm plata.</p>
+      <p>Am primit comanda dumneavoastră și v-am trimis ${c.facturaNr ? "factura" : "proforma"} pe email. <strong>Nu am început încă publicarea</strong>, fiindcă mai așteptăm plata.</p>
+      ${!c.facturaNr && linkPf ? `<p style="margin:16px 0;"><a href="${linkPf}" style="background:#E4002B;color:#fff;padding:12px 24px;border-radius:8px;text-decoration:none;display:inline-block;font-weight:600;">Vezi proforma ${nrPf}</a></p>` : ""}
       ${pdf ? `<p><strong>📎 ${esc(c.facturaNr ? `Factura ${c.facturaNr}` : "Factura")} e atașată din nou la acest e-mail, în format PDF.</strong>${c.facturaUrl ? ` O găsiți și online: <a href="${c.facturaUrl}">vezi factura</a>.` : ""}</p>` : c.facturaUrl ? `<p>Factura o găsiți aici: <a href="${c.facturaUrl}">vezi factura</a>.</p>` : ""}
       ${bankTransferEmailBox(`${suma} lei`, detalii)}
       <p><strong>Ați plătit deja?</strong> Trimiteți-ne o dovadă — o captură din aplicația băncii sau ordinul de plată din contul firmei — ca răspuns la acest email sau pe WhatsApp, și confirmăm pe loc.</p>
       <p>Imediat ce vedem încasarea, pornim tot: publicăm pe cele 50 de ziare în maximum 12 ore lucrătoare, pornim și campania de promovare pe Facebook a postării cu articolul dumneavoastră, și vă trimitem raportul cu toate linkurile.</p>
-      <p style="color:#64748b;font-size:13px;">Dacă e ceva neclar cu factura sau vreți să plătiți altfel, scrieți-ne pe WhatsApp la <a href="${waLink(SITE.phone) || "#"}" style="color:#c1121f;">${esc(SITE.phone)}</a>.</p>
+      <p style="color:#64748b;font-size:13px;">Dacă e ceva neclar cu ${c.facturaNr ? "factura" : "proforma"} sau vreți să plătiți altfel, scrieți-ne pe WhatsApp la <a href="${waLink(SITE.phone) || "#"}" style="color:#c1121f;">${esc(SITE.phone)}</a>.</p>
       <p style="margin-top:24px;">Cu stimă,<br/><strong>Echipa MediaExpres</strong></p>
     `,
           ),
         });
         reamintiriPlata++;
+        if (!alDoilea) {
+          await trimitePushAdmin(
+            "☎️ OP neplătit de 3 ore",
+            `${c.companyName || c.email} · ${c.contactPhone || ""} — sună-l`,
+            `/admin/materiale/${c.id}`,
+          ).catch(() => undefined);
+        }
       }
       await db
         .update(orderSubmissions)

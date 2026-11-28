@@ -98,7 +98,7 @@ export default async function PlataPage({
           <p className="mx-auto mt-2 max-w-xl text-white/85">
             {row.paymentMethod === "op"
               ? "Nu mai completa formularul încă o dată. Mai jos vezi pașii următori."
-              : "Nu mai completa formularul încă o dată. Ultimul pas: alege cum plătești, iar factura o primești automat pe email."}
+              : "Nu mai completa formularul încă o dată. Ultimul pas: alege cum plătești, iar documentele le primești automat pe email."}
           </p>
         </div>
       </section>

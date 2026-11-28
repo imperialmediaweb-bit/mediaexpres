@@ -69,12 +69,20 @@ export function PlataAlegere({
         <ol className="mt-3 space-y-4 text-sm text-emerald-950">
           <li className="flex gap-3">
             <span className={pas}>1</span>
-            <span>În câteva minute primiți pe email <strong>confirmarea comenzii și factura</strong>.</span>
+            <div>
+              Primiți pe email <strong>proforma</strong>, cu datele pentru plată. O puteți deschide și de aici:
+              <a
+                href={`/comanda/proforma/${encodeURIComponent(refComanda)}`}
+                className="mt-2 block w-full rounded-lg bg-brand-red px-4 py-2.5 text-center text-sm font-bold text-white hover:bg-brand-red/90"
+              >
+                Vezi și descarcă proforma
+              </a>
+            </div>
           </li>
           <li className="flex gap-3">
             <span className={pas}>2</span>
             <div className="w-full">
-              Faceți plata prin OP, din contul firmei. La detalii scrieți numărul facturii.
+              Faceți plata prin OP, din contul firmei. La detalii scrieți numărul proformei.
               <dl className="mt-2 grid gap-x-6 gap-y-1.5 rounded-lg bg-white p-4 text-sm sm:grid-cols-[auto_1fr]">
                 <dt className="text-slate-500">Beneficiar</dt>
                 <dd className="font-semibold text-brand-navy">{beneficiar}</dd>
@@ -95,15 +103,24 @@ export function PlataAlegere({
               <p className="mt-2 text-xs text-emerald-900/80">
                 Sau pe{" "}
                 <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>,
-                ca răspuns la emailul cu factura, ori în chatul live din colțul paginii. Pagina o puteți deschide oricând din linkul primit pe email.
+                ca răspuns la emailul cu proforma, ori în chatul live din colțul paginii. Pagina o puteți deschide oricând din linkul primit pe email.
               </p>
             </div>
           </li>
           <li className="flex gap-3">
             <span className={pas}>4</span>
-            <span>Cum vedem plata, pornim campania (în maximum 12 ore lucrătoare) și primiți pe email <strong>linkul unde urmăriți publicarea în timp real</strong>.</span>
+            <span>Cum vedem plata, primiți <strong>factura fiscală</strong> pe email, pornim campania (în maximum 12 ore lucrătoare) și primiți <strong>linkul unde urmăriți publicarea în timp real</strong>.</span>
           </li>
         </ol>
+        <button
+          type="button"
+          onClick={() => alege("card")}
+          disabled={busy !== null}
+          className="mt-5 w-full rounded-lg border-2 border-emerald-700 bg-white px-4 py-2.5 text-sm font-bold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+        >
+          {busy === "card" ? "Se deschide plata..." : `Prefer să plătesc acum cu cardul (${price.toLocaleString("ro")} lei)`}
+        </button>
+        {error && <p className="mt-2 text-sm text-red-700">{error}</p>}
         <p className="mt-5 text-sm text-emerald-900/90">
           Aveți o întrebare? Scrieți-ne pe{" "}
           <a href={waHref} target="_blank" rel="noopener noreferrer" className="font-semibold underline">WhatsApp</a>{" "}
@@ -144,10 +161,10 @@ export function PlataAlegere({
           {busy === "op" ? <Loader2 className="h-8 w-8 animate-spin text-brand-navy" /> : <Landmark className="h-8 w-8 text-brand-navy" />}
           <span className="mt-2 font-serif text-lg font-bold text-brand-navy">Plătesc prin OP</span>
           <span className="mt-1 text-xs text-slate-600">
-            Primești acum factura pe email, cu IBAN-ul. Plătești din contul firmei.
+            Primești acum proforma pe email, cu IBAN-ul. Plătești din contul firmei; factura vine după încasare.
           </span>
           <span className="mt-3 w-full rounded-lg border-2 border-brand-navy px-4 py-2 text-sm font-bold text-brand-navy">
-            Trimite-mi factura
+            Trimite-mi proforma
           </span>
         </button>
 

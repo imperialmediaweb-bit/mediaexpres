@@ -263,12 +263,12 @@ export async function POST(req: NextRequest) {
       ? `📝 Comandă nouă, încă neplătită — ${d.companyName} (${pkg.price} lei)`
       : `🏦 Comandă prin OP — ${d.companyName} (${pkg.price} lei)`,
     html: wrapEmail(
-      laPlata ? "Comandă nouă — factura a plecat automat" : "Comandă nouă prin transfer bancar",
+      laPlata ? "Comandă nouă — proforma a plecat automat" : "Comandă nouă prin transfer bancar",
       `
-      ${laPlata ? `<p style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;color:#1e3a8a;">Clientul a completat formularul. <strong>Factura a plecat automat pe email (OP), încă n-a plătit.</strong> Dacă nu plătește în câteva ore, merită un telefon: ${esc(d.contactPhone)}.</p>` : ""}
+      ${laPlata ? `<p style="background:#eff6ff;border:1px solid #93c5fd;border-radius:8px;padding:12px;color:#1e3a8a;">Clientul a completat formularul. <strong>Proforma a plecat automat pe email (OP), încă n-a plătit. Factura StartCo iese abia când apeși „Confirmă plata”.</strong> Dacă nu plătește în câteva ore, merită un telefon: ${esc(d.contactPhone)}.</p>` : ""}
       ${d.articolDupa ? '<p style="background:#fffbeb;border:1px solid #fde68a;border-radius:8px;padding:12px;"><strong>Articolul vine după plată</strong> — clientul l-a lăsat pentru mai târziu.</p>' : ""}
-      ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, factura a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
-      ${laPlata ? "" : '<p>Factura se emite automat în StartCo pe datele de mai jos (verificate la ANAF). Dacă nu reușește, primești un email separat „Factura de emis manual”. Publici abia după ce vezi încasarea în extras și confirmi plata în admin.</p>'}
+      ${screening.flagged ? '<p style="background:#fef2f2;border:2px solid #b91c1c;border-radius:8px;padding:12px;color:#b91c1c;"><strong>⚠️ CITEȘTE ARTICOLUL ÎNAINTE SĂ PUBLICI.</strong> Textul conține termeni din zona interzisă — vezi alerta separată. Comanda merge normal, proforma a plecat; verificarea o faci înainte de publicare, nu înainte de încasare. Dacă nu se poate publica, banii NU se restituie (art. 4 din Termeni, declarat de client la comandă).</p>' : ""}
+      ${laPlata ? "" : '<p>Clientul a primit proforma. Factura se emite automat în StartCo pe datele de mai jos când apeși „Confirmă plata” în admin (după ce vezi încasarea în extras). Dacă nu reușește, primești un email separat „Factura de emis manual”.</p>'}
       <h3 style="margin:20px 0 8px;font-family:Georgia,serif;color:#111111;">Date pentru factură${anaf.status === "found" ? " (verificate la ANAF)" : " — ANAF n-a răspuns, sunt cele scrise de client"}</h3>
       <table style="width:100%;border-collapse:collapse;margin:0 0 16px;">
         ${kv("Denumire", d.companyName)}
@@ -284,7 +284,7 @@ export async function POST(req: NextRequest) {
         ${kv("Categorie", d.isCasino ? "⚠️ CAZINO / iGaming" : "Standard")}
         ${kv("Publicare", d.uniquePerSite ? "variantă unică pe fiecare ziar" : "IDENTIC pe toate")}${d.linkuriSponsored ? kv("Linkuri", "marcate rel=\"sponsored\" (cerut de client)") : ""}
         ${kv("Ritm ales de client", etichetaRitm(d.ritm))}
-        ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește factura")}
+        ${kv("Dovada plății", d.paymentProof ? "atașată de client (vezi mai jos)" : "neatașată — normal, plătește după ce primește proforma")}
         ${kv("De unde a venit", etichetaSursa(sursa))}
         ${kv("Ne-a găsit (spune clientul)", d.aflatDeLa || "—")}
       </table>
@@ -310,7 +310,7 @@ export async function POST(req: NextRequest) {
       html: wrapEmail(
         "Articol de citit înainte de publicare",
         `
-        <p style="color:#b91c1c;"><strong>Comanda a mers normal — factura a plecat, clientul poate plăti.</strong> Alerta asta e doar pentru tine: textul conține termeni din zona interzisă și trebuie citit <strong>înainte de publicare</strong>.</p>
+        <p style="color:#b91c1c;"><strong>Comanda a mers normal — proforma a plecat, clientul poate plăti.</strong> Alerta asta e doar pentru tine: textul conține termeni din zona interzisă și trebuie citit <strong>înainte de publicare</strong>.</p>
         <p>Nu e o urgență financiară. Clientul a bifat la comandă declarația că articolul nu prezintă tratamente sau conținut interzis, iar art. 4 din Termeni spune că, dacă declarația e falsă, <strong>banii nu se restituie</strong>. Deci dacă nu se poate publica, nu ai de returnat nimic — doar de anunțat clientul.</p>
         ${kv("Motiv", screening.reason || "conținut interzis")}
         ${kv("Termeni găsiți", screening.hits.join(", "))}

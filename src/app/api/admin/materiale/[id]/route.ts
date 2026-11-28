@@ -1,3 +1,4 @@
+import { issueInvoiceForOrder } from "@/lib/invoicing";
 import { NextRequest, NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
 import { getSession } from "@/lib/auth";
@@ -66,6 +67,35 @@ export async function PATCH(
       .returning({ id: orderSubmissions.id });
     if (!updated) {
       return NextResponse.json({ ok: false, error: "Nu există" }, { status: 404 });
+    }
+    // 28.11.2026 (owner): la OP clientul a primit doar proforma; factura
+    // StartCo se emite ACUM, incasata, si pleaca pe email. Comenzile vechi
+    // care au deja factura (invoiceLabel) nu primesc a doua.
+    if (primaConfirmare) {
+      try {
+        const [o] = await db
+          .select()
+          .from(orderSubmissions)
+          .where(eq(orderSubmissions.id, params.id))
+          .limit(1);
+        const pk = o ? findPackageById(o.packageId) : undefined;
+        if (o && pk && o.paymentMethod === "op" && !o.invoiceLabel && o.stripeSessionId) {
+          await issueInvoiceForOrder({
+            email: o.email,
+            customerName: o.companyName,
+            cui: o.companyCui || o.cui,
+            address: o.companyAddress || o.billingAddress,
+            phone: o.contactPhone,
+            amount: pk.price,
+            packageLabel: pk.name,
+            orderReference: o.stripeSessionId,
+            markPaid: true,
+            mentions: `Achitat prin transfer bancar (OP). Ref: ${o.stripeSessionId}`,
+          });
+        }
+      } catch (err) {
+        console.error("[confirm_payment] factura dupa incasare:", err);
+      }
     }
     // 04.10.2026 — banii au intrat: comanda pleaca in retea (lib/retea.ts).
     await trimiteAutomatInRetea(params.id, "plata OP confirmata");
