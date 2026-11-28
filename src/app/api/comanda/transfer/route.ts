@@ -1,3 +1,5 @@
+import { gasesteComanda } from "@/lib/comanda-ref";
+import { raportUrl } from "@/lib/raport-link";
 import { NextRequest, NextResponse } from "next/server";
 import { eticheteazaAlegerea } from "@/lib/zona-pachet";
 import { z } from "zod";
@@ -184,7 +186,7 @@ export async function POST(req: NextRequest) {
         })
         .where(eq(orderSubmissions.id, dubla.id));
       console.warn("[comanda/transfer] comanda trimisa din nou, folosesc", dubla.ref);
-      return NextResponse.json({ ok: true, ref: dubla.ref, dejaPrimita: true });
+      return NextResponse.json({ ok: true, ref: dubla.ref, dejaPrimita: true, raport: raportUrl(dubla.id) });
     }
   } catch (e) {
     console.error("[comanda/transfer] verificare dubla:", e);
@@ -345,5 +347,7 @@ export async function POST(req: NextRequest) {
     });
   }
 
-  return NextResponse.json({ ok: true, ref: reference });
+  // 28.11.2026 — linkul de urmarire in timp real, aratat imediat in chat.
+  const salvata = await gasesteComanda(reference).catch(() => null);
+  return NextResponse.json({ ok: true, ref: reference, raport: salvata ? raportUrl(salvata.id) : undefined });
 }

@@ -2,6 +2,7 @@ import { sendEmail, wrapEmail, escapeHtml as esc, bankTransferEmailBox, ADMIN_EM
 import { SITE } from "@/data/site";
 import { gasesteComanda } from "@/lib/comanda-ref";
 import { linkProforma, numarProforma } from "@/lib/proforma";
+import { raportUrl } from "@/lib/raport-link";
 
 /**
  * Pasul „platesc prin OP": emailul catre client cu PROFORMA (facuta de noi) si
@@ -44,6 +45,7 @@ export async function pornestePlataOp(args: {
         <li style="margin:6px 0;"><strong>Publicăm în maximum 12 ore lucrătoare</strong> de la încasare și primiți raportul cu toate linkurile.</li>
         <li style="margin:6px 0;"><strong>Factura fiscală</strong> vine pe email imediat după încasare.</li>
       </ol>
+      ${row ? `<p><strong>Urmăriți comanda în timp real:</strong> <a href="${raportUrl(row.id)}">${raportUrl(row.id)}</a><br/><span style="color:#64748b;font-size:13px;">Acum vedeți pașii comenzii (primită, plată, redacție). Când apar articolele, aici apare fiecare ziar, cu data, ora și linkul.</span></p>` : ""}
       ${args.hasProof ? '<p>Dovada plății pe care ați atașat-o ne ajută să confirmăm mai repede — mulțumim.</p>' : ""}
       ${bankTransferEmailBox(`${price} lei`, nr)}
       <p style="background:#fffbeb;border:1px solid #f59e0b;border-radius:8px;padding:12px;font-size:13px;color:#78350f;"><strong>De reținut:</strong> la comandă ați declarat că articolul nu prezintă tratamente sau metode de vindecare pentru boli și nu conține alt conținut interzis. Dacă la verificare se dovedește altfel, comanda se anulează, articolul nu se publică <strong>și suma plătită nu se restituie</strong> (art. 4 din <a href="${SITE.url}/legal/termeni">Termeni și condiții</a>). Dacă aveți un dubiu, întrebați-ne ÎNAINTE să plătiți — răspundem repede.</p>

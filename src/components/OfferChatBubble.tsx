@@ -523,6 +523,7 @@ export function OfferChatBubble() {
           "",
           "Plătești pe baza ei, apoi urci dovada pe pagina proformei — sau direct aici, cu „Am plătit — trimit dovada”.",
           data.articolDupa ? "Articolul și pozele ni le trimiți după plată, tot aici sau pe email." : "",
+          j.raport ? `Aici urmărești comanda în timp real (pașii acum, apoi fiecare ziar cu linkul lui, imediat ce apare):\n${j.raport}` : "",
           "Imediat ce intră banii, primești factura fiscală pe email, publicăm în maximum 12 ore lucrătoare și primești raportul cu toate linkurile.",
         ]
           .filter((x, i) => x || i === 2)

@@ -7,6 +7,7 @@ import { numarProforma } from "@/lib/proforma";
 import { waLink } from "@/lib/whatsapp";
 import { INVOICE_PRODUCT_NAME } from "@/lib/startco";
 import { DovadaPlata } from "../../plata/[ref]/DovadaPlata";
+import { raportUrl } from "@/lib/raport-link";
 import { Butoane } from "./Butoane";
 
 export const dynamic = "force-dynamic";
@@ -125,12 +126,28 @@ export default async function ProformaPage({ params }: { params: { ref: string }
         {!platita && (
           <div className="no-print mt-6 space-y-4">
             <Butoane iban={SITE.billing.iban} />
+            {/* 28.11.2026 — si de pe proforma se poate plati cu cardul: factura
+                iese automat, fara OP si fara asteptarea extrasului. */}
+            {!row.invoiceLabel && (
+              <a
+                href={`/comanda/plata/${encodeURIComponent(params.ref)}`}
+                className="block rounded-lg bg-emerald-600 px-5 py-3 text-center font-bold text-white hover:bg-emerald-700"
+              >
+                Prefer să plătesc acum cu cardul ({suma} lei)
+              </a>
+            )}
             <div className="rounded-xl border border-slate-200 bg-white p-5">
               <p className="font-semibold text-brand-navy">Ați plătit? Urcați dovada și pornim imediat.</p>
               <div className="mt-3">
                 <DovadaPlata refComanda={params.ref} dejaTrimisa={Boolean(row.paymentProof)} />
               </div>
             </div>
+            <a
+              href={raportUrl(row.id)}
+              className="block rounded-lg border-2 border-brand-navy px-5 py-3 text-center font-bold text-brand-navy hover:bg-slate-50"
+            >
+              Urmărește comanda în timp real
+            </a>
             <p className="text-center text-sm text-slate-600">
               Întrebări?{" "}
               <a href={wa || "#"} className="font-semibold text-emerald-700 underline">Scrieți-ne pe WhatsApp</a>{" "}
