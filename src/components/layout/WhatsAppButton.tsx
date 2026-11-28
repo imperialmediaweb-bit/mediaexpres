@@ -4,7 +4,7 @@ import { usePathname } from "next/navigation";
 import { SITE } from "@/data/site";
 import { trackPixelEvent } from "@/components/analytics/MetaPixel";
 import { trackGaEvent } from "@/components/analytics/GoogleAnalytics";
-import { hasStickyMobileCta } from "@/components/conversion/ConversionWidgets";
+import { hasStickyMobileCta, ePaginaComanda } from "@/components/conversion/ConversionWidgets";
 import { useSursaWhatsApp } from "@/hooks/useSursaWhatsApp";
 import { useZonaLibera } from "@/hooks/useZonaLibera";
 
@@ -42,6 +42,8 @@ export function WhatsAppButton() {
    */
   const acopera = useZonaLibera();
   if (!pathname || pathname.startsWith("/admin")) return null;
+  // 28.11.2026 — pe paginile de comanda ramane doar chatul (ConversionWidgets).
+  if (ePaginaComanda(pathname)) return null;
 
   // Pe ecrane mici, bara fixa de comanda ocupa banda de jos. Cand exista, urcam
   // butonul deasupra ei; altfel sta jos de tot.

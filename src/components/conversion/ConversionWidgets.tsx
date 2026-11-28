@@ -28,8 +28,15 @@ function matches(pathname: string, paths: string[]): boolean {
  * Spune daca pe pagina asta se afiseaza bara fixa de comanda de pe mobil.
  * Butonul de WhatsApp o citeste ca sa se ridice deasupra barei in loc sa o acopere.
  */
+// 28.11.2026 (owner: „prea una peste alta") — pe paginile de comanda raman doar
+// formularul si chatul: fara bara de jos, fara popup, fara butonul WhatsApp.
+export function ePaginaComanda(pathname: string | null): boolean {
+  return !!pathname && (pathname === "/comanda" || pathname.startsWith("/comanda/"));
+}
+
 export function hasStickyMobileCta(pathname: string | null): boolean {
   if (!pathname || pathname.startsWith("/admin")) return false;
+  if (ePaginaComanda(pathname)) return false;
   return matches(pathname, COMMERCIAL_PATHS);
 }
 
@@ -50,6 +57,7 @@ export function ConversionWidgets() {
   // Hook-ul sta inaintea oricarui `return`, cum cer regulile React.
   const pretPeEcran = useZonaLibera(true, "[data-pret]", "-86% 0px 0px 0px");
   if (!pathname || pathname.startsWith("/admin")) return null;
+  if (ePaginaComanda(pathname)) return null;
   if (!matches(pathname, COMMERCIAL_PATHS)) return null;
 
   // Pe landingul platit omul a venit SA CUMPERE — bara de jos duce direct la
