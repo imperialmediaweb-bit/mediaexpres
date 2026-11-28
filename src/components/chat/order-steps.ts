@@ -179,7 +179,8 @@ export const STEPS: Step[] = [
     id: "hasArticle",
     kind: "choice",
     skip: (d) => d.method !== "op",
-    ask: () => "Cum vine articolul? Îl poți lipi ca text, urca în Word, îl scriem noi fără cost sau ni-l trimiți după plată.",
+    ask: () =>
+      "Cum vine articolul?\n\n• Îl lipești ca text, aici în chat.\n• Îl urci în Word (.docx): luăm singuri titlul, textul, linkurile și pozele din el.\n• Îl scriem noi, fără cost: ne spui ce face firma și ce vrei să transmiți.\n• Îl trimiți după plată: plătești acum și ne trimiți textul și pozele când le ai.",
     choices: [
       { label: "Îl lipesc ca text", value: "am" },
       { label: "Îl urc în Word (.docx)", value: "word" },
@@ -260,7 +261,7 @@ export const STEPS: Step[] = [
     kind: "choice",
     skip: (d) => d.method !== "op",
     ask: () =>
-      "Textul îl vrei rescris diferit pe fiecare ziar sau identic peste tot? Recomand rescris: Google preferă texte unice, iar articolele se indexează mai bine.",
+      "Textul îl vrei rescris sau identic?\n\n• Rescris (recomandat): fiecare ziar primește o variantă proprie, cu același mesaj, aceleași nume și aceleași linkuri. Google indexează mai bine textele unice, deci apari în mai multe locuri.\n• Identic: același text, cuvânt cu cuvânt, pe toate ziarele. Bun dacă textul e un comunicat oficial care nu se schimbă. Google poate arăta doar câteva dintre copii.",
     choices: [
       { label: "Rescris pe fiecare ziar (recomandat)", value: "unic" },
       { label: "Identic peste tot", value: "identic" },
@@ -270,7 +271,8 @@ export const STEPS: Step[] = [
     id: "linkuriSponsored",
     kind: "choice",
     skip: (d) => d.method !== "op",
-    ask: () => "Linkurile le marcăm „sponsored” sau rămân normale (dofollow)?",
+    ask: () =>
+      "Linkurile le lăsăm normale sau le marcăm „sponsored”?\n\n• Normale (dofollow, recomandat): linkul spre site-ul tău contează pentru Google, ca un link obișnuit dintr-un articol de presă.\n• Sponsored: îi spune lui Google că linkul e plătit. Cititorii nu văd nicio diferență, dar linkul nu mai contează pentru Google. Îl aleg firmele care vor să respecte strict regulile Google despre linkurile plătite.",
     choices: [
       { label: "Normale, dofollow", value: "nu" },
       { label: "Marcate sponsored", value: "da" },
@@ -280,7 +282,8 @@ export const STEPS: Step[] = [
     id: "ritm",
     kind: "choice",
     skip: (d) => d.method !== "op",
-    ask: () => "Cum publicăm: totul deodată sau eșalonat?",
+    ask: () =>
+      "Cum publicăm?\n\n• Rapid: toate cele 50 de ziare în maximum 12 ore lucrătoare. Bun pentru o lansare, un eveniment sau o ofertă cu termen.\n• Întins pe 3 zile: câteva ziare pe zi. Arată mai natural și ține subiectul viu câteva zile.\n• Întins pe 2 săptămâni: puțin câte puțin. E cel mai natural pentru Google și apari mai mult timp în presă.",
     choices: RITMURI.map((r) => ({ label: r.eticheta, value: r.id })),
   },
   {
@@ -291,7 +294,7 @@ export const STEPS: Step[] = [
     skip: (d) => d.method !== "op",
     skippable: true,
     ask: () =>
-      "Articolul primește și reclamă plătită pe Facebook, 3 zile, inclusă în preț. Pe ce ziar din listă o vrei? Scrie numele (de ex. „Cluj Expres” sau „România Expres”) — sau sari, și alegem noi ziarul din județul tău.",
+      "Articolul primește și reclamă plătită pe Facebook, 3 zile, inclusă în preț: postarea cu articolul tău e promovată pe pagina unui ziar, la oamenii din zona aleasă. Pe ce ziar o vrei? Un ziar local (de ex. „Cluj Expres”) dacă clienții tăi sunt din județul acela, sau „România Expres” pentru toată țara. Scrie numele, sau sari și alegem noi ziarul din județul tău.",
     placeholder: "Numele ziarului, sau sari",
   },
   {
