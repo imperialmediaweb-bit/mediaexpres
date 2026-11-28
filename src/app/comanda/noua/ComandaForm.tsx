@@ -273,6 +273,62 @@ export function ComandaForm({
     }
   }
 
+  // 28.11.2026 — unde se opresc oamenii (lib/funnel-comanda.ts): fiecare pas o
+  // singura data pe vizitator; erorile de validare de fiecare data.
+  const sid = useRef("");
+  const pasiTrimisi = useRef(new Set<string>());
+  function pas(nume: string, eroare?: string) {
+    try {
+      if (!sid.current) {
+        let v = "";
+        try { v = sessionStorage.getItem("me_sid") || ""; } catch { /* privat */ }
+        if (!v) {
+          v = (Math.random().toString(36).slice(2) + Date.now().toString(36)).slice(0, 20);
+          try { sessionStorage.setItem("me_sid", v); } catch { /* privat */ }
+        }
+        sid.current = v;
+      }
+      if (nume !== "eroare") {
+        if (pasiTrimisi.current.has(nume)) return;
+        pasiTrimisi.current.add(nume);
+      }
+      void fetch("/api/comanda/pas", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sid: sid.current, pas: nume, ...(eroare ? { eroare } : {}) }),
+        keepalive: true,
+      }).catch(() => undefined);
+    } catch {
+      /* masuratoarea nu strica niciodata formularul */
+    }
+  }
+  useEffect(() => { pas("deschis"); }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (firma) pas("cui_gasit"); }, [firma]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (varianta === "dupa") pas("dupa_plata"); }, [varianta]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (f.body.trim().length >= 100) pas("articol"); }, [f.body]); // eslint-disable-line react-hooks/exhaustive-deps
+  useEffect(() => { if (error) pas("eroare", error); }, [error]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  const [sunaMa, setSunaMa] = useState<"" | "trimit" | "ok" | "fara-tel">("");
+  async function cereSuna() {
+    const phone = f.contactPhone.trim();
+    if (phone.replace(/\D/g, "").length < 9) {
+      setSunaMa("fara-tel");
+      return;
+    }
+    setSunaMa("trimit");
+    pas("ajutor_suna");
+    try {
+      await fetch("/api/comanda/suna-ma", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ phone, email: f.email.trim() }),
+      });
+    } catch {
+      /* tot aratam confirmarea; emailul de lead l-a prins oricum */
+    }
+    setSunaMa("ok");
+  }
+
   // Cand emailul si telefonul sunt scrise, proprietarul afla imediat (o singura
   // data), ca sa poata suna chiar daca omul nu termina comanda.
   const contactTrimis = useRef(false);
@@ -283,6 +339,7 @@ export function ComandaForm({
     if (!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(email) || phone.replace(/\D/g, "").length < 10) return;
     const t = setTimeout(() => {
       contactTrimis.current = true;
+      pas("email_telefon");
       void fetch("/api/comanda/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -294,6 +351,7 @@ export function ComandaForm({
 
   async function submit() {
     if (busy) return;
+    pas("apasat_trimite");
     const dupa = varianta === "dupa";
     const verificari: [boolean, string][] = [
       [!/^[^@\s]+@[^@\s]+\.[^@\s]{2,}$/.test(f.email.trim()),
@@ -358,6 +416,7 @@ export function ComandaForm({
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare");
       trackGaEvent("add_payment_info", { value: price, currency: "RON" });
+      pas("trimis");
       window.location.href = `/comanda/plata/${j.ref}`;
     } catch (e) {
       setError(e instanceof Error ? e.message : "Eroare");
@@ -738,6 +797,46 @@ export function ComandaForm({
       <ContentDeclaration checked={contentDeclaration} onChange={setContentDeclaration} />
 
       <FormError message={error} className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-700" />
+
+      {/* 28.11.2026 (owner) — cine se incurca: chat live, WhatsApp sau il sunam noi. */}
+      <section className="rounded-xl border border-slate-200 bg-white p-4">
+        <p className="text-sm font-semibold text-brand-navy">Te-ai încurcat? Te ajutăm acum:</p>
+        <div className="mt-3 grid grid-cols-3 gap-2">
+          <button
+            type="button"
+            onClick={() => {
+              pas("ajutor_chat");
+              window.dispatchEvent(new Event("me:deschide-chat"));
+            }}
+            className="rounded-lg border-2 border-brand-navy px-2 py-2.5 text-sm font-bold text-brand-navy hover:bg-slate-50"
+          >
+            Chat live
+          </button>
+          <a
+            href={`https://wa.me/${SITE.whatsapp}?text=${encodeURIComponent("Bună ziua, am început o comandă pe site și am o întrebare.")}`}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() => pas("ajutor_whatsapp")}
+            className="rounded-lg bg-[#25D366] px-2 py-2.5 text-center text-sm font-bold text-white hover:opacity-90"
+          >
+            WhatsApp
+          </a>
+          <button
+            type="button"
+            onClick={cereSuna}
+            disabled={sunaMa === "trimit" || sunaMa === "ok"}
+            className="rounded-lg bg-brand-red px-2 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90 disabled:opacity-70"
+          >
+            {sunaMa === "ok" ? "Vă sunăm!" : sunaMa === "trimit" ? "..." : "Sunați-mă"}
+          </button>
+        </div>
+        {sunaMa === "ok" && (
+          <p className="mt-2 text-sm text-emerald-700">Am primit. Vă sunăm în câteva minute la {f.contactPhone}.</p>
+        )}
+        {sunaMa === "fara-tel" && (
+          <p className="mt-2 text-sm text-red-700">Scrie numărul de telefon sus, la „Datele tale”, și apasă din nou.</p>
+        )}
+      </section>
 
       <div>
         <button

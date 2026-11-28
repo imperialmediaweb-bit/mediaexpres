@@ -80,6 +80,12 @@ type ReturnStep = "email" | "pick" | "proof" | "title" | "body" | "images" | "va
 
 export function OfferChatBubble() {
   const [open, setOpen] = useState(false);
+  // 28.11.2026 — butonul „Chat live" din formularul de comanda deschide chatul.
+  useEffect(() => {
+    const deschide = () => setOpen(true);
+    window.addEventListener("me:deschide-chat", deschide);
+    return () => window.removeEventListener("me:deschide-chat", deschide);
+  }, []);
   /**
    * 16.09.2026 — pe telefon, bula statea fix peste butonul rosu „Comanda
    * acum" din pagina. Omul care a citit tot si a ajuns la buton gasea peste

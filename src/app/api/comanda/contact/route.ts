@@ -6,6 +6,8 @@ import { findPackageById } from "@/data/packages";
 import { sursaDinCerere, etichetaSursa } from "@/lib/sursa";
 import { creeazaLimita, ipDinCerere } from "@/lib/limita-ip";
 import { salveazaComandaInceputa } from "@/lib/comanda-inceputa";
+import { trimitePushAdmin } from "@/lib/admin-push";
+import { linkSunaLead } from "@/lib/lead-suna";
 
 export const runtime = "nodejs";
 
@@ -57,5 +59,12 @@ export async function POST(req: NextRequest) {
       </table>`,
     ),
   }).catch((e) => console.error("[comanda/contact]", e));
+  // 28.11.2026 (owner): si notificare pe telefon, cu Suna / WhatsApp dintr-o
+  // atingere — cine e sunat in primele minute termina comanda mai des.
+  await trimitePushAdmin(
+    "🛒 A început o comandă — sună-l acum",
+    `${phone} · ${email} · ${etichetaSursa(sursaDinCerere(req))}`,
+    linkSunaLead(phone, email),
+  ).catch(() => undefined);
   return NextResponse.json({ ok: true });
 }
