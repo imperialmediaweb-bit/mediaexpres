@@ -1,5 +1,6 @@
 import { SITE } from "@/data/site";
-import { CONTENT_DECLARATION_SHORT } from "@/lib/content-policy";
+import { CONTENT_DECLARATION_SHORT, TITLU_DE_PROPUS } from "@/lib/content-policy";
+import { RITMURI, RITM_IMPLICIT, type RitmId } from "@/lib/ritm";
 
 /**
  * Comanda completa purtata ca o conversatie, pas cu pas.
@@ -26,9 +27,19 @@ export interface OrderData {
   companyCui: string;
   companyAddress: string;
   hasArticle: boolean;
+  /** 28.11.2026 — articolul vine ca fisier Word (.docx), citit in browser. */
+  articolWord: boolean;
+  /** 28.11.2026 — articolul si pozele vin dupa plata (ca in formular). */
+  articolDupa: boolean;
   title: string;
   body: string;
   siteUrl: string;
+  /** „pe ce cuvinte → spre ce adresa", o linie pe link. */
+  linkNotes: string;
+  /** Text rescris unic pe fiecare ziar (recomandat) sau identic. */
+  uniquePerSite: boolean;
+  linkuriSponsored: boolean;
+  ritm: RitmId;
   /** Declaratia de continut, ceruta inainte de plata. */
   contentDeclaration: boolean;
 }
@@ -43,9 +54,15 @@ export const EMPTY_ORDER: OrderData = {
   companyCui: "",
   companyAddress: "",
   hasArticle: true,
+  articolWord: false,
+  articolDupa: false,
   title: "",
   body: "",
   siteUrl: "",
+  linkNotes: "",
+  uniquePerSite: true,
+  linkuriSponsored: false,
+  ritm: RITM_IMPLICIT,
   contentDeclaration: false,
 };
 
@@ -56,6 +73,7 @@ export type StepKind =
   | "tel"
   | "long"
   | "images"
+  | "docx"
   | "proof"
   | "review";
 
@@ -108,10 +126,10 @@ export const STEPS: Step[] = [
     id: "method",
     kind: "choice",
     ask: (d) =>
-      `Publicarea în toate cele 50 de ziare costă ${priceOf(d)} lei, cu factură fiscală. Cum vrei să plătești?`,
+      `Publicarea în toate cele 50 de ziare costă ${priceOf(d)} lei, cu factură fiscală. Recomand cardul: plătești acum în siguranță (Stripe), factura vine automat pe email și pornim imediat. Prin OP primești o proformă și pornim când intră banii. Cum vrei să plătești?`,
     choices: [
-      { label: "Cu cardul, acum", value: "card" },
-      { label: "Prin transfer bancar (OP)", value: "op" },
+      { label: "Cu cardul, acum (recomandat)", value: "card" },
+      { label: "Prin transfer bancar (OP), cu proformă", value: "op" },
     ],
   },
   {
@@ -161,16 +179,24 @@ export const STEPS: Step[] = [
     id: "hasArticle",
     kind: "choice",
     skip: (d) => d.method !== "op",
-    ask: () => "Ai articolul scris, sau îl redactăm noi? (îl scriem noi fără cost suplimentar)",
+    ask: () => "Cum vine articolul? Îl poți lipi ca text, urca în Word, îl scriem noi fără cost sau ni-l trimiți după plată.",
     choices: [
-      { label: "Am articolul scris", value: "am" },
+      { label: "Îl lipesc ca text", value: "am" },
+      { label: "Îl urc în Word (.docx)", value: "word" },
       { label: "Scrieți-l voi", value: "nu-am" },
+      { label: "Îl trimit după plată", value: "dupa" },
     ],
+  },
+  {
+    id: "docx",
+    kind: "docx",
+    skip: (d) => d.method !== "op" || !d.articolWord,
+    ask: () => "Urcă fișierul Word (.docx). Luăm din el titlul, textul, linkurile și pozele.",
   },
   {
     id: "title",
     kind: "text",
-    skip: (d) => d.method !== "op" || !d.hasArticle,
+    skip: (d) => d.method !== "op" || !d.hasArticle || d.articolDupa || d.articolWord,
     ask: () => "Titlul articolului:",
     placeholder: "Titlul care apare în ziare",
     validate: (v) => (v.trim().length >= 5 ? null : "Titlul e prea scurt."),
@@ -178,7 +204,7 @@ export const STEPS: Step[] = [
   {
     id: "body",
     kind: "long",
-    skip: (d) => d.method !== "op" || !d.hasArticle,
+    skip: (d) => d.method !== "op" || !d.hasArticle || d.articolDupa || d.articolWord,
     ask: () =>
       `Lipește textul articolului. Ideal 300–500 de cuvinte, dar acceptăm de la ${MIN_BODY} de caractere.`,
     placeholder: "Textul articolului...",
@@ -190,7 +216,7 @@ export const STEPS: Step[] = [
   {
     id: "theme",
     kind: "long",
-    skip: (d) => d.method !== "op" || d.hasArticle,
+    skip: (d) => d.method !== "op" || d.hasArticle || d.articolDupa,
     ask: () =>
       "Spune-mi despre ce să scriem: ce face firma, ce vrei să comunici, ce e important să apară. Câteva propoziții sunt de ajuns.",
     placeholder: "Ce face firma, ce vrei să comunici...",
@@ -212,11 +238,50 @@ export const STEPS: Step[] = [
         : "Scrie adresa completă, cu https:// la început.",
   },
   {
+    id: "linkNotes",
+    kind: "long",
+    skip: (d) => d.method !== "op" || d.articolDupa,
+    skippable: true,
+    ask: (d) =>
+      d.linkNotes
+        ? `Din Word am luat linkurile:\n${d.linkNotes}\nVrei să adaugi sau să schimbi ceva? Scrie aici, sau sari.`
+        : "Pe ce cuvinte punem linkurile și spre ce adresă? Un rând pe link, de exemplu: „vopsitorie auto → https://firma.ro”. Sau sari, și le punem noi pe numele firmei.",
+    placeholder: "cuvinte → https://adresa.ro",
+  },
+  {
     id: "images",
     kind: "images",
-    skip: (d) => d.method !== "op",
+    skip: (d) => d.method !== "op" || d.articolDupa,
     skippable: true,
     ask: () => "Ai poze pentru articol? Poți încărca până la 3. Dacă nu ai, publicăm fără.",
+  },
+  {
+    id: "uniquePerSite",
+    kind: "choice",
+    skip: (d) => d.method !== "op",
+    ask: () =>
+      "Textul îl vrei rescris diferit pe fiecare ziar sau identic peste tot? Recomand rescris: Google preferă texte unice, iar articolele se indexează mai bine.",
+    choices: [
+      { label: "Rescris pe fiecare ziar (recomandat)", value: "unic" },
+      { label: "Identic peste tot", value: "identic" },
+    ],
+  },
+  {
+    id: "linkuriSponsored",
+    kind: "choice",
+    skip: (d) => d.method !== "op",
+    ask: () => "Linkurile le marcăm „sponsored” sau rămân normale (dofollow)?",
+    choices: [
+      { label: "Normale, dofollow", value: "nu" },
+      { label: "Marcate sponsored", value: "da" },
+    ],
+  },
+  {
+    id: "ritm",
+    kind: "choice",
+    skip: (d) => d.method !== "op",
+    ask: () => "Cum publicăm: totul deodată sau eșalonat?",
+    choices: RITMURI.map((r) => ({ label: r.eticheta, value: r.id })),
   },
   {
     // Promovarea pe Facebook (3 zile, reclama platita, inclusa): clientul
@@ -261,17 +326,17 @@ export const STEPS: Step[] = [
 ];
 
 export function bankDetailsText(amount: number): string {
+  // 28.11.2026 — la OP pleaca intai proforma (lib/proforma.ts); factura
+  // fiscala se emite dupa incasare.
   return [
-    "Acum plata. Datele pentru transfer:",
+    `Acum plata, ${amount} lei. Când trimiți comanda, îți fac pe loc proforma, cu IBAN-ul, aici în chat și pe email.`,
     "",
     `Beneficiar: ${SITE.billing.company}`,
     `IBAN: ${SITE.billing.iban}`,
     `Banca: ${SITE.billing.bank}`,
-    `Suma: ${amount} lei`,
-    "Detalii plată: Publicare articol — 50 de ziare",
     "",
-    "Nu trebuie să plătești acum ca să comanzi: după ce trimiți comanda primești factura pe email și plătești pe baza ei.",
-    "Ai făcut deja transferul? Încarcă dovada și confirmăm mai repede — altfel apasă butonul roșu și plătești după ce primești factura.",
+    "Plătești pe baza proformei, apoi urci dovada (aici sau pe pagina proformei). Factura fiscală vine pe email după încasare.",
+    "Ai plătit deja? Încarcă dovada acum — altfel apasă butonul roșu.",
   ].join("\n");
 }
 
@@ -289,7 +354,9 @@ export function nextStepIndex(from: number, d: OrderData): number {
  * pe primul rand, ca sa se vada in lista de comenzi fara sa o deschizi.
  */
 export function buildSubmission(d: OrderData) {
-  const body = d.hasArticle
+  const body = d.articolDupa
+    ? ""
+    : d.hasArticle
     ? d.body.trim()
     : `[DE REDACTAT DE NOI — clientul nu are articol scris]\n\nTema primită de la client:\n${d.body.trim()}`;
 
@@ -301,7 +368,16 @@ export function buildSubmission(d: OrderData) {
     companyName: d.companyName.trim(),
     companyCui: d.companyCui.trim(),
     companyAddress: d.companyAddress.trim(),
-    title: d.hasArticle ? d.title.trim() : `[De redactat] ${d.companyName.trim()}`,
+    title: d.articolDupa
+      ? TITLU_DE_PROPUS
+      : d.hasArticle
+        ? d.title.trim() || TITLU_DE_PROPUS
+        : `[De redactat] ${d.companyName.trim()}`,
+    articolDupa: d.articolDupa,
+    linkNotes: d.linkNotes.trim() || undefined,
+    uniquePerSite: d.uniquePerSite,
+    linkuriSponsored: d.linkuriSponsored,
+    ritm: d.ritm,
     body,
     siteUrl: d.siteUrl.trim() || undefined,
     fbBoostPaper: d.fbBoostPaper.trim() || undefined,

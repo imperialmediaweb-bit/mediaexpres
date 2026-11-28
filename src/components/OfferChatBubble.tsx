@@ -31,9 +31,26 @@ import {
   buildSubmission,
   priceOf,
   packageIdOf,
+  MIN_BODY,
   type OrderData,
   type Step,
 } from "@/components/chat/order-steps";
+import { importaDocx, mesajImportDocx } from "@/lib/docx-client";
+import type { RitmId } from "@/lib/ritm";
+
+// 28.11.2026 — linkurile din mesaje (proforma, lista de ziare) se pot apasa.
+function cuLinkuri(text: string) {
+  const parti = text.split(/(https?:\/\/[^\s)]+)/g);
+  return parti.map((p, i) =>
+    /^https?:\/\//.test(p) ? (
+      <a key={i} href={p} target="_blank" rel="noopener noreferrer" className="break-all font-semibold underline">
+        {p}
+      </a>
+    ) : (
+      p
+    ),
+  );
+}
 
 interface Message {
   role: "user" | "assistant";
@@ -179,6 +196,29 @@ export function OfferChatBubble() {
       clearInterval(iv);
     };
   }, [mode, thread, open]);
+
+  // 28.11.2026 (owner: „nu-l lasa fara raspuns") — daca la „Vorbeste cu un om"
+  // nu raspunde nimeni din echipa in 3 minute, consultantul preia: raspunde la
+  // intrebari si face comanda aici, in chat. Echipa primeste in continuare tot
+  // (nota ajunge si in conversatia din admin).
+  const [preluat, setPreluat] = useState(false);
+  useEffect(() => {
+    if (mode !== "live" || !thread || preluat) return;
+    const ultimaEchipa = messages.map((m) => !!m.team).lastIndexOf(true);
+    const ultimaClient = messages.map((m) => m.role === "user").lastIndexOf(true);
+    if (ultimaClient < 0 || ultimaEchipa > ultimaClient) return;
+    const t = setTimeout(() => {
+      const nota =
+        "Colegii mei sunt ocupați chiar acum, dar te ajut eu pe loc. Te pot lămuri la orice întrebare despre publicare și putem face comanda acum, aici în chat, în 2 minute: articolul (text sau Word), până la 3 poze, cum publicăm și plata. Apasă butonul de mai jos sau scrie-mi întrebarea.";
+      const history: Message[] = [...messages, { role: "assistant", content: nota }];
+      setMessages(history);
+      setPreluat(true);
+      setMode("chat");
+      setLastAction("comanda");
+      void postLive(history, false, thread).catch(() => undefined);
+    }, 3 * 60_000);
+    return () => clearTimeout(t);
+  }, [mode, thread, messages, preluat]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function postLive(history: Message[], start: boolean, id: string) {
     const email = liveEmail || history.map((m) => (m.role === "user" ? m.content.match(EMAIL_IN_TEXT)?.[0] : null)).find(Boolean) || undefined;
@@ -332,7 +372,14 @@ export function OfferChatBubble() {
     const d = { ...data };
     if (s.id === "casino") d.isCasino = value === "da";
     if (s.id === "method") d.method = value === "card" ? "card" : "op";
-    if (s.id === "hasArticle") d.hasArticle = value === "am";
+    if (s.id === "hasArticle") {
+      d.hasArticle = value === "am" || value === "word";
+      d.articolWord = value === "word";
+      d.articolDupa = value === "dupa";
+    }
+    if (s.id === "uniquePerSite") d.uniquePerSite = value !== "identic";
+    if (s.id === "linkuriSponsored") d.linkuriSponsored = value === "da";
+    if (s.id === "ritm") d.ritm = value as RitmId;
     if (s.id === "declaration") {
       if (value !== "da") {
         // Nu-l ducem mai departe si nu-i luam banii. Un „nu sunt sigur" aici
@@ -367,7 +414,12 @@ export function OfferChatBubble() {
     const d = { ...data };
     // Pasul „theme" scrie tot in body — la trimitere e marcat ca temă de redactat.
     const field = s.id === "theme" ? "body" : (s.id as keyof OrderData);
-    (d as Record<string, unknown>)[field] = value;
+    if (s.id === "linkNotes" && data.linkNotes) {
+      // Linkurile luate din Word raman; ce scrie omul se adauga.
+      d.linkNotes = value ? `${data.linkNotes}\n${value}` : data.linkNotes;
+    } else {
+      (d as Record<string, unknown>)[field] = value;
+    }
     setData(d);
     setInput("");
 
@@ -412,6 +464,38 @@ export function OfferChatBubble() {
     }
   }
 
+  async function uploadDocx(list: FileList | null) {
+    const file = list?.[0];
+    if (!file) return;
+    setStepError(null);
+    setUploading(true);
+    try {
+      const r = await importaDocx(file);
+      if (!r.body || r.body.trim().length < MIN_BODY) throw new Error("Nu am găsit destul text în document.");
+      const loc = Math.max(0, 3 - images.length);
+      const noi = r.images.slice(0, loc).map((i) => ({ url: i.url, name: i.name }));
+      if (noi.length) setImages((prev) => [...prev, ...noi]);
+      const d = { ...data, title: r.title || data.title, body: r.body, linkNotes: r.linkNotes || data.linkNotes };
+      setData(d);
+      echo(`📄 ${file.name}`);
+      say(mesajImportDocx(r, loc));
+      goToNext(step, d);
+    } catch (e) {
+      setStepError(
+        `${e instanceof Error ? e.message : "Nu am putut citi documentul."} Poți apăsa „Lipesc textul” și îl pui direct aici.`,
+      );
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function docxLaText() {
+    const d = { ...data, articolWord: false, hasArticle: true };
+    setData(d);
+    echo("Lipesc textul");
+    goToNext(step, d);
+  }
+
   async function submitOrder() {
     if (loading) return;
     setLoading(true);
@@ -426,14 +510,23 @@ export function OfferChatBubble() {
           featuredIndex: 0,
           ...(proof ? { paymentProof: proof } : {}),
           facebookOptIn: true,
-          uniquePerSite: true,
         }),
       });
       const j = await res.json();
       if (!res.ok || !j.ok) throw new Error(j.error || "Eroare la trimitere");
       setMode("sent");
+      const linkPf = j.ref ? `${window.location.origin}/comanda/proforma/${encodeURIComponent(j.ref)}` : "";
       say(
-        "Am primit comanda ta. Îți trimitem factura fiscală pe email în aceeași zi lucrătoare și plătești pe baza ei. Imediat ce vedem încasarea în extras, publicăm în maximum 12 ore lucrătoare și primești pe email raportul cu toate linkurile.",
+        [
+          "Am primit comanda ta. Ți-am făcut proforma, o găsești și pe email:",
+          linkPf,
+          "",
+          "Plătești pe baza ei, apoi urci dovada pe pagina proformei — sau direct aici, cu „Am plătit — trimit dovada”.",
+          data.articolDupa ? "Articolul și pozele ni le trimiți după plată, tot aici sau pe email." : "",
+          "Imediat ce intră banii, primești factura fiscală pe email, publicăm în maximum 12 ore lucrătoare și primești raportul cu toate linkurile.",
+        ]
+          .filter((x, i) => x || i === 2)
+          .join("\n"),
       );
     } catch (e) {
       setStepError(e instanceof Error ? e.message : "Eroare la trimitere");
@@ -837,7 +930,7 @@ export function OfferChatBubble() {
                 }`}
               >
                 {m.team && <span className="mb-0.5 block text-[11px] font-semibold text-emerald-700">Echipa MediaExpres</span>}
-                {m.content}
+                {cuLinkuri(m.content)}
               </div>
             </div>
           ))
@@ -955,19 +1048,41 @@ export function OfferChatBubble() {
               {images.length ? "Continuă" : "Fără poze"}
             </button>
           </div>
+        ) : current?.kind === "docx" ? (
+          <div className="grid gap-2">
+            <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg bg-brand-red px-3 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90">
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+              Alege fișierul Word (.docx)
+              <input
+                type="file"
+                accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+                hidden
+                disabled={uploading}
+                onChange={(e) => void uploadDocx(e.target.files)}
+              />
+            </label>
+            <button
+              type="button"
+              onClick={docxLaText}
+              disabled={uploading}
+              className="rounded-lg border border-slate-300 px-3 py-2 text-sm text-slate-600 hover:border-brand-navy"
+            >
+              Lipesc textul
+            </button>
+          </div>
         ) : current?.kind === "proof" ? (
           <div className="grid gap-2">
             {mode !== "return" && (
             <button
               type="button"
               onClick={() => {
-                echo("Trimit comanda, plătesc după factură");
+                echo("Trimit comanda, vreau proforma");
                 goToNext(step, data);
               }}
               disabled={uploading}
               className="rounded-lg bg-brand-red px-3 py-2.5 text-sm font-bold text-white hover:bg-brand-red/90 disabled:opacity-60"
             >
-              Trimit comanda, plătesc după factură
+              Trimit comanda, vreau proforma
             </button>
             )}
             <label className="flex cursor-pointer items-center justify-center gap-2 rounded-lg border border-slate-300 px-3 py-2 text-sm font-medium text-slate-700 hover:border-brand-navy">
